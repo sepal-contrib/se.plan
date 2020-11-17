@@ -28,3 +28,14 @@ goals = [
     'Achievement of international commitments',
     'Improve connectivity - landscape biodiversity'
 ]
+
+# list of the available priorities for the priority tile
+priorities = [
+    'Production Forest',
+    ' Protected Area',
+    'Community Foresty',
+    'Community Protected Area',
+    'Biodiversity conservation corridor',
+    'Other private land or public land'
+]
+    
