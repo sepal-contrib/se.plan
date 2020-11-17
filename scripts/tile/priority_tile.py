@@ -33,12 +33,14 @@ class satisfactionSlider(v.Row, HasTraits):
         # build the slider
         self.subheader = v.Subheader(children=[label])
         self.slider = v.Slider(
-            max         = 4,
-            min         = 0,
-            track_color = 'grey',
-            thumb_label = self._labels[default_value],
-            color       = self._colors[default_value],
-            v_model     = default_value
+            max             = 4,
+            min             = 0,
+            track_color     = 'grey',
+            tick_size       = 4,
+            ticks           = True,
+            label            = self._labels[default_value],
+            color           = self._colors[default_value],
+            v_model         = default_value
         )
         
         # build the row 
@@ -58,7 +60,7 @@ class satisfactionSlider(v.Row, HasTraits):
         
     def on_change(self, change):
         self.slider.color = self._colors[change['new']]
-        self.slider.thumb_label = self._labels[change['new']]
+        self.slider.label = self._labels[change['new']]
         
         tmp = json.loads(self.custom_v_model)
         tmp[1] = change['new']

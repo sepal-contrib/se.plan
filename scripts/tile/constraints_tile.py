@@ -85,7 +85,7 @@ class Criteria (v.Row, HasTraits):
         
 from sepal_ui.scripts import utils as su
 
-class ConstraintTile(sw.Tile):
+class ConstraintTile(sw.Tile, HasTraits):
     
     # create custom_v_model as a traitlet
     # the traitlet List cannot be listened to so we were force to use Unicode json instead
