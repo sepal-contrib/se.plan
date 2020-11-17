@@ -11,7 +11,12 @@ CRITERIA_LABEL = "Criteria"
 ##############################
 ##      potential tile      ##
 ##############################
-
 POTENTIAL_TXT = """Max % tree cover in land use classes"""
 LAND_USE_SELECT_LABEL = "Which land uses allow restoration?"
 MAX_ALLOW_TREECOVER_LABEL = 'Maximum allowable percent tree cover in {}:'
+
+
+##########################
+##      Goals tile      ##
+##########################
+GOAL_SELECT_LABEL = "restoration goals"
