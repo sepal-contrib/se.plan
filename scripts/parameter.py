@@ -11,3 +11,10 @@ criterias = [
     'Protected area',
     'Opportunity cost'
 ]
+
+land_use = [
+    "Agriculture",
+    "Protected Areas",
+    "Rangeland",
+    "Grassland"
+]
