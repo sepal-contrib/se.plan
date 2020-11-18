@@ -2,6 +2,7 @@ import ipyvuetify as v
 from traitlets import observe, List, Unicode
 from .. import parameter as pm
 from ipywidgets import jslink
+from sepal_ui import sepalwidgets as sw
 
 class WeightSlider(v.Slider):
         
@@ -219,3 +220,71 @@ class CustomLayerTable(v.SimpleTable):
                 text_field.disabled =  not change['new']
         
         return
+    
+    
+class CustomizeLayerTile(sw.Tile):
+    
+    def __init__(self, **kwargs):
+        
+        # name the tile
+        id_ = "manual_widget"
+        title = "Manual layer selection"
+        
+        # create and assemble the two tables
+        self.dlt = DefaultLayerTable()
+        self.clt = CustomLayerTable()
+        
+        self.ep = v.ExpansionPanels(
+            accordion = True,
+            children = [
+                v.ExpansionPanel(
+                    key = 1,
+                    children = [
+                        v.ExpansionPanelHeader(children = ["Weighted default layers"]),
+                        v.ExpansionPanelContent(children = [self.dlt])
+                    ]
+                ),
+                v.ExpansionPanel(
+                    key = 2,
+                    children = [
+                        v.ExpansionPanelHeader(children = ["Use customized layers"]),
+                        v.ExpansionPanelContent(children = [self.clt])
+                    ]
+                )
+            ]
+        )
+        
+        # create the btns
+        self.reset_to_questionnaire = sw.Btn(
+            text   = 'Apply questionnaire answers', 
+            icon   = 'mdi-help-center',
+            class_ = 'mr-2'
+        )
+        self.reset_to_questionnaire.color = 'success'
+        
+        self.reset_to_default = sw.Btn(
+            text   = 'Apply default parameters',
+            icon   = 'mdi-restore', 
+            class_ = 'ml-2'
+        )
+        self.reset_to_default.color = 'warning'
+        
+        self.btn_line = v.Row(
+            class_   = 'mb-3',
+            children = [self.reset_to_questionnaire, self.reset_to_default]
+        )
+        
+        # create the txt 
+        self.txt = sw.Markdown("On est des fous")
+        
+        # build the tile 
+        super().__init__(
+            id_, 
+            title,
+            inputs = [
+                self.txt,
+                self.btn_line,
+                self.ep
+            ],
+            **kwargs
+        )
