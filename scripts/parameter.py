@@ -1,3 +1,6 @@
+import pandas as pd
+import os
+
 # list of the available constraint criteria
 criterias = [
     'Bare land',
@@ -38,4 +41,6 @@ priorities = [
     'Biodiversity conservation corridor',
     'Other private land or public land'
 ]
-    
+
+# list of available layers for the optimisation based on the layer_list in data 
+layer_list = pd.read_csv(os.path.join(os.path.dirname(__file__), '..', 'data', 'layer_list.csv')).fillna('')
