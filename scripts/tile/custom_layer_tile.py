@@ -152,3 +152,70 @@ class DefaultLayerTable(v.SimpleTable):
                 ])
             ]
         )
+
+class CustomLayerTable(v.SimpleTable):
+    
+    _headers = [
+        'active',
+        'Theme',
+        'Sub theme',
+        'Layer name',
+        'Custom layer'
+    ]
+    
+    def __init__(self):
+        
+        self.text_fields = [v.TextField(
+            _metadata  = {'name' : row.layer_name},
+            placeholder = row.gee_asset,
+            v_model = None,
+            disabled = True
+        ) for i, row in pm.layer_list.iterrows()]   
+        
+        self.checkboxs = [v.Checkbox(
+            _metadata = {'name': row.layer_name},
+            v_model = False
+        ) for i, row in pm.layer_list.iterrows()]
+        
+        # here we build a real table so "acrrocher vos ceintures"
+        super().__init__(
+            style_='{overflow: auto, max_height: 300px}',
+            dense = True,
+            children = [
+                v.Html(tag = 'thead', children = [
+                    v.Html(tag = 'tr', children = [
+                        v.Html(tag = 'th', children = [h]) for h in self._headers
+                    ])
+                ]),
+                v.Html(tag = 'tbody', children = [
+                    v.Html(tag = 'tr', children = [
+                        v.Html(tag = 'td', children = [self.checkboxs[i]]),
+                        v.Html(tag = 'td', children = [row.theme]),
+                        v.Html(tag = 'td', children = [row.subtheme]),
+                        v.Html(tag = 'td', children = [row.layer_name]),
+                        v.Html(tag = 'td', children = [self.text_fields[i]]),
+                    ]) for i, row in pm.layer_list.iterrows()
+                ])
+            ]
+        )
+        
+        # link the valu together
+        self.__link_lines()
+        
+    def __link_lines(self):
+        
+        for checkbox in self.checkboxs:
+            checkbox.observe(self.__on_check, 'v_model')
+            
+        return
+        
+        
+    def __on_check(self, change):
+        
+        layer_name = change['owner']._metadata['name']
+        
+        for text_field in self.text_fields:
+            if text_field._metadata['name'] == layer_name:
+                text_field.disabled =  not change['new']
+        
+        return
