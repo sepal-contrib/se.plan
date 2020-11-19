@@ -3,6 +3,19 @@ from traitlets import observe, List, Unicode
 from .. import parameter as pm
 from ipywidgets import jslink
 from sepal_ui import sepalwidgets as sw
+from .. import message as ms
+
+class customize_layer_io:
+    
+    def __init__(self):
+        
+        dict_ = [{
+            'name': row.layer_name
+            'assetId': row.gee_asset
+            'weight': 0
+        } for i, row in pm.layer_list.iterrows()]
+        
+        self.layer_dict = json.dumps(dict_)
 
 class WeightSlider(v.Slider):
         
@@ -224,7 +237,10 @@ class CustomLayerTable(v.SimpleTable):
     
 class CustomizeLayerTile(sw.Tile):
     
-    def __init__(self, **kwargs):
+    def __init__(self, io, **kwargs):
+        
+        # link the io to the tile
+        self.io = io
         
         # name the tile
         id_ = "manual_widget"
@@ -235,19 +251,20 @@ class CustomizeLayerTile(sw.Tile):
         self.clt = CustomLayerTable()
         
         self.ep = v.ExpansionPanels(
+            focusable = True,
             accordion = True,
-            children = [
+            children  = [
                 v.ExpansionPanel(
                     key = 1,
                     children = [
-                        v.ExpansionPanelHeader(children = ["Weighted default layers"]),
+                        v.ExpansionPanelHeader(children = [ms.DEFAULT_TABLE_LABEL]),
                         v.ExpansionPanelContent(children = [self.dlt])
                     ]
                 ),
                 v.ExpansionPanel(
                     key = 2,
                     children = [
-                        v.ExpansionPanelHeader(children = ["Use customized layers"]),
+                        v.ExpansionPanelHeader(children = [ms.CUSTOM_TABLE_LABEL]),
                         v.ExpansionPanelContent(children = [self.clt])
                     ]
                 )
@@ -257,8 +274,8 @@ class CustomizeLayerTile(sw.Tile):
         # create the btns
         self.reset_to_questionnaire = sw.Btn(
             text   = 'Apply questionnaire answers', 
-            icon   = 'mdi-help-center',
-            class_ = 'mr-2'
+            icon   = 'mdi-file-question-outline',
+            class_ = 'ml-5 mr-2'
         )
         self.reset_to_questionnaire.color = 'success'
         
@@ -275,7 +292,7 @@ class CustomizeLayerTile(sw.Tile):
         )
         
         # create the txt 
-        self.txt = sw.Markdown("On est des fous")
+        self.txt = sw.Markdown(ms.CUSTOMIZE_TILE_TXT)
         
         # build the tile 
         super().__init__(
@@ -288,3 +305,36 @@ class CustomizeLayerTile(sw.Tile):
             ],
             **kwargs
         )
+        
+        # link the values to the io
+        io 
+        
+    def apply_values(self, layers_values):
+        """Apply the value that are in the layer values table. layer_values should have the exact same structure as the io define in this file"""
+        
+        # small check on the layer_value structure
+        if len(layer_values) != len(json.loads(self.io)):
+            return
+        
+        
+        # apply the modification to the widget (the io will follow with the observe methods)
+        for dict_ in layer_values:
+            
+            # extract the values
+            name = dict_['name']
+            assetId = dic_['assetId']
+            weight = dict_['weight']
+            
+            for slider in self.dlt.sliders:
+                if slider._metadata['name'] == name:
+                    slider.v_model = weight
+                    
+            for text_field in self.clt.text_fields:
+                if text_field._metadata['name'] == name:
+                    text_field.v_model = assetId
+                    
+        return 
+    
+            
+            
+        
