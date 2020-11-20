@@ -85,14 +85,14 @@ class QuestionnaireTile (sw.Tile):
         self.io.constraints = self.constraint_tile[0].custom_v_model
         self.io.potential = self.potential_tile[0].custom_v_model
         self.io.goals = self.goal_tile[0].custom_v_model
-        self.io.priorities = self.priority_tile.custom_v_model
+        self.io.priorities = self.priority_tile.v_model
         
         
         # link the variable to the io 
         self.constraint_tile[0].observe(self.__on_constraint, 'custom_v_model')
         self.potential_tile[0].observe(self.__on_potential_tile, 'custom_v_model')
         self.goal_tile[0].observe(self.__on_goal_tile, 'custom_v_model')
-        self.priority_tile.observe(self.__on_priority_tile, 'custom_v_model')
+        self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
         
     def __on_constraint(self, change):
         self.io.constraints = change['new']
