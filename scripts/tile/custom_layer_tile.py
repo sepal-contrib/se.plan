@@ -1,5 +1,5 @@
 import ipyvuetify as v 
-from traitlets import observe, List, Unicode
+from traitlets import observe, List, Unicode, Dict, Any
 from .. import parameter as pm
 from ipywidgets import jslink
 from sepal_ui import sepalwidgets as sw
@@ -16,15 +16,13 @@ class customize_layer_io:
     
     def __init__(self):
         
-        dict_ = [
+        self.layer_list = [
             {
                 'name'   : row.layer_name,
-                'assetId': row.gee_asset,
+                'layer': row.gee_asset,
                 'weight' : 0
             } for i, row in pm.layer_list.iterrows()
         ]
-        
-        self.layer_dict = json.dumps(dict_)
 
 class WeightSlider(v.Slider):
         
@@ -59,6 +57,9 @@ class WeightSlider(v.Slider):
     
 class LayerTable(v.DataTable, sw.SepalWidget):
     
+    # unicode value to notify a change
+    change_model = Any().tag(sync=True)
+    
     def __init__(self):
         
         self.headers = [
@@ -75,7 +76,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'theme'   : row.theme,
                 'subtheme': row.subtheme,
                 'name'    : row.layer_name,
-                'weight'  : 0,
+                'weight'  : 3,
                 'layer'   : row.gee_asset
             } for i, row in pm.layer_list.iterrows()
         ]
@@ -92,6 +93,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         self.dialog_edit = EditDialog()
         
         super().__init__(
+            change_model = 0,
             v_model = [],
             show_select = True, 
             single_select = True,
@@ -119,18 +121,41 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         # link the search textField 
         self.search_field.on_event('blur', self._on_search)
         self.edit_icon.on_event('click', self._on_click)
+        self.dialog_edit.observe(self._on_dialog_change, 'custom_v_model')
         
         
     def _on_search(self, widget, data, event):    
         self.search = widget.v_model
+        
+        return 
         
     def _on_click(self, widget, data, event):
         
         self.dialog_edit.set_dialog(self.v_model)
         self.dialog_edit.value = True
         
+        return
+    
+    def _on_dialog_change(self, change):
         
-        print(self.v_model)
+        data = json.loads(change['new'])
+        
+        # we need to change the full items traitlet to trigger a change 
+        tmp = self.items.copy()
+        
+        # search for the item to modify 
+        for item in tmp:
+            if item['name'] == data['name']:
+                item['weight'] = data['weight']
+                item['layer'] = data['layer']
+        
+        # reply the modyfied items 
+        self.items = tmp
+        
+        # notify the change to the rest of the app 
+        self.change_model += 1
+        
+        return
         
         
 class CustomizeLayerTile(sw.Tile):
@@ -164,6 +189,8 @@ class CustomizeLayerTile(sw.Tile):
             children = [self.reset_to_questionnaire, self.reset_to_default]
         )
         
+        self.table = LayerTable()
+        
         # create the txt 
         self.txt = sw.Markdown(ms.CUSTOMIZE_TILE_TXT)
         
@@ -173,13 +200,26 @@ class CustomizeLayerTile(sw.Tile):
             title,
             inputs = [
                 self.txt,
-                self.btn_line
+                self.btn_line,
+                self.table
             ],
             **kwargs
         )
         
         # link the values to the io
-        io 
+        self.table.observe(self._on_item_change, 'change_model')
+        
+    def _on_item_change(self, change):
+            
+        # normally io and the table have the same indexing so I can take advantage of it 
+        for i in range (len(self.io.layer_list)):
+            io_item = self.io.layer_list[i]
+            item = self.table.items[i]
+            
+            io_item['layer'] = item['layer']
+            io_item['weight'] = item['weight']
+            
+        return
         
     def apply_values(self, layers_values):
         """Apply the value that are in the layer values table. layer_values should have the exact same structure as the io define in this file"""
@@ -201,9 +241,15 @@ class CustomizeLayerTile(sw.Tile):
     
 class EditDialog(sw.SepalWidget, v.Dialog):
     
+    _EMPTY_V_MODEL = { 'name': None, 'weight': None, 'layer': None }
+    
+    # use a custom v_model because the regular one set value automatically to 1 (display forever)
+    custom_v_model = Unicode().tag(sync=True)
+    
     def __init__(self):
         
-        self.init_layer = "A/nonCustom/Layer"
+        self.init_layer = ''
+        self.name = ''
         
         self.title = v.CardTitle(children=['Layer name'])
         self.text = v.CardText(children = [fake.paragraph(13)])
@@ -251,6 +297,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
         
         super().__init__(
+            custom_v_model = json.dumps(self._EMPTY_V_MODEL),
             persistent = True,
             value = False,
             max_width = '500px',
@@ -266,11 +313,30 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         if not change['new']:
             change['owner'].v_model = self.init_layer
             
+        return 
+            
     def _cancel_click(self, widget, data, event):
+        
+        # close without doing anything
         self.value = False
         
+        return 
+        
     def _save_click(self, widget, data, event):
+        
+        # change v_model with the new values
+        tmp = json.loads(self.custom_v_model)
+        tmp.update(
+            name   = self.name,
+            weight = self.weight.v_model,
+            layer  = self.layer.v_model
+        )
+        self.custom_v_model = json.dumps(tmp)
+        
+        # close 
         self.value = False
+        
+        return
         
     def set_dialog(self, data):
         
@@ -296,6 +362,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         else: 
             
             # change title 
+            self.name = data[0]['name']
             self.title.children = [data[0]['name']]
             
             # change text 
@@ -315,3 +382,5 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             
             # enable save 
             self.save.disabled = False
+            
+        return
