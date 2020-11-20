@@ -62,11 +62,12 @@ class LayerTable(v.DataTable, sw.SepalWidget):
     def __init__(self):
         
         self.headers = [
-          { 'text': 'Theme'     , 'value': 'theme' },
-          { 'text': 'Sub theme' , 'value': 'subtheme' },
-          { 'text': 'Layer name', 'value': 'name' },
-          { 'text': 'Weight'    , 'value': 'weight' },
-          { 'text': 'Action'    , 'value': 'action' },
+          {'text': 'Theme'     , 'value': 'theme'},
+          {'text': 'Sub theme' , 'value': 'subtheme'},
+          {'text': 'Layer name', 'value': 'name'},
+          {'text': 'Weight'    , 'value': 'weight'},
+          {'text': 'Layer'     , 'value': 'layer'},
+          {'text': 'Action'    , 'value': 'action'},
         ]
         
         self.items = [
@@ -74,7 +75,8 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'theme'   : row.theme,
                 'subtheme': row.subtheme,
                 'name'    : row.layer_name,
-                'weight'  : 0
+                'weight'  : 0,
+                'layer'   : row.gee_asset
             } for i, row in pm.layer_list.iterrows()
         ]
         
@@ -87,7 +89,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.edit_icon = v.Icon(small=True, children=['mdi-pencil'])
         
-        self.dialog_edit = v.Dialog(children = [v.Card(children = ['toto'])])
+        self.dialog_edit = EditDialog()
         
         super().__init__(
             v_model = [],
@@ -106,6 +108,10 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                     'name': 'item.action',
                     'variable': 'item',
                     'children': self.edit_icon
+                },
+                { # the dialog as a footer
+                    'name': 'footer',
+                    'children': self.dialog_edit
                 }
             ]
         )
@@ -120,8 +126,10 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
     def _on_click(self, widget, data, event):
         
-        #self.dialog_edit.value = True
-        print(self.value)
+        self.dialog_edit.set_dialog(self.v_model)
+        self.dialog_edit.value = True
+        
+        
         print(self.v_model)
         
         
@@ -263,3 +271,47 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         
     def _save_click(self, widget, data, event):
         self.value = False
+        
+    def set_dialog(self, data):
+        
+        # if data are empty
+        if not len(data):
+            
+            # default title
+            self.title.children = ['No layer']
+            
+            # default text
+            self.text.children = ['You need to select a layer before making modifications']
+            
+            # mute all the component 
+            self.weight.v_model = 3
+            self.weight.disabled = True
+            
+            self.layer.v_model = 'no Layer'
+            self.layer.disabled = True
+            
+            # disable save 
+            self.save.disabled = True
+            
+        else: 
+            
+            # change title 
+            self.title.children = [data[0]['name']]
+            
+            # change text 
+            layer_df_line = pm.layer_list[pm.layer_list.layer_name == data[0]['name']].iloc[0]
+            self.text.children = [layer_df_line.layer_info]
+            
+            # enable slider 
+            self.weight.disabled = False
+            self.weight.v_model = data[0]['weight']
+            
+            # enable textField
+            self.layer.disabled = False
+            self.layer.v_model = data[0]['layer']
+            
+            # change default layer name 
+            self.init_layer = layer_df_line.gee_asset
+            
+            # enable save 
+            self.save.disabled = False
