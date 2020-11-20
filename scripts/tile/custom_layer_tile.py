@@ -4,16 +4,25 @@ from .. import parameter as pm
 from ipywidgets import jslink
 from sepal_ui import sepalwidgets as sw
 from .. import message as ms
+import json
+from IPython import display
+
+
+# for debug only 
+from faker import Faker
+fake = Faker()
 
 class customize_layer_io:
     
     def __init__(self):
         
-        dict_ = [{
-            'name': row.layer_name
-            'assetId': row.gee_asset
-            'weight': 0
-        } for i, row in pm.layer_list.iterrows()]
+        dict_ = [
+            {
+                'name'   : row.layer_name,
+                'assetId': row.gee_asset,
+                'weight' : 0
+            } for i, row in pm.layer_list.iterrows()
+        ]
         
         self.layer_dict = json.dumps(dict_)
 
@@ -37,204 +46,85 @@ class WeightSlider(v.Slider):
             max         = 6,
             min         = 0,
             track_color = 'grey',
-            thumb_label = True,
+            thumb_label = 'always',
             color       = self._colors[default_value],
-            v_model     = default_value
+            v_model     = default_value,
+            class_      = 'ml-5 mr-5'
         )
         
     @observe('v_model')
     def on_change(self, change):
         self.color = self._colors[change['new']]
         return 
-
-#class WeightSlider(v.Row):
-#    
-#    _colors = {
-#        0: 'red',
-#        1: 'orange',
-#        2: 'yellow accent-3',
-#        3: 'light-green',
-#        4: 'green',
-#        5: 'primary',
-#        6: 'primary'
-#    }
-#    
-#    def __init__(self, name, default_value = 0, **kwargs):
-#        
-#        self.name = name
-#        
-#        self.minus = v.Icon(
-#            color=self._colors[default_value],
-#            class_='ml-5',
-#            children=['mdi-minus']
-#        )
-#        
-#        self.plus = v.Icon(
-#            color=self._colors[default_value],
-#            class_='mr-5',
-#            children=['mdi-plus']
-#        )
-#        
-#        self.text_field = v.TextField(
-#            readonly = True,
-#            full_width = False,
-#            outlined = True,
-#            background_color = self._colors[default_value],
-#            v_model=None
-#        ) 
-#        
-#        super().__init__(
-#            Row=True,
-#            xs12=True,
-#            v_model = default_value,
-#            children = [
-#                self.minus,
-#                self.text_field,
-#                self.plus
-#            ]
-#        )
-#        
-#        # link all the variables       
-#        jslink((self, 'v_model'), (self.text_field, 'v_model'))
-#        self.minus.on_event('click', self.__on_minus)
-#        self.plus.on_event('click', self.__on_plus)
-#        
-#            
-#        
-#    @observe('v_model')
-#    def on_change(self, change):
-#        
-#        val = int(change['new'])
-#        
-#        # prevent value to exeed 6
-#        if val < 0:
-#            val = 0 
-#            self.v_model = val
-#        elif val > 6:
-#            val = 6
-#            self.v_model = val
-#        
-#        # change the color of the widget
-#        self.minus.color = self._colors[val]
-#        self.plus.color = self._colors[val]
-#        self.text_field.background_color = self._colors[val]
-#        
-#        return 
-#    
-#    def __on_plus(self, event, data, widget):
-#        
-#        self.text_field.v_model += 1
-#        
-#        return 
-#    
-#    def __on_minus(self, event, data, widget):
-#        
-#        self.text_field.v_model -= 1
-#        
-#        return
     
-class DefaultLayerTable(v.SimpleTable):
-    
-    _headers = [
-        'Theme',
-        'Sub theme',
-        'Layer name',
-        'Weight'
-    ]
+class LayerTable(v.DataTable, sw.SepalWidget):
     
     def __init__(self):
         
-        self.sliders = [WeightSlider(name) for name in pm.layer_list.layer_name]        
+        self.headers = [
+          { 'text': 'Theme'     , 'value': 'theme' },
+          { 'text': 'Sub theme' , 'value': 'subtheme' },
+          { 'text': 'Layer name', 'value': 'name' },
+          { 'text': 'Weight'    , 'value': 'weight' },
+          { 'text': 'Action'    , 'value': 'action' },
+        ]
         
-        # here we build a real table so "acrrocher vos ceintures"
-        super().__init__(
-            style_='{overflow: auto, max_height: 300px}',
-            dense = True,
-            children = [
-                v.Html(tag = 'thead', children = [
-                    v.Html(tag = 'tr', children = [
-                        v.Html(tag = 'th', children = [h]) for h in self._headers
-                    ])
-                ]),
-                v.Html(tag = 'tbody', children = [
-                    v.Html(tag = 'tr', children = [
-                        v.Html(tag = 'td', xs4=True, children = [row.theme]),
-                        v.Html(tag = 'td', xs4=True, children = [row.subtheme]),
-                        v.Html(tag = 'td', xs4=True, children = [row.layer_name]),
-                        v.Html(tag = 'td', xs4=True, children = [self.sliders[i]]),
-                    ]) for i, row in pm.layer_list.iterrows()
-                ])
-            ]
+        self.items = [
+            {
+                'theme'   : row.theme,
+                'subtheme': row.subtheme,
+                'name'    : row.layer_name,
+                'weight'  : 0
+            } for i, row in pm.layer_list.iterrows()
+        ]
+        
+        self.search_field = v.TextField(
+            v_model=None,
+            label = 'Search',
+            clearable = True,
+            append_icon = 'mdi-magnify'
         )
-
-class CustomLayerTable(v.SimpleTable):
-    
-    _headers = [
-        'active',
-        'Theme',
-        'Sub theme',
-        'Layer name',
-        'Custom layer'
-    ]
-    
-    def __init__(self):
         
-        self.text_fields = [v.TextField(
-            _metadata  = {'name' : row.layer_name},
-            placeholder = row.gee_asset,
-            v_model = None,
-            disabled = True
-        ) for i, row in pm.layer_list.iterrows()]   
+        self.edit_icon = v.Icon(small=True, children=['mdi-pencil'])
         
-        self.checkboxs = [v.Checkbox(
-            _metadata = {'name': row.layer_name},
-            v_model = False
-        ) for i, row in pm.layer_list.iterrows()]
+        self.dialog_edit = v.Dialog(children = [v.Card(children = ['toto'])])
         
-        # here we build a real table so "acrrocher vos ceintures"
         super().__init__(
-            style_='{overflow: auto, max_height: 300px}',
-            dense = True,
-            children = [
-                v.Html(tag = 'thead', children = [
-                    v.Html(tag = 'tr', children = [
-                        v.Html(tag = 'th', children = [h]) for h in self._headers
-                    ])
-                ]),
-                v.Html(tag = 'tbody', children = [
-                    v.Html(tag = 'tr', children = [
-                        v.Html(tag = 'td', children = [self.checkboxs[i]]),
-                        v.Html(tag = 'td', children = [row.theme]),
-                        v.Html(tag = 'td', children = [row.subtheme]),
-                        v.Html(tag = 'td', children = [row.layer_name]),
-                        v.Html(tag = 'td', children = [self.text_fields[i]]),
-                    ]) for i, row in pm.layer_list.iterrows()
-                ])
+            v_model = [],
+            show_select = True, 
+            single_select = True,
+            headers = self.headers,
+            items = self.items,
+            search = '',
+            v_slots = [
+                { # the search slot 
+                    'name': 'top',
+                    'variable': 'data-table',
+                    'children': self.search_field
+                },
+                { # the pencil for modification
+                    'name': 'item.action',
+                    'variable': 'item',
+                    'children': self.edit_icon
+                }
             ]
         )
         
-        # link the valu together
-        self.__link_lines()
-        
-    def __link_lines(self):
-        
-        for checkbox in self.checkboxs:
-            checkbox.observe(self.__on_check, 'v_model')
-            
-        return
+        # link the search textField 
+        self.search_field.on_event('blur', self._on_search)
+        self.edit_icon.on_event('click', self._on_click)
         
         
-    def __on_check(self, change):
+    def _on_search(self, widget, data, event):    
+        self.search = widget.v_model
         
-        layer_name = change['owner']._metadata['name']
+    def _on_click(self, widget, data, event):
         
-        for text_field in self.text_fields:
-            if text_field._metadata['name'] == layer_name:
-                text_field.disabled =  not change['new']
+        #self.dialog_edit.value = True
+        print(self.value)
+        print(self.v_model)
         
-        return
-    
-    
+        
 class CustomizeLayerTile(sw.Tile):
     
     def __init__(self, io, **kwargs):
@@ -245,31 +135,6 @@ class CustomizeLayerTile(sw.Tile):
         # name the tile
         id_ = "manual_widget"
         title = "Manual layer selection"
-        
-        # create and assemble the two tables
-        self.dlt = DefaultLayerTable()
-        self.clt = CustomLayerTable()
-        
-        self.ep = v.ExpansionPanels(
-            focusable = True,
-            accordion = True,
-            children  = [
-                v.ExpansionPanel(
-                    key = 1,
-                    children = [
-                        v.ExpansionPanelHeader(children = [ms.DEFAULT_TABLE_LABEL]),
-                        v.ExpansionPanelContent(children = [self.dlt])
-                    ]
-                ),
-                v.ExpansionPanel(
-                    key = 2,
-                    children = [
-                        v.ExpansionPanelHeader(children = [ms.CUSTOM_TABLE_LABEL]),
-                        v.ExpansionPanelContent(children = [self.clt])
-                    ]
-                )
-            ]
-        )
         
         # create the btns
         self.reset_to_questionnaire = sw.Btn(
@@ -300,8 +165,7 @@ class CustomizeLayerTile(sw.Tile):
             title,
             inputs = [
                 self.txt,
-                self.btn_line,
-                self.ep
+                self.btn_line
             ],
             **kwargs
         )
@@ -324,17 +188,78 @@ class CustomizeLayerTile(sw.Tile):
             name = dict_['name']
             assetId = dic_['assetId']
             weight = dict_['weight']
-            
-            for slider in self.dlt.sliders:
-                if slider._metadata['name'] == name:
-                    slider.v_model = weight
-                    
-            for text_field in self.clt.text_fields:
-                if text_field._metadata['name'] == name:
-                    text_field.v_model = assetId
                     
         return 
     
-            
-            
+class EditDialog(sw.SepalWidget, v.Dialog):
+    
+    def __init__(self):
         
+        self.init_layer = "A/nonCustom/Layer"
+        
+        self.title = v.CardTitle(children=['Layer name'])
+        self.text = v.CardText(children = [fake.paragraph(13)])
+        self.weight = WeightSlider('layer_name', 3)
+        self.check_custom = v.Checkbox(v_model = False, label = 'Use custom layer')
+        self.layer = v.TextField(
+            clearable = True,
+            v_model = self.init_layer, 
+            color = 'warning',
+            outlined = True,
+            label = 'Layer'
+        )
+        
+        self.ep = v.ExpansionPanels(
+            accordion = True,
+            children  = [
+                v.ExpansionPanel(
+                    key = 1,
+                    children = [
+                        v.ExpansionPanelHeader(
+                            disable_icon_rotate = True,
+                            children = ['change layer used for the computation'],
+                            v_slots = [{
+                                'name': 'actions',
+                                'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
+                            }]
+                        ),
+                        v.ExpansionPanelContent(children = [self.layer])
+                    ]
+                )
+            ]
+        )
+        self.cancel = v.Btn(color='primary', outlined = True, children = ['Cancel'])
+        self.save = v.Btn(color='primary', children = ['save'])        
+        
+        self.card = v.Card(
+            children = [
+                self.title,
+                self.text,
+                v.Subheader(children = ['Weight']),
+                self.weight,
+                v.Row(align_end = True, class_ = 'px-5', children = [self.ep]),
+                v.CardActions( class_ = 'ma-5', children = [self.cancel, self.save])
+            ]
+        )
+        
+        super().__init__(
+            persistent = True,
+            value = False,
+            max_width = '500px',
+            children = [self.card]
+        )
+        
+        # link som element together 
+        self.layer.observe(self._on_layer_clear, 'v_model')
+        self.cancel.on_event('click', self._cancel_click)
+        self.save.on_event('click', self._save_click)
+        
+    def _on_layer_clear(self, change):
+        if not change['new']:
+            change['owner'].v_model = self.init_layer
+            
+    def _cancel_click(self, widget, data, event):
+        self.value = False
+        
+    def _save_click(self, widget, data, event):
+        self.value = False
