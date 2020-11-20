@@ -12,7 +12,7 @@ from IPython import display
 from faker import Faker
 fake = Faker()
 
-class customize_layer_io:
+class CustomizeLayerIo:
     
     def __init__(self):
         
@@ -76,7 +76,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'theme'   : row.theme,
                 'subtheme': row.subtheme,
                 'name'    : row.layer_name,
-                'weight'  : 3,
+                'weight'  : 0,
                 'layer'   : row.gee_asset
             } for i, row in pm.layer_list.iterrows()
         ]
@@ -227,7 +227,6 @@ class CustomizeLayerTile(sw.Tile):
         # small check on the layer_value structure
         if len(layer_values) != len(json.loads(self.io)):
             return
-        
         
         # apply the modification to the widget (the io will follow with the observe methods)
         for dict_ in layer_values:
