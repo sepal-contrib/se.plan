@@ -1,5 +1,10 @@
 import ipyvuetify as v
 from traitlets import Unicode
+import ee 
+from . import parameter as pm
+from sepal_ui import sepalwidgets as sw
+
+ee.Initialize()
 
 
 def add_area(feature):
@@ -47,4 +52,31 @@ def sum_up(aoi_io, layer_io, output):
     output.add_msg(MyHTML(), 'warning')
     
     return
+    
+def compute_layers(layers_io):
+    
+    # use the layers io to produce a specific layer in the user assets 
+    # for demo purposes I will only use a treecover asset that I found in GEE 
+    final_layer = ( 
+        ee.ImageCollection('NASA/MEASURES/GFCC/TC/v3')
+        .filter(ee.Filter.date('2015-01-01', '2015-12-31'))
+        .select('tree_canopy_cover')
+        .mosaic()
+    )
+    
+    # we also need to create a dashboard in mkd to be displayer 
+    
+    final_dashboard = sw.Markdown("**No dashboarding function yet**")
+    
+    return (final_layer, final_dashboard)
+
+def display_layer(layer, aoi_io, m):
+    
+    
+    aoi_ee = aoi_io.get_aoi_ee()
+    m.zoom_ee_object(aoi_ee.geometry())
+    m.addLayer(layer.clip(aoi_ee.geometry()), pm.final_viz, 'restoration layer')
+    
+    return
+    
     

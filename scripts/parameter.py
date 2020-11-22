@@ -44,3 +44,10 @@ priorities = [
 
 # list of available layers for the optimisation based on the layer_list in data 
 layer_list = pd.read_csv(os.path.join(os.path.dirname(__file__), '..', 'data', 'layer_list.csv')).fillna('')
+
+# vizualisation parameters of the final_layer 
+final_viz = {
+  'min'    : 0.0,
+  'max'    : 100.0,
+  'palette': ['ffffff', 'afce56', '5f9c00', '0e6a00', '003800'],
+}
