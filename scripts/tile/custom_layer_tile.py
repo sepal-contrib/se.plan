@@ -225,17 +225,22 @@ class CustomizeLayerTile(sw.Tile):
         """Apply the value that are in the layer values table. layer_values should have the exact same structure as the io define in this file"""
         
         # small check on the layer_value structure
-        if len(layer_values) != len(json.loads(self.io)):
+        if len(layers_values) != len(self.io.layer_list):
             return
         
         # apply the modification to the widget (the io will follow with the observe methods)
-        for dict_ in layer_values:
+        for i, dict_ in enumerate(layers_values):
             
-            # extract the values
-            name = dict_['name']
-            assetId = dic_['assetId']
-            weight = dict_['weight']
-                    
+            # apply them to the table
+            if self.table.items[i]['name'] == dict_['name']:
+                self.table.items[i].update(
+                    layer  = dict_['layer'],
+                    weight = dict_['weight']
+                )
+                
+            # notify the change to rest of the app 
+            self.table.change_model += 1
+                     
         return 
     
 class EditDialog(sw.SepalWidget, v.Dialog):
