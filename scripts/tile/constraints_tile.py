@@ -88,7 +88,7 @@ from sepal_ui.scripts import utils as su
 class ConstraintTile(sw.Tile, HasTraits):
     
     # create custom_v_model as a traitlet
-    # the traitlet List cannot be listened to so we were force to use Unicode json instead
+    # the traitlet List cannot be listened to so we we're force to use Unicode json instead
     
     # build as such : 
     # { 'criteria_name' : [active (as bool), lt or gt (0-1), value], ...}
@@ -122,7 +122,6 @@ class ConstraintTile(sw.Tile, HasTraits):
             id_, 
             title, 
             inputs = [
-                #tree_cover_switch, 
                 tile_txt, 
                 self.critera_select
             ] + self.criterias_values, 

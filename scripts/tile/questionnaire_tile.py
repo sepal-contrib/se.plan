@@ -11,7 +11,7 @@ import ipyvuetify as v
 from ipywidgets import jslink
 
 
-class QuestionaireIo():
+class QuestionnaireIo():
     
     def __init__(self):
     
