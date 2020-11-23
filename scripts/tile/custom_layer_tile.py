@@ -97,6 +97,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
             v_model = [],
             show_select = True, 
             single_select = True,
+            item_key = 'name',
             headers = self.headers,
             items = self.items,
             search = '',
@@ -167,7 +168,7 @@ class CustomizeLayerTile(sw.Tile):
         
         # name the tile
         id_ = "manual_widget"
-        title = "Manual layer selection"
+        title = "Customize layers input"
         
         # create the btns
         self.reset_to_questionnaire = sw.Btn(
