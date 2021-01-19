@@ -18,7 +18,6 @@ criterias = [
 # list of the available land use for the potential land use tile 
 land_use = [
     "Agriculture",
-    "Protected Areas",
     "Rangeland",
     "Grassland"
 ]
