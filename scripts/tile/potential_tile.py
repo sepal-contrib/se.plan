@@ -26,6 +26,7 @@ class PotentialTile(sw.Tile, HasTraits):
         
         # select the potential land use
         self.land_use = v.Select(
+            chips    = True,
             v_model  = [], 
             label    = ms.LAND_USE_SELECT_LABEL,
             items    = pm.land_use,
