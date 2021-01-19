@@ -1,4 +1,5 @@
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 from .. import message as ms
 from .. import parameter as pm
@@ -17,8 +18,8 @@ class PotentialTile(sw.Tile, HasTraits):
         title = "Restoration potential and land use" 
         id_ = 'nested_widget'
         
-        #default custom_v_model 
-        self.custom_v_model = json.dumps([[],0])
+        #default custom_v_model
+        self.custom_v_model = json.dumps({label: -1 for label in  pm.land_use})
         
         # short description of the tile
         tile_txt = sw.Markdown(ms.POTENTIAL_TXT)
@@ -31,30 +32,15 @@ class PotentialTile(sw.Tile, HasTraits):
             multiple = True
         )
         
-        # select the maximum allowable percent of tree cover
-        self.subheader = v.Subheader(
-            class_   = 'ml-0',
-            children = [ms.MAX_ALLOW_TREECOVER_LABEL.format('')]
-        )
-        self.pcnt_treecover = v.Slider(
-            v_model     = None,
-            min         = 0,
-            max         = 100, 
-            thumb_label = True,
-            disabled    = True
-        )
+        self.pcnt_treecover = [v.Slider(v_model=None, thumb_label=True, disabled=True, label=f'treecover in {label}') for label in pm.land_use]
+        for slider in self.pcnt_treecover:
+            su.hide_component(slider)
 
         # create the tile 
         super().__init__(
             id_, 
             title, 
-            inputs = [
-                tile_txt, 
-                self.land_use,
-                self.subheader,
-                self.pcnt_treecover
-                
-            ],
+            inputs = [tile_txt, self.land_use] + self.pcnt_treecover,
             **kwargs
         )
         
@@ -63,37 +49,42 @@ class PotentialTile(sw.Tile, HasTraits):
         
         # link the widgets together 
         self.land_use.observe(self.__on_select, 'v_model')
-        self.pcnt_treecover.observe(self.__on_change_treecover, 'v_model')
+        for slider in self.pcnt_treecover:
+            slider.observe(self.__on_change_treecover, 'v_model')
         
     def __on_select(self, change):
         
         val = change['new']
         
-        #change the custom_v_model
+        # load the custom_v_model
         tmp = json.loads(self.custom_v_model)
-        tmp[0] = val
+        
+        for label, slider in zip(pm.land_use, self.pcnt_treecover):
+            if label in val:
+                tmp[label] = slider.v_model
+                slider.disabled = False
+                su.show_component(slider)
+            else:
+                tmp[label] = -1
+                slider.disabled = True
+                su.hide_component(slider)
+        
+        # save the new values 
         self.custom_v_model = json.dumps(tmp)
-        
-        # create a readable str (can be done more efficiently I'm sure) 
-        str_ = ''
-        if len(val) == 1:
-            str_ = val[0]
-        elif len(val) > 1:
-            str_  = ', '.join(val[:-1]) + ' & ' + val[-1]
-
-        # change the title 
-        self.subheader.children = [ms.MAX_ALLOW_TREECOVER_LABEL.format(str_)]
-        
-        # disabled the slider if nothing is set
-        self.pcnt_treecover.disabled = (val == [])
         
         return 
             
     def __on_change_treecover(self, change):
         
-        #change the custom_v_model
+        # load the custom_v_model
         tmp = json.loads(self.custom_v_model)
-        tmp[1] = change['new']
+        
+        # get the slider 
+        for label, slider in zip(pm.land_use, self.pcnt_treecover):
+            if slider == change['owner']:
+                tmp[label] = change['new']
+        
+        # save the value
         self.custom_v_model = json.dumps(tmp)
         
         return
