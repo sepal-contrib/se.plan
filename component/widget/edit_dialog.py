@@ -4,8 +4,10 @@ import json
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
 from faker import Faker
+import pandas as pd
 
 from component import parameter as cp
+from .weight_slider import WeightSlider
 
 fake = Faker()
 
@@ -135,8 +137,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.name = data[0]['name']
             self.title.children = [data[0]['name']]
             
+            # get the layer list pd dataframe 
+            layer_list = pd.read_csv(cp.layer_list).fillna('')
+            
             # change text 
-            layer_df_line = cp.layer_list[cp.layer_list.layer_name == data[0]['name']].iloc[0]
+            layer_df_line = layer_list[layer_list.layer_name == data[0]['name']].iloc[0]
             self.text.children = [layer_df_line.layer_info]
             
             # enable slider 

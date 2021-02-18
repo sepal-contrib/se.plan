@@ -6,6 +6,7 @@ import ipyvuetify as v
 import pandas as pd
 
 from component import parameter as cp
+from .edit_dialog import EditDialog
 
 class LayerTable(v.DataTable, sw.SepalWidget):
     
@@ -42,7 +43,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.edit_icon = v.Icon(small=True, children=['mdi-pencil'])
         
-        self.dialog_edit = cw.EditDialog()
+        self.dialog_edit = EditDialog()
         
         super().__init__(
             change_model = 0,

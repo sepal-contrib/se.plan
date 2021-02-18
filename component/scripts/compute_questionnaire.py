@@ -1,6 +1,9 @@
 import json
 import random
-from . import parameter as pm
+
+import pandas as pd
+
+from component import parameter as cp
 
 def compute_questionnaire(questionnaire_io):
     """use the questionnaire answers to produce a layer list of weight"""
@@ -19,7 +22,7 @@ def compute_questionnaire(questionnaire_io):
                 'name'   : row.layer_name,
                 'layer': row.gee_asset,
                 'weight' : random.randint(0,6)
-            } for i, row in pm.layer_list.iterrows()
+            } for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows()
         ]
     
     return layers_values
