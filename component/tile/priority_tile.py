@@ -5,6 +5,7 @@ from sepal_ui import sepalwidgets as sw
 from ipywidgets import jslink
 
 from component import widget as cw
+from component.message import cm
         
             
 class PriorityTile (sw.Tile, HasTraits):
@@ -14,7 +15,7 @@ class PriorityTile (sw.Tile, HasTraits):
     def __init__(self, **kwargs):
         
         # name the tile
-        title = "Restoration priorities"
+        title = cm.priority.title
         id_ = "nested_widget"
         
         # create the sliders

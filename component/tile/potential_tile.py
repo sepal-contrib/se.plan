@@ -17,25 +17,25 @@ class PotentialTile(sw.Tile, HasTraits):
     def __init__(self, **kwargs):
         
         # name the tile 
-        title = "Restoration potential and land use" 
+        title = cm.potential.title
         id_ = 'nested_widget'
         
         #default custom_v_model
         self.custom_v_model = json.dumps({label: -1 for label in  cp.land_use})
         
         # short description of the tile
-        tile_txt = sw.Markdown(cm.questionnaire.potential)
+        tile_txt = sw.Markdown(cm.potential.desc)
         
         # select the potential land use
         self.land_use = v.Select(
             chips    = True,
             v_model  = [], 
-            label    = cm.questionnaire.land_use_lbl,
+            label    = cm.potential.land_use_lbl,
             items    = cp.land_use,
             multiple = True
         )
         
-        self.pcnt_treecover = [v.Slider(v_model=None, thumb_label=True, disabled=True, label=f'treecover in {label}') for label in cp.land_use]
+        self.pcnt_treecover = [v.Slider(v_model=None, thumb_label=True, disabled=True, label=cm.potential.treecover_lbl.format(label)) for label in cp.land_use]
         for slider in self.pcnt_treecover:
             su.hide_component(slider)
 

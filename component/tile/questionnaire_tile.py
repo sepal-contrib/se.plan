@@ -1,6 +1,7 @@
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
 
+from component.message import cm
 from .constraints_tile import ConstraintTile
 from .potential_tile import PotentialTile
 from .goal_tile import GoalTile
@@ -11,7 +12,7 @@ class QuestionnaireTile (sw.Tile):
     def __init__(self, io, **kwargs):
         
         # name the tile 
-        title = "Questionnaire Identifying Restoration Objective & Goals"
+        title = cm.questionnaire.title
         id_ = "questionnaire_widget"
         
         # build the tiles

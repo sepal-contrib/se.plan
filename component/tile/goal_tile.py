@@ -15,7 +15,7 @@ class GoalTile(sw.Tile, HasTraits):
     def __init__(self, **kwargs):
         
         # name the tile
-        title = "Restoration goals"
+        title = cm.goal.title
         id_ = "nested_widget"
         
         #default value 
@@ -23,7 +23,7 @@ class GoalTile(sw.Tile, HasTraits):
         
         # select the goals
         self.select_goal = v.Select(
-            label   = cm.questionnaire.goal_lbl,
+            label   = cm.goal.goal_lbl,
             items   = cp.goals,
             v_model = None
         )

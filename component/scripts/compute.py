@@ -1,8 +1,10 @@
-import ipyvuetify as v
 from traitlets import Unicode
+
+import ipyvuetify as v
 import ee 
-from . import parameter as pm
 from sepal_ui import sepalwidgets as sw
+
+from component import parameter as cp
 
 ee.Initialize()
 
@@ -75,7 +77,7 @@ def display_layer(layer, aoi_io, m):
     
     aoi_ee = aoi_io.get_aoi_ee()
     m.zoom_ee_object(aoi_ee.geometry())
-    m.addLayer(layer.clip(aoi_ee.geometry()), pm.final_viz, 'restoration layer')
+    m.addLayer(layer.clip(aoi_ee.geometry()), cp.final_viz, 'restoration layer')
     
     return
     

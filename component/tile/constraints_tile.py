@@ -20,18 +20,18 @@ class ConstraintTile(sw.Tile, HasTraits):
     def __init__(self, **kwargs):
         
         # name the tile 
-        title = "Constraints" 
+        title = cm.constraints.title 
         id_= 'nested_widget'
         
         # write a quick explaination 
-        tile_txt = sw.Markdown(cm.questionnaire.constraints)
+        tile_txt = sw.Markdown(cm.constraints.desc)
         
         # select widget to select the actives criterias
         self.critera_select = v.Select(
             chips    = True,
             v_model  = None,
             items    = [*cp.criterias],
-            label    = cm.questionnaire.criteria_lbl,
+            label    = cm.constraints.criteria_lbl,
             multiple = True
         )
         

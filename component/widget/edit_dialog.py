@@ -7,6 +7,7 @@ from faker import Faker
 import pandas as pd
 
 from component import parameter as cp
+from component.message import cm
 from .weight_slider import WeightSlider
 
 fake = Faker()
@@ -26,7 +27,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.title = v.CardTitle(children=['Layer name'])
         self.text = v.CardText(children = [fake.paragraph(13)])
         self.weight = WeightSlider('layer_name', 3)
-        self.check_custom = v.Checkbox(v_model = False, label = 'Use custom layer')
+        self.check_custom = v.Checkbox(v_model = False, label = cm.dial.layer)
         self.layer = v.TextField(
             clearable = True,
             v_model = self.init_layer, 
@@ -43,7 +44,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
                     children = [
                         v.ExpansionPanelHeader(
                             disable_icon_rotate = True,
-                            children = ['change layer used for the computation'],
+                            children = [cm.dial.change],
                             v_slots = [{
                                 'name': 'actions',
                                 'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
@@ -54,14 +55,14 @@ class EditDialog(sw.SepalWidget, v.Dialog):
                 )
             ]
         )
-        self.cancel = v.Btn(color='primary', outlined = True, children = ['Cancel'])
-        self.save = v.Btn(color='primary', children = ['save'])        
+        self.cancel = v.Btn(color='primary', outlined = True, children = [cm.dial.cancel])
+        self.save = v.Btn(color='primary', children = [cm.dial.save])        
         
         self.card = v.Card(
             children = [
                 self.title,
                 self.text,
-                v.Subheader(children = ['Weight']),
+                v.Subheader(children = [cm.dial.weight]),
                 self.weight,
                 v.Row(align_end = True, class_ = 'px-5', children = [self.ep]),
                 v.CardActions( class_ = 'ma-5', children = [self.cancel, self.save])
@@ -116,10 +117,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         if not len(data):
             
             # default title
-            self.title.children = ['No layer']
+            self.title.children = [cm.dial.no_layer]
             
             # default text
-            self.text.children = ['You need to select a layer before making modifications']
+            self.text.children = [cm.dial.disc]
             
             # mute all the component 
             self.weight.v_model = 3

@@ -1,16 +1,70 @@
 {
-    "app":{},
+    "app":{
+        "title": "Restoration planning module",
+        "drawer": {
+            "aoi": "AOI selection",
+            "question": "Questionnaire",
+            "custom": "Manual selection",
+            "compute": "Compute",
+            "dashboard": "Restoration dashboard",
+            "map": "Result map"
+        }
+        
+    },
     "questionnaire": {
-        "constraints": "Select constraints from the dropdown menu below to add a limitation to consider. For each constraint, choose values greater than or less than a particular value. Note that some constraint are scaled differntly so please read their short description after selection to assign appropriate values.",
-        "criteria_lbl": "Criteria",
-        "potential": "Max % tree cover in land use classes",
-        "land_use_lbl": "Which land uses allow restoration?",
+        "title": "Questionnaire Identifying Restoration Objective & Goals",
         "max_treecover": "Maximum allowable percent tree cover in {}:",
-        "goal_lbl": "restoration goals",
         "default_layer": "Weighted default layers",
         "custom_layer": "Use customized layers",
-        "questionnaire_btn": "Apply questionnaire answers",
-        "default_btn": "Apply default parameters", 
-        "custom_tile_txt": "by clicking on the 'apply questionnaire button, the different layers will be wheighted to best meet your answers. The User still have liberty of changing the value of any weight. In the second Panel The user will find all the layer that can be changed with custom one.Be extra careful wile changing the wheigth and using custom layer as it can lead to wrong or inacurate recommandations"
+        "questionnaire_btn": "Apply questionnaire answers"
+    },
+    "valid":{
+        "title": "Select your inputs",
+        "btn": "Validate your data"
+    },
+    "compute": {
+        "title": "Launch computation",
+        "btn": "compute the restoration dashboard",
+        "desc": "**The launch button will be available after you check the input data in order to avoid wrong computations**"
+    },
+    "constraints": {
+        "title": "Constraints",
+        "desc": "Select constraints from the dropdown menu below to add a limitation to consider. For each constraint, choose values greater than or less than a particular value. Note that some constraint are scaled differntly so please read their short description after selection to assign appropriate values.",
+        "criteria_lbl": "Criteria"
+    },
+    "custom": {
+        "title": "Customize layers input",
+        "desc": "by clicking on the 'apply questionnaire button, the different layers will be wheighted to best meet your answers. The User still have liberty of changing the value of any weight. In the second Panel The user will find all the layer that can be changed with custom one.Be extra careful wile changing the wheigth and using custom layer as it can lead to wrong or inacurate recommandations",
+        "question_btn": "Apply questionnaire answers",
+        "default_btn": "Apply default parameters"
+    },
+    "dial": {
+        "layer": "Use custom layer",
+        "change": "change layer used for the computation",
+        "cancel": "cancel",
+        "save": "save",
+        "weight": "Weight",
+        "no_layer": "No layer",
+        "disc": "You need to select a layer before making modifications"
+        
+    },
+    "dashboard": {
+        "title": "Restoration dashboard"
+    },
+    "goal": {
+        "title": "Restoration goals",
+        "goal_lbl": "restoration goals"
+    },
+    "map": {
+        "title": "Result Map"
+    },
+    "potential": {
+        "title": "Restoration potential and land use",
+        "desc": "Max % tree cover in land use classes",
+        "land_use_lbl": "Which land uses allow restoration?",
+        "treecover_lbl": "treecover in {}"
+    },
+    "priority": {
+        "title": "Restoration priorities"
     }
 }

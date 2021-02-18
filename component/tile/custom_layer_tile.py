@@ -16,18 +16,18 @@ class CustomizeLayerTile(sw.Tile):
         
         # name the tile
         id_ = "manual_widget"
-        title = "Customize layers input"
+        title = cm.custom.title
         
         # create the btns
         self.reset_to_questionnaire = sw.Btn(
-            text   = 'Apply questionnaire answers', 
+            text   = cm.custom.question_btn, 
             icon   = 'mdi-file-question-outline',
             class_ = 'ml-5 mr-2'
         )
         self.reset_to_questionnaire.color = 'success'
         
         self.reset_to_default = sw.Btn(
-            text   = 'Apply default parameters',
+            text   = cm.custom.default_btn,
             icon   = 'mdi-restore', 
             class_ = 'ml-2'
         )
@@ -41,7 +41,7 @@ class CustomizeLayerTile(sw.Tile):
         self.table = cw.LayerTable()
         
         # create the txt 
-        self.txt = sw.Markdown(cm.questionnaire.custom_tile_txt)
+        self.txt = sw.Markdown(cm.custom.desc)
         
         # build the tile 
         super().__init__(
