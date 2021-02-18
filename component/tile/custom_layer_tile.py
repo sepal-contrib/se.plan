@@ -1,16 +1,8 @@
-import ipyvuetify as v 
-from traitlets import observe, List, Unicode, Dict, Any
-from .. import parameter as pm
-from ipywidgets import jslink
-from sepal_ui import sepalwidgets as sw
-from .. import message as ms
-import json
-from IPython import display
+from sepal_ui import sepalwidgets as sw 
+import ipyvuetify as v
 
-
-# for debug only 
-from faker import Faker
-fake = Faker()        
+from component import widget as cw
+from component.message import cm
         
 class CustomizeLayerTile(sw.Tile):
     
@@ -43,10 +35,10 @@ class CustomizeLayerTile(sw.Tile):
             children = [self.reset_to_questionnaire, self.reset_to_default]
         )
         
-        self.table = LayerTable()
+        self.table = cw.LayerTable()
         
         # create the txt 
-        self.txt = sw.Markdown(ms.CUSTOMIZE_TILE_TXT)
+        self.txt = sw.Markdown(cm.questionnaire.custom_tile_txt)
         
         # build the tile 
         super().__init__(

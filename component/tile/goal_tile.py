@@ -1,8 +1,10 @@
-import ipyvuetify as v
-from sepal_ui import sepalwidgets as sw
-from .. import parameter as pm 
-from .. import message as ms
 from traitlets import HasTraits, Unicode
+
+from sepal_ui import sepalwidgets as sw
+import ipyvuetify as v
+
+from component.message import cm
+from component import parameter as cp
 
 
 class GoalTile(sw.Tile, HasTraits):
@@ -21,8 +23,8 @@ class GoalTile(sw.Tile, HasTraits):
         
         # select the goals
         self.select_goal = v.Select(
-            label   = ms.GOAL_SELECT_LABEL,
-            items   = pm.goals,
+            label   = cm.questionnaire.goal_lbl,
+            items   = cp.goals,
             v_model = None
         )
         

@@ -1,10 +1,10 @@
-import ipyvuetify as v
-from sepal_ui import sepalwidgets as sw
-from traitlets import Unicode, HasTraits
-from .. import parameter as pm 
-from .. import message as ms
+from traitlets import HasTraits, Unicode
 import json
+
+from sepal_ui import sepalwidgets as sw
 from ipywidgets import jslink
+
+from component import widget as cw
         
             
 class PriorityTile (sw.Tile, HasTraits):
@@ -18,7 +18,7 @@ class PriorityTile (sw.Tile, HasTraits):
         id_ = "nested_widget"
         
         # create the sliders
-        self.table = PriorityTable()
+        self.table = cw.PriorityTable()
         
         # build the tile
         super().__init__(

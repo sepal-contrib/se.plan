@@ -1,3 +1,9 @@
+from traitlets import HasTraits, Integer, observe
+
+from sepal_ui.scripts import utils as su
+import ipyvuetify as v
+
+
 class Constraint(HasTraits):
     
     custom_v_model = Integer().tag(sync=True)

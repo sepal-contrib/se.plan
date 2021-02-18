@@ -1,0 +1,16 @@
+{
+    "app":{},
+    "questionnaire": {
+        "constraints": "Select constraints from the dropdown menu below to add a limitation to consider. For each constraint, choose values greater than or less than a particular value. Note that some constraint are scaled differntly so please read their short description after selection to assign appropriate values.",
+        "criteria_lbl": "Criteria",
+        "potential": "Max % tree cover in land use classes",
+        "land_use_lbl": "Which land uses allow restoration?",
+        "max_treecover": "Maximum allowable percent tree cover in {}:",
+        "goal_lbl": "restoration goals",
+        "default_layer": "Weighted default layers",
+        "custom_layer": "Use customized layers",
+        "questionnaire_btn": "Apply questionnaire answers",
+        "default_btn": "Apply default parameters", 
+        "custom_tile_txt": "by clicking on the 'apply questionnaire button, the different layers will be wheighted to best meet your answers. The User still have liberty of changing the value of any weight. In the second Panel The user will find all the layer that can be changed with custom one.Be extra careful wile changing the wheigth and using custom layer as it can lead to wrong or inacurate recommandations"
+    }
+}

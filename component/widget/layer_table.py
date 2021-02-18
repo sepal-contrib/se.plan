@@ -1,3 +1,12 @@
+import json
+from traitlets import Any
+
+from sepal_ui import sepalwidgets as sw
+import ipyvuetify as v
+import pandas as pd
+
+from component import parameter as cp
+
 class LayerTable(v.DataTable, sw.SepalWidget):
     
     # unicode value to notify a change
@@ -21,7 +30,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'name'    : row.layer_name,
                 'weight'  : 0,
                 'layer'   : row.gee_asset
-            } for i, row in pm.layer_list.iterrows()
+            } for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows()
         ]
         
         self.search_field = v.TextField(
@@ -33,7 +42,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.edit_icon = v.Icon(small=True, children=['mdi-pencil'])
         
-        self.dialog_edit = EditDialog()
+        self.dialog_edit = cw.EditDialog()
         
         super().__init__(
             change_model = 0,

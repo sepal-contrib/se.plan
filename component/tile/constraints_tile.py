@@ -1,12 +1,12 @@
-from traitlets import observe, HasTraits, Unicode, Integer
+from traitlets import HasTraits, Unicode
 import json
 
-import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
-from sepal_ui.scripts import utils as su
+import ipyvuetify as v
 
-from .. import message as ms 
-from .. import parameter as pm
+from component.message import cm
+from component import parameter as cp
+from component import widget as cw
 
 class ConstraintTile(sw.Tile, HasTraits):
     
@@ -24,27 +24,27 @@ class ConstraintTile(sw.Tile, HasTraits):
         id_= 'nested_widget'
         
         # write a quick explaination 
-        tile_txt = sw.Markdown(ms.CONSTRAINT_TXT)
+        tile_txt = sw.Markdown(cm.questionnaire.constraints)
         
         # select widget to select the actives criterias
         self.critera_select = v.Select(
             chips    = True,
             v_model  = None,
-            items    = [*pm.criterias],
-            label    = ms.CRITERIA_LABEL,
+            items    = [*cp.criterias],
+            label    = cm.questionnaire.criteria_lbl,
             multiple = True
         )
         
         # criteria widget that will be used to change the impact of each criteria and hide them
         self.criterias_values = []
-        for key, value in pm.criterias.items():
+        for key, value in cp.criterias.items():
             
             if value == None: # binary criteria 
-                crit = Binary(key)
+                crit = cw.Binary(key)
             elif isinstance(value, list):
-                crit = Dropdown(key, value)
+                crit = cw.Dropdown(key, value)
             elif isinstance(value, int):
-                crit = Range(key, value)
+                crit = cw.Range(key, value)
                 
             self.criterias_values.append(crit)
             

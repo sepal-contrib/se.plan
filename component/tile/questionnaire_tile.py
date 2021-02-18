@@ -1,14 +1,10 @@
 from sepal_ui import sepalwidgets as sw
+import ipyvuetify as v
 
 from .constraints_tile import ConstraintTile
 from .potential_tile import PotentialTile
 from .goal_tile import GoalTile
 from .priority_tile import PriorityTile
-
-from traitlets import observe, HasTraits, Unicode
-
-import ipyvuetify as v
-from ipywidgets import jslink
 
 class QuestionnaireTile (sw.Tile):
     

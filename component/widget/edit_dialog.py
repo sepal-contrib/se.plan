@@ -1,3 +1,14 @@
+from traitlets import Unicode
+import json
+
+from sepal_ui import sepalwidgets as sw
+import ipyvuetify as v
+from faker import Faker
+
+from component import parameter as cp
+
+fake = Faker()
+
 class EditDialog(sw.SepalWidget, v.Dialog):
     
     _EMPTY_V_MODEL = { 'name': None, 'weight': None, 'layer': None }
@@ -125,7 +136,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.title.children = [data[0]['name']]
             
             # change text 
-            layer_df_line = pm.layer_list[pm.layer_list.layer_name == data[0]['name']].iloc[0]
+            layer_df_line = cp.layer_list[cp.layer_list.layer_name == data[0]['name']].iloc[0]
             self.text.children = [layer_df_line.layer_info]
             
             # enable slider 

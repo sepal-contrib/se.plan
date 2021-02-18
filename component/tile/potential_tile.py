@@ -1,10 +1,12 @@
+from traitlets import HasTraits, Unicode
+import json
+
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 import ipyvuetify as v
-from .. import message as ms
-from .. import parameter as pm
-import json
-from traitlets import HasTraits, Unicode
+
+from component import parameter as cp
+from component.message import cm
 
 class PotentialTile(sw.Tile, HasTraits):
     
@@ -19,21 +21,21 @@ class PotentialTile(sw.Tile, HasTraits):
         id_ = 'nested_widget'
         
         #default custom_v_model
-        self.custom_v_model = json.dumps({label: -1 for label in  pm.land_use})
+        self.custom_v_model = json.dumps({label: -1 for label in  cp.land_use})
         
         # short description of the tile
-        tile_txt = sw.Markdown(ms.POTENTIAL_TXT)
+        tile_txt = sw.Markdown(cm.questionnaire.potential)
         
         # select the potential land use
         self.land_use = v.Select(
             chips    = True,
             v_model  = [], 
-            label    = ms.LAND_USE_SELECT_LABEL,
-            items    = pm.land_use,
+            label    = cm.questionnaire.land_use_lbl,
+            items    = cp.land_use,
             multiple = True
         )
         
-        self.pcnt_treecover = [v.Slider(v_model=None, thumb_label=True, disabled=True, label=f'treecover in {label}') for label in pm.land_use]
+        self.pcnt_treecover = [v.Slider(v_model=None, thumb_label=True, disabled=True, label=f'treecover in {label}') for label in cp.land_use]
         for slider in self.pcnt_treecover:
             su.hide_component(slider)
 
@@ -60,7 +62,7 @@ class PotentialTile(sw.Tile, HasTraits):
         # load the custom_v_model
         tmp = json.loads(self.custom_v_model)
         
-        for label, slider in zip(pm.land_use, self.pcnt_treecover):
+        for label, slider in zip(cp.land_use, self.pcnt_treecover):
             if label in val:
                 tmp[label] = slider.v_model
                 slider.disabled = False
@@ -81,7 +83,7 @@ class PotentialTile(sw.Tile, HasTraits):
         tmp = json.loads(self.custom_v_model)
         
         # get the slider 
-        for label, slider in zip(pm.land_use, self.pcnt_treecover):
+        for label, slider in zip(cp.land_use, self.pcnt_treecover):
             if slider == change['owner']:
                 tmp[label] = change['new']
         

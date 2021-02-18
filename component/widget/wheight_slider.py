@@ -1,3 +1,7 @@
+from traitlets import observe
+
+import ipyvuetify as v
+
 class WeightSlider(v.Slider):
         
     _colors = {

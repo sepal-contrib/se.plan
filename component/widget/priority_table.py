@@ -1,3 +1,9 @@
+import json
+
+import ipyvuetify as v
+
+from component import parameter as cp
+
 class PriorityTable(v.SimpleTable):
     
     _labels = [
@@ -16,17 +22,17 @@ class PriorityTable(v.SimpleTable):
         'green'
     ]
     
-    _DEFAULT_V_MODEL = {name: 0 for name in pm.priorities}
+    _DEFAULT_V_MODEL = {name: 0 for name in cp.priorities}
     
     def __init__(self):
         
         
         # construct the checkbox list
         self.checkbox_list = {}
-        for name in pm.priorities:
+        for name in cp.priorities:
             line = []
             for i, color in enumerate(self._colors):
-                line.append(v.CheckBox(
+                line.append(v.Checkbox(
                     color = color, 
                     _metadata = {'label': name, 'val': i}, 
                     v_model = i==0
@@ -35,7 +41,7 @@ class PriorityTable(v.SimpleTable):
             
         # construct the rows of the table
         rows = []
-        for name in pm.priorities:
+        for name in cp.priorities:
             row  = [v.Html(tag = 'td', children = [name])]
             for j in range(len(self._colors)):
                 row.append(v.Html(tag = 'td', children = [self.checkbox_list[name][j]]))
@@ -56,7 +62,7 @@ class PriorityTable(v.SimpleTable):
         )
         
         # link the checks with the v_model
-        for name in pm.priorities:
+        for name in cp.priorities:
             for check in self.checkbox_list[name]:
                 check.observe(self._on_check_change, 'v_model')
         
