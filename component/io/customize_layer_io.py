@@ -1,8 +1,15 @@
-from .tile.custom_layer_tile import CustomizeLayerIo
-from . import parameter as pm
-import random
-
-
+class CustomizeLayerIo:
+    
+    def __init__(self):
+        
+        self.layer_list = [
+            {
+                'name'   : row.layer_name,
+                'layer': row.gee_asset,
+                'weight' : 0
+            } for i, row in pm.layer_list.iterrows()
+        ]
+        
 default_layer_io = CustomizeLayerIo()
 
 for i, layer in enumerate(default_layer_io.layer_list):

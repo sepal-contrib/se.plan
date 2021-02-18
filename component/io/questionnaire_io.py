@@ -1,8 +1,12 @@
-from .tile.questionnaire_tile import QuestionnaireIo
-from . import parameter as pm
-import random
-import json
-
+class QuestionnaireIo():
+    
+    def __init__(self):
+    
+        self.constraints = ''
+        self.potential = ''
+        self.goals = ''
+        self.priorities = ''
+        
 # questionnaire_io.constraints = { name of the criteria : [ bool activated, bool gt or lt, value] } for each criteria as json dict  
 default_questionnaire_io = QuestionnaireIo()
 

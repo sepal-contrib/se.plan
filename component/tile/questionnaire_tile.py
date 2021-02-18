@@ -10,16 +10,6 @@ from traitlets import observe, HasTraits, Unicode
 import ipyvuetify as v
 from ipywidgets import jslink
 
-
-class QuestionnaireIo():
-    
-    def __init__(self):
-    
-        self.constraints = ''
-        self.potential = ''
-        self.goals = ''
-        self.priorities = ''
-
 class QuestionnaireTile (sw.Tile):
     
     def __init__(self, io, **kwargs):
