@@ -12,12 +12,16 @@ class ValidationTile(sw.Tile):
         self.aoi_io = aoi_io
         self.compute_tile = compute_tile
         
+        # add the btn and output 
+        self.btn = sw.Btn(cm.valid.btn)
+        self.output = sw.Alert()
+        
         # create the tile 
         super().__init__(
             id_ = compute_tile._metadata['mount_id'],
             title = cm.valid.title,
-            btn = sw.Btn(cm.valid.btn),
-            output = sw.Alert()
+            btn = self.btn,
+            output = self.output
         )
         
         # js behaviours 
@@ -55,13 +59,16 @@ class ComputeTile(sw.Tile):
         # add the widgets 
         compute_txt = sw.Markdown(cm.compute.desc)
         
+        self.btn = sw.Btn(cm.compute.btn, disabled = False)
+        self.output = sw.Alert()
+        
         # create the tile 
         super().__init__(
             id_ = "compute_widget",
             title = cm.compute.title,
             inputs = [compute_txt],
-            btn = sw.Btn(cm.compute.btn, disabled = True),
-            output = sw.Alert()
+            btn = self.btn,
+            output = self.output
         )
         
         # add the js behaviours 
