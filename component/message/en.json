@@ -7,7 +7,8 @@
             "custom": "Manual selection",
             "compute": "Compute",
             "dashboard": "Restoration dashboard",
-            "map": "Result map"
+            "map": "Result map",
+            "About": "About"
         }
         
     },
