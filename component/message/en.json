@@ -26,16 +26,16 @@
     "compute": {
         "title": "Launch computation",
         "btn": "compute the restoration dashboard",
-        "desc": "**The launch button will be available after you check the input data in order to avoid wrong computations**"
+        "desc": "**The launch button will be available after you validate your inputs**"
     },
     "constraints": {
         "title": "Constraints",
-        "desc": "Select constraints from the dropdown menu below to add a limitation to consider. For each constraint, choose values greater than or less than a particular value. Note that some constraint are scaled differntly so please read their short description after selection to assign appropriate values.",
+        "desc": "Select constraints from the dropdown menu below to add a limitation to consider. For each constraint, choose values greater than or less than a particular value. Note that constraints are scaled differently, so please read the short description after selection to assign appropriate values.",
         "criteria_lbl": "Criteria"
     },
     "custom": {
         "title": "Customize layers input",
-        "desc": "by clicking on the 'apply questionnaire button, the different layers will be wheighted to best meet your answers. The User still have liberty of changing the value of any weight. In the second Panel The user will find all the layer that can be changed with custom one.Be extra careful wile changing the wheigth and using custom layer as it can lead to wrong or inacurate recommandations",
+        "desc": "When you click on the 'Apply Questionnaire' button, the layers will be weighted according to your responses. However, you can still change the value of any weight. In the second panel, you will find all of the layers that can be replaced with custom versions. Exercise caution when changing weights and using custom layers, as this can lead to inaccurate recommendations.",
         "question_btn": "Apply questionnaire answers",
         "default_btn": "Apply default parameters"
     },
