@@ -6,13 +6,9 @@ ee.Initialize()
 class gee_compute:
     def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
         self.rp_aoi_io = rp_aoi_io
-        self.selected_aoi = ""#rp_aoi_io.selected_features
+        self.selected_aoi = rp_aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
-        
-    def get_selected_aoi(rp_aoi_io):
-        # todo: conditionally select aoi depending on if country or drawn
-        return
     
     def constraints_catagorical(self, value,contratint_bool,name,layer_id):
 
@@ -180,7 +176,7 @@ class gee_compute:
         constraints_layers = self.make_constraints(constraints, constraints_layers)
 
         self.normalizeBenefits(benefits_layers,method='quantile')
-
+        #todo: benefit weighting 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
         wlc_image = ee.Image(1).expression(exp,exp_dict)
