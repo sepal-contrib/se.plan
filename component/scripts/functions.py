@@ -1,195 +1,212 @@
 import ee
-import ipyvuetify as v
-
-def normalizeBands(img,region='projects/goldmine-265915/assets/lao/Houaphan'):
-    # todo: remove default region and connect with init region
-    try:
-        # How am I going to have this variable availible...
-        # region = ee.Geometry.Rectangle(app.selected_c.geometry().bounds().toGeoJSON())
-        region = ee.FeatureCollection(region)
-    except NameError as err:
-        # region = ee.Geometry.Rectangle(app.pages.map.getBounds(), undefined, False)
-        print('Motherfucker ',err)
-
-    def rename(i):
-        imin = ee.String(i).cat(preMin)
-        imax = ee.String(i).cat(preMax)
-        return ee.List([imin, imax])
-
-    def mm(plist):
-        plist = ee.List(plist)
-        # get bandname
-        fbn = ee.String(plist.get(0)).slice(0, -4)
-        imgMin = ee.Image.constant(mmvalues.get(plist.get(0)))
-        imgMax = ee.Image.constant(mmvalues.get(plist.get(1)))
-        normImg = img.select(fbn).subtract(imgMin).divide(imgMax.subtract(imgMin))
-        return normImg.toFloat();  # .rename(fbn)
-
-    def mmUs(plist):
-        plist = ee.List(plist)
-        # get bandname
-        fbn = ee.String(plist.get(0)).slice(0, -4)
-        imgMin = ee.Number(mmvalues.get(plist.get(0)))
-        imgMax = ee.Number(mmvalues.get(plist.get(1)))
-        return img.select(fbn).unitScale(imgMin, imgMax).toFloat()
-
-    mmvalues = img.reduceRegion(
-        **{'reducer': ee.Reducer.minMax(), 'geometry': region, 'scale': 10000, 'maxPixels': 22e13, 'bestEffort': True,
-         'tileScale': 4})
-    bn = img.bandNames()
-    preMax = '_max'
-    preMin = '_min'
-    bn = bn.map(rename)
-
-    return ee.ImageCollection(bn.map(mmUs)).toBands()
-
-
-def updateInverseBands(img, ilist):
-    areThereInversBands = ee.Algorithms.IsEqual(img.select(ilist).bandNames().length().gte(1), 1)
-    ee.Algorithms.If(areThereInversBands,
-                     inverseRelation(img, ilist),
-                     img)
-    return img
-
-
-def inverseRelation(img, ilist):
-    bn = img.bandNames()
-    tb = ee.Image(1).subtract(img.select(ilist))
-    # select non inverse bands, add inverse bands to img, reorder
-    return img.select(bn.removeAll(ilist)).addBands(tb).select(bn)
-
-
-def loadFeatures():
-    globcover = ee.Image('ESA/GLOBCOVER_L4_200901_200912_V2_3').select('landcover')
-    bare = globcover.eq(200).unmask(0).select(['landcover'], ['bare'])
-    shrub = globcover.eq(130).add(globcover.eq(110)).add(globcover.eq(120)) \
-        .add(globcover.eq(30)).add(globcover.eq(150)) \
-        .unmask(0).select(['landcover'], ['shrub'])
-    ag = globcover.eq(11).add(globcover.eq(14)).add(globcover.eq(20)) \
-        .unmask(0).select(['landcover'], ['ag'])
-    pop = ee.Image('JRC/GHSL/P2016/POP_GPW_GLOBE_V1/2015')
-    # Tree cover from Landsat VCF
-    Ptree = ee.ImageCollection('GLCF/GLS_TCC').filter(ee.Filter.equals('year', 2000)).select(['tree_canopy_cover'], [
-        'p_tree_canopy_cover']).mosaic()
-    Ctree = ee.ImageCollection('GLCF/GLS_TCC').filter(ee.Filter.equals('year', 2010)) \
-        .select(['tree_canopy_cover'], ['c_tree_canopy_cover']).mosaic()
-    elevation = ee.Image('USGS/SRTMGL1_003')
-    slope = ee.Terrain.slope(elevation)
-    # add WDPA layer and rasterize
-    wdpa_poly = ee.FeatureCollection("WCMC/WDPA/current/polygons")
-    wdpa = wdpa_poly.filter(ee.Filter.neq('WDPAID', {})).reduceToImage(**{
-        'properties': ['WDPAID'], 'reducer': ee.Reducer.first()}).gt(0).unmask(0).rename('wdpa')
-    precip = ee.ImageCollection('UCSB-CHG/CHIRPS/PENTAD').filter(ee.Filter.equals('year', 2017)).first().rename(
-        'rain');  # ask about date range and when it will be entered
-    datamask = ee.Image('UMD/hansen/global_forest_change_2015').select('datamask') \
-        .bitwiseAnd(1 << 0).eq(1);
-    tcpotential = ee.Image("users/bastinjf_climate/FC_0412_b").rename('tcPotential')
-    # output img or list? img for now for selecting by feature
-    return ee.Image.cat([globcover, bare, shrub, pop, ag, Ptree, Ctree, elevation, slope, wdpa, precip, datamask,
-                         tcpotential])  # add rain
-def wlc(ranks, inverseList,region):
-  img = loadFeatures()
-
-  img = normalizeBands(img,region);
-
-  img = updateInverseBands(img,inverseList)
-
-  # good dict for xp
-  fdict_enum = {'f' + str(index): element for index, element in enumerate(ranks)}
-  idict_enum = {'b' + str(index): img.select(index) for index, element in enumerate(ranks)}
-
-  z = {**fdict_enum, **idict_enum}
-
-
-  # redo exprssion...
-  exp_enum = ['(f' + str(index) + '*b' + str(index) + ')' for index, element in enumerate(ranks)]
-  # i_enum = {'b'+str(index): img.select(index) for index, element in enumerate(ranks)}
-  exp = '+'.join(exp_enum).join(['(', ')'])
-
-  img = img.expression(exp, z)
-  return img
+import json
+ee.Initialize()
 
 # Test loading from here
-class gee_compute():
-    def __init__(self, aoi_content):
-        self.default_rank_goals = {'Enhancement of existing areas': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                              'Increase the forest cover': [6, 6, 6, 6, 6, 0, 0, 0, 0, 0, 0, 0],
-                              'Reflect relevant national regulations': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                              'Achievement of international commitments': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                              'Improve connectivity - landscape biodiversity': [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-                              }
-        self.aoi_content = aoi_content
+class gee_compute:
+    def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
+        self.rp_aoi_io = rp_aoi_io
+        self.selected_aoi = ""#rp_aoi_io.selected_features
+        self.rp_layers_io = rp_layers_io
+        self.rp_questionaire_io = rp_questionaire_io
+        
+    def get_selected_aoi(rp_aoi_io):
+        # todo: conditionally select aoi depending on if country or drawn
+        return
+    
+    def constraints_catagorical(self, value,contratint_bool,name,layer_id):
 
-    def get_constraints(self, l):
-        selected = self.aoi_content.children[1].children[0].children[0].critera_select.v_model
-        lname = l.children[0].children[0].children[0]
-        # Check if value is selected
-        try:
-            limg = l.children[0].children[0].children[0] in selected
-        except TypeError as e:
-            limg = []
-            pass
-        # gt = true, lt = false
-        gt_lt = l.children[1].children[0].v_model
-        # value
-        v = l.children[2].children[0].v_model
-        if limg:
-            return {'name': lname, 'image': limg, 'mode': gt_lt, 'value': v}
+        layer = {'theme':'constraints'}
+        layer['name'] = name 
+
+        if contratint_bool == True:
+            layer['eeimage'] = ee.Image(layer_id).eq(value)
+            return layer
+        elif contratint_bool == False:
+            layer['eeimage'] = ee.Image(layer_id).neq(value)
+            return layer
+
+    def constraints_hight_low_bool (self,value, contratint_bool, layer):
+        if contratint_bool == True:
+            layer['eeimage'] = ee.Image(layer['layer']).gt(value)
+        elif contratint_bool == False:
+            layer['eeimage'] = ee.Image(layer['layer']).lt(value)
+
+    def make_constraints(self, constraints, constraints_layers):
+        for i in constraints:
+            value = constraints[i]
+            name = i
+            if value == None or value == -1:
+                continue
+
+            # Landcover specific constraints
+            landcover_default_object = {'Bare land':22,'Shrub land':15,'Agricultural land':5}
+            landcover_default_keys = landcover_default_object.keys()
+
+            if name in landcover_default_keys:
+                constraint_layer = next(item for item in constraints_layers if item["name"] == 'Current land cover')
+                layer_id = constraint_layer['layer']
+                landcover_constraints = [self.constraints_catagorical(landcover_default_object[i],True,i,layer_id) for i in landcover_default_keys]
+            
+            elif name == 'Tree cover':
+                constraint_layer = next(item for item in constraints_layers if item["name"] == 'Current canopy cover')
+                layer_id = constraint_layer['layer']
+
+                default = 'GLCF/GLS_TCC'#todo: have this checked from csv
+                if layer_id == default:
+                    cover_image = ee.ImageCollection('GLCF/GLS_TCC').filter(ee.Filter.equals('year', 2010)).select(['tree_canopy_cover'], ['c_tree_canopy_cover']).mosaic()
+                else:
+                    cover_image = ee.Image(layer_id)
+
+                eeimage = {'eeimage':cover_image.lt(value)}
+                constraint_layer.update(eeimage)
+
+            elif name == 'Protected areas':
+                constraint_layer = next(item for item in constraints_layers if item["name"] == 'Protected areas')
+                layer_id = constraint_layer['layer']
+                protected_feature = ee.FeatureCollection(layer_id)
+                protected_image = protected_feature.filter(ee.Filter.neq('WDPAID', {})).reduceToImage(**{
+                'properties': ['WDPAID'], 'reducer': ee.Reducer.first()}).gt(0).unmask(0).rename('wdpa')
+                eeimage = {'eeimage':protected_image}
+                constraint_layer.update(eeimage)
+            
+            else:
+                constraint_layer = next(item for item in constraints_layers if item["name"] == name)
+
+                self.constraints_hight_low_bool(value,True,constraint_layer)
+
+        constraints_layers = constraints_layers + landcover_constraints
+        return constraints_layers
+
+    def minmaxNormalization(self,eeimage,region): 
+        mmvalues = eeimage.reduceRegion(
+            **{'reducer': ee.Reducer.minMax(), 'geometry': region, 'scale': 10000, 'maxPixels': 1e13, 'bestEffort': True,
+            'tileScale': 4})
+
+        bandname = ee.String(eeimage.bandNames().get(0))
+        keyMin = bandname.cat('_min')
+        keyMax = bandname.cat('_max')
+
+        imgMin = ee.Number(mmvalues.get(keyMin) )
+        imgMax = ee.Number(mmvalues.get(keyMax) )
+
+        return eeimage.unitScale(imgMin, imgMax).toFloat()
+
+    def quantileGetNumbers(self,eeimage,percentiles):
+        bandname = ee.String(eeimage.bandNames().get(0))
+        
+        low = ee.Number(percentiles.get( bandname.cat('_low')))
+        lowmed = ee.Number(percentiles.get( bandname.cat('_lowmed')))
+        highmed = ee.Number(percentiles.get( bandname.cat('_highmed')))
+        high = ee.Number(percentiles.get( bandname.cat('_high')))
+        
+        return low, lowmed, highmed, high
+
+    def quantileNormalization(self,eeimage,region):
+        percentiles = eeimage.reduceRegion(**{'reducer':ee.Reducer.percentile([20,40,60,80],['low','lowmed','highmed','high']),
+            'geometry':region, 'scale':100, 'bestEffort':True, 'maxPixels':1e13, 'tileScale':2})
+        
+        low, lowmed, highmed, high = self.quantileGetNumbers(eeimage, percentiles)
+
+        out = eeimage.where(eeimage.lte(low),1) \
+            .where(eeimage.gt(low).And(eeimage.lte(lowmed)),2) \
+            .where(eeimage.gt(lowmed).And(eeimage.lte(highmed)),3) \
+            .where(eeimage.gt(highmed).And(eeimage.lte(high)),4) \
+            .where(eeimage.gt(high),5)
+        return out
+
+    def normalizeImage(self,layer, region, method='mixmax'):
+        eeimage = layer['eeimage']
+        if method == 'minmax': 
+            eeimage = self.minmaxNormalization(eeimage,region)#.rename('minmzx')
+        elif method == 'quantile':
+            eeimage = self.quantileNormalization(eeimage,region)#.rename('quant')
+        layer.update({'eeimage':eeimage})
+
+    def normalizeBenefits(self,benefits_layers,method='minmax'):
+        list(map(lambda i : self.normalizeImage(i,region, method), benefits_layers))
+
+    def make_benefit_expression(self,benefits_layers):
+        # build expression for benefits
+        fdict_bene = {'f' + str(index): element['weight'] for index, element in enumerate(benefits_layers)}
+        idict_bene = {'b' + str(index): element['eeimage'] for index, element in enumerate(benefits_layers)}
+
+        exp_bene = ['(f' + str(index) + '*b' + str(index) + ')' for index, element in enumerate(benefits_layers)]
+        # i_enum = {'b'+str(index): img.select(index) for index, element in enumerate(ranks)}
+        benefits_exp = '+'.join(exp_bene).join(['(', ')'])
+
+        return fdict_bene, idict_bene, benefits_exp 
+
+    def make_cost_expression(self,costs_layers):
+        idict = {'c' + str(index):element['eeimage'] for index, element in enumerate(costs_layers)}
+        exp = ['(c' + str(index) + ')' for index, element in enumerate(costs_layers)]
+        exp_string = '+'.join(exp).join(['(', ')'])
+
+        return idict, exp_string
+
+    def make_constraint_expression(self,constraints_layers):
+        idict = {'cn' + str(index):element['eeimage'] for index, element in enumerate(constraints_layers)}
+        exp = ['(cn' + str(index) + ')' for index, element in enumerate(constraints_layers)]
+        exp_string = '*'.join(exp).join(['(', ')'])
+
+        return idict, exp_string
+
+    def make_expression(self,benefits_layers,costs_layers,constraints_layers):
+        fdict_bene, idict_bene, benefits_exp = self.make_benefit_expression(benefits_layers)
+        idict_cost, costs_exp = self.make_cost_expression(costs_layers)
+        idict_cons, constraint_exp = self.make_constraint_expression(constraints_layers)
+
+        expression_dict = {**fdict_bene, **idict_bene, **idict_cost, **idict_cons}
+        expression = f"( ( {benefits_exp} / {costs_exp} ) * {constraint_exp} )"
+
+        return expression, expression_dict
+
+    def wlc(self):
+        layerlist = self.rp_layers_io['layer_list'] 
+        constraints = self.rp_questionaire_io #json.loads(rp_questionaire_io.constraints)
+        # load layers and create eeimages
+        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
+        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), benefits_layers))
+
+        risks_layers = [i for i in layerlist if i['theme'] == 'risks']
+        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), risks_layers))
+
+        costs_layers = [i for i in layerlist if i['theme'] == 'costs']
+        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), costs_layers))
+
+        # constraint_layer, initialize with constant value 1 
+        constraints_layers = [i for i in layerlist if i['theme'] == 'constraints']
+        list(map(lambda i : i.update({'eeimage':ee.Image(1)}), constraints_layers))
+        constraints_layers = self.make_constraints(constraints, constraints_layers)
+
+        self.normalizeBenefits(benefits_layers,method='quantile')
+
+        exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
+
+        wlc_image = ee.Image(1).expression(exp,exp_dict)
+        return wlc_image
 
 
-    def create_res_priorities(self, l):
-        if isinstance(l, v.Html):
-            return
-        slider_value = l.children[0].v_model
-        slider_name = l.children[0].label
-
-        return {'label': slider_name, 'value': slider_value}
-
-
-    def get_res_priorities(self):
-        rp_sliders = self.aoi_content.children[1].children[3].children[0].children[0].children
-        res_priorities = [x for x in [*map(self.create_res_priorities, rp_sliders)] if x is not None]
-        return res_priorities
-
-
-    def adjust_ranks_by_slider(self, slider_val, ranks, priority):
-        #     maybe get slider max from class at some point
-        slider_max = 4
-        slider_val_perc = slider_val / slider_max - 1
-
-        change = [x * slider_val_perc for x in priority]
-        ranks_new = [x + y for x, y in zip(ranks, change)]
-
-        return ranks_new
+# tests
+rp_layers_io = {'layer_list':[{'name': 'Net imports of forest products', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 0,'theme':'benefits'},
+{'name': 'Net imports of forest products', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 2,'theme':'benefits'},
+{'name': 'Net imports of forest products', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 3,'theme':'benefits'},
+{'name': 'Current land cover', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 3,'theme':'constraints'},
+{'name': 'Current canopy cover', 'layer': 'GLCF/GLS_TCC', 'weight': 3,'theme':'constraints'}, 
+{'name': 'Annual rainfall', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 3,'theme':'constraints'}, 
+{'name': 'Accessibility to major cities', 'layer': 'user/myprofile/aFalseAsset', 'weight': 4,'theme':'costs'},
+{'name': 'Establishment cost', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 4,'theme':'costs','subtheme':'subtheme1'},
+{'name': 'Forest employment per ha of forest', 'layer': 'user/myprofile/aFalseAsset', 'weight': 6,'theme':'risks'},
+{'name':'Protected areas','layer':'WCMC/WDPA/current/polygons','theme':'constraints'}, 
+]}
+constraints = {'Bare land': -1, 'Shrub land': True, 'Agricultural land': True, 'Annual rainfall': 5, 'Population': -1,
+ 'Elevation': -1, 'Slope': -1, 'Tree cover': -1, 'Protected area': -1, 'Opportunity cost': -1, 'Tree cover':89}
+region = ee.Geometry.Polygon(
+        [[[-78.48947375603689, -3.788304531206833],
+          [-78.48947375603689, -6.1959483939283935],
+          [-74.82004016228689, -6.1959483939283935],
+          [-74.82004016228689, -3.788304531206833]]], None, False)
 
 
-
-    def prep_run_comp(self):
-        #     get constraints
-        c_values = self.aoi_content.children[1].children[0].children[0].criterias_values
-
-        constraints = [x for x in [*map(self.get_constraints, c_values)] if x is not None]
-
-        #     get get restoration goal
-        r_goal = self.aoi_content.children[1].children[2].children[0].children[0].children[1].children[0].v_model
-        if r_goal is None:
-            return
-        ranks = self.default_rank_goals[r_goal]
-
-        #     adjust rank by sliders
-        # get all rest priorities, will these need to be dynamic based on goal?
-        prioity_1 = [-1, 1, 1, 0, -1, 1, 0, 1]
-        prioity_2 = [-1, 1, 1, 0, -1, 1, 0, 1]
-        prioity_3 = [-1, 1, 1, 0, -1, 1, 0, 1]
-        prioity_4 = [-1, 1, 1, 0, -1, 1, 0, 1]
-        prioity_5 = [-1, 1, 1, 0, -1, 1, 0, 1]
-        prioity_6 = [-1, 1, 1, 0, -1, 1, 0, 1]
-        p_list = [prioity_1, prioity_2, prioity_3, prioity_4, prioity_5, prioity_6]
-
-        selected_priorities = self.get_res_priorities()
-
-        for x, e in enumerate(p_list):
-            ranks = self.adjust_ranks_by_slider(selected_priorities[x]['value'], ranks, e)
-        #     remove zeros from
-        model_ranks = [x if x >= 0 else 0 for x in ranks]
-        return model_ranks, ranks, constraints, selected_priorities
+t = gee_compute(region,rp_layers_io,constraints)
+print(t.wlc())
