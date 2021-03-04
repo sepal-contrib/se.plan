@@ -74,7 +74,7 @@ class gee_compute:
         constraints_layers = constraints_layers + landcover_constraints
         return constraints_layers
 
-    def minmaxNormalization(self,eeimage,region): 
+    def minmax_normalization(self,eeimage,region): 
         mmvalues = eeimage.reduceRegion(
             **{'reducer': ee.Reducer.minMax(), 'geometry': region, 'scale': 10000, 'maxPixels': 1e13, 'bestEffort': True,
             'tileScale': 4})
@@ -88,7 +88,7 @@ class gee_compute:
 
         return eeimage.unitScale(imgMin, imgMax).toFloat()
 
-    def quantileGetNumbers(self,eeimage,percentiles):
+    def quantile_get_numbers(self,eeimage,percentiles):
         bandname = ee.String(eeimage.bandNames().get(0))
         
         low = ee.Number(percentiles.get( bandname.cat('_low')))
@@ -98,11 +98,11 @@ class gee_compute:
         
         return low, lowmed, highmed, high
 
-    def quantileNormalization(self,eeimage,region):
+    def quantile_normalization(self,eeimage,region):
         percentiles = eeimage.reduceRegion(**{'reducer':ee.Reducer.percentile([20,40,60,80],['low','lowmed','highmed','high']),
             'geometry':region, 'scale':100, 'bestEffort':True, 'maxPixels':1e13, 'tileScale':2})
         
-        low, lowmed, highmed, high = self.quantileGetNumbers(eeimage, percentiles)
+        low, lowmed, highmed, high = self.quantile_get_numbers(eeimage, percentiles)
 
         out = eeimage.where(eeimage.lte(low),1) \
             .where(eeimage.gt(low).And(eeimage.lte(lowmed)),2) \
@@ -114,12 +114,12 @@ class gee_compute:
     def normalizeImage(self,layer, region, method='mixmax'):
         eeimage = layer['eeimage']
         if method == 'minmax': 
-            eeimage = self.minmaxNormalization(eeimage,region)#.rename('minmzx')
+            eeimage = self.minmax_normalization(eeimage,region)#.rename('minmzx')
         elif method == 'quantile':
-            eeimage = self.quantileNormalization(eeimage,region)#.rename('quant')
+            eeimage = self.quantile_normalization(eeimage,region)#.rename('quant')
         layer.update({'eeimage':eeimage})
 
-    def normalizeBenefits(self,benefits_layers,method='minmax'):
+    def normalize_benefits(self,benefits_layers,method='minmax'):
         list(map(lambda i : self.normalizeImage(i,region, method), benefits_layers))
 
     def make_benefit_expression(self,benefits_layers):
@@ -175,7 +175,7 @@ class gee_compute:
         list(map(lambda i : i.update({'eeimage':ee.Image(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
 
-        self.normalizeBenefits(benefits_layers,method='quantile')
+        self.normalize_benefits(benefits_layers,method='quantile')
         #todo: benefit weighting 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
@@ -183,26 +183,3 @@ class gee_compute:
         return wlc_image
 
 
-# tests
-rp_layers_io = {'layer_list':[{'name': 'Net imports of forest products', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 0,'theme':'benefits'},
-{'name': 'Net imports of forest products', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 2,'theme':'benefits'},
-{'name': 'Net imports of forest products', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 3,'theme':'benefits'},
-{'name': 'Current land cover', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 3,'theme':'constraints'},
-{'name': 'Current canopy cover', 'layer': 'GLCF/GLS_TCC', 'weight': 3,'theme':'constraints'}, 
-{'name': 'Annual rainfall', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 3,'theme':'constraints'}, 
-{'name': 'Accessibility to major cities', 'layer': 'user/myprofile/aFalseAsset', 'weight': 4,'theme':'costs'},
-{'name': 'Establishment cost', 'layer': 'projects/john-ee-282116/assets/fakecost', 'weight': 4,'theme':'costs','subtheme':'subtheme1'},
-{'name': 'Forest employment per ha of forest', 'layer': 'user/myprofile/aFalseAsset', 'weight': 6,'theme':'risks'},
-{'name':'Protected areas','layer':'WCMC/WDPA/current/polygons','theme':'constraints'}, 
-]}
-constraints = {'Bare land': -1, 'Shrub land': True, 'Agricultural land': True, 'Annual rainfall': 5, 'Population': -1,
- 'Elevation': -1, 'Slope': -1, 'Tree cover': -1, 'Protected area': -1, 'Opportunity cost': -1, 'Tree cover':89}
-region = ee.Geometry.Polygon(
-        [[[-78.48947375603689, -3.788304531206833],
-          [-78.48947375603689, -6.1959483939283935],
-          [-74.82004016228689, -6.1959483939283935],
-          [-74.82004016228689, -3.788304531206833]]], None, False)
-
-
-t = gee_compute(region,rp_layers_io,constraints)
-print(t.wlc())
