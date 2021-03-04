@@ -6,7 +6,7 @@ ee.Initialize()
 class gee_compute:
     def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
         self.rp_aoi_io = rp_aoi_io
-        self.selected_aoi = rp_aoi_io.get_aoi_ee()
+        self.selected_aoi = rp_aoi_io# rp_aoi_io.get_aoi_ee() 
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
     
@@ -111,7 +111,7 @@ class gee_compute:
             .where(eeimage.gt(high),5)
         return out
 
-    def normalizeImage(self,layer, region, method='mixmax'):
+    def normalize_image(self,layer, region, method='mixmax'):
         eeimage = layer['eeimage']
         if method == 'minmax': 
             eeimage = self.minmax_normalization(eeimage,region)#.rename('minmzx')
@@ -120,7 +120,7 @@ class gee_compute:
         layer.update({'eeimage':eeimage})
 
     def normalize_benefits(self,benefits_layers,method='minmax'):
-        list(map(lambda i : self.normalizeImage(i,region, method), benefits_layers))
+        list(map(lambda i : self.normalize_image(i,self.selected_aoi, method), benefits_layers))
 
     def make_benefit_expression(self,benefits_layers):
         # build expression for benefits
