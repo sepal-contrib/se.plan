@@ -47,16 +47,16 @@ goals = [
     'Enhancement of existing areas',
     'Increase the forest cover',
     'Reflect relevant national regulations',
-    'Achievement of international commitments',
-    'Improve connectivity - landscape biodiversity'
+    'Achieve international commitments',
+    'Improve connectivity and landscape biodiversity'
 ]
 
 # list of the available priorities for the priority tile
 priorities = [
     'Production Forest',
-    ' Protected Area',
-    'Community Foresty',
+    'Protected Area',
+    'Community Forestry',
     'Community Protected Area',
-    'Biodiversity conservation corridor',
+    'Biodiversity Conservation Corridor',
     'Other private land or public land'
 ]

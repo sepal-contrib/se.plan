@@ -17,7 +17,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.headers = [
           {'text': 'Theme'     , 'value': 'theme'},
-          {'text': 'Sub theme' , 'value': 'subtheme'},
+          {'text': 'Subtheme' , 'value': 'subtheme'},
           {'text': 'Layer name', 'value': 'name'},
           {'text': 'Weight'    , 'value': 'weight'},
           {'text': 'Layer'     , 'value': 'layer'},
