@@ -5,8 +5,7 @@ ee.Initialize()
 # Test loading from here
 class gee_compute:
     def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
-        self.rp_aoi_io = rp_aoi_io.get_aoi_ee() 
-        self.selected_aoi = rp_aoi_io# rp_aoi_io.get_aoi_ee() 
+        self.selected_aoi = rp_aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
     
@@ -159,7 +158,7 @@ class gee_compute:
 
     def wlc(self):
         layerlist = self.rp_layers_io.layer_list
-        constraints = self.rp_questionaire_io #json.loads(rp_questionaire_io.constraints)
+        constraints = json.loads(self.rp_questionaire_io.constraints)
         # load layers and create eeimages
         benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), benefits_layers))
