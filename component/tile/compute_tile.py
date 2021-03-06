@@ -44,11 +44,12 @@ class ValidationTile(sw.Tile):
     
 class ComputeTile(sw.Tile):
     
-    def __init__(self, io, aoi_io, m, dashboard_tile):
+    def __init__(self, io, aoi_io, m, dashboard_tile, questionaire_io):
         
         # gather the ios 
         self.io = io
         self.aoi_io = aoi_io
+        self.questionaire_io = questionaire_io
         
         # get the map
         self.m = m
@@ -80,7 +81,7 @@ class ComputeTile(sw.Tile):
         widget.toggle_loading()
     
         # create a layer and a dashboard 
-        layer, dashboard = cs.compute_layers(self.io)
+        layer, dashboard = cs.compute_layers(self.aoi_io, self.io, self.questionaire_io)
     
         # display the layer in the map
         cs.display_layer(layer, self.aoi_io, self.m)
