@@ -14,7 +14,9 @@ class CustomizeLayerIo:
             {
                 'name'   : row.layer_name,
                 'layer': row.gee_asset,
-                'weight' : 0
+                'weight' : 0,
+                'theme' : row.theme,
+                'subtheme' : row.subtheme
             } for i, row in layer_list.iterrows()
         ]
         
