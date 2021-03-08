@@ -2,6 +2,7 @@ from traitlets import Unicode
 import json
 
 from sepal_ui import sepalwidgets as sw
+from sepal_ui import mapping as sm
 import ipyvuetify as v
 from faker import Faker
 import pandas as pd
@@ -55,6 +56,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
                 )
             ]
         )
+        
+        self.m = sm.SepalMap()
+        self.m.layout.height = '40vh'
+        self.m.layout.margin = '2em'
+        
         self.cancel = v.Btn(color='primary', outlined = True, children = [cm.dial.cancel])
         self.save = v.Btn(color='primary', children = [cm.dial.save])        
         
@@ -65,6 +71,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
                 v.Subheader(children = [cm.dial.weight]),
                 self.weight,
                 v.Row(align_end = True, class_ = 'px-5', children = [self.ep]),
+                self.m,
                 v.CardActions( class_ = 'ma-5', children = [self.cancel, self.save])
             ]
         )
@@ -73,7 +80,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             custom_v_model = json.dumps(self._EMPTY_V_MODEL),
             persistent = True,
             value = False,
-            max_width = '500px',
+            max_width = '700px',
             children = [self.card]
         )
         
