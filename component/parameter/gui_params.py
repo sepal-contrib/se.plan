@@ -1,6 +1,12 @@
 # colors to use for levels 
 colors = [
-    
+    "#FD7070", # red
+    "#FD8970", # light red
+    "#FDA370", # accent orange
+    "#FDBC70", # orange
+    "#FDE670", # light orange
+    "#E9FD70", # yellow
+    "#95FD70"  # green
 ]
 
 # list of the available constraint criteria
