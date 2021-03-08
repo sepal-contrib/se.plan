@@ -3,6 +3,7 @@ from sepal_ui import mapping as sm
 import ipyvuetify as v
 
 from component.message import cm
+from component import parameter as cp
 
 class MapTile(sw.Tile):
     
@@ -13,6 +14,7 @@ class MapTile(sw.Tile):
         
         # create the map 
         self.m = sm.SepalMap()
+        self.m.add_colorbar(colors=cp.colors, vmin=0, vmax=5)
         
         # create a layout with 2 btn 
         self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
