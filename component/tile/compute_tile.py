@@ -60,7 +60,7 @@ class ComputeTile(sw.Tile):
         # add the widgets 
         compute_txt = sw.Markdown(cm.compute.desc)
         
-        self.btn = sw.Btn(cm.compute.btn, disabled = False)
+        self.btn = sw.Btn(cm.compute.btn, disabled=True)
         self.output = sw.Alert()
         
         # create the tile 

@@ -1,3 +1,8 @@
+# colors to use for levels 
+colors = [
+    
+]
+
 # list of the available constraint criteria
 # None for binary inputs 
 # dict for dropdonw 
