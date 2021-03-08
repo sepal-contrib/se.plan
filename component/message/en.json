@@ -22,7 +22,10 @@
     "valid":{
         "title": "Model recipe (input benefits, risks, costs, and constraints)",
         "display": "Validate your data",
-        "save": "Save your recipe"
+        "save": "Save your recipe",
+        "txt": ["The map indicating how the overall net benefits at a site compares across other locations in the landscape is created using a weighted sum approach. This is a simple multi-attribute decision analysis method where relevant objects or landscape attributes, such as presence of buildings, water, or primary forest (often called “spatial layers”) are weighted according to a decision maker's interpretation of their relative importance in achieving a  particular goal.  The ranked benefit layer is then created by calculating the weighted value for each location and summing these across all spatial layers. Next the ranked benefit layer is divided by the estimated costs. Finally, the areas that have been indicated as unsuitable for restoration because of ecological or socioeconomic risk are masked from the results.",
+                "We often recommend that users explore different  weighting combinations in order to examine how areas recommended for restoration might change depending on their decisions. In order to assist in comparing alternative benefit rankings and constraints, we have included the snapshot of your model settings above. You also have the option to save this as a recipe in SEPAL so you can revisit it at a later point in time."
+        ]
     },
     "compute": {
         "title": "Launch computation",

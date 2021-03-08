@@ -16,6 +16,7 @@ class ValidationTile(sw.Tile):
         
         # create the layer list widget 
         self.layers_recipe = cw.layerRecipe()
+        mkd = sw.Markdown('  \n'.join(cm.valid.txt))
         
         # add the btn and output 
         self.valid = sw.Btn(cm.valid.display, class_ = 'ma-1')
@@ -25,7 +26,7 @@ class ValidationTile(sw.Tile):
         # create the tile 
         super().__init__(
             id_ = compute_tile._metadata['mount_id'],
-            inputs= [self.layers_recipe],
+            inputs= [self.layers_recipe, mkd],
             title = cm.valid.title,
             btn = v.Row(children = [self.valid, self.save]),
             output = self.output
