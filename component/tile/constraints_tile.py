@@ -13,8 +13,6 @@ class ConstraintTile(sw.Tile, HasTraits):
     # create custom_v_model as a traitlet
     # the traitlet List cannot be listened to so we're force to use Unicode json instead
     
-    # build as such : 
-    # { 'criteria_name' : [active (as bool), lt or gt (0-1), value], ...}
     custom_v_model = Unicode('').tag(sync=True)
     
     def __init__(self, **kwargs):

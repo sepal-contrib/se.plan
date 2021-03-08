@@ -15,13 +15,22 @@ class QuestionnaireIo():
 # questionnaire_io.constraints = { name of the criteria : [ bool activated, bool gt or lt, value] } for each criteria as json dict  
 default_questionnaire_io = QuestionnaireIo()
 
-criterias = {
-    criteria : [
-        random.random() < 0.5, 
-        random.random() < 0.5,
-        random.randint(0,100)
-    ] for criteria in cp.criterias
-}
+criterias = {}
+for name, val in cp.criterias.items():
+    
+    if val == None: # binary criteria 
+        crit = random.random() < .5
+    elif isinstance(val, list):
+        crit = val[int(random.random()*3)]['value']
+    elif isinstance(val, int):
+        crit = int(random.random() * val)
+    
+    # randomly activate them
+    crit = crit if random.random() < .5 else -1
+    
+    # set them in the criterias list 
+    criterias[name] = crit
+
 default_questionnaire_io.constraints = json.dumps(criterias)
 
 # questionnaire_io.potential = [ [names of land use that allow restration], treecover] as json list
