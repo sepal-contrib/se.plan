@@ -20,8 +20,9 @@
         "questionnaire_btn": "Apply questionnaire answers"
     },
     "valid":{
-        "title": "Select your inputs",
-        "btn": "Validate your data"
+        "title": "Model recipe (input benefits, risks, costs, and constraints)",
+        "display": "Validate your data",
+        "save": "Save your recipe"
     },
     "compute": {
         "title": "Launch computation",

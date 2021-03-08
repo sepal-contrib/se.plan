@@ -1,7 +1,9 @@
 from sepal_ui import sepalwidgets as sw
+import ipyvuetify as v
 
 from component import scripts as cs
 from component.message import cm
+from component import widget as cw
 
 class ValidationTile(sw.Tile):
     
@@ -12,20 +14,25 @@ class ValidationTile(sw.Tile):
         self.aoi_io = aoi_io
         self.compute_tile = compute_tile
         
+        # create the layer list widget 
+        self.layers_recipe = cw.layerRecipe()
+        
         # add the btn and output 
-        self.btn = sw.Btn(cm.valid.btn)
+        self.valid = sw.Btn(cm.valid.display, class_ = 'ma-1')
+        self.save = sw.Btn(cm.valid.save, class_ = 'ma-1', disabled = True)
         self.output = sw.Alert()
         
         # create the tile 
         super().__init__(
             id_ = compute_tile._metadata['mount_id'],
+            inputs= [self.layers_recipe],
             title = cm.valid.title,
-            btn = self.btn,
+            btn = v.Row(children = [self.valid, self.save]),
             output = self.output
         )
         
         # js behaviours 
-        self.btn.on_event('click', self._validate_data)
+        self.valid.on_event('click', self._validate_data)
         
     def _validate_data(self, widget, event, data):
         """validate the data and release the computation btn"""
@@ -33,10 +40,12 @@ class ValidationTile(sw.Tile):
         widget.toggle_loading()
     
         # watch the inputs
-        cs.sum_up(self.aoi_io, self.io, self.output)
+        #cs.sum_up(self.aoi_io, self.io, self.output)
+        self.layers_recipe.digest_layers(self.io.layer_list)
     
         # free the computation btn
         self.compute_tile.btn.disabled = False
+        self.save.disabled = False
     
         widget.toggle_loading()
         
