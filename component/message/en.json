@@ -68,8 +68,8 @@
         "high": "High",
         "txt": [
             "The map below indicates priority areas of restoration potential, based on your specified ranking of restoration objectives, constraints, and risks. Areas in the map that are green indicate a higher return on investment, while areas mapped in red indicate a lower return with regard to your team’s objectives.",
-            "Investigate the restoration suitability map and identify some areas that seem promising for planning restoration activities. Once you have identified these regions, you can draw a boundary around them to run summary statistics on, including a detailed analysis of the estimated benefits, risks, costs, and constraints. This information can help you assess tradeoffs and restoration priorities between regions of interest.",
-            "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and establishment costs. Comparing the relative magnitude of this indicator across space and between sites can be used to help identify which sites offer a high return on investment and which ones offer a low return."
+            "Investigate the restoration suitability map and identify some areas that seem promising for planning restoration activities. Once you have identified these regions, you can draw a boundary around them and produce summary statistics, including a detailed analysis of the estimated benefits, risks, costs, and constraints. This information can help you assess tradeoffs and restoration priorities for regions of interest.",
+            "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and establishment costs. This indicator allows you to compare the restoration suitability of different sites and determine which offer the highest return on investment."
             ]
     },
     "potential": {
