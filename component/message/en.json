@@ -8,7 +8,8 @@
             "compute": "Compute",
             "dashboard": "Restoration dashboard",
             "map": "Result map",
-            "about": "About"
+            "about": "About",
+            "quintile": "Edit Custom map"
         }
         
     },
@@ -52,6 +53,20 @@
         "no_layer": "No layer",
         "disc": "You need to select a layer before making modifications"
         
+    },
+    "quintile": {
+        "no_asset": "No asset has been set",
+        "txt": [
+            "Some explaination about the tile function and how to use it."
+        ],
+        "clip": {
+            "hint": "click on the link then 'ctrl+a' and then 'ctrl+c'",
+            "lbl": "quintile asset link",
+            "title": "Asset link",
+            "done": "Done"
+        },
+        "title": "Transform custom asset into Quintile asset",
+        "btn": "Transform the map"
     },
     "dashboard": {
         "title": "Restoration dashboard"

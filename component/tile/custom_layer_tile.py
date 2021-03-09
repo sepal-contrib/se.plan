@@ -8,7 +8,7 @@ from component import scripts as cs
         
 class CustomizeLayerTile(sw.Tile):
     
-    def __init__(self, io, questionnaire_io, **kwargs):
+    def __init__(self, aoi_tile, io, questionnaire_io, **kwargs):
         
         # link the ios to the tile
         self.io = io
@@ -38,7 +38,7 @@ class CustomizeLayerTile(sw.Tile):
             children = [self.reset_to_questionnaire, self.reset_to_default]
         )
         
-        self.table = cw.LayerTable()
+        self.table = cw.LayerTable(aoi_tile)
         
         # create the txt 
         self.txt = sw.Markdown(cm.custom.desc)
