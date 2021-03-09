@@ -6,12 +6,14 @@ from sepal_ui import mapping as sm
 import ipyvuetify as v
 from faker import Faker
 import pandas as pd
+import ee
 
 from component import parameter as cp
 from component.message import cm
 from .weight_slider import WeightSlider
 
 fake = Faker()
+ee.Initialize()
 
 class EditDialog(sw.SepalWidget, v.Dialog):
     
@@ -20,7 +22,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
     # use a custom v_model because the regular one set value automatically to 1 (display forever)
     custom_v_model = Unicode().tag(sync=True)
     
-    def __init__(self):
+    def __init__(self, aoi_tile):
+        
+        # listen to the aoi_tile to update the map
+        self.tile = aoi_tile
         
         self.init_layer = ''
         self.name = ''
@@ -84,10 +89,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             children = [self.card]
         )
         
-        # link som element together 
+        # link some element together 
         self.layer.observe(self._on_layer_clear, 'v_model')
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
+        self.tile.aoi_select_btn.observe(self._update_aoi, 'loading')
         
     def _on_layer_clear(self, change):
         if not change['new']:
@@ -116,6 +122,27 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         # close 
         self.value = False
         
+        return
+    
+    def _update_aoi(self, change):
+        
+        # the toggle btn has changed let's see if it's for a good reason
+        if self.tile.aoi_output.type == 'success':
+            
+            # get the aoi
+            aoi_ee = self.tile.io.get_aoi_ee()
+            
+            # draw an outline 
+            outline = ee.Image().byte().paint(
+              featureCollection =  aoi_ee,
+              color = 1,
+              width = 3
+            )
+            
+            # update the map
+            self.m.addLayer(outline, {'palette': v.theme.themes.dark.accent[1:]}, 'aoi')
+            self.m.zoom_ee_object(aoi_ee.geometry())
+            
         return
         
     def set_dialog(self, data):

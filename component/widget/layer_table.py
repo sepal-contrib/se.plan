@@ -13,7 +13,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
     # unicode value to notify a change
     change_model = Any().tag(sync=True)
     
-    def __init__(self):
+    def __init__(self, aoi_tile):
         
         self.headers = [
           {'text': 'Theme'     , 'value': 'theme'},
@@ -43,7 +43,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.edit_icon = v.Icon(small=True, children=['mdi-pencil'])
         
-        self.dialog_edit = EditDialog()
+        self.dialog_edit = EditDialog(aoi_tile)
         
         super().__init__(
             change_model = 0,
