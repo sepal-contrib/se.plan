@@ -90,14 +90,28 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
         
         # link some element together 
-        self.layer.observe(self._on_layer_clear, 'v_model')
+        self.layer.observe(self._on_layer_change, 'v_model')
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
         self.tile.aoi_select_btn.observe(self._update_aoi, 'loading')
         
-    def _on_layer_clear(self, change):
+    def _on_layer_change(self, change):
+        
+        # replace the v_model by the init one 
         if not change['new']:
             change['owner'].v_model = self.init_layer
+        
+        # if the layer is different than the init one
+        elif change['new'] != self.init_layer:
+            
+            # check if the layer is quantile based 
+            
+            # display it on the map
+            self.m.addLayer(ee.Image(
+                ee.Image(change['new']).clip(self.tile.io.get_aoi_ee()),
+                cp.final_viz.update(max=5),
+                'custom layer'
+            ))
             
         return 
             
@@ -166,6 +180,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             # disable save 
             self.save.disabled = True
             
+            # remove the images 
+            for l in self.m.layers:
+                if l.name in ['init layer', 'custom layer']:
+                    self.m.remove_layer(l)
+            
         else: 
             
             # change title 
@@ -189,6 +208,21 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             
             # change default layer name 
             self.init_layer = layer_df_line.gee_asset
+            
+            # update the map with the default layer
+            self.m.addLayer(ee.Image(
+                ee.Image(self.init_layer).clip(self.tile.io.get_aoi_ee()),
+                cp.final_viz.update(max=5),
+                'init layer'
+            ))
+            
+            # add the custom layer if existing 
+            if data[0]['layer'] != self.init_layer:
+                self.m.addLayer(ee.Image(
+                    ee.Image(data[0]['layer']).clip(self.tile.io.get_aoi_ee()),
+                    cp.final_viz.update(max=5),
+                    'custom_layer'
+                ))
             
             # enable save 
             self.save.disabled = False
