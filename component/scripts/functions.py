@@ -87,7 +87,7 @@ class gee_compute:
 
         return eeimage.unitScale(imgMin, imgMax).toFloat()
 
-    def quantile_get_numbers(self,eeimage,percentiles):
+    def quintile_get_numbers(self,eeimage,percentiles):
         bandname = ee.String(eeimage.bandNames().get(0))
         
         low = ee.Number(percentiles.get( bandname.cat('_low')))
@@ -97,11 +97,11 @@ class gee_compute:
         
         return low, lowmed, highmed, high
 
-    def quantile_normalization(self,eeimage,region):
+    def quintile_normalization(self,eeimage,region):
         percentiles = eeimage.reduceRegion(**{'reducer':ee.Reducer.percentile([20,40,60,80],['low','lowmed','highmed','high']),
             'geometry':region, 'scale':100, 'bestEffort':True, 'maxPixels':1e13, 'tileScale':2})
         
-        low, lowmed, highmed, high = self.quantile_get_numbers(eeimage, percentiles)
+        low, lowmed, highmed, high = self.quintile_get_numbers(eeimage, percentiles)
 
         out = eeimage.where(eeimage.lte(low),1) \
             .where(eeimage.gt(low).And(eeimage.lte(lowmed)),2) \
@@ -114,8 +114,8 @@ class gee_compute:
         eeimage = layer['eeimage']
         if method == 'minmax': 
             eeimage = self.minmax_normalization(eeimage,region)#.rename('minmzx')
-        elif method == 'quantile':
-            eeimage = self.quantile_normalization(eeimage,region)#.rename('quant')
+        elif method == 'quintile':
+            eeimage = self.quintile_normalization(eeimage,region)#.rename('quant')
         layer.update({'eeimage':eeimage})
 
     def normalize_benefits(self,benefits_layers,method='minmax'):
@@ -174,7 +174,7 @@ class gee_compute:
         list(map(lambda i : i.update({'eeimage':ee.Image(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
 
-        self.normalize_benefits(benefits_layers,method='quantile')
+        self.normalize_benefits(benefits_layers,method='quintile')
         #todo: benefit weighting 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
