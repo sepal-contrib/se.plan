@@ -14,7 +14,7 @@ class PriorityTable(v.SimpleTable):
         'very important',
     ]
         
-    _colors = [cp.colors[int(i*6/5)] for i in range(5)]
+    _colors = cp.gradient(5)
     
     _DEFAULT_V_MODEL = {name: 0 for name in cp.priorities}
     

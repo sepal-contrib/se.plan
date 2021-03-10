@@ -107,11 +107,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             # check if the layer is quantile based 
             
             # display it on the map
-            self.m.addLayer(ee.Image(
+            self.m.addLayer(
                 ee.Image(change['new']).clip(self.tile.io.get_aoi_ee()),
                 cp.final_viz.update(max=5),
                 'custom layer'
-            ))
+            )
             
         return 
             
@@ -210,19 +210,19 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.init_layer = layer_df_line.gee_asset
             
             # update the map with the default layer
-            self.m.addLayer(ee.Image(
+            self.m.addLayer(
                 ee.Image(self.init_layer).clip(self.tile.io.get_aoi_ee()),
                 cp.final_viz.update(max=5),
                 'init layer'
-            ))
+            )
             
             # add the custom layer if existing 
             if data[0]['layer'] != self.init_layer:
-                self.m.addLayer(ee.Image(
+                self.m.addLayer(
                     ee.Image(data[0]['layer']).clip(self.tile.io.get_aoi_ee()),
                     cp.final_viz.update(max=5),
                     'custom_layer'
-                ))
+                )
             
             # enable save 
             self.save.disabled = False

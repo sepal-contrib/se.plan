@@ -11,16 +11,16 @@ class WeightSlider(v.Slider):
         self.name = name
         
         super().__init__(
-            max         = 6,
+            max         = 10,
             min         = 0,
             track_color = 'grey',
             thumb_label = 'always',
-            color       = cp.colors[default_value],
+            color       = cp.gradient(11)[default_value],
             v_model     = default_value,
             class_      = 'ml-5 mr-5'
         )
         
     @observe('v_model')
     def on_change(self, change):
-        self.color = cp.colors[change['new']]
+        self.color = cp.gradient(11)[change['new']]
         return 

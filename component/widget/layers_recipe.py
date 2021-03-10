@@ -62,13 +62,13 @@ class layerRecipe(v.Layout, sw.SepalWidget):
                         v.TextField(
                             hint = row["layer"] if row["layer"] != original_asset else "default",
                             persistent_hint = True,
-                            color = cp.colors[int(row['weight']*6/5)],
+                            color = cp.gradient(11)[row['weight']],
                             disabled = True,
                             v_model = row['name']
                         ),
                         v.Icon(
                             class_ = 'ml-2',
-                            color = cp.colors[int(row['weight']*6/5)],
+                            color = cp.gradient(11)[row['weight']],
                             children = [f"mdi-numeric-{row['weight']}-circle"]
                         )
                     ]

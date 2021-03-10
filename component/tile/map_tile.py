@@ -14,7 +14,7 @@ class MapTile(sw.Tile):
         
         # create the map 
         self.m = sm.SepalMap()
-        self.m.add_colorbar(colors=cp.colors, vmin=0, vmax=5)
+        self.m.add_colorbar(colors=cp.red_to_green, vmin=0, vmax=5)
         
         # create a layout with 2 btn 
         self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
