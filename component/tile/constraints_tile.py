@@ -48,15 +48,16 @@ class ConstraintTile(sw.Tile, HasTraits):
             
             if value == None: # binary criteria 
                 crit = cw.Binary(key)
+                self.criterias_values.append(crit)
             elif isinstance(value, list): # dropdown values
                 crit = cw.Dropdown(key, value)
+                self.criterias_values.append(crit)
             elif isinstance(value, int): # range values
                 crit = cw.Range(key, value)
+                self.criterias_values.append(crit)
             else: # header
                 continue
                 
-            self.criterias_values.append(crit)
-            
         default_v_model = {}
         for c in self.criterias_values:
             c.disable()
