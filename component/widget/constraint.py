@@ -3,6 +3,7 @@ from traitlets import HasTraits, Integer, observe
 from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 
+from component.message import cm
 
 class Constraint(HasTraits):
     
@@ -70,6 +71,8 @@ class Range(v.Slider, Constraint):
     def __init__(self, name, max, **kwargs):
         
         super().__init__(
+            persistent_hint = True,
+            hint = cm.questionnaire.slider_hint,
             name = name, 
             label = name,
             max = max,

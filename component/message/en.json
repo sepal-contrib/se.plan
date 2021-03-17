@@ -18,7 +18,8 @@
         "max_treecover": "Maximum allowable percent tree cover in {}:",
         "default_layer": "Weighted default layers",
         "custom_layer": "Use customized layers",
-        "questionnaire_btn": "Apply questionnaire answers"
+        "questionnaire_btn": "Apply questionnaire answers",
+        "slider_hint": "Max % tree cover in the class"
     },
     "valid":{
         "title": "Model recipe (input benefits, risks, costs, and constraints)",

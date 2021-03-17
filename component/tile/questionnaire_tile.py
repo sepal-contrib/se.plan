@@ -3,7 +3,6 @@ import ipyvuetify as v
 
 from component.message import cm
 from .constraints_tile import ConstraintTile
-from .potential_tile import PotentialTile
 from .priority_tile import PriorityTile
 
 class QuestionnaireTile (sw.Tile):
@@ -16,12 +15,10 @@ class QuestionnaireTile (sw.Tile):
         
         # build the tiles
         self.constraint_tile = ConstraintTile(),
-        self.potential_tile  = PotentialTile(),
         self.priority_tile   = PriorityTile()
         
         self.tiles = [
             self.constraint_tile,
-            self.potential_tile,
             self.priority_tile
         ]          
             
@@ -67,21 +64,15 @@ class QuestionnaireTile (sw.Tile):
         #save the associated io and set the default value
         self.io = io
         self.io.constraints = self.constraint_tile[0].custom_v_model
-        self.io.potential = self.potential_tile[0].custom_v_model
         self.io.priorities = self.priority_tile.v_model
         
         
         # link the variable to the io 
         self.constraint_tile[0].observe(self.__on_constraint, 'custom_v_model')
-        self.potential_tile[0].observe(self.__on_potential_tile, 'custom_v_model')
         self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
         
     def __on_constraint(self, change):
         self.io.constraints = change['new']
-        return
-    
-    def __on_potential_tile(self, change):
-        self.io.potential = change['new']
         return
     
     def __on_priority_tile(self, change):

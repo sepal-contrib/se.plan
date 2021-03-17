@@ -25,10 +25,19 @@ class ConstraintTile(sw.Tile, HasTraits):
         tile_txt = sw.Markdown(cm.constraints.desc)
         
         # select widget to select the actives criterias
+        
+        # create the criterias list 
+        items = []
+        for c in cp.criterias:
+            if cp.criterias[c] == 'header':
+                items.append({'header': c})
+            else:
+                items.append({'text': c, 'value':c})
+                
         self.critera_select = v.Select(
             chips    = True,
             v_model  = None,
-            items    = [*cp.criterias],
+            items    = items,
             label    = cm.constraints.criteria_lbl,
             multiple = True
         )
@@ -39,10 +48,12 @@ class ConstraintTile(sw.Tile, HasTraits):
             
             if value == None: # binary criteria 
                 crit = cw.Binary(key)
-            elif isinstance(value, list):
+            elif isinstance(value, list): # dropdown values
                 crit = cw.Dropdown(key, value)
-            elif isinstance(value, int):
+            elif isinstance(value, int): # range values
                 crit = cw.Range(key, value)
+            else: # header
+                continue
                 
             self.criterias_values.append(crit)
             
