@@ -9,7 +9,6 @@ class QuestionnaireIo():
     
         self.constraints = ''
         self.potential = ''
-        self.goals = ''
         self.priorities = ''
         
 # questionnaire_io.constraints = { name of the criteria : [ bool activated, bool gt or lt, value] } for each criteria as json dict  

@@ -108,6 +108,7 @@ class gee_compute:
             .where(eeimage.gt(lowmed).And(eeimage.lte(highmed)),3) \
             .where(eeimage.gt(highmed).And(eeimage.lte(high)),4) \
             .where(eeimage.gt(high),5)
+        
         return out
 
     def normalize_image(self,layer, region, method='mixmax'):
