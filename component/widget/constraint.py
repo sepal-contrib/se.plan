@@ -49,9 +49,10 @@ class Binary(v.Switch, Constraint):
     def __init__(self, name, **kwargs):
         
         super().__init__(
+            disabled = True,
             name = name,
             label = name,
-            v_model = False
+            v_model = True
         )
         
 class Dropdown(v.Select, Constraint):
@@ -62,7 +63,7 @@ class Dropdown(v.Select, Constraint):
             name = name,
             label = name,
             items = items,
-            v_model = 10
+            v_model = int(items[0]['value'])
         )
         
         
