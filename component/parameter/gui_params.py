@@ -53,10 +53,8 @@ goals = [
 
 # list of the available priorities for the priority tile
 priorities = [
-    'Production Forest',
-    'Protected Area',
-    'Community Forestry',
-    'Community Protected Area',
-    'Biodiversity Conservation Corridor',
-    'Other private land or public land'
+    'Local livelihoods',
+    'Wood production',
+    'Non-timber tree benefits',
+    'Water quality'
 ]
