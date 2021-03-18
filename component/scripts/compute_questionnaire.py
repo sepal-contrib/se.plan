@@ -16,13 +16,25 @@ def compute_questionnaire(questionnaire_io):
     # questionnaire_io.constraints = { name of the criteria : [ bool activated, bool gt or lt, value] } for each criteria as json dict
     
     # at the moment we just load random weight values
-    
-    layers_values = [
-            {
+
+    priorities = json.loads(questionnaire_io.priorities)
+
+    def assign_weights(index, row):
+        layer_dict ={
                 'name'   : row.layer_name,
+                'theme' : row.theme,
+                'subtheme' : row.subtheme,
                 'layer': row.gee_asset,
-                'weight' : random.randint(0,6)
-            } for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows()
-        ]
+        }
+        if row.theme == "benefits" :
+            layer_dict['weight'] = priorities[layer_dict['subtheme']]
+        else:
+            layer_dict['weight'] = 0
+
+        return layer_dict
+    
+    layers_values= [ assign_weights(i, row) for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows() ]
+
+    
     
     return layers_values
