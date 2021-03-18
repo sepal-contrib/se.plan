@@ -28,6 +28,7 @@ class gee_compute:
             layer['eeimage'] = ee.Image(layer['layer']).lt(value)
 
     def make_constraints(self, constraints, constraints_layers):
+        landcover_constraints = []
         for i in constraints:
             value = constraints[i]
             name = i
@@ -37,7 +38,7 @@ class gee_compute:
             # Landcover specific constraints
             landcover_default_object = {'Bare land':22,'Shrub land':15,'Agricultural land':5}
             landcover_default_keys = landcover_default_object.keys()
-
+            
             if name in landcover_default_keys:
                 constraint_layer = next(item for item in constraints_layers if item["name"] == 'Current land cover')
                 layer_id = constraint_layer['layer']
@@ -161,7 +162,7 @@ class gee_compute:
         layerlist = self.rp_layers_io.layer_list
         constraints = json.loads(self.rp_questionaire_io.constraints)
         # load layers and create eeimages
-        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
+        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and i['weight'] != 0]
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), benefits_layers))
 
         risks_layers = [i for i in layerlist if i['theme'] == 'risks']
@@ -172,14 +173,14 @@ class gee_compute:
 
         # constraint_layer, initialize with constant value 1 
         constraints_layers = [i for i in layerlist if i['theme'] == 'constraint']
-        list(map(lambda i : i.update({'eeimage':ee.Image(1)}), constraints_layers))
+        list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
-
-        self.normalize_benefits(benefits_layers,method='quintile')
+        # note: need to have check for geometry either here or before it reaches here...
+        # self.normalize_benefits(benefits_layers,method='minmax')
         #todo: benefit weighting 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-
-        wlc_image = ee.Image(1).expression(exp,exp_dict)
+        print(exp)
+        wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
         return wlc_image
 
 
