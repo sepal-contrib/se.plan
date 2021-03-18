@@ -24,7 +24,7 @@ def compute_questionnaire(questionnaire_io):
                 'name'   : row.layer_name,
                 'theme' : row.theme,
                 'subtheme' : row.subtheme,
-                'layer': row.gee_asset,
+                'layer': row.gee_asset.strip(),
         }
         if row.theme == "benefits" :
             layer_dict['weight'] = priorities[layer_dict['subtheme']]
