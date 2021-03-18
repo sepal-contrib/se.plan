@@ -171,7 +171,7 @@ class gee_compute:
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), costs_layers))
 
         # constraint_layer, initialize with constant value 1 
-        constraints_layers = [i for i in layerlist if i['theme'] == 'constraints']
+        constraints_layers = [i for i in layerlist if i['theme'] == 'constraint']
         list(map(lambda i : i.update({'eeimage':ee.Image(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
 
