@@ -7,7 +7,7 @@ class LayerFull(v.Layout):
     
     COLORS = cp.gradient(5) + ['grey']
     
-    def __init__(self, layer_name, values=[0,0,0,0,0,0], total=100):
+    def __init__(self, layer_name, values=[0]*6, total=100):
         
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna('')
