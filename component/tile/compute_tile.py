@@ -54,7 +54,7 @@ class ValidationTile(sw.Tile):
     
 class ComputeTile(sw.Tile):
     
-    def __init__(self, io, aoi_io, m, dashboard_tile, questionaire_io):
+    def __init__(self, io, aoi_io, m, area_tile, theme_tile, questionaire_io):
         
         # gather the ios 
         self.io = io
@@ -65,7 +65,8 @@ class ComputeTile(sw.Tile):
         self.m = m
         
         # get the dashboard tile 
-        self.dashboard_tile = dashboard_tile
+        self.area_tile = area_tile
+        self.theme_tile = theme_tile
         
         # add the widgets 
         compute_txt = sw.Markdown(cm.compute.desc)
@@ -97,7 +98,8 @@ class ComputeTile(sw.Tile):
         cs.display_layer(layer, self.aoi_io, self.m)
         
         # display the dashboard 
-        self.dashboard_tile.set_content([dashboard])
+        self.area_tile.set_summary() # calling it without argument will lead to fake output
+        self.theme_tile.set_summary() # calling it without argument will lead to fake output
     
         widget.toggle_loading()
         

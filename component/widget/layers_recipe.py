@@ -45,7 +45,7 @@ class layerRecipe(v.Layout, sw.SepalWidget):
             tmp_layers = layer_list[layer_list.theme == theme]
             
             # add the theme title 
-            themes_layout.append(v.Html(xs12 = True, class_ = 'mt-2', tag="h2", children=[theme.capitalize()]))
+            themes_layout.append(v.Html(xs12 = True, class_ = 'mt-6', tag="h2", children=[theme.capitalize()]))
             
             # loop in these layers and create the widgets
             theme_layer_widgets = []
@@ -63,7 +63,7 @@ class layerRecipe(v.Layout, sw.SepalWidget):
                             hint = row["layer"] if row["layer"] != original_asset else "default",
                             persistent_hint = True,
                             color = cp.gradient(11)[row['weight']],
-                            disabled = True,
+                            readonly = True,
                             v_model = row['name']
                         ),
                         v.Icon(

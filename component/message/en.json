@@ -84,7 +84,7 @@
                 "The tool will include data on two types of costs: opportunity and establishment costs. The opportunity cost is based on the cropland layer, but if there are gaps we present the opportunity cost as estimate based on the pastureland map. Establishment costs refer to artificial regeneration, which typically means planting seedlings but sometimes means sowing seeds.",
                 "Note: Estimates on the probability of natural regeneration success is included in the \"Risks\" category." 
             ],
-            "constraint": "Results indicate what percentage of the total area of the region of interest is subject to each particular constraint."   
+            "constraint": ["Results indicate what percentage of the total area of the region of interest is subject to each particular constraint."]
         }
     },
     "goal": {

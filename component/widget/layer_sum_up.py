@@ -70,7 +70,7 @@ class LayerFull(v.Layout):
             ]
         )
         
-class layerPercentage(v.Layout):
+class LayerPercentage(v.Layout):
     
     COLORS = cp.gradient(5) + ['grey']
     
