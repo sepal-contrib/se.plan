@@ -163,7 +163,7 @@ class gee_compute:
         constraints = json.loads(self.rp_questionaire_io.constraints)
         # load layers and create eeimages
         benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and i['weight'] != 0]
-        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), benefits_layers))
+        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask()}), benefits_layers))
 
         risks_layers = [i for i in layerlist if i['theme'] == 'risks']
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), risks_layers))
