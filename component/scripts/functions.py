@@ -181,6 +181,11 @@ class gee_compute:
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
         print(exp)
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
-        return wlc_image
+        
+        # rather than clipping paint wlc to region
+        wlc_out = ee.Image().float()
+        wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
+        
+        return wlc_out
 
 
