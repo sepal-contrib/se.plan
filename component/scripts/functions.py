@@ -125,7 +125,7 @@ class gee_compute:
 
     def make_benefit_expression(self,benefits_layers):
         # build expression for benefits
-        fdict_bene = {'f' + str(index): element['weight'] for index, element in enumerate(benefits_layers)}
+        fdict_bene = {'f' + str(index): element['norm_weight'] for index, element in enumerate(benefits_layers)}
         idict_bene = {'b' + str(index): element['eeimage'] for index, element in enumerate(benefits_layers)}
 
         exp_bene = ['(f' + str(index) + '*b' + str(index) + ')' for index, element in enumerate(benefits_layers)]
@@ -177,9 +177,13 @@ class gee_compute:
         constraints_layers = self.make_constraints(constraints, constraints_layers)
         # note: need to have check for geometry either here or before it reaches here...
         # self.normalize_benefits(benefits_layers,method='minmax')
-        #todo: benefit weighting 
+        
+        #normalize benefit weights to 0 - 1 
+        sum_weights =sum(i['weight'] for i in benefits_layers)
+        list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights,5) }), benefits_layers))
+
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-        print(exp)
+        print(exp, exp_dict)
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
         
         # rather than clipping paint wlc to region
