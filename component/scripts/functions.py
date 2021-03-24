@@ -88,36 +88,47 @@ class gee_compute:
 
         return eeimage.unitScale(imgMin, imgMax).toFloat()
 
-    def quintile_get_numbers(self,eeimage,percentiles):
-        bandname = ee.String(eeimage.bandNames().get(0))
-        
-        low = ee.Number(percentiles.get( bandname.cat('_low')))
-        lowmed = ee.Number(percentiles.get( bandname.cat('_lowmed')))
-        highmed = ee.Number(percentiles.get( bandname.cat('_highmed')))
-        high = ee.Number(percentiles.get( bandname.cat('_high')))
-        
-        return low, lowmed, highmed, high
+    def quintile_normalization(self, image, featurecollection, scale=100):
+        quintile_collection = image.reduceRegions(collection=featurecollection, 
+        reducer=ee.Reducer.percentile(percentiles=[20,40,60,80],outputNames=['low','lowmed','highmed','high']), 
+        tileScale=2,scale=scale)
+    
+        #only use features that have non null quintiles  
+        valid_quintiles = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']))
+        valid_quintiles_size = valid_quintiles.size()
+        vaild_quintiles_list = valid_quintiles.toList(valid_quintiles_size)
+        #catch regions where input region is null for user info
+        invalid_regions = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']).Not())
 
-    def quintile_normalization(self,eeimage,region):
-        percentiles = eeimage.reduceRegion(**{'reducer':ee.Reducer.percentile([20,40,60,80],['low','lowmed','highmed','high']),
-            'geometry':region, 'scale':100, 'bestEffort':True, 'maxPixels':1e13, 'tileScale':2})
-        
-        low, lowmed, highmed, high = self.quintile_get_numbers(eeimage, percentiles)
+        def conditions(feature):
+            feature = ee.Feature(feature)
 
-        out = eeimage.where(eeimage.lte(low),1) \
-            .where(eeimage.gt(low).And(eeimage.lte(lowmed)),2) \
-            .where(eeimage.gt(lowmed).And(eeimage.lte(highmed)),3) \
-            .where(eeimage.gt(highmed).And(eeimage.lte(high)),4) \
-            .where(eeimage.gt(high),5)
-        
-        return out
+            quintiles = ee.Image().byte()
+            quintiles = quintiles.paint(ee.FeatureCollection(feature), 0)
+
+            low = ee.Number(feature.get('low'))
+            lowmed = ee.Number(feature.get('lowmed'))
+            highmed = ee.Number(feature.get('highmed'))
+            high = ee.Number(feature.get('high'))
+
+            out = quintiles.where(image.lte(low),1).where(image.gt(low).And(image.lte(lowmed)),2) \
+            .where(image.gt(lowmed).And(image.lte(highmed)),3) \
+            .where(image.gt(highmed).And(image.lte(high)),4) \
+            .where(image.gt(high),5)
+            
+            return out
+    
+        quintile_image = ee.ImageCollection(vaild_quintiles_list.map(conditions)).mosaic()
+        return (quintile_image, invalid_regions)
+
 
     def normalize_image(self,layer, region, method='mixmax'):
         eeimage = layer['eeimage']
         if method == 'minmax': 
-            eeimage = self.minmax_normalization(eeimage,region)#.rename('minmzx')
+            eeimage = self.minmax_normalization(eeimage,region)
         elif method == 'quintile':
-            eeimage = self.quintile_normalization(eeimage,region)#.rename('quant')
+            region_as_featurecollection = ee.FeatureCollection(region)
+            eeimage = self.quintile_normalization(eeimage,region_as_featurecollection)[0]
         layer.update({'eeimage':eeimage})
 
     def normalize_benefits(self,benefits_layers,method='minmax'):
@@ -176,11 +187,11 @@ class gee_compute:
         list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
         # note: need to have check for geometry either here or before it reaches here...
-        # self.normalize_benefits(benefits_layers,method='minmax')
+        self.normalize_benefits(benefits_layers,method='quintile')
         
         #normalize benefit weights to 0 - 1 
         sum_weights =sum(i['weight'] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights,5) }), benefits_layers))
+        list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights, 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
         print(exp, exp_dict)
@@ -190,6 +201,6 @@ class gee_compute:
         wlc_out = ee.Image().float()
         wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
         
-        return wlc_out
+        return (wlc_out, benefits_layers, constraints_layers)
 
 
