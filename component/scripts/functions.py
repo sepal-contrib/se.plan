@@ -201,6 +201,6 @@ class gee_compute:
         wlc_out = ee.Image().float()
         wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
         
-        return (wlc_out, benefits_layers, constraints_layers)
+        return wlc_out #(wlc_out, benefits_layers, constraints_layers)
 
 
