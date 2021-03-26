@@ -4,6 +4,7 @@ import json
 # dev
 from test_gee_compute_params import *
 from functions import *
+
 def _quintile(image, featurecollection, scale=100):
     """ computes standar quintiles of an image based on an aoi. returns feature collection with quintiles as propeties """ 
     quintile_collection = image.reduceRegions(collection=featurecollection, 
@@ -11,8 +12,8 @@ def _quintile(image, featurecollection, scale=100):
     tileScale=2,scale=scale)
 
     return quintile_collection
-def _count_quintiles(image, geometry, scale=100):
-    histogram_quintile = image.reduceRegion(reducer=ee.Reducer.countDistinct(), geometry=geometry, scale=scale,  bestEffort=True, maxPixels=1e13, tileScale=2)
+def count_quintiles(image, geometry, scale=100):
+    histogram_quintile = image.reduceRegion(reducer=ee.Reducer.frequencyHistogram(), geometry=geometry, scale=scale,  bestEffort=True, maxPixels=1e13, tileScale=2)
     return histogram_quintile
 
 def get_wlc_stats(wlc, aoi):
@@ -46,14 +47,14 @@ if __name__ == "__main__":
 
     aoi = region.get_aoi_ee()
     wlc_io = gee_compute(region,io,io)
-    wlc_out = wlc_io.wlc()
+    wlc_out, benefits_layers, constraints_layers = wlc_io.wlc()
     # wlc_out = wlc_out[0]
     # get wlc quntiles  
     t1 = get_wlc_stats(wlc_out, aoi)
-    print(t1.getInfo())
+    # print(t1.getInfo())
 
     # get dict of quintile counts for wlc
     # print(type(wlc_out),wlc_out.bandNames().getInfo())
     wlc_quintile, bad_features = wlc_io.quintile_normalization(wlc_out,ee.FeatureCollection(aoi))
-    t2 = _count_quintiles(wlc_quintile, aoi)
+    t2 = count_quintiles(wlc_quintile, aoi)
     print(t2.getInfo())
