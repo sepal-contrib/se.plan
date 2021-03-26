@@ -16,17 +16,23 @@ def count_quintiles(image, geometry, scale=100):
     histogram_quintile = image.reduceRegion(reducer=ee.Reducer.frequencyHistogram(), geometry=geometry, scale=scale,  bestEffort=True, maxPixels=1e13, tileScale=2)
     return histogram_quintile
 
-def get_wlc_stats(wlc, aoi):
+def get_image_stats(image, aoi, geeio, scale=100) :
+    """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
     aoi_as_fc = ee.FeatureCollection(aoi)
-    wlc_quintile = _quintile(wlc, aoi_as_fc)
+    fc_quintile = _quintile(image, aoi_as_fc)
 
-    return wlc_quintile
+    image_quin, bad_features = geeio.quintile_normalization(image,aoi_as_fc)
+    quintile_frequency = count_quintiles(image_quin, aoi)
 
+    return fc_quintile.first().set('frequency',quintile_frequency)
+# def somefunction()
 
-def get_summary_statistics(wlc, aoi, benefits, costs, constraints):
+#     return {'layername':'itsname',"value":"pixelCount"}
+
+def get_summary_statistics(wlc, aoi, benefits, costs, constraints, geeio):
     # returns summarys for the dashboard. 
     # restoration sutibuility
-    wlc_summary = get_wlc_stats(wlc,aoi)
+    wlc_summary = get_image_stats(wlc, aoi, geeio)
 
     # benefits
     all_benefits = get_benefit_stats(benefits, aoi)
@@ -46,15 +52,15 @@ if __name__ == "__main__":
     layerlist = io.layer_list
 
     aoi = region.get_aoi_ee()
-    wlc_io = gee_compute(region,io,io)
-    wlc_out, benefits_layers, constraints_layers = wlc_io.wlc()
+    geeio = gee_compute(region,io,io)
+    wlc_out, benefits_layers, constraints_layers = geeio.wlc()
     # wlc_out = wlc_out[0]
     # get wlc quntiles  
-    t1 = get_wlc_stats(wlc_out, aoi)
-    # print(t1.getInfo())
+    t1 = get_image_stats(wlc_out, aoi, geeio)
+    print(t1.getInfo())
 
     # get dict of quintile counts for wlc
     # print(type(wlc_out),wlc_out.bandNames().getInfo())
-    wlc_quintile, bad_features = wlc_io.quintile_normalization(wlc_out,ee.FeatureCollection(aoi))
-    t2 = count_quintiles(wlc_quintile, aoi)
-    print(t2.getInfo())
+    # wlc_quintile, bad_features = geeio.quintile_normalization(wlc_out,ee.FeatureCollection(aoi))
+    # t2 = count_quintiles(wlc_quintile, aoi)
+    # print(t2.getInfo())
