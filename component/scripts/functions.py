@@ -1,34 +1,45 @@
 import ee
 import json
+# from component import parameter as cp
 ee.Initialize()
 
-# Test loading from here
 class gee_compute:
     def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
         self.selected_aoi = rp_aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
     
-    def constraints_catagorical(self, value,contratint_bool,name,layer_id):
+    def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
 
         layer = {'theme':'constraints'}
         layer['name'] = name 
 
-        if contratint_bool == True:
-            layer['eeimage'] = ee.Image(layer_id).eq(value)
-            return layer
-        elif contratint_bool == False:
-            layer['eeimage'] = ee.Image(layer_id).neq(value)
-            return layer
+        if contratint_bool:
+            layer['eeimage'] = ee.Image(layer_id).eq(cat_value)
+        else:
+            layer['eeimage'] = ee.Image(layer_id).neq(cat_value)
+        print('con cat',layer)
+        print(cat_value,contratint_bool,name,layer_id)
+        return layer
 
     def constraints_hight_low_bool (self,value, contratint_bool, name, layer_id):
         layer = {'theme':'constraints'}
         layer['name'] = name 
         
-        if contratint_bool == True:
+        if contratint_bool:
             layer['eeimage'] = ee.Image(layer_id).gt(value)
-        elif contratint_bool == False:
+        else:
             layer['eeimage'] = ee.Image(layer_id).lt(value)
+
+    def constraints_tree_cover(self, cat_value, value, name, layer_id):
+        layer = {'theme':'constraints'}
+        layer['name'] = name 
+        
+        treecoverpotential = ee.Image('projects/john-ee-282116/assets/fao-restoration/features/RestorePotential')
+        threshold_max = value * 0.01
+
+        layer['eeimage'] = ee.Image.constant(1).where(ee.Image(layer_id).eq(cat_value).And(treecoverpotential.gt(threshold_max)), 0)
+        return layer
 
     def get_layer_and_id(self, layername, constraints_layers):
         try:
@@ -38,11 +49,30 @@ class gee_compute:
         except TypeError:
             raise f"Layer {layername} does not exsit."
 
+    def update_range_constraint(self, value, name, constraints_layers):
+        # TODO: need to update op cost into single layer, skip for now
+        if name == "Opportunity cost" or name == "Annual rainfall":
+            return
+        
+        constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
+
+        if name == 'Slope' and layer_id == 'CGIAR/SRTM90_V4':
+            image = ee.Image(layer_id)
+            lmage = ee.Algorithms.Terrain(image).select('slope').lt(value)
+        # what annual rain fall product do we want to use?
+        elif name == "Annual rainfall" and layer_id == 'UCSB-CHG/CHIRPS/PENTAD':
+            image = ee.ImageCollection(layer_id).filter(ee.Filter.equals('year', 2017)).first()
+        else:
+            image = ee.Image(layer_id).lt(value)
+        
+        eeimage = {'eeimage': image}
+        constraint_layer.update(eeimage)
+
     def make_constraints(self, constraints, constraints_layers):
         landcover_constraints = []
         # Landcover specific constraints, todo: move this to paramters file..
         landcover_default_object = {'Bare land':22,'Shrub land':15,'Agricultural land':5, 'Agriculture':40,'Rangeland':1,'Grassland':1}
-
+        default_range_constraints =[]# [i for i in cp.criterias if type(cp.criterias[i]) is list]
         
         for i in constraints:
             value = constraints[i]
@@ -56,31 +86,18 @@ class gee_compute:
                 constraint_layer, layer_id = self.get_layer_and_id('Current land cover', constraints_layers)
                 landcover_value = landcover_default_object[name] 
 
-                landcover_constraints = landcover_constraints.append(self.constraints_catagorical(landcover_value, value, name, layer_id))
+                landcover_constraints.append(self.constraints_catagorical(landcover_value, value, name, layer_id))
 
             # restoration coverage % masking by lc
             elif name in landcover_default_keys and type(value) is int:
                 constraint_layer, layer_id = self.get_layer_and_id('Current land cover', constraints_layers)
                 landcover_value = landcover_default_object[name] 
 
-                landcover_constraints = landcover_constraints.append(self.constraints_hight_low_bool(True, value, name, layer_id))
+                landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, name, layer_id))
 
             #range constraints (rain, elevation, slope, ect)
-            elif type(value) is int:
-                treecoverpotential = ee.Image('projects/john-ee-282116/assets/fao-restoration/features/RestorePotential')
-                threshold_max = value * 0.01
-                continue
-             #canpy cover masking... ask if we still plan to use this
-            elif name == 'Tree cover':
-                constraint_layer, layer_id = self.get_layer_and_id('Current canopy cover', constraints_layers)
-                default = 'GLCF/GLS_TCC'#todo: have this checked from csv
-                if layer_id == default:
-                    cover_image = ee.ImageCollection('GLCF/GLS_TCC').filter(ee.Filter.equals('year', 2010)).select(['tree_canopy_cover'], ['c_tree_canopy_cover']).mosaic()
-                else:
-                    cover_image = ee.Image(layer_id)
-
-                eeimage = {'eeimage':cover_image.lt(value)}
-                constraint_layer.update(eeimage)
+            elif name in default_range_constraints:
+                self.update_range_constraint(value, name, constraints_layers)
 
             # protected areas masking
             elif name == 'Protected areas':
