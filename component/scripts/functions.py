@@ -18,8 +18,7 @@ class gee_compute:
             layer['eeimage'] = ee.Image(layer_id).eq(cat_value)
         else:
             layer['eeimage'] = ee.Image(layer_id).neq(cat_value)
-        print('con cat',layer)
-        print(cat_value,contratint_bool,name,layer_id)
+
         return layer
 
     def constraints_hight_low_bool (self,value, contratint_bool, name, layer_id):
