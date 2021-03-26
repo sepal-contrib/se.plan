@@ -13,11 +13,15 @@ class gee_compute:
 
         layer = {'theme':'constraints'}
         layer['name'] = name 
+        image = ee.Image(layer_id)
+
+        if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
+            image = image.select("discrete_classification")
 
         if contratint_bool:
-            layer['eeimage'] = ee.Image(layer_id).eq(cat_value)
+            layer['eeimage'] = image.eq(cat_value)
         else:
-            layer['eeimage'] = ee.Image(layer_id).neq(cat_value)
+            layer['eeimage'] = image.neq(cat_value)
 
         return layer
 
@@ -33,11 +37,15 @@ class gee_compute:
     def constraints_tree_cover(self, cat_value, value, name, layer_id):
         layer = {'theme':'constraints'}
         layer['name'] = name 
-        
+        image = ee.Image(layer_id)
+
+        if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
+            image = image.select("discrete_classification")
+
         treecoverpotential = ee.Image('projects/john-ee-282116/assets/fao-restoration/features/RestorePotential')
         threshold_max = value * 0.01
 
-        layer['eeimage'] = ee.Image.constant(1).where(ee.Image(layer_id).eq(cat_value).And(treecoverpotential.gt(threshold_max)), 0)
+        layer['eeimage'] = ee.Image.constant(1).where(image.eq(cat_value).And(treecoverpotential.gt(threshold_max)), 0)
         return layer
 
     def get_layer_and_id(self, layername, constraints_layers):
@@ -236,9 +244,9 @@ class gee_compute:
         list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights, 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-        print(exp, exp_dict)
+        # print(exp, exp_dict)
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
-        
+        print('wlc names..',wlc_image.bandNames().getInfo())
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
         wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
