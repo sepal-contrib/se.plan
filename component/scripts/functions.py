@@ -19,9 +19,9 @@ class gee_compute:
             image = image.select("discrete_classification")
 
         if contratint_bool:
-            layer['eeimage'] = image.eq(cat_value)
-        else:
             layer['eeimage'] = image.neq(cat_value)
+        else:
+            layer['eeimage'] = image.eq(cat_value)
 
         return layer
 
@@ -78,7 +78,7 @@ class gee_compute:
     def make_constraints(self, constraints, constraints_layers):
         landcover_constraints = []
         # Landcover specific constraints, todo: move this to paramters file..
-        landcover_default_object = {'Bare land':22,'Shrub land':15,'Agricultural land':5, 'Agriculture':40,'Rangeland':1,'Grassland':1}
+        landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30}
         default_range_constraints =[]# [i for i in cp.criterias if type(cp.criterias[i]) is list]
         
         for i in constraints:
@@ -244,13 +244,13 @@ class gee_compute:
         list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights, 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-        # print(exp, exp_dict)
+
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
-        print('wlc names..',wlc_image.bandNames().getInfo())
+
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
         wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
         
-        return wlc_out #(wlc_out, benefits_layers, constraints_layers)
+        return (wlc_out, benefits_layers, constraints_layers)
 
 
