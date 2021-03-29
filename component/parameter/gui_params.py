@@ -25,6 +25,11 @@ criterias = {
         {'text': 'low slope',    'value': 10},
     ],
     'Socio-economic constraints': 'header',
+    'Accessibility to major cities' : [
+        {'text': 'high acessibility',    'value': 1140},
+        {'text': 'medium acessibility', 'value': 600},
+        {'text': 'low acessibility',    'value': 103},
+    ],
     'Population': [
         {'text': 'high populated',    'value': 10e6},
         {'text': 'medium populated', 'value': 10e3},
@@ -40,7 +45,19 @@ criterias = {
     "Agriculture": 100,
     "Rangeland": 100,
     "Grassland": 100,
-    "settlements": 100
+    "settlements": 100,
+    'Environmental indicators': 'header',
+    'Forest cover change in 5 km buffer':[
+        {'text': 'high change',    'value': 0.064},
+        {'text': 'medium change', 'value': 0.058},
+        {'text': 'low change',    'value': 0.006},
+        ],
+    'Climate risk':[
+        {'text': 'high climate risk',    'value': 25},
+        {'text': 'medium climate risk', 'value': -2},
+        {'text': 'low climate risk',    'value': -24},
+        ]
+
 }
 
 # list of the available priorities for the priority tile
