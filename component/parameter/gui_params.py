@@ -56,7 +56,10 @@ criterias = {
         {'text': 'high climate risk',    'value': 25},
         {'text': 'medium climate risk', 'value': -2},
         {'text': 'low climate risk',    'value': -24},
-        ]
+        ],
+    'Non-monetary': 'header',
+    'landscape variation in natural regeneration success':[]
+    'Locations with declining population':None, 
 
 }
 
