@@ -48,9 +48,9 @@ criterias = {
     "settlements": 100,
     'Environmental indicators': 'header',
     'Forest cover change in 5 km buffer':[
-        {'text': 'high change',    'value': 0.064},
-        {'text': 'medium change', 'value': 0.058},
-        {'text': 'low change',    'value': 0.006},
+        {'text': 'high change',    'value': 30},
+        {'text': 'medium change', 'value': 15},
+        {'text': 'low change',    'value': 5},
         ],
     'Climate risk':[
         {'text': 'high climate risk',    'value': 25},
@@ -66,7 +66,6 @@ criterias = {
     'Locations with declining population':None, 
 
 }
-
 # list of the available priorities for the priority tile
 priorities = [
     'Local livelihoods',
