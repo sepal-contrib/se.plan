@@ -1,6 +1,17 @@
 import ee
 import json
-# from component import parameter as cp
+try:
+    from component import parameter as cp
+except:
+    print('paramters not imported useing default criterias list')
+    class cp:
+        criterias = {'Landscape variation in natural regeneration success':"",
+        'Climate risk':"",
+        'Forest cover change in 5 km buffer':"",
+        'Annual rainfall':"",
+        'Elevation':"",
+         'Slope':"",
+         'Accessibility to major cities':"",'Population':"",'Opportunity cost':""}
 ee.Initialize()
 
 class gee_compute:
@@ -53,7 +64,7 @@ class gee_compute:
             constraint_layer = next(item for item in constraints_layers if item["name"] == layername)
             layer_id = constraint_layer['layer']
             return constraint_layer, layer_id
-        except TypeError:
+        except StopIteration:
             raise f"Layer {layername} does not exsit."
 
     def update_range_constraint(self, value, name, constraints_layers):
@@ -62,24 +73,27 @@ class gee_compute:
             return
         
         constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
-
+        # apply any preprocessing 
         if name == 'Slope' and layer_id == 'CGIAR/SRTM90_V4':
             image = ee.Image(layer_id)
-            lmage = ee.Algorithms.Terrain(image).select('slope').lt(value)
-        # what annual rain fall product do we want to use?
-        elif name == "Annual rainfall" and layer_id == 'UCSB-CHG/CHIRPS/PENTAD':
+            lmage = ee.Algorithms.Terrain(image).select('slope')
+        elif name == 'Annual rainfall' and layer_id == 'UCSB-CHG/CHIRPS/PENTAD':# what annual rain fall product do we want to use?
             image = ee.ImageCollection(layer_id).filter(ee.Filter.equals('year', 2017)).first()
+        elif name == 'Forest cover change in 5 km buffer' and layer_id == 'projects/john-ee-282116/assets/fao-restoration/features/DeforestRate':
+            image = ee.Image(layer_id).multiply(100)
+        elif name == 'Landscape variation in natural regeneration success' and layer_id == 'projects/john-ee-282116/assets/fao-restoration/features/Regeneration':
+            image = ee.Image(layer_id).multiply(100)
         else:
-            image = ee.Image(layer_id).lt(value)
+            image = ee.Image(layer_id)
         
-        eeimage = {'eeimage': image}
+        eeimage = {'eeimage': image.lt(value)}
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):
         landcover_constraints = []
         # Landcover specific constraints, todo: move this to paramters file..
         landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30}
-        default_range_constraints =[]# [i for i in cp.criterias if type(cp.criterias[i]) is list]
+        default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]) is list]
         
         for i in constraints:
             value = constraints[i]
@@ -102,7 +116,7 @@ class gee_compute:
 
                 landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, name, layer_id))
 
-            #range constraints (rain, elevation, slope, ect)
+            #high med lowe constraints (rain, elevation, slope, ect)
             elif name in default_range_constraints:
                 self.update_range_constraint(value, name, constraints_layers)
 
@@ -251,6 +265,6 @@ class gee_compute:
         wlc_out = ee.Image().float()
         wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
         
-        return (wlc_out, benefits_layers, constraints_layers)
+        return (wlc_out, benefits_layers, constraints_layers, costs_layers)
 
 
