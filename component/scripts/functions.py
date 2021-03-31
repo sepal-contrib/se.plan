@@ -15,10 +15,11 @@ except:
 ee.Initialize()
 
 class gee_compute:
-    def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
+    def __init__(self, rp_aoi_io, rp_layers_io, rp_default_layer_io, rp_questionaire_io):
         self.selected_aoi = rp_aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
+        self.rp_default_layer = rp_default_layer_io.layer_list
     
     def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
 
@@ -66,6 +67,13 @@ class gee_compute:
             return constraint_layer, layer_id
         except StopIteration:
             raise f"Layer {layername} does not exsit."
+    
+    def is_default_layer(self, name, layer_id):
+        default_layer_id = next(item['layer'] for item in self.rp_default_layer if item["name"] == name)
+        return layer_id == default_layer_id
+    
+    # def load_default_layers():
+
 
     def update_range_constraint(self, value, name, constraints_layers):
         # TODO: need to update op cost into single layer, skip for now
@@ -99,6 +107,7 @@ class gee_compute:
             value = constraints[i]
             name = i
             landcover_default_keys = landcover_default_object.keys()
+
             if value == None or value == -1:
                 continue
 
@@ -122,12 +131,19 @@ class gee_compute:
 
             # protected areas masking
             elif name == 'Protected areas':
-                constraint_layer, layer_id = self.get_layer_and_id('Protected areas', constraints_layers)
+                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
 
                 protected_feature = ee.FeatureCollection(layer_id)
                 protected_image = protected_feature.filter(ee.Filter.neq('WDPAID', {})).reduceToImage(**{
                 'properties': ['WDPAID'], 'reducer': ee.Reducer.first()}).gt(0).unmask(0).rename('wdpa')
                 eeimage = {'eeimage':protected_image}
+                constraint_layer.update(eeimage)
+                        # protected areas masking
+ 
+            elif name == 'Locations with declining population':
+                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
+                # Loctions w declining pop is 1,2 binary 
+                eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
                 constraint_layer.update(eeimage)
             
             else:

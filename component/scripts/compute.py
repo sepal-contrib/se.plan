@@ -56,7 +56,7 @@ def sum_up(aoi_io, layer_io, output):
     
     return
     
-def compute_layers(aoi_io, layers_io, questionaire_io):
+def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io):
     
     # use the layers io to produce a specific layer in the user assets 
     # for demo purposes I will only use a treecover asset that I found in GEE 
@@ -68,7 +68,7 @@ def compute_layers(aoi_io, layers_io, questionaire_io):
     )
     
     # we also need to create a dashboard in mkd to be displayer 
-    # final_layer = cs.gee_compute(aoi_io, layers_io, questionaire_io).wlc()
+    final_layer = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io).wlc()
 
     final_dashboard = sw.Markdown("**No dashboarding function yet**")
     
