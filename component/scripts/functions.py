@@ -144,7 +144,8 @@ class gee_compute:
                 constraint_layer.update(eeimage)
             
             else:
-                self.constraints_hight_low_bool(value,True,constraint_layer)
+                eeimage = {'eeimage' : ee.Image(layer_id).eq(0)}
+                constraint_layer.update(eeimage)
 
         constraints_layers = constraints_layers + landcover_constraints
         return constraints_layers
