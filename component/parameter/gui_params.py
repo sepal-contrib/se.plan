@@ -35,7 +35,7 @@ criterias = {
         {'text': 'medium populated', 'value': 10e3},
         {'text': 'low populated',    'value': 10},
     ],
-    'Protected area': None,
+    'Protected areas': None,
     'Opportunity cost': [
         {'text': 'cost a lot',    'value': 100},
         {'text': 'medium cost', 'value': 50},
