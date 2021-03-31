@@ -20,6 +20,8 @@ class gee_compute:
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
         self.rp_default_layer = rp_default_layer_io.layer_list
+
+        self.landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30}
     
     def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
 
@@ -61,12 +63,18 @@ class gee_compute:
         return layer
 
     def get_layer_and_id(self, layername, constraints_layers):
+        
         try:
-            constraint_layer = next(item for item in constraints_layers if item["name"] == layername)
+            if layername in  self.landcover_default_object.keys():
+                constraint_layer = next(item for item in constraints_layers if item["name"] == 'Current land cover')
+            else:
+                constraint_layer = next(item for item in constraints_layers if item["name"] == layername)
+            
             layer_id = constraint_layer['layer']
             return constraint_layer, layer_id
-        except StopIteration:
-            raise f"Layer {layername} does not exsit."
+
+        except:
+            print(f"Layer {layername} does not exsit.")
     
     def is_default_layer(self, name, layer_id):
         default_layer_id = next(item['layer'] for item in self.rp_default_layer if item["name"] == name)
@@ -98,31 +106,25 @@ class gee_compute:
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):
+        # TODO add in default check for protected areas, and location w decline pop
         landcover_constraints = []
         # Landcover specific constraints, todo: move this to paramters file..
-        landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30}
         default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]) is list]
         
         for i in constraints:
             value = constraints[i]
             name = i
-            landcover_default_keys = landcover_default_object.keys()
-
-            if value == None or value == -1:
-                continue
+            if value == None or value == -1 : continue 
+            constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
 
             # boolean masking lc
-            if name in landcover_default_keys and type(value) is bool:
-                constraint_layer, layer_id = self.get_layer_and_id('Current land cover', constraints_layers)
-                landcover_value = landcover_default_object[name] 
-
+            if name in self.landcover_default_object.keys() and type(value) is bool:
+                landcover_value = self.landcover_default_object[name] 
                 landcover_constraints.append(self.constraints_catagorical(landcover_value, value, name, layer_id))
 
             # restoration coverage % masking by lc
-            elif name in landcover_default_keys and type(value) is int:
-                constraint_layer, layer_id = self.get_layer_and_id('Current land cover', constraints_layers)
-                landcover_value = landcover_default_object[name] 
-
+            elif name in self.landcover_default_object.keys() and type(value) is int:
+                landcover_value = self.landcover_default_object[name] 
                 landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, name, layer_id))
 
             #high med lowe constraints (rain, elevation, slope, ect)
@@ -131,24 +133,18 @@ class gee_compute:
 
             # protected areas masking
             elif name == 'Protected areas':
-                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
-
                 protected_feature = ee.FeatureCollection(layer_id)
                 protected_image = protected_feature.filter(ee.Filter.neq('WDPAID', {})).reduceToImage(**{
                 'properties': ['WDPAID'], 'reducer': ee.Reducer.first()}).gt(0).unmask(0).rename('wdpa')
                 eeimage = {'eeimage':protected_image}
                 constraint_layer.update(eeimage)
-                        # protected areas masking
  
             elif name == 'Locations with declining population':
-                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
                 # Loctions w declining pop is 1,2 binary 
                 eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
                 constraint_layer.update(eeimage)
             
             else:
-                constraint_layer = next(item for item in constraints_layers if item["name"] == name)
-
                 self.constraints_hight_low_bool(value,True,constraint_layer)
 
         constraints_layers = constraints_layers + landcover_constraints
