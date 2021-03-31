@@ -6,12 +6,10 @@ except:
     print('paramters not imported useing default criterias list')
     class cp:
         criterias = {'Landscape variation in natural regeneration success':"",
-        'Climate risk':"",
-        'Forest cover change in 5 km buffer':"",
-        'Annual rainfall':"",
-        'Elevation':"",
-         'Slope':"",
+        'Climate risk':"", 'Forest cover change in 5 km buffer':"",
+        'Annual rainfall':"", 'Elevation':"", 'Slope':"",
          'Accessibility to major cities':"",'Population':"",'Opportunity cost':""}
+
 ee.Initialize()
 
 class gee_compute:
@@ -114,8 +112,11 @@ class gee_compute:
             value = constraints[i]
             name = i
             if value == None or value == -1 : continue 
-            constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
-
+            try:
+                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
+            except:
+                print(name,value)
+                continue
             # boolean masking lc
             if name in self.landcover_default_object.keys() and type(value) is bool:
                 landcover_value = self.landcover_default_object[name] 
@@ -131,14 +132,14 @@ class gee_compute:
                 self.update_range_constraint(value, name, constraints_layers)
 
             # protected areas masking
-            elif name == 'Protected areas' and is_default_layer(name, layer_id):
+            elif name == 'Protected areas' and self.is_default_layer(name, layer_id):
                 protected_feature = ee.FeatureCollection(layer_id)
                 protected_image = protected_feature.filter(ee.Filter.neq('WDPAID', {})).reduceToImage(**{
                 'properties': ['WDPAID'], 'reducer': ee.Reducer.first()}).gt(0).unmask(0).rename('wdpa')
                 eeimage = {'eeimage':protected_image}
                 constraint_layer.update(eeimage)
  
-            elif name == 'Locations with declining population' and is_default_layer(name,layer_id)):
+            elif name == 'Locations with declining population' and self.is_default_layer(name,layer_id):
                 # Loctions w declining pop is 1,2 binary 
                 eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
                 constraint_layer.update(eeimage)
