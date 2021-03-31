@@ -92,7 +92,7 @@ class gee_compute:
         # apply any preprocessing 
         if name == 'Slope' and layer_id == 'CGIAR/SRTM90_V4':
             image = ee.Image(layer_id)
-            lmage = ee.Algorithms.Terrain(image).select('slope')
+            image = ee.Algorithms.Terrain(image).select('slope')
         elif name == 'Annual rainfall' and layer_id == 'UCSB-CHG/CHIRPS/PENTAD':# what annual rain fall product do we want to use?
             image = ee.ImageCollection(layer_id).filter(ee.Filter.equals('year', 2017)).first()
         elif name == 'Forest cover change in 5 km buffer' and layer_id == 'projects/john-ee-282116/assets/fao-restoration/features/DeforestRate':
@@ -108,7 +108,6 @@ class gee_compute:
     def make_constraints(self, constraints, constraints_layers):
         # TODO add in default check for protected areas, and location w decline pop
         landcover_constraints = []
-        # Landcover specific constraints, todo: move this to paramters file..
         default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]) is list]
         
         for i in constraints:
@@ -132,14 +131,14 @@ class gee_compute:
                 self.update_range_constraint(value, name, constraints_layers)
 
             # protected areas masking
-            elif name == 'Protected areas':
+            elif name == 'Protected areas' and is_default_layer(name, layer_id):
                 protected_feature = ee.FeatureCollection(layer_id)
                 protected_image = protected_feature.filter(ee.Filter.neq('WDPAID', {})).reduceToImage(**{
                 'properties': ['WDPAID'], 'reducer': ee.Reducer.first()}).gt(0).unmask(0).rename('wdpa')
                 eeimage = {'eeimage':protected_image}
                 constraint_layer.update(eeimage)
  
-            elif name == 'Locations with declining population':
+            elif name == 'Locations with declining population' and is_default_layer(name,layer_id)):
                 # Loctions w declining pop is 1,2 binary 
                 eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
                 constraint_layer.update(eeimage)
