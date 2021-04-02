@@ -97,6 +97,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         
     def _on_layer_change(self, change):
         
+        # do nothing if it's no_layer
+        if change['new'] == 'no Layer':
+            return self
+        
         # replace the v_model by the init one 
         if not change['new']:
             change['owner'].v_model = self.init_layer
@@ -113,7 +117,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
                 'custom layer'
             )
             
-        return 
+        return self
             
     def _cancel_click(self, widget, data, event):
         

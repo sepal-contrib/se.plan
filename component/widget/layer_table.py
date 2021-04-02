@@ -17,7 +17,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.headers = [
           {'text': 'Theme'     , 'value': 'theme'},
-          {'text': 'Subtheme' , 'value': 'subtheme'},
+          {'text': 'Subtheme'  , 'value': 'subtheme'},
           {'text': 'Layer name', 'value': 'name'},
           {'text': 'Weight'    , 'value': 'weight'},
           {'text': 'Layer'     , 'value': 'layer'},
@@ -103,7 +103,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 item['weight'] = data['weight']
                 item['layer'] = data['layer']
         
-        # reply the modyfied items 
+        # reply with the modyfied items 
         self.items = tmp
         
         # notify the change to the rest of the app 
