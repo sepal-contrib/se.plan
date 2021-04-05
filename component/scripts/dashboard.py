@@ -75,25 +75,26 @@ def get_summary_statistics(wlcoutputs, geeio):
     count_aoi = get_aoi_count(aoi, 'aoi_count')
 
     # restoration sutibuility
-    # note: benefits from wlc are in quintiles, so must remake 
-    # with real image values!
     wlc, benefits, constraints, costs = wlcoutputs
     mask = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).byte(), c))).min()
+
+    # restoration pot. stats
     wlc_summary = get_image_stats(wlc, aoi, geeio)
 
     # benefits
+    # remake benefits from layerlist as original output are in quintiles
     all_benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
     benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), all_benefits_layers))})
 
     # costs
-    all_costs = get_cost_stats(costs, aoi)
+    costs_out = ee.Dictionary({'costs':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), costs))})
 
     #cconstraints
-    all_constraints = get_constraint_status(constraints, aoi)
+    constraints_out =ee.Dictionary({'costs':list(map(lambda i : get_image_count(i['eeimage'],aoi, i['name']), constraints))}) 
 
-    return wlc_summary.merge(all_benefits).merge(all_costs).merge(all_constraints)
+    return wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
 
 if __name__ == "__main__":
     ee.Initialize()
