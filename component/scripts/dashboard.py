@@ -47,6 +47,25 @@ def get_image_count(image, aoi, name):
     value = ee.Dictionary({'value':count_img.values()})
     out_dict = ee.Dictionary({name:value})
     return out_dict
+    
+def get_image_sum(image, aoi, name, mask):
+    sum_img = image.updateMask(mask).reduceRegion(**{
+                    'reducer':ee.Reducer.sum(), 
+                    'geometry':aoi,
+                    'scale':100,
+                    'maxPixels':1e13,
+                    })
+    total_img = image.reduceRegion(**{
+                    'reducer':ee.Reducer.sum(), 
+                    'geometry':aoi,
+                    'scale':100,
+                    'maxPixels':1e13,
+                    })
+
+    value = ee.Dictionary({'value':sum_img.values(),
+                            'total':total_img.values()})
+    out_dict = ee.Dictionary({name:value})
+    return out_dict
 
 def get_summary_statistics(wlcoutputs, geeio):
     # returns summarys for the dashboard. 
@@ -58,14 +77,15 @@ def get_summary_statistics(wlcoutputs, geeio):
     # restoration sutibuility
     # note: benefits from wlc are in quintiles, so must remake 
     # with real image values!
-    wlc, benefits, costs, constraints = wlcoutputs
+    wlc, benefits, constraints, costs = wlcoutputs
+    mask = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).byte(), c))).min()
     wlc_summary = get_image_stats(wlc, aoi, geeio)
 
     # benefits
     all_benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
-    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_count(i['eeimage'],aoi, i['name']), all_benefits_layers))})
+    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), all_benefits_layers))})
 
     # costs
     all_costs = get_cost_stats(costs, aoi)
@@ -98,17 +118,21 @@ if __name__ == "__main__":
 
     # test getting aoi count
     # count_aoi = get_aoi_count(aoi, 'aoi_count')
-    # print(count_aoi.getInfo())
+    # print(count_aoi.values().getInfo())
+    
+    c = wlcoutputs[2]
+    # print(c)
+    cimg = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).byte(), c))).min()
+    # print(cimg)
 
     a = wlcoutputs[1][0]
-    print(a)
+    # print(a)
 
-    b = get_image_count(a['eeimage'],aoi, a['name'])
-    # print(b.getInfo())
+    # b = get_image_count(a['eeimage'],aoi, a['name'])
+    # # print(b.getInfo())
     all_benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
-    t = ee.Dictionary({'benefits':list(map(lambda i : get_image_count(i['eeimage'],aoi, i['name']), all_benefits_layers))})
-    # seemingly works... worried a bout total areas all being same, but might be aoi
+    t = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], cimg), all_benefits_layers))})
+    # # seemingly works... worried a bout total areas all being same, but might be aoi
     print(t.getInfo())
-
