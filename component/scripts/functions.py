@@ -3,12 +3,12 @@ import json
 try:
     from component import parameter as cp
 except:
-    print('paramters not imported useing default criterias list')
+    print('paramters not imported useing default range criterias list')
     class cp:
-        criterias = {'Landscape variation in natural regeneration success':"",
-        'Climate risk':"", 'Forest cover change in 5 km buffer':"",
-        'Annual rainfall':"", 'Elevation':"", 'Slope':"",
-         'Accessibility to major cities':"",'Population':"",'Opportunity cost':""}
+        criterias = {'Landscape variation in natural regeneration success':[],
+        'Climate risk':[], 'Forest cover change in 5 km buffer':[],
+        'Annual rainfall':[], 'Elevation':[], 'Slope':[],
+         'Accessibility to major cities':[],'Population':[],'Opportunity cost':[]}
 
 ee.Initialize()
 
@@ -107,7 +107,7 @@ class gee_compute:
         # TODO add in default check for protected areas, and location w decline pop
         landcover_constraints = []
         default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]) is list]
-        
+
         for i in constraints:
             value = constraints[i]
             name = i
