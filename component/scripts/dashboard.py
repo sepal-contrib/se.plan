@@ -1,10 +1,6 @@
 import ee
 import json
 
-# dev
-from test_gee_compute_params import *
-from functions import *
-
 def _quintile(image, geometry, scale=100):
     """ computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties """ 
     quintile_collection = image.reduceRegion(geometry=geometry, 
@@ -101,7 +97,7 @@ def get_summary_statistics(wlcoutputs, geeio):
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
-    all_benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
+    all_benefits_layers = [i for i in geeio.rp_layers_io.layer_list if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
     benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), all_benefits_layers))})
@@ -121,7 +117,11 @@ def get_stats_as_feature_collection(wlcoutputs, geeio):
     fc = ee.FeatureCollection(feat)
 
     return fc
+
 if __name__ == "__main__":
+    # dev
+    from test_gee_compute_params import *
+    from functions import *
     ee.Initialize()
     io = fake_io()
     io_default = fake_default_io()
@@ -133,9 +133,13 @@ if __name__ == "__main__":
     wlcoutputs= geeio.wlc()
     wlc_out = wlcoutputs[0]
 
+    # test getting as fc for export
+    t7 = get_stats_as_feature_collection(wlcoutputs,geeio)
+    print(t7.getInfo())
+
     # test wrapper
-    t0 = get_summary_statistics(wlcoutputs,geeio)
-    print(t0.getInfo())
+    # t0 = get_summary_statistics(wlcoutputs,geeio)
+    # print(t0.getInfo())
     # get wlc quntiles  
     # t1 = get_image_stats(wlc_out, aoi, geeio)
     # print(t1.getInfo())
