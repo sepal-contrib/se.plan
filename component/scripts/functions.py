@@ -19,7 +19,7 @@ class gee_compute:
         self.rp_questionaire_io = rp_questionaire_io
         self.rp_default_layer = rp_default_layer_io.layer_list
 
-        self.landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30}
+        self.landcover_default_object = {'Bare land':200,'Shrub land':120,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':130}
     
     def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
 
@@ -88,14 +88,14 @@ class gee_compute:
         
         constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
         # apply any preprocessing 
-        if name == 'Slope' and layer_id == 'CGIAR/SRTM90_V4':
+        if name == 'Slope' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id)
             image = ee.Algorithms.Terrain(image).select('slope')
-        elif name == 'Annual rainfall' and layer_id == 'UCSB-CHG/CHIRPS/PENTAD':# what annual rain fall product do we want to use?
+        elif name == 'Annual rainfall' and self.is_default_layer(name, layer_id):# what annual rain fall product do we want to use?
             image = ee.ImageCollection(layer_id).filter(ee.Filter.equals('year', 2017)).first()
-        elif name == 'Forest cover change in 5 km buffer' and layer_id == 'projects/john-ee-282116/assets/fao-restoration/features/DeforestRate':
+        elif name == 'Forest cover change in 5 km buffer' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id).multiply(100)
-        elif name == 'Landscape variation in natural regeneration success' and layer_id == 'projects/john-ee-282116/assets/fao-restoration/features/Regeneration':
+        elif name == 'Landscape variation in natural regeneration success' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id).multiply(100)
         else:
             image = ee.Image(layer_id)
