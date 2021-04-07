@@ -19,7 +19,8 @@ class gee_compute:
         self.rp_questionaire_io = rp_questionaire_io
         self.rp_default_layer = rp_default_layer_io.layer_list
 
-        self.landcover_default_object = {'Bare land':200,'Shrub land':120,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':130}
+        self.landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30, 'Settlements':50}
+        self.remap_from, self.remap_to = [200,201,202, 120, 10,20,30, 130, 120],[200,200,200, 120, 40,40,40, 130, 120]
     
     def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
 
@@ -28,8 +29,8 @@ class gee_compute:
         image = ee.Image(layer_id)
 
         if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
+            # image = image.remap(self.remap_from, self.remap_to)
             image = image.select("discrete_classification")
-
         if contratint_bool:
             layer['eeimage'] = image.neq(cat_value)
         else:
@@ -77,8 +78,6 @@ class gee_compute:
     def is_default_layer(self, name, layer_id):
         default_layer_id = next(item['layer'] for item in self.rp_default_layer if item["name"] == name)
         return layer_id == default_layer_id
-    
-    # def load_default_layers():
 
 
     def update_range_constraint(self, value, name, constraints_layers):
@@ -93,9 +92,9 @@ class gee_compute:
             image = ee.Algorithms.Terrain(image).select('slope')
         elif name == 'Annual rainfall' and self.is_default_layer(name, layer_id):# what annual rain fall product do we want to use?
             image = ee.ImageCollection(layer_id).filter(ee.Filter.equals('year', 2017)).first()
-        elif name == 'Forest cover change in 5 km buffer' and self.is_default_layer(name, layer_id):
+        elif name == 'Deforestation rate' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id).multiply(100)
-        elif name == 'Landscape variation in natural regeneration success' and self.is_default_layer(name, layer_id):
+        elif name == 'Natural regeneration probability' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id).multiply(100)
         else:
             image = ee.Image(layer_id)
@@ -139,7 +138,7 @@ class gee_compute:
                 eeimage = {'eeimage':protected_image}
                 constraint_layer.update(eeimage)
  
-            elif name == 'Locations with declining population' and self.is_default_layer(name,layer_id):
+            elif name == 'Declining population' and self.is_default_layer(name,layer_id):
                 # Loctions w declining pop is 1,2 binary 
                 eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
                 constraint_layer.update(eeimage)
