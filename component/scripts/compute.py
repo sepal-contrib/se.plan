@@ -7,6 +7,7 @@ from sepal_ui import sepalwidgets as sw
 from component import parameter as cp
 from component import scripts as cs
 
+
 ee.Initialize()
 
 
@@ -68,11 +69,18 @@ def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io):
     )
     
     # we also need to create a dashboard in mkd to be displayer 
-    final_layer = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io).wlc()
+    geeio = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io)
+    final_layer = geeio.wlc()
+
+    compute_dashboard = cs.get_stats_as_feature_collection(final_layer, geeio)
+    # export to csv
+    # cs.export_stats(compute_dashboard)
+    # grab csv from drive/sepal
+
 
     final_dashboard = sw.Markdown("**No dashboarding function yet**")
     
-    return (final_layer, final_dashboard)
+    return (final_layer[0], final_dashboard)
 
 def display_layer(layer, aoi_io, m):
     
