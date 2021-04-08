@@ -19,7 +19,50 @@ class DashThemeTile(sw.Tile):
             id_ = "dashboard_widget",
             title = cm.dashboard.theme.title,
         )
+    def dev_set_summary(self,json_themes_values):
+        benefits_layer = []
+        constraints_layer = []
+        costs_layer = []
+        for k,val in json_themes_values.items():
+            print(k)
+            for layer in json_themes_values[k]:
+                if k == 'suitibility':
+                    # print(layer)
+                    continue
+
+                name = list(layer.keys())[0]
+                try:
+                    if k == 'benefits':
+                        print(layer[name]['value'], layer[name]['total'])
+                        benefits_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
+                    elif k == 'costs':
+                        print(layer[name]['value'], layer[name]['total'])
+                        costs_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
+                    elif k == 'constraints':
+                        print(layer[name]['value'], layer[name]['total'])
+                        constraints_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
+                except:
+                    print(name, 'not found')
+                    continue
         
+        benefits = v.Html(tag='h2', children= ['Benefits'])
+
+        benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
+        costs = v.Html(tag='h2', children= ['Costs'])
+            
+        costs_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.cost))
+        constraints = v.Html(tag='h2', children=['Constraints'])
+            
+        constraints_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.constraint))
+        self.set_content(
+               [benefits, benefits_txt] + benefits_layer \
+               + [costs, costs_txt] + costs_layer \
+               + [constraints, constraints_txt] + constraints_layer
+            )
+        
+        return self
+            
+
     def set_summary(self, json_themes_values=None):
         
         # if none create fake data 
@@ -44,7 +87,7 @@ class DashThemeTile(sw.Tile):
                     }
                     
             benefits = v.Html(tag='h2', children= ['Benefits'])
-            
+
             benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
             
             benefits_layer = []
