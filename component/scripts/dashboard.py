@@ -1,5 +1,6 @@
 import ee
 import json
+import datetime
 
 def _quintile(image, geometry, scale=100):
     """ computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties """ 
@@ -94,10 +95,14 @@ def get_summary_statistics(wlcoutputs, geeio):
 
     # restoration pot. stats
     wlc_summary = get_image_stats(wlc, aoi, geeio)
+    try:
+        layer_list = geeio.rp_layers_io.layer_list
+    except:
+        layer_list = layerlist
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
-    all_benefits_layers = [i for i in geeio.rp_layers_io.layer_list if i['theme'] == 'benefits']
+    all_benefits_layers = [i for i in layer_list if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
     benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), all_benefits_layers))})
@@ -117,7 +122,17 @@ def get_stats_as_feature_collection(wlcoutputs, geeio):
     fc = ee.FeatureCollection(feat)
 
     return fc
-
+def export_stats(fc):
+    now = datetime.datetime.utcnow()
+    suffix = now.strftime("%Y%m%d%H%M%S")
+    desc = f"restoration_dashboard_{suffix}"
+    task = ee.batch.Export.table.toDrive(collection=fc, 
+                                     description=desc,
+                                     folder='restoration_dashboard',
+                                    #  fileFormat='GeoJSON'
+                                    )
+    task.start()
+    print(task.status())
 if __name__ == "__main__":
     # dev
     from test_gee_compute_params import *
@@ -136,6 +151,7 @@ if __name__ == "__main__":
     # test getting as fc for export
     t7 = get_stats_as_feature_collection(wlcoutputs,geeio)
     print(t7.getInfo())
+    # export_stats(t7)
 
     # test wrapper
     # t0 = get_summary_statistics(wlcoutputs,geeio)
