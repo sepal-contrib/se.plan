@@ -33,6 +33,14 @@ class LayerFull(v.Layout):
             v.Html(tag='th', children = ["ratio"])
         ])])]
         
+        # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
+        def human_format(num, round_to=2):
+            magnitude = 0
+            while abs(num) >= 1000:
+                magnitude += 1
+                num = round(num / 1000.0, round_to)
+            return '{:.{}f}{}'.format(round(num, round_to), round_to, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+        
         rows = []
         for val, clr in zip(values, self.COLORS):
             
@@ -42,7 +50,7 @@ class LayerFull(v.Layout):
                         style_=f"color: {clr}",
                         color= clr, 
                         tag='td', 
-                        children=[f"{val}"]
+                        children=[f"{human_format(val)}"]
                     ),
                     v.Html(tag='td', children=[v.ProgressLinear(
                         v_model=int(val/total*100), 
