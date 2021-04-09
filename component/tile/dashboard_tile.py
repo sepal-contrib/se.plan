@@ -40,9 +40,10 @@ class DashThemeTile(sw.Tile):
                         costs_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
                     elif k == 'constraints':
                         print(layer[name]['value'], layer[name]['total'])
-                        constraints_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
-                except:
-                    print(name, 'not found')
+                        constraints_layer.append(cw.LayerPercentage(name, layer[name]['value']))
+                        # constraints_layer.append(cw.LayerPercentage(name, layer[name]['value'],  layer[name]['total'][0]))
+                except Exception as e:
+                    print(name, 'not found',e)
                     continue
         
         benefits = v.Html(tag='h2', children= ['Benefits'])
