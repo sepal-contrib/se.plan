@@ -27,7 +27,7 @@ def get_aoi_name(selected_info):
         selected_name = 'Custom Area of Interest'
     return selected_name
 
-def get_image_stats(image, geeio, selected_info, mask, scale=100) :
+def get_image_stats(image, geeio, selected_info, mask, total, scale=100) :
     """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
     aoi_as_fc = ee.FeatureCollection(geeio.selected_aoi)
 
@@ -42,8 +42,8 @@ def get_image_stats(image, geeio, selected_info, mask, scale=100) :
     list_values = ee.Dictionary(quintile_frequency.values().get(0)).values()
 
     out_dict = ee.Dictionary({'suitibility':{
-        'name' : selected_name,
-        'values':list_values,
+        selected_name :{'values':list_values,
+        'total' : total}
         }})
     return out_dict
 
@@ -111,8 +111,7 @@ def get_summary_statistics(wlcoutputs, geeio, selected_info):
     mask = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
-    wlc_summary = get_image_stats(wlc, geeio, selected_info, mask)
-    wlc_summary = ee.Dictionary(wlc_summary.get('suitibility')).set('total',count_aoi.values())
+    wlc_summary = get_image_stats(wlc, geeio, selected_info, mask, count_aoi.values().get(0))
 
     try:
         layer_list = geeio.rp_layers_io.layer_list
@@ -169,8 +168,8 @@ if __name__ == "__main__":
     selected_info = [None]
     # test getting as fc for export
     t7 = get_stats_as_feature_collection(wlcoutputs,geeio,selected_info)
-    # print(t7.getInfo())
-    # export_stats(t7)
+    print(t7.getInfo())
+    export_stats(t7)
 
     # test wrapper
     # t0 = get_summary_statistics(wlcoutputs,geeio)

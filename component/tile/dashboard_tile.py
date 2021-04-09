@@ -24,10 +24,8 @@ class DashThemeTile(sw.Tile):
         constraints_layer = []
         costs_layer = []
         for k,val in json_themes_values.items():
-            print(k)
             for layer in json_themes_values[k]:
                 if k == 'suitibility':
-                    # print(layer)
                     continue
 
                 name = list(layer.keys())[0]
@@ -146,7 +144,9 @@ class DashRegionTile(sw.Tile):
                     "total": 100 # total surface
                 }
             }
-        
+        else:
+           json_feature_values = json_feature_values['suitibility']
+
         feats = []
         for feat in json_feature_values:
             
