@@ -26,6 +26,6 @@ for i, layer in enumerate(default_layer_io.layer_list):
     
     layer_df_line = layer_list[layer_list.layer_name == layer['name']].iloc[0]
     layer.update(
-        layer  = layer_df_line.gee_asset if random.random() < 0.5 else f'user/custom/Layer{i}',
+        layer  = layer_df_line.gee_asset.strip(), #if random.random() < 0.5 else f'user/custom/Layer{i}',
         weight = random.randint(0, 5) 
     )
