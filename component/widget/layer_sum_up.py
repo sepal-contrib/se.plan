@@ -87,10 +87,14 @@ class LayerPercentage(v.Layout):
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna('')
         layer_row = layer_list[layer_list.layer_name == layer_name]
-        
-        if len(layer_row) != 1:
+
+        if len(layer_row) != 1 and layer_name not in cp.criterias:
             raise IndexError(f"The layer {layer_name} is not part of the existing layers of the application. Please contact our maintainer.")
-        
+        if len(layer_row) != 1 and layer_name in cp.criterias:
+            new_row = pd.DataFrame([["","",layer_name,"",layer_name,"HA"]], columns = ['theme', 'subtheme', 'layer_name', 'gee_asset', 'layer_info', 'unit'])
+            layer_row = new_row
+
+
         #add the title
         title = v.Html(tag='h4', children=[layer_name])
         # build the internal details        
@@ -109,7 +113,7 @@ class LayerPercentage(v.Layout):
                     tag='span',
                     class_ = 'ml-1 mr-1',
                     style_ = f'color: {clr}',
-                    children=[f'{val}%']
+                    children=[f'{round(val,2)}%']
                 ))
                 
         super().__init__(
