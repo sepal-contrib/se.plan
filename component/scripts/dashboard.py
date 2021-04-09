@@ -64,6 +64,8 @@ def get_image_percent_cover(image, aoi, name):
     return out_dict
     
 def get_image_sum(image, aoi, name, mask):
+    """ computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
+     
     sum_img = image.updateMask(mask).reduceRegion(**{
                     'reducer':ee.Reducer.sum(), 
                     'geometry':aoi,
@@ -129,7 +131,7 @@ def export_stats(fc):
     task = ee.batch.Export.table.toDrive(collection=fc, 
                                      description=desc,
                                      folder='restoration_dashboard',
-                                    #  fileFormat='GeoJSON'
+                                     fileFormat='GeoJSON'
                                     )
     task.start()
     print(task.status())
@@ -145,12 +147,12 @@ if __name__ == "__main__":
 
     aoi = region.get_aoi_ee()
     geeio = gee_compute(region,io,io_default,io)
-    wlcoutputs= geeio.wlc()
-    wlc_out = wlcoutputs[0]
+    # wlcoutputs= geeio.wlc()
+    # wlc_out = wlcoutputs[0]
 
     # test getting as fc for export
-    t7 = get_stats_as_feature_collection(wlcoutputs,geeio)
-    print(t7.getInfo())
+    # t7 = get_stats_as_feature_collection(wlcoutputs,geeio)
+    # print(t7.getInfo())
     # export_stats(t7)
 
     # test wrapper
@@ -167,8 +169,8 @@ if __name__ == "__main__":
     # print(t2.getInfo())
 
     # test getting aoi count
-    # count_aoi = get_aoi_count(aoi, 'aoi_count')
-    # print(count_aoi.values().getInfo())
+    count_aoi = get_aoi_count(aoi, 'aoi_count')
+    print(count_aoi.values().getInfo())
     
     # c = wlcoutputs[2]
     # # print(c)
