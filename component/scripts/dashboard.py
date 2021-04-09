@@ -29,9 +29,6 @@ def get_aoi_name(selected_info):
 
 def get_image_stats(image, geeio, selected_info, mask, scale=100) :
     """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
-    # TODO : need this to return something like
-    #   'suitibility' : 'AOI_NAME': {'values':[1,2,3,4], 'total':100}
-    # add constaints after making quintile? as class six?
     aoi_as_fc = ee.FeatureCollection(geeio.selected_aoi)
 
     # fc_quintile = _quintile(image, aoi)
@@ -115,7 +112,7 @@ def get_summary_statistics(wlcoutputs, geeio, selected_info):
 
     # restoration pot. stats
     wlc_summary = get_image_stats(wlc, geeio, selected_info, mask)
-    wlc_summary = wlc_summary.set('total',count_aoi.values())
+    wlc_summary = ee.Dictionary(wlc_summary.get('suitibility')).set('total',count_aoi.values())
 
     try:
         layer_list = geeio.rp_layers_io.layer_list
@@ -171,7 +168,7 @@ if __name__ == "__main__":
     wlc_out = wlcoutputs[0]
     selected_info = [None]
     # test getting as fc for export
-    # t7 = get_stats_as_feature_collection(wlcoutputs,geeio,selected_info)
+    t7 = get_stats_as_feature_collection(wlcoutputs,geeio,selected_info)
     # print(t7.getInfo())
     # export_stats(t7)
 
