@@ -12,24 +12,42 @@ def _quintile(image, geometry, scale=100):
 
     return quintile_collection
 def count_quintiles(image, geometry, scale=100):
-    histogram_quintile = image.reduceRegion(reducer=ee.Reducer.frequencyHistogram(),
+    histogram_quintile = image.reduceRegion(reducer=ee.Reducer.frequencyHistogram().unweighted(),
                         geometry=geometry,
                         scale=scale, 
                         # bestEffort=True, 
                         maxPixels=1e13, 
                         tileScale=2)
     return histogram_quintile
+def get_aoi_name(selected_info):
+    if 'country_code' in selected_info:
+        selected_name = selected_info['country_code']
+    else:
+        # TODO : add this to lang.json 
+        selected_name = 'Custom Area of Interest'
+    return selected_name
 
-def get_image_stats(image, aoi, geeio, scale=100) :
+def get_image_stats(image, geeio, selected_info, mask, scale=100) :
     """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
-    aoi_as_fc = ee.FeatureCollection(aoi)
+    # TODO : need this to return something like
+    #   'suitibility' : 'AOI_NAME': {'values':[1,2,3,4], 'total':100}
+    # add constaints after making quintile? as class six?
+    aoi_as_fc = ee.FeatureCollection(geeio.selected_aoi)
+
     # fc_quintile = _quintile(image, aoi)
 
     # should move quintile norm out of geeio at some point...along with all other utilities
     image_quin, bad_features = geeio.quintile_normalization(image,aoi_as_fc)
-    quintile_frequency = count_quintiles(image_quin, aoi)
+    image_quin = image_quin.where(mask.eq(0),6)
+    quintile_frequency = count_quintiles(image_quin, geeio.selected_aoi)
 
-    out_dict = ee.Dictionary({'suitibility':{'value':quintile_frequency.values()}})
+    selected_name = get_aoi_name(selected_info)
+    list_values = ee.Dictionary(quintile_frequency.values().get(0)).values()
+
+    out_dict = ee.Dictionary({'suitibility':{
+        'name' : selected_name,
+        'values':list_values,
+        }})
     return out_dict
 
 def get_aoi_count(aoi, name):
@@ -58,7 +76,7 @@ def get_image_percent_cover(image, aoi, name):
     count_val = ee.Number(count_img.values().get(0))
 
     percent = count_val.divide(total_val).multiply(100)
-    value = ee.Dictionary({'value':[percent],
+    value = ee.Dictionary({'values':[percent],
                             'total':[total_val]})
     out_dict = ee.Dictionary({name:value})
     return out_dict
@@ -79,12 +97,12 @@ def get_image_sum(image, aoi, name, mask):
                     'maxPixels':1e13,
                     })
 
-    value = ee.Dictionary({'value':sum_img.values(),
+    value = ee.Dictionary({'values':sum_img.values(),
                             'total':total_img.values()})
     out_dict = ee.Dictionary({name:value})
     return out_dict
 
-def get_summary_statistics(wlcoutputs, geeio):
+def get_summary_statistics(wlcoutputs, geeio, selected_info):
     # returns summarys for the dashboard. 
     # {name: values: [],
     #        total: int}
@@ -96,7 +114,9 @@ def get_summary_statistics(wlcoutputs, geeio):
     mask = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
-    wlc_summary = get_image_stats(wlc, aoi, geeio)
+    wlc_summary = get_image_stats(wlc, geeio, selected_info, mask)
+    wlc_summary = wlc_summary.set('total',count_aoi.values())
+
     try:
         layer_list = geeio.rp_layers_io.layer_list
     except:
@@ -117,8 +137,8 @@ def get_summary_statistics(wlcoutputs, geeio):
 
     return wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
 
-def get_stats_as_feature_collection(wlcoutputs, geeio):
-    stats = get_summary_statistics(wlcoutputs, geeio)
+def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info):
+    stats = get_summary_statistics(wlcoutputs, geeio, selected_info)
     geom = ee.Geometry.Point([0,0])
     feat = ee.Feature(geom).set(stats)
     fc = ee.FeatureCollection(feat)
@@ -147,11 +167,11 @@ if __name__ == "__main__":
 
     aoi = region.get_aoi_ee()
     geeio = gee_compute(region,io,io_default,io)
-    # wlcoutputs= geeio.wlc()
-    # wlc_out = wlcoutputs[0]
-
+    wlcoutputs= geeio.wlc()
+    wlc_out = wlcoutputs[0]
+    selected_info = [None]
     # test getting as fc for export
-    # t7 = get_stats_as_feature_collection(wlcoutputs,geeio)
+    # t7 = get_stats_as_feature_collection(wlcoutputs,geeio,selected_info)
     # print(t7.getInfo())
     # export_stats(t7)
 
@@ -159,18 +179,18 @@ if __name__ == "__main__":
     # t0 = get_summary_statistics(wlcoutputs,geeio)
     # print(t0.getInfo())
     # get wlc quntiles  
-    # t1 = get_image_stats(wlc_out, aoi, geeio)
+    # t1 = get_image_stats(wlc_out, geeio, selected_info)
     # print(t1.getInfo())
 
     # get dict of quintile counts for wlc
     # print(type(wlc_out),wlc_out.bandNames().getInfo())
     # wlc_quintile, bad_features = geeio.quintile_normalization(wlc_out,ee.FeatureCollection(aoi))
     # t2 = count_quintiles(wlc_quintile, aoi)
-    # print(t2.getInfo())
+    # print(ee.Dictionary(t2.get('constant')).values().getInfo())
 
     # test getting aoi count
-    count_aoi = get_aoi_count(aoi, 'aoi_count')
-    print(count_aoi.values().getInfo())
+    # count_aoi = get_aoi_count(aoi, 'aoi_count')
+    # print(count_aoi.values().getInfo())
     
     # c = wlcoutputs[2]
     # # print(c)
