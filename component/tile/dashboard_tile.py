@@ -31,15 +31,12 @@ class DashThemeTile(sw.Tile):
                 name = list(layer.keys())[0]
                 try:
                     if k == 'benefits':
-                        print(layer[name]['value'], layer[name]['total'])
-                        benefits_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
+                        benefits_layer.append(cw.LayerFull(name, layer[name]['values'],  layer[name]['total'][0]))
                     elif k == 'costs':
-                        print(layer[name]['value'], layer[name]['total'])
-                        costs_layer.append(cw.LayerFull(name, layer[name]['value'],  layer[name]['total'][0]))
+                        costs_layer.append(cw.LayerFull(name, layer[name]['values'],  layer[name]['total'][0]))
                     elif k == 'constraints':
-                        print(layer[name]['value'], layer[name]['total'])
-                        constraints_layer.append(cw.LayerPercentage(name, layer[name]['value']))
-                        # constraints_layer.append(cw.LayerPercentage(name, layer[name]['value'],  layer[name]['total'][0]))
+                        constraints_layer.append(cw.LayerPercentage(name, layer[name]['values']))
+
                 except Exception as e:
                     print(name, 'not found',e)
                     continue
