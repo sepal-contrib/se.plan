@@ -67,15 +67,17 @@ def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io):
         .select('tree_canopy_cover')
         .mosaic()
     )
+    selected_info = aoi_io.get_not_null_attrs()
     
     # we also need to create a dashboard in mkd to be displayer 
     geeio = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io)
     final_layer = geeio.wlc()
 
-    compute_dashboard = cs.get_stats_as_feature_collection(final_layer, geeio)
-    # export to csv
+    compute_dashboard = cs.get_stats_as_feature_collection(final_layer, geeio, selected_info)
+    # export to json
     # cs.export_stats(compute_dashboard)
     # grab csv from drive/sepal
+
 
 
     final_dashboard = sw.Markdown("**No dashboarding function yet**")
