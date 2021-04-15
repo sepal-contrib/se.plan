@@ -1,6 +1,8 @@
 import ee
 import json
 import datetime
+# from component import utils
+import os
 
 def _quintile(image, geometry, scale=100):
     """ computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties """ 
@@ -150,7 +152,25 @@ def export_stats(fc):
                                      fileFormat='GeoJSON'
                                     )
     task.start()
-    print(task.status())
+    utils.gee.wait_for_completion(desc,"")
+    # print(task.status())
+
+def getdownloadasurl(fc):
+    # hacky way to download data until I can figure out downlading from drive
+    now = datetime.datetime.utcnow()
+    suffix = now.strftime("%Y%m%d%H%M%S")
+    desc = f"restoration_dashboard_{suffix}"
+    url = fc.getDownloadURL('GeoJSON', filename=desc)
+    dest = r"."
+    file = f'{dest}/{desc}.GEOjson'
+
+    os.system(f'curl {url} -H "Accept: application/json" -H "Content-Type: application/json" -o {file}')
+
+    with open(file) as f:
+        json_features = json.load(f)
+    os.remove(file)
+    return json_features
+
 if __name__ == "__main__":
     # dev
     from test_gee_compute_params import *
@@ -168,8 +188,9 @@ if __name__ == "__main__":
     selected_info = [None]
     # test getting as fc for export
     t7 = get_stats_as_feature_collection(wlcoutputs,geeio,selected_info)
-    print(t7.getInfo())
-    export_stats(t7)
+    # print(t7.getInfo())
+    f = getdownloadasurl(t7)
+    print(f, type(f))
 
     # test wrapper
     # t0 = get_summary_statistics(wlcoutputs,geeio)
