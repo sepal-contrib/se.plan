@@ -29,3 +29,5 @@ for i, layer in enumerate(default_layer_io.layer_list):
         layer  = layer_df_line.gee_asset.strip(), #if random.random() < 0.5 else f'user/custom/Layer{i}',
         weight = random.randint(0, 5) 
     )
+    if layer['theme'] != 'benefits':
+        layer.update(weight=random.randint(0,1))
