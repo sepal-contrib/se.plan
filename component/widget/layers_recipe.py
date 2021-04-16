@@ -56,23 +56,42 @@ class layerRecipe(v.Layout, sw.SepalWidget):
 
                 # cannot make the slots work with icons so I need to move to intermediate layout 
                 # the color have 7 values and there are only 5 weight 
-                theme_layer_widgets.append(v.Row(
-                    class_ = 'ml-2 mr-2',
-                    children = [
-                        v.TextField(
-                            hint = row["layer"] if row["layer"] != original_asset else "default",
-                            persistent_hint = True,
-                            color = cp.gradient(11)[row['weight']],
-                            readonly = True,
-                            v_model = row['name']
-                        ),
-                        v.Icon(
-                            class_ = 'ml-2',
-                            color = cp.gradient(11)[row['weight']],
-                            children = [f"mdi-numeric-{row['weight']}-circle"]
-                        )
-                    ]
-                ))
+                if row['theme'] == 'benefits':
+                    theme_layer_widgets.append(v.Row(
+                        class_ = 'ml-2 mr-2',
+                        children = [
+                            v.TextField(
+                                hint = row["layer"] if row["layer"] != original_asset else "default",
+                                persistent_hint = True,
+                                color = cp.gradient(11)[row['weight']],
+                                readonly = True,
+                                v_model = row['name']
+                            ),
+                            v.Icon(
+                                class_ = 'ml-2',
+                                color = cp.gradient(11)[row['weight']],
+                                children = [f"mdi-numeric-{row['weight']}-circle"]
+                            )
+                        ]
+                    ))
+                else:
+                    theme_layer_widgets.append(v.Row(
+                        class_ = 'ml-2 mr-2',
+                        children = [
+                            v.TextField(
+                                hint = row["layer"] if row["layer"] != original_asset else "default",
+                                persistent_hint = True,
+                                color = cp.gradient(2)[row['weight']],
+                                readonly = True,
+                                v_model = row['name']
+                            ),
+                            v.Icon(
+                                class_ = 'ml-2',
+                                color = cp.gradient(2)[row['weight']],
+                                children = ["mdi-circle-slice-8"]
+                            )
+                        ]
+                    ))                    
                 
             # add the lines to the layout
             themes_layout.append(v.Layout(row = True, children=theme_layer_widgets))
