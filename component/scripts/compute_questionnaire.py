@@ -18,6 +18,7 @@ def compute_questionnaire(questionnaire_io):
     # at the moment we just load random weight values
 
     priorities = json.loads(questionnaire_io.priorities)
+    constraints = json.loads(questionnaire_io.constraints)
 
     def assign_weights(index, row):
         layer_dict ={
@@ -29,7 +30,15 @@ def compute_questionnaire(questionnaire_io):
         if row.theme == "benefits" :
             layer_dict['weight'] = priorities[layer_dict['subtheme']]
         else:
-            layer_dict['weight'] = 0
+            try:
+                constraint_weight = constraints[layer_dict['name']]
+                if  constraint_weight == -1:
+                    constraint_weight = 0
+                #assign 1 to weight if its used, and 0 if not
+                layer_dict['weight'] = min(max(int(constraint_weight), 0), 1)
+            except:
+                print(layer_dict['name']," is not in constraints questionnaire")
+                layer_dict['weight'] = 0
 
         return layer_dict
     
