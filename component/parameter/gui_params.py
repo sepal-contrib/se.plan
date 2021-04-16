@@ -25,7 +25,7 @@ criterias = {
         {'text': 'low slope',    'value': 10},
     ],
     'Socio-economic constraints': 'header',
-    'Accessibility to major cities' : [
+    'Accessibility to cities' : [
         {'text': 'high acessibility',    'value': 1140},
         {'text': 'medium acessibility', 'value': 600},
         {'text': 'low acessibility',    'value': 103},
@@ -45,9 +45,9 @@ criterias = {
     "Agriculture": 100,
     "Rangeland": 100,
     "Grassland": 100,
-    "settlements": 100,
+    "Settlements": 100,
     'Environmental indicators': 'header',
-    'Forest cover change in 5 km buffer':[
+    'Deforestation rate':[
         {'text': 'high change',    'value': 30},
         {'text': 'medium change', 'value': 15},
         {'text': 'low change',    'value': 5},
@@ -58,12 +58,12 @@ criterias = {
         {'text': 'low climate risk',    'value': -24},
         ],
     'Non-monetary': 'header',
-    'Landscape variation in natural regeneration success':[
+    'Natural regeneration probability':[
         {'text': 'high variation',    'value': 92},
         {'text': 'medium variation', 'value': 60},
         {'text': 'low variation',    'value': 14},
         ],
-    'Locations with declining population':None, 
+    'Declining population':None, 
 
 }
 # list of the available priorities for the priority tile
