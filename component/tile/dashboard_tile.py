@@ -19,7 +19,46 @@ class DashThemeTile(sw.Tile):
             id_ = "dashboard_widget",
             title = cm.dashboard.theme.title,
         )
+    def dev_set_summary(self,json_themes_values):
+        benefits_layer = []
+        constraints_layer = []
+        costs_layer = []
+        for k,val in json_themes_values.items():
+            for layer in json_themes_values[k]:
+                if k == 'suitibility':
+                    continue
+
+                name = list(layer.keys())[0]
+                try:
+                    if k == 'benefits':
+                        benefits_layer.append(cw.LayerFull(name, layer[name]['values'],  layer[name]['total'][0]))
+                    elif k == 'costs':
+                        costs_layer.append(cw.LayerFull(name, layer[name]['values'],  layer[name]['total'][0]))
+                    elif k == 'constraints':
+                        constraints_layer.append(cw.LayerPercentage(name, layer[name]['values']))
+
+                except Exception as e:
+                    print(name, 'not found',e)
+                    continue
         
+        benefits = v.Html(tag='h2', children= ['Benefits'])
+
+        benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
+        costs = v.Html(tag='h2', children= ['Costs'])
+            
+        costs_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.cost))
+        constraints = v.Html(tag='h2', children=['Constraints'])
+            
+        constraints_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.constraint))
+        self.set_content(
+               [benefits, benefits_txt] + benefits_layer \
+               + [costs, costs_txt] + costs_layer \
+               + [constraints, constraints_txt] + constraints_layer
+            )
+        
+        return self
+            
+
     def set_summary(self, json_themes_values=None):
         
         # if none create fake data 
@@ -44,7 +83,7 @@ class DashThemeTile(sw.Tile):
                     }
                     
             benefits = v.Html(tag='h2', children= ['Benefits'])
-            
+
             benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
             
             benefits_layer = []
@@ -102,7 +141,9 @@ class DashRegionTile(sw.Tile):
                     "total": 100 # total surface
                 }
             }
-        
+        else:
+           json_feature_values = json_feature_values['suitibility']
+
         feats = []
         for feat in json_feature_values:
             
