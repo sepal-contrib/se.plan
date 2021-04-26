@@ -16,12 +16,13 @@ class LayerTable(v.DataTable, sw.SepalWidget):
     def __init__(self, aoi_tile):
         
         self.headers = [
-          {'text': 'Theme'     , 'value': 'theme'},
-          {'text': 'Subtheme'  , 'value': 'subtheme'},
-          {'text': 'Layer name', 'value': 'name'},
-          {'text': 'Weight'    , 'value': 'weight'},
-          {'text': 'Layer'     , 'value': 'layer'},
-          {'text': 'Action'    , 'value': 'action'},
+            {'text': 'Theme'     , 'value': 'theme'},
+            {'text': 'Subtheme'  , 'value': 'subtheme'},
+            {'text': 'Layer name', 'value': 'name'},
+            {'text': 'Weight'    , 'value': 'weight'},
+            {'text': 'Layer'     , 'value': 'layer'},
+            {'text': 'Unit'      , 'value': 'unit'},
+            {'text': 'Action'    , 'value': 'action'},
         ]
         
         self.items = [
@@ -30,7 +31,8 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'subtheme': row.subtheme,
                 'name'    : row.layer_name,
                 'weight'  : 0,
-                'layer'   : row.gee_asset
+                'layer'   : row.gee_asset,
+                'unit'    : row.unit
             } for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows()
         ]
         
@@ -108,7 +110,8 @@ class LayerTable(v.DataTable, sw.SepalWidget):
             if item['name'] == data['name']:
                 item.update(
                     weight = data['weight'],
-                    layer = data['layer']
+                    layer = data['layer'],
+                    unit = data['unit']
                 )
         
         # reply with the modyfied items 

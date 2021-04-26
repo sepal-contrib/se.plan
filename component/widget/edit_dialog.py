@@ -17,7 +17,7 @@ ee.Initialize()
 
 class EditDialog(sw.SepalWidget, v.Dialog):
     
-    _EMPTY_V_MODEL = { 'name': None, 'weight': None, 'layer': None }
+    _EMPTY_V_MODEL = {'name': None, 'weight': None, 'layer': None, 'unit': None}
     
     # use a custom v_model because the regular one set value automatically to 1 (display forever)
     custom_v_model = Unicode().tag(sync=True)
@@ -34,13 +34,8 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.text = v.CardText(children = [fake.paragraph(13)])
         self.weight = WeightSlider('layer_name', 3)
         self.check_custom = v.Checkbox(v_model = False, label = cm.dial.layer)
-        self.layer = v.TextField(
-            clearable = True,
-            v_model = self.init_layer, 
-            color = 'warning',
-            outlined = True,
-            label = 'Layer'
-        )
+        self.layer = v.TextField(v_model = None, color = 'warning', outlined = True, label = 'Layer')
+        self.unit = v.TextField(v_model=None, color="warning", outlined=True, label="Unit")
         
         self.ep = v.ExpansionPanels(accordion = True, children = [
             v.ExpansionPanel(children = [
@@ -52,7 +47,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
                         'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
                     }]
                 ),
-                v.ExpansionPanelContent(children = [self.layer])
+                v.ExpansionPanelContent(children = [self.layer, self.unit])
             ])
         ])
         
@@ -102,8 +97,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         # if the layer is different than the init one
         elif change['new'] != self.init_layer:
             
-            # check if the layer is quantile based 
-            
             # display it on the map
             self.m.addLayer(
                 ee.Image(change['new']).clip(self.tile.io.get_aoi_ee()),
@@ -127,7 +120,8 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         tmp.update(
             name   = self.name,
             weight = self.weight.v_model,
-            layer  = self.layer.v_model
+            layer  = self.layer.v_model,
+            unit   = self.unit.v_model
         )
         self.custom_v_model = json.dumps(tmp)
         
@@ -169,11 +163,14 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.text.children = [cm.dial.disc]
             
             # mute all the component 
-            self.weight.v_model = 3
+            self.weight.v_model = 5
             self.weight.disabled = True
             
             self.layer.v_model = 'no Layer'
             self.layer.disabled = True
+            
+            self.unit.v_model = 'no unit'
+            self.unit.disabled = True
             
             # disable save 
             self.save.disabled = True
@@ -200,9 +197,12 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.weight.disabled = False
             self.weight.v_model = data[0]['weight']
             
-            # enable textField
+            # enable textFields
             self.layer.disabled = False
             self.layer.v_model = data[0]['layer']
+            
+            self.unit.disabled = False
+            self.unit.v_model = data[0]['unit']
             
             # change default layer name 
             self.init_layer = layer_df_line.gee_asset

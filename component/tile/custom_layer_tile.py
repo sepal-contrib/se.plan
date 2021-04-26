@@ -1,6 +1,5 @@
 from sepal_ui import sepalwidgets as sw 
 import ipyvuetify as v
-import pandas as pd
 
 from component import widget as cw
 from component.message import cm
@@ -70,6 +69,7 @@ class CustomizeLayerTile(sw.Tile):
             item = self.table.items[i]
             
             io_item['layer'] = item['layer']
+            io_item['unit'] = item['unit']
             io_item['weight'] = item['weight']
             
         return self
@@ -98,7 +98,8 @@ class CustomizeLayerTile(sw.Tile):
             if tmp_table[i]['name'] == dict_['name']:
                 tmp_table[i].update(
                     layer  = dict_['layer'],
-                    weight = dict_['weight']
+                    weight = dict_['weight'],
+                    unit = dict_['unit']
                 )
             
         # change the actual value of items 

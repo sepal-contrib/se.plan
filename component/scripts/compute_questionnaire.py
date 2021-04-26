@@ -25,6 +25,7 @@ def compute_questionnaire(questionnaire_io):
                 'name'   : row.layer_name,
                 'theme' : row.theme,
                 'subtheme' : row.subtheme,
+                'unit': row.unit,
                 'layer': row.gee_asset.strip(),
         }
         if row.theme == "benefits" :
