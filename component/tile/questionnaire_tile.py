@@ -41,7 +41,7 @@ class QuestionnaireTile (sw.Tile):
         # build the tile 
         super().__init__(id_, title, inputs=[tabs], **kwargs)
         
-        #save the associated io and set the default value
+        # save the associated io and set the default value
         self.io = io
         self.io.constraints = self.constraint_tile.custom_v_model
         self.io.priorities = self.priority_tile.v_model

@@ -8,8 +8,7 @@
             "compute": "Compute",
             "dashboard": "Restoration dashboard",
             "map": "Result map",
-            "about": "About",
-            "quintile": "Edit Custom map"
+            "about": "About"
         }
         
     },
@@ -36,7 +35,7 @@
     },
     "constraints": {
         "title": "Constraints",
-        "desc": "Select constraints from the dropdown menu below to add a limitation to consider. For each constraint, choose values greater than or less than a particular value. Note that constraints are scaled differently, so please read the short description after selection to assign appropriate values.",
+        "desc": "Select your constraints for the analysis. Constraints are grouped by theme, click on the arrow to expand the menu and select the constraint you want to activate. By selecting a constraint in the dropdown menu, you will activate it. They can then be further customized (if eligible).",
         "criteria_lbl": "Criteria"
     },
     "custom": {
@@ -53,21 +52,6 @@
         "weight": "Weight",
         "no_layer": "No layer",
         "disc": "You need to select a layer before making modifications"
-        
-    },
-    "quintile": {
-        "no_asset": "No asset has been set",
-        "txt": [
-            "Some explaination about the tile function and how to use it."
-        ],
-        "clip": {
-            "hint": "click on the link then 'ctrl+a' and then 'ctrl+c'",
-            "lbl": "quintile asset link",
-            "title": "Asset link",
-            "done": "Done"
-        },
-        "title": "Transform custom asset into Quintile asset",
-        "btn": "Transform the map"
     },
     "dashboard": {
         "region": {
