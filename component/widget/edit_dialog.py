@@ -42,25 +42,19 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             label = 'Layer'
         )
         
-        self.ep = v.ExpansionPanels(
-            accordion = True,
-            children  = [
-                v.ExpansionPanel(
-                    key = 1,
-                    children = [
-                        v.ExpansionPanelHeader(
-                            disable_icon_rotate = True,
-                            children = [cm.dial.change],
-                            v_slots = [{
-                                'name': 'actions',
-                                'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
-                            }]
-                        ),
-                        v.ExpansionPanelContent(children = [self.layer])
-                    ]
-                )
-            ]
-        )
+        self.ep = v.ExpansionPanels(accordion = True, children = [
+            v.ExpansionPanel(children = [
+                v.ExpansionPanelHeader(
+                    disable_icon_rotate = True,
+                    children = [cm.dial.change],
+                    v_slots = [{
+                        'name': 'actions',
+                        'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
+                    }]
+                ),
+                v.ExpansionPanelContent(children = [self.layer])
+            ])
+        ])
         
         self.m = sm.SepalMap()
         self.m.layout.height = '40vh'

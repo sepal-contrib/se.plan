@@ -1,10 +1,12 @@
 from sepal_ui import sepalwidgets as sw 
 import ipyvuetify as v
+import pandas as pd
 
 from component import widget as cw
 from component.message import cm
 from component import io as cio
 from component import scripts as cs
+from component import parameter as cp
         
 class CustomizeLayerTile(sw.Tile):
     
@@ -79,18 +81,31 @@ class CustomizeLayerTile(sw.Tile):
         if len(layers_values) != len(self.io.layer_list):
             return
         
+        
+        # create a tmp list of items
+        # update it with the current values in self.table.items
+        tmp_table = []
+        for i, item in enumerate(self.table.items):
+            tmp_table.append({})
+            for k in item.keys():
+                tmp_table[i][k] = item[k]
+            
+        
         # apply the modification to the widget (the io will follow with the observe methods)
         for i, dict_ in enumerate(layers_values):
             
             # apply them to the table
-            if self.table.items[i]['name'] == dict_['name']:
-                self.table.items[i].update(
+            if tmp_table[i]['name'] == dict_['name']:
+                tmp_table[i].update(
                     layer  = dict_['layer'],
                     weight = dict_['weight']
                 )
-                
-            # notify the change to rest of the app 
-            self.table.change_model += 1
+            
+        # change the actual value of items 
+        self.table.items = tmp_table
+            
+        # notify the change to rest of the app 
+        self.table.change_model += 1
                      
         return self 
     

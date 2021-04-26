@@ -95,18 +95,31 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         data = json.loads(change['new'])
         
         # we need to change the full items traitlet to trigger a change 
-        tmp = self.items.copy()
+        # create a tmp list of items
+        # update it with the current values in self.table.items
+        tmp_table = []
+        for i, item in enumerate(self.items):
+            tmp_table.append({})
+            for k in item.keys():
+                tmp_table[i][k] = item[k]
         
         # search for the item to modify 
-        for item in tmp:
+        for item in tmp_table:
             if item['name'] == data['name']:
-                item['weight'] = data['weight']
-                item['layer'] = data['layer']
+                item.update(
+                    weight = data['weight'],
+                    layer = data['layer']
+                )
         
         # reply with the modyfied items 
-        self.items = tmp
+        self.items = tmp_table
         
         # notify the change to the rest of the app 
         self.change_model += 1
+        
+        # deselect the item 
+        # this trick is to force the update of the values at the next selection
+        # still searching for a more elegant solution
+        self.v_model = []
         
         return
