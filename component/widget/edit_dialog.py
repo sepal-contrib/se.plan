@@ -1,5 +1,6 @@
 from traitlets import Unicode
 import json
+from pathlib import Path
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
@@ -79,30 +80,33 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
         
         # link some element together 
-        self.layer.observe(self._on_layer_change, 'v_model')
+        self.layer.on_event('blur', self._on_layer_change)
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
         self.tile.aoi_select_btn.observe(self._update_aoi, 'loading')
         
-    def _on_layer_change(self, change):
+    def _on_layer_change(self, widget, event, data):
         
         # do nothing if it's no_layer
-        if change['new'] == 'no Layer':
+        if widget.v_model == 'no Layer':
             return self
         
         # replace the v_model by the init one 
-        if not change['new']:
-            change['owner'].v_model = self.init_layer
+        if not widget.v_model:
+            widget.v_model = self.init_layer
         
         # if the layer is different than the init one
-        elif change['new'] != self.init_layer:
+        elif widget.v_model != self.init_layer:
             
             # display it on the map
-            self.m.addLayer(
-                ee.Image(change['new']).clip(self.tile.io.get_aoi_ee()),
-                cp.final_viz.update(max=5),
-                'custom layer'
-            )
+            geometry = self.tile.io.get_aoi_ee()
+            image = Path(widget.v_model)
+            
+            # it the map cannot be displayed then return to init
+            try:
+                self.display_on_map(image, geometry)
+            except Exception as e:
+                widget.v_model = self.init_layer
             
         return self
             
@@ -177,7 +181,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             
             # remove the images 
             for l in self.m.layers:
-                if l.name in ['init layer', 'custom layer']:
+                if not (l.name in ['aoi', 'CartoDB.DarkMatter']):
                     self.m.remove_layer(l)
             
         else: 
@@ -207,22 +211,49 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             # change default layer name 
             self.init_layer = layer_df_line.gee_asset
             
-            # update the map with the default layer
-            self.m.addLayer(
-                ee.Image(self.init_layer).clip(self.tile.io.get_aoi_ee()),
-                cp.final_viz.update(max=5),
-                'init layer'
-            )
-            
             # add the custom layer if existing 
+            geometry = self.tile.io.get_aoi_ee()
             if data[0]['layer'] != self.init_layer:
-                self.m.addLayer(
-                    ee.Image(data[0]['layer']).clip(self.tile.io.get_aoi_ee()),
-                    cp.final_viz.update(max=5),
-                    'custom_layer'
-                )
+                custom_img = Path(data[0]['layer'])
+                self.display_on_map(custom_img, geometry)
+            else:
+                default_img = Path(self.init_layer)
+                self.display_on_map(default_img, geometry)
             
             # enable save 
             self.save.disabled = False
             
         return
+    
+    def display_on_map(self, image, geometry):
+        
+        # clip image
+        ee_image = ee.Image(str(image)).clip(geometry)
+        
+        # get min 
+        min_ = ee_image.reduceRegion(
+            reducer = ee.Reducer.min(),
+            geometry = geometry,
+            scale = 250
+        )
+        min_ = list(min_.getInfo().values())[0]
+        
+        # get max 
+        max_ = ee_image.reduceRegion(
+            reducer = ee.Reducer.max(),
+            geometry = geometry,
+            scale = 250
+        )
+        max_ = list(max_.getInfo().values())[0]
+        
+        # update viz_params acordingly
+        viz_params = cp.inferno
+        viz_params.update(
+            min = min_,
+            max = max_
+        )
+        
+        # dispaly on map
+        self.m.addLayer(ee_image, viz_params, image.stem)
+        
+        return self
