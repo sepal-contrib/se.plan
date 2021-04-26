@@ -14,7 +14,9 @@ class QuestionnaireIo():
 default_questionnaire_io = QuestionnaireIo()
 
 criterias = {}
-for name, val in cp.criterias.items():
+for name, dict_ in cp.criterias.items():
+    
+    val = dict_['content']
     
     if val == None: # binary criteria 
         crit = random.random() < .5

@@ -16,12 +16,13 @@ class LayerTable(v.DataTable, sw.SepalWidget):
     def __init__(self, aoi_tile):
         
         self.headers = [
-          {'text': 'Theme'     , 'value': 'theme'},
-          {'text': 'Subtheme' , 'value': 'subtheme'},
-          {'text': 'Layer name', 'value': 'name'},
-          {'text': 'Weight'    , 'value': 'weight'},
-          {'text': 'Layer'     , 'value': 'layer'},
-          {'text': 'Action'    , 'value': 'action'},
+            {'text': 'Theme'     , 'value': 'theme'},
+            {'text': 'Subtheme'  , 'value': 'subtheme'},
+            {'text': 'Layer name', 'value': 'name'},
+            {'text': 'Weight'    , 'value': 'weight'},
+            {'text': 'Layer'     , 'value': 'layer'},
+            {'text': 'Unit'      , 'value': 'unit'},
+            {'text': 'Action'    , 'value': 'action'},
         ]
         
         self.items = [
@@ -30,7 +31,8 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'subtheme': row.subtheme,
                 'name'    : row.layer_name,
                 'weight'  : 0,
-                'layer'   : row.gee_asset
+                'layer'   : row.gee_asset,
+                'unit'    : row.unit
             } for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows()
         ]
         
@@ -95,18 +97,32 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         data = json.loads(change['new'])
         
         # we need to change the full items traitlet to trigger a change 
-        tmp = self.items.copy()
+        # create a tmp list of items
+        # update it with the current values in self.table.items
+        tmp_table = []
+        for i, item in enumerate(self.items):
+            tmp_table.append({})
+            for k in item.keys():
+                tmp_table[i][k] = item[k]
         
         # search for the item to modify 
-        for item in tmp:
+        for item in tmp_table:
             if item['name'] == data['name']:
-                item['weight'] = data['weight']
-                item['layer'] = data['layer']
+                item.update(
+                    weight = data['weight'],
+                    layer = data['layer'],
+                    unit = data['unit']
+                )
         
-        # reply the modyfied items 
-        self.items = tmp
+        # reply with the modyfied items 
+        self.items = tmp_table
         
         # notify the change to the rest of the app 
         self.change_model += 1
+        
+        # deselect the item 
+        # this trick is to force the update of the values at the next selection
+        # still searching for a more elegant solution
+        self.v_model = []
         
         return

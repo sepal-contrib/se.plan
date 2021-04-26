@@ -15,7 +15,7 @@ class ConstraintTile(sw.Tile, HasTraits):
     
     custom_v_model = Unicode('').tag(sync=True)
     
-    def __init__(self, **kwargs):
+    def __init__(self):
         
         # name the tile 
         title = cm.constraints.title 
@@ -24,75 +24,43 @@ class ConstraintTile(sw.Tile, HasTraits):
         # write a quick explaination 
         tile_txt = sw.Markdown(cm.constraints.desc)
         
-        # select widget to select the actives criterias
-        
-        # create the criterias list 
-        items = []
-        for c in cp.criterias:
-            if cp.criterias[c] == 'header':
-                items.append({'header': c})
-            else:
-                items.append({'text': c, 'value':c})
-                
-        self.critera_select = v.Select(
-            chips    = True,
-            v_model  = None,
-            items    = items,
-            label    = cm.constraints.criteria_lbl,
-            multiple = True
-        )
-        
-        # criteria widget that will be used to change the impact of each criteria and hide them
-        self.criterias_values = []
-        for key, value in cp.criterias.items():
+        # create the criteria list
+        self.criterias = []
+        for key, c in cp.criterias.items():
+            
+            header = c['header']
+            value = c['content']
             
             if value == None: # binary criteria 
-                crit = cw.Binary(key)
-                self.criterias_values.append(crit)
+                crit = cw.Binary(key, header)
             elif isinstance(value, list): # dropdown values
-                crit = cw.Dropdown(key, value)
-                self.criterias_values.append(crit)
+                crit = cw.Dropdown(key, value, header)
             elif isinstance(value, int): # range values
-                crit = cw.Range(key, value)
-                self.criterias_values.append(crit)
-            else: # header
-                continue
+                crit = cw.Range(key, value, header)
                 
-        default_v_model = {}
-        for c in self.criterias_values:
-            c.disable()
-            default_v_model[c.name] = c.custom_v_model
+            self.criterias.append(crit)
             
-        
+        # create the each expansion-panel content 
+        self.panels = v.ExpansionPanels(
+            v_model=None, 
+            hover=True,
+            accordion=True,
+            children=[cw.CustomPanel(k, self.criterias) for k in cp.criteria_types.keys()]
+        )
+           
         # default custom_v_model
+        default_v_model = {c.name: c.custom_v_model for c in self.criterias}
         self.custom_v_model = json.dumps(default_v_model)
         
         # cration of the tile 
-        super().__init__(
-            id_, 
-            title, 
-            inputs = [tile_txt, self.critera_select] + self.criterias_values, 
-            **kwargs
-        )
+        super().__init__(id_, title, inputs = [tile_txt, self.panels])
         
         # hide the tile border
         self.children[0].elevation = 0
         
         # link the visibility of each criteria to the select widget
-        self.critera_select.observe(self._on_select, 'v_model')
-        for c in self.criterias_values:
-            c.observe(self._on_change, 'custom_v_model')
-        
-    def _on_select(self, change):
-            
-        for criteria in self.criterias_values:
-            # change the visibility and activation process
-            if criteria.name in change['new']: 
-                criteria.unable()
-            else:
-                criteria.disable()
-        
-        return         
+        [c.observe(self._on_change, 'custom_v_model') for c in self.criterias]
+        self.panels.observe(self._on_panel_change, 'v_model')         
     
     def _on_change(self, change):
         
@@ -102,6 +70,19 @@ class ConstraintTile(sw.Tile, HasTraits):
         self.custom_v_model = json.dumps(tmp)
         
         return
+    
+    def _on_panel_change(self, change):
+        """revaluate each panel title when the v_model of the expansionpanels is changed"""
+        
+        # loop in the custom panels 
+        for i, p in enumerate(self.panels.children):
+            
+            if i == change['new']:
+                p.expand()
+            else: 
+                p.shrunk()
+                
+        return self
         
         
        

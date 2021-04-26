@@ -265,7 +265,7 @@ class gee_compute:
         # note: need to have check for geometry either here or before it reaches here...
         self.normalize_benefits(benefits_layers,method='quintile')
         
-        #normalize benefit weights to 0 - 1 
+        # normalize benefit weights to 0 - 1 
         sum_weights =sum(i['weight'] for i in benefits_layers)
         list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights, 5) }), benefits_layers))
 

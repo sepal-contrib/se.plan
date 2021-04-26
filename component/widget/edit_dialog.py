@@ -1,5 +1,6 @@
 from traitlets import Unicode
 import json
+from pathlib import Path
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
@@ -17,7 +18,7 @@ ee.Initialize()
 
 class EditDialog(sw.SepalWidget, v.Dialog):
     
-    _EMPTY_V_MODEL = { 'name': None, 'weight': None, 'layer': None }
+    _EMPTY_V_MODEL = {'name': None, 'weight': None, 'layer': None, 'unit': None}
     
     # use a custom v_model because the regular one set value automatically to 1 (display forever)
     custom_v_model = Unicode().tag(sync=True)
@@ -34,33 +35,22 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.text = v.CardText(children = [fake.paragraph(13)])
         self.weight = WeightSlider('layer_name', 3)
         self.check_custom = v.Checkbox(v_model = False, label = cm.dial.layer)
-        self.layer = v.TextField(
-            clearable = True,
-            v_model = self.init_layer, 
-            color = 'warning',
-            outlined = True,
-            label = 'Layer'
-        )
+        self.layer = v.TextField(v_model = None, color = 'warning', outlined = True, label = 'Layer')
+        self.unit = v.TextField(v_model=None, color="warning", outlined=True, label="Unit")
         
-        self.ep = v.ExpansionPanels(
-            accordion = True,
-            children  = [
-                v.ExpansionPanel(
-                    key = 1,
-                    children = [
-                        v.ExpansionPanelHeader(
-                            disable_icon_rotate = True,
-                            children = [cm.dial.change],
-                            v_slots = [{
-                                'name': 'actions',
-                                'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
-                            }]
-                        ),
-                        v.ExpansionPanelContent(children = [self.layer])
-                    ]
-                )
-            ]
-        )
+        self.ep = v.ExpansionPanels(accordion = True, children = [
+            v.ExpansionPanel(children = [
+                v.ExpansionPanelHeader(
+                    disable_icon_rotate = True,
+                    children = [cm.dial.change],
+                    v_slots = [{
+                        'name': 'actions',
+                        'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
+                    }]
+                ),
+                v.ExpansionPanelContent(children = [self.layer, self.unit])
+            ])
+        ])
         
         self.m = sm.SepalMap()
         self.m.layout.height = '40vh'
@@ -90,30 +80,35 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
         
         # link some element together 
-        self.layer.observe(self._on_layer_change, 'v_model')
+        self.layer.on_event('blur', self._on_layer_change)
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
         self.tile.aoi_select_btn.observe(self._update_aoi, 'loading')
         
-    def _on_layer_change(self, change):
+    def _on_layer_change(self, widget, event, data):
+        
+        # do nothing if it's no_layer
+        if widget.v_model == 'no Layer':
+            return self
         
         # replace the v_model by the init one 
-        if not change['new']:
-            change['owner'].v_model = self.init_layer
+        if not widget.v_model:
+            widget.v_model = self.init_layer
         
         # if the layer is different than the init one
-        elif change['new'] != self.init_layer:
-            
-            # check if the layer is quantile based 
+        elif widget.v_model != self.init_layer:
             
             # display it on the map
-            self.m.addLayer(
-                ee.Image(change['new']).clip(self.tile.io.get_aoi_ee()),
-                cp.final_viz.update(max=5),
-                'custom layer'
-            )
+            geometry = self.tile.io.get_aoi_ee()
+            image = Path(widget.v_model)
             
-        return 
+            # it the map cannot be displayed then return to init
+            try:
+                self.display_on_map(image, geometry)
+            except Exception as e:
+                widget.v_model = self.init_layer
+            
+        return self
             
     def _cancel_click(self, widget, data, event):
         
@@ -129,7 +124,8 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         tmp.update(
             name   = self.name,
             weight = self.weight.v_model,
-            layer  = self.layer.v_model
+            layer  = self.layer.v_model,
+            unit   = self.unit.v_model
         )
         self.custom_v_model = json.dumps(tmp)
         
@@ -171,18 +167,21 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.text.children = [cm.dial.disc]
             
             # mute all the component 
-            self.weight.v_model = 3
+            self.weight.v_model = 5
             self.weight.disabled = True
             
             self.layer.v_model = 'no Layer'
             self.layer.disabled = True
+            
+            self.unit.v_model = 'no unit'
+            self.unit.disabled = True
             
             # disable save 
             self.save.disabled = True
             
             # remove the images 
             for l in self.m.layers:
-                if l.name in ['init layer', 'custom layer']:
+                if not (l.name in ['aoi', 'CartoDB.DarkMatter']):
                     self.m.remove_layer(l)
             
         else: 
@@ -202,29 +201,59 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.weight.disabled = False
             self.weight.v_model = data[0]['weight']
             
-            # enable textField
+            # enable textFields
             self.layer.disabled = False
             self.layer.v_model = data[0]['layer']
+            
+            self.unit.disabled = False
+            self.unit.v_model = data[0]['unit']
             
             # change default layer name 
             self.init_layer = layer_df_line.gee_asset
             
-            # update the map with the default layer
-            self.m.addLayer(
-                ee.Image(self.init_layer).clip(self.tile.io.get_aoi_ee()),
-                cp.final_viz.update(max=5),
-                'init layer'
-            )
-            
             # add the custom layer if existing 
+            geometry = self.tile.io.get_aoi_ee()
             if data[0]['layer'] != self.init_layer:
-                self.m.addLayer(
-                    ee.Image(data[0]['layer']).clip(self.tile.io.get_aoi_ee()),
-                    cp.final_viz.update(max=5),
-                    'custom_layer'
-                )
+                custom_img = Path(data[0]['layer'])
+                self.display_on_map(custom_img, geometry)
+            else:
+                default_img = Path(self.init_layer)
+                self.display_on_map(default_img, geometry)
             
             # enable save 
             self.save.disabled = False
             
         return
+    
+    def display_on_map(self, image, geometry):
+        
+        # clip image
+        ee_image = ee.Image(str(image)).clip(geometry)
+        
+        # get min 
+        min_ = ee_image.reduceRegion(
+            reducer = ee.Reducer.min(),
+            geometry = geometry,
+            scale = 250
+        )
+        min_ = list(min_.getInfo().values())[0]
+        
+        # get max 
+        max_ = ee_image.reduceRegion(
+            reducer = ee.Reducer.max(),
+            geometry = geometry,
+            scale = 250
+        )
+        max_ = list(max_.getInfo().values())[0]
+        
+        # update viz_params acordingly
+        viz_params = cp.inferno
+        viz_params.update(
+            min = min_,
+            max = max_
+        )
+        
+        # dispaly on map
+        self.m.addLayer(ee_image, viz_params, image.stem)
+        
+        return self

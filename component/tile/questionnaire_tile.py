@@ -14,7 +14,7 @@ class QuestionnaireTile (sw.Tile):
         id_ = "questionnaire_widget"
         
         # build the tiles
-        self.constraint_tile = ConstraintTile(),
+        self.constraint_tile = ConstraintTile()
         self.priority_tile   = PriorityTile()
         
         self.tiles = [
@@ -23,52 +23,32 @@ class QuestionnaireTile (sw.Tile):
         ]          
             
         # build the content and the stepper header
-        step_content = []
-        stepper_children = []
+        tab_content = []
         for i, tile in enumerate(self.tiles):
             
-            # for no reason the tiles are sometimes embed in a len 1 tuple
-            tile = tile if type(tile) != tuple else tile[0]
-            
-            # build the stepper
-            stepper_children.append(v.StepperStep(
-                key      = i + 1,
-                complete = False,
-                step     = i + 1,
-                editable = True,
-                children = [tile.get_title()]
-            ))
-            stepper_children.append(v.Divider())
-            
-            # build the content 
-            step_content.append(v.StepperContent(
-                key      = i + 1,
-                step     = i + 1, 
-                children = [tile]
-            ))
-            
-        stepper_children.pop()
+            # add the title and content 
+            tab_content.append(v.Tab(children=[tile.get_title()]))
+            tab_content.append(v.TabItem(children=[tile]))
         
-        # build the stepper 
-        stepper = v.Stepper(
-            class_="mt-2",
-             children=[
-                 v.StepperHeader(children=stepper_children),
-                 v.StepperItems(children=step_content)
-             ]
+        # build the tabs 
+        tabs = tabs = v.Tabs(
+            class_='mt-5',
+            fixed_tabs = True,
+            centered = True,
+            children = tab_content
         )
         
         # build the tile 
-        super().__init__(id_, title, inputs=[stepper], **kwargs)
+        super().__init__(id_, title, inputs=[tabs], **kwargs)
         
-        #save the associated io and set the default value
+        # save the associated io and set the default value
         self.io = io
-        self.io.constraints = self.constraint_tile[0].custom_v_model
+        self.io.constraints = self.constraint_tile.custom_v_model
         self.io.priorities = self.priority_tile.v_model
         
         
         # link the variable to the io 
-        self.constraint_tile[0].observe(self.__on_constraint, 'custom_v_model')
+        self.constraint_tile.observe(self.__on_constraint, 'custom_v_model')
         self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
         
     def __on_constraint(self, change):
