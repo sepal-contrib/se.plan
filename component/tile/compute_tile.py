@@ -15,7 +15,7 @@ class ValidationTile(sw.Tile):
         self.compute_tile = compute_tile
         
         # create the layer list widget 
-        self.layers_recipe = cw.layerRecipe()
+        self.layers_recipe = cw.layerRecipe().hide()
         mkd = sw.Markdown('  \n'.join(cm.valid.txt))
         
         # add the btn and output 
@@ -41,6 +41,7 @@ class ValidationTile(sw.Tile):
     
         # watch the inputs
         self.layers_recipe.digest_layers(self.io.layer_list)
+        self.layers_recipe.show()
         
         # save the inputs in a json
         cs.save_recipe(self.io, self.aoi_io)

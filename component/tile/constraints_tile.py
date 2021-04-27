@@ -42,6 +42,7 @@ class ConstraintTile(sw.Tile, HasTraits):
             
         # create the each expansion-panel content 
         self.panels = v.ExpansionPanels(
+            focusable=True,
             v_model=None, 
             hover=True,
             accordion=True,

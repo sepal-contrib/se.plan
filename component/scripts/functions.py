@@ -5,14 +5,22 @@ try:
 except:
     print('paramters not imported useing default range criterias list')
     class cp:
-        criterias = {'Landscape variation in natural regeneration success':[],
-        'Climate risk':[], 'Forest cover change in 5 km buffer':[],
-        'Annual rainfall':[], 'Elevation':[], 'Slope':[],
-         'Accessibility to major cities':[],'Population':[],'Opportunity cost':[]}
+        criterias = {
+            'Landscape variation in natural regeneration success':[],
+            'Climate risk':[], 
+            'Forest cover change in 5 km buffer':[],
+            'Annual rainfall':[], 
+            'Elevation':[], 
+            'Slope':[],
+            'Accessibility to major cities':[],
+            'Population':[],
+            'Opportunity cost':[]
+        }
 
 ee.Initialize()
 
 class gee_compute:
+    
     def __init__(self, rp_aoi_io, rp_layers_io, rp_default_layer_io, rp_questionaire_io):
         self.selected_aoi = rp_aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
