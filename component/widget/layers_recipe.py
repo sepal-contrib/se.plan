@@ -7,7 +7,7 @@ from component import parameter as cp
 
 
 
-class layerRecipe(v.Layout, sw.SepalWidget):
+class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
     
     # load the layers 
     LAYER_LIST = pd.read_csv(cp.layer_list).fillna('')
@@ -15,11 +15,9 @@ class layerRecipe(v.Layout, sw.SepalWidget):
     LAYER_LIST["weight"] = [0 for i in range(len(LAYER_LIST))]
     
     
-    def __init__(self, **kwargs):
+    def __init__(self):
         
-        super().__init__(**kwargs)
-        self.row = True
-        self.class_ = "ma-5"
+        super().__init__(class_='mt-5', accordion=True)
         
         # display the default values (all with default layer and 0 valued weight)
         self.digest_layers()
@@ -27,7 +25,7 @@ class layerRecipe(v.Layout, sw.SepalWidget):
     def digest_layers(self, layer_list=None):
         """
         Digest the layers as a json list. This list should be composed of at least 5 information : name, layer, weight, theme and subtheme
-        When digestiong, the layout will represent each layer sorted by categories
+        When digestion, the layout will represent each layer sorted by categories
         fore each one of them if the layer used is the default one we'll write default, if not the name of the layer. 
         for each one of them the value of the weight will also be set
         """
@@ -38,14 +36,14 @@ class layerRecipe(v.Layout, sw.SepalWidget):
         # get all the themes 
         themes = np.unique(layer_list.theme)
         
-        themes_layout = []
+        ep_content = []
         for theme in themes:
             
             # filter the layers 
             tmp_layers = layer_list[layer_list.theme == theme]
             
             # add the theme title 
-            themes_layout.append(v.Html(xs12 = True, class_ = 'mt-6', tag="h2", children=[theme.capitalize()]))
+            title = v.ExpansionPanelHeader(children=[theme.capitalize()])
             
             # loop in these layers and create the widgets
             theme_layer_widgets = []
@@ -61,6 +59,7 @@ class layerRecipe(v.Layout, sw.SepalWidget):
                         class_ = 'ml-2 mr-2',
                         children = [
                             v.TextField(
+                                small=True,
                                 hint = row["layer"] if row["layer"] != original_asset else "default",
                                 persistent_hint = True,
                                 color = cp.gradient(11)[row['weight']],
@@ -79,6 +78,7 @@ class layerRecipe(v.Layout, sw.SepalWidget):
                         class_ = 'ml-2 mr-2',
                         children = [
                             v.TextField(
+                                small=True,
                                 hint = row["layer"] if row["layer"] != original_asset else "default",
                                 persistent_hint = True,
                                 color = cp.gradient(2)[row['weight']],
@@ -94,10 +94,13 @@ class layerRecipe(v.Layout, sw.SepalWidget):
                     ))                    
                 
             # add the lines to the layout
-            themes_layout.append(v.Layout(row = True, children=theme_layer_widgets))
+            content = v.ExpansionPanelContent(children=theme_layer_widgets)
+            
+            # create the ep 
+            ep_content.append(v.ExpansionPanel(children=[title, content]))
             
         # add the layout element to the global layout 
-        self.children = themes_layout
+        self.children = ep_content
         
         return self
                 

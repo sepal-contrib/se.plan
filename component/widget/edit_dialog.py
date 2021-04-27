@@ -73,7 +73,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         
         super().__init__(
             custom_v_model = json.dumps(self._EMPTY_V_MODEL),
-            persistent = True,
+            #persistent = True,
             value = False,
             max_width = '700px',
             children = [self.card]
@@ -247,7 +247,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         max_ = list(max_.getInfo().values())[0]
         
         # update viz_params acordingly
-        viz_params = cp.inferno
+        viz_params = cp.plt_viz['viridis']
         viz_params.update(
             min = min_,
             max = max_
