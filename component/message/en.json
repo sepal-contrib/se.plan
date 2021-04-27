@@ -42,7 +42,12 @@
         "title": "Customize layers input",
         "desc": "When you click on the 'Apply Questionnaire' button, the layers will be weighted according to your responses. However, you can still change the value of any weight. In the second panel, you will find all of the layers that can be replaced with custom versions. Exercise caution when changing weights and using custom layers, as this can lead to inaccurate recommendations.",
         "question_btn": "Apply questionnaire answers",
-        "default_btn": "Apply default parameters"
+        "default_btn": "Apply default parameters",
+        "recipe": {
+            "title": "Load an existing recipe",
+            "apply": "Apply the selected recipe",
+            "file": "Select recipe file"
+        }
     },
     "dial": {
         "layer": "Use custom layer",

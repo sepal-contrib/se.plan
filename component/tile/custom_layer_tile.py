@@ -23,16 +23,17 @@ class CustomizeLayerTile(sw.Tile):
         self.reset_to_questionnaire = sw.Btn(
             text   = cm.custom.question_btn, 
             icon   = 'mdi-file-question-outline',
-            class_ = 'ml-5 mr-2'
+            class_ = 'ml-5 mr-2',
+            color = 'success'
         )
-        self.reset_to_questionnaire.color = 'success'
         
+        # to be discarder at the end of the testing period
         self.reset_to_default = sw.Btn(
             text   = cm.custom.default_btn,
             icon   = 'mdi-restore', 
-            class_ = 'ml-2'
+            class_ = 'ml-2',
+            color = 'warning'
         )
-        self.reset_to_default.color = 'warning'
         
         self.btn_line = v.Row(
             class_   = 'mb-3',
@@ -44,11 +45,34 @@ class CustomizeLayerTile(sw.Tile):
         # create the txt 
         self.txt = sw.Markdown(cm.custom.desc)
         
+        # create the panel that contains the file loader 
+        self.file_select = sw.FileInput(['.json'], cp.result_dir, cm.custom.recipe.file)
+        
+        self.reset_to_recipe = sw.Btn(
+            text   = cm.custom.recipe.apply,
+            icon   = 'mdi-download', 
+            class_ = 'ml-2',
+            color = 'success'
+        )
+        
+        ep = v.ExpansionPanels(class_="mt-5", children=[v.ExpansionPanel(children=[
+            v.ExpansionPanelHeader(
+                disable_icon_rotate = True,
+                children=[cm.custom.recipe.title],
+                v_slots = [{
+                    'name': 'actions',
+                    'children' : v.Icon(children=['mdi-download'])
+                }]
+            ),
+            v.ExpansionPanelContent(children=[self.file_select, self.reset_to_recipe])
+        ])])
+        
         # build the tile 
         super().__init__(
             id_, 
             title,
             inputs = [
+                ep,
                 self.txt,
                 self.btn_line,
                 self.table
