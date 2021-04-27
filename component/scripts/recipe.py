@@ -1,5 +1,6 @@
 import json 
 from datetime import datetime
+from copy import copy
 
 from component import parameter as cp
 
@@ -16,7 +17,7 @@ def save_recipe(io, aoi_io):
     
     with json_file.open('w') as f:
         
-        aoi_dict = aoi_io.__dict__
+        aoi_dict = copy(aoi_io).__dict__
         aoi_dict.update(feature_collection = None) # remove feature collection as it's not serializable
         
         data = {
