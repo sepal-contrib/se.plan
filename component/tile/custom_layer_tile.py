@@ -1,5 +1,11 @@
+from pathlib import Path
+import json
+
 from sepal_ui import sepalwidgets as sw 
 import ipyvuetify as v
+import ee
+
+ee.Initialize()
 
 from component import widget as cw
 from component.message import cm
@@ -14,6 +20,7 @@ class CustomizeLayerTile(sw.Tile):
         # link the ios to the tile
         self.io = io
         self.questionnaire_io = questionnaire_io
+        self.aoi_tile = aoi_tile
         
         # name the tile
         id_ = "manual_widget"
@@ -27,17 +34,9 @@ class CustomizeLayerTile(sw.Tile):
             color = 'success'
         )
         
-        # to be discarder at the end of the testing period
-        self.reset_to_default = sw.Btn(
-            text   = cm.custom.default_btn,
-            icon   = 'mdi-restore', 
-            class_ = 'ml-2',
-            color = 'warning'
-        )
-        
         self.btn_line = v.Row(
             class_   = 'mb-3',
-            children = [self.reset_to_questionnaire, self.reset_to_default]
+            children = [self.reset_to_questionnaire]
         )
         
         self.table = cw.LayerTable(aoi_tile)
@@ -55,6 +54,8 @@ class CustomizeLayerTile(sw.Tile):
             color = 'success'
         )
         
+        self.recipe_output = sw.Alert()
+        
         ep = v.ExpansionPanels(class_="mt-5", children=[v.ExpansionPanel(children=[
             v.ExpansionPanelHeader(
                 disable_icon_rotate = True,
@@ -64,7 +65,7 @@ class CustomizeLayerTile(sw.Tile):
                     'children' : v.Icon(children=['mdi-download'])
                 }]
             ),
-            v.ExpansionPanelContent(children=[self.file_select, self.reset_to_recipe])
+            v.ExpansionPanelContent(children=[self.file_select, self.reset_to_recipe, self.recipe_output])
         ])])
         
         # build the tile 
@@ -82,8 +83,9 @@ class CustomizeLayerTile(sw.Tile):
         
         # js behaviours
         self.table.observe(self._on_item_change, 'change_model')
-        self.reset_to_default.on_event('click', self._apply_default)
+        #self.reset_to_default.on_event('click', self._apply_default)
         self.reset_to_questionnaire.on_event('click', self._apply_questionnaire)
+        self.reset_to_recipe.on_event('click', self.load_recipe)
         
     def _on_item_change(self, change):
             
@@ -135,7 +137,10 @@ class CustomizeLayerTile(sw.Tile):
         return self 
     
     def _apply_default(self, widget, data, event):
-        """apply the default layer table to the layer_io"""
+        """
+        apply the default layer table to the layer_io
+        deprecated would need to be removed
+        """
         
         # toggle the btns
         self.reset_to_default.toggle_loading()
@@ -176,5 +181,39 @@ class CustomizeLayerTile(sw.Tile):
         self.reset_to_questionnaire.toggle_loading()
     
         return self 
+    
+    def load_recipe(self, widget, event, data, path=None):
+        """load the recipe file into the different io, then update the display of the table"""
+        
+        # toogle the btns
+        self.reset_to_questionnaire.toggle_loading()
+        widget.toggle_loading()
+        
+        # check if path is set, if not use the one frome file select 
+        path = path or self.file_select.v_model
+        
+        try:
+            cs.load_recipe(self.io, self.aoi_tile.io, path)
+            
+            # reload the values in the table
+            self.apply_values(self.io.layer_list)
+        
+            # validate the aoi 
+            self.aoi_tile.aoi_select_btn.fire_event('click','')
+            
+            self.recipe_output.add_msg('loaded', 'success')
+        
+        except Exception as e:
+            self.recipe_output.add_msg(str(e))
+            
+        # toogle the btns
+        self.reset_to_questionnaire.toggle_loading()
+        widget.toggle_loading()
+                
+        return self
+        
+            
+                    
+        
         
         
