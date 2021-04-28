@@ -15,10 +15,14 @@ class MapTile(sw.Tile):
         # create the map 
         self.m = sm.SepalMap()
         self.m.add_colorbar(colors=cp.red_to_green, vmin=0, vmax=5)
+        self.m.set_drawing_controls(add=True)
         
         # create a layout with 2 btn 
         self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
         self.to_sepal = sw.Btn(cm.map.to_sepal, class_='ma-2', disabled=True)
+        self.draw_custom_area = sw.Btn(cm.map.draw_custom_area, class_='ma-2', disabled=False)
+        
+        self.draw_custom_area.on_event('click',self._add_dc)
         
         # create the tile
         super().__init__(
@@ -28,6 +32,11 @@ class MapTile(sw.Tile):
             output = sw.Alert(),
             btn = v.Layout(children=[
                 self.to_asset, 
-                self.to_sepal
+                self.to_sepal,
+                self.draw_custom_area,
             ])
         )
+    
+    def _add_dc(self, widget, data, event):
+        self.m.show_dc()
+        return self

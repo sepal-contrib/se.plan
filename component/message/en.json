@@ -84,6 +84,7 @@
         "title": "Result Map",
         "to_asset": "Download to GEE assets",
         "to_sepal": "Download to SEPAL",
+        "draw_custom_area": "Draw sub AOI",
         "low": "Low",
         "high": "High",
         "txt": [
