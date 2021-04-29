@@ -53,7 +53,7 @@ def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwarg
 
     out_dict = ee.Dictionary({'suitibility':{
         selected_name :{'values':list_values,
-        'total' : total}
+        'total' : total,'geedic':quintile_frequency}
         }})
     return out_dict
 
@@ -121,7 +121,7 @@ def get_summary_statistics(wlcoutputs, aoi, geeio, selected_info):
     mask = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
-    wlc_summary = get_image_stats(wlc, geeio, selected_info, mask, count_aoi.values().get(0))
+    wlc_summary = get_image_stats(wlc, geeio, selected_info, mask, count_aoi.values().get(0),aoi=aoi)
 
     try:
         layer_list = geeio.rp_layers_io.layer_list
