@@ -113,7 +113,7 @@ class gee_compute:
     def make_constraints(self, constraints, constraints_layers):
         # TODO add in default check for protected areas, and location w decline pop
         landcover_constraints = []
-        default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]) is list]
+        default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]['content']) is list]
 
         for i in constraints:
             value = constraints[i]
