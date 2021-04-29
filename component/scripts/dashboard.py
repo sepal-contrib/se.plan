@@ -13,6 +13,7 @@ def _quintile(image, geometry, scale=100):
                         maxPixels=1e13)
 
     return quintile_collection
+
 def count_quintiles(image, geometry, scale=100):
     histogram_quintile = image.reduceRegion(reducer=ee.Reducer.frequencyHistogram().unweighted(),
                         geometry=geometry,
@@ -21,24 +22,31 @@ def count_quintiles(image, geometry, scale=100):
                         maxPixels=1e13, 
                         tileScale=2)
     return histogram_quintile
+
 def get_aoi_name(selected_info):
     if 'country_code' in selected_info:
         selected_name = selected_info['country_code']
+    elif isinstance(selected_info,str):
+        selected_name = selected_info
     else:
         # TODO : add this to lang.json 
         selected_name = 'Custom Area of Interest'
     return selected_name
 
-def get_image_stats(image, geeio, selected_info, mask, total, scale=100) :
+def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwargs) :
     """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
+    # check if aoi other than whole area is being summarized.
+    if 'aoi' in kwargs:
+        aoi = kwargs['aoi']
+    else:
+        aoi = geeio.selected_aoi
+    
     aoi_as_fc = ee.FeatureCollection(geeio.selected_aoi)
-
-    # fc_quintile = _quintile(image, aoi)
 
     # should move quintile norm out of geeio at some point...along with all other utilities
     image_quin, bad_features = geeio.quintile_normalization(image,aoi_as_fc)
     image_quin = image_quin.where(mask.eq(0),6)
-    quintile_frequency = count_quintiles(image_quin, geeio.selected_aoi)
+    quintile_frequency = count_quintiles(image_quin, aoi)
 
     selected_name = get_aoi_name(selected_info)
     list_values = ee.Dictionary(quintile_frequency.values().get(0)).values()
@@ -101,11 +109,11 @@ def get_image_sum(image, aoi, name, mask):
     out_dict = ee.Dictionary({name:value})
     return out_dict
 
-def get_summary_statistics(wlcoutputs, geeio, selected_info):
+def get_summary_statistics(wlcoutputs, aoi, geeio, selected_info):
     # returns summarys for the dashboard. 
     # {name: values: [],
     #        total: int}
-    aoi = geeio.selected_aoi
+    # aoi = geeio.selected_aoi
     count_aoi = get_aoi_count(aoi, 'aoi_count')
 
     # restoration sutibuility
@@ -135,13 +143,27 @@ def get_summary_statistics(wlcoutputs, geeio, selected_info):
 
     return wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
 
-def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info):
-    stats = get_summary_statistics(wlcoutputs, geeio, selected_info)
+
+def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
+    if 'aoi' in kwargs:
+        aoi = kwargs['aoi']
+    else:
+        aoi = geeio.selected_aoi
+    
+    stats = get_summary_statistics(wlcoutputs, aoi, geeio, selected_info)
     geom = ee.Geometry.Point([0,0])
     feat = ee.Feature(geom).set(stats)
     fc = ee.FeatureCollection(feat)
 
     return fc
+
+def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, m):
+    aoi_stats = get_stats_as_feature_collection(wlcoutputs, geeio, selected_info)
+    sub_stats = [get_stats_as_feature_collection(wlcoutputs, geeio, f'Sub region {m.draw_features.index(i)}',aoi=i.geometry()) for i in m.draw_features]
+    sub_stats = ee.FeatureCollection(sub_stats).flatten()
+    combined = aoi_stats.merge(sub_stats)
+    return combined
+
 def export_stats(fc):
     now = datetime.datetime.utcnow()
     suffix = now.strftime("%Y%m%d%H%M%S")
@@ -152,8 +174,8 @@ def export_stats(fc):
                                      fileFormat='GeoJSON'
                                     )
     task.start()
-    utils.gee.wait_for_completion(desc,"")
-    # print(task.status())
+    # utils.gee.wait_for_completion(desc,"")
+    print(task.status())
 
 def getdownloadasurl(fc):
     # hacky way to download data until I can figure out downlading from drive

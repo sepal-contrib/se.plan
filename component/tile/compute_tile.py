@@ -94,7 +94,7 @@ class ComputeTile(sw.Tile):
         widget.toggle_loading()
     
         # create a layer and a dashboard 
-        layer, dashboard = cs.compute_layers(self.aoi_io, self.io, self.default_io, self.questionaire_io)
+        layer, dashboard = cs.compute_layers(self.aoi_io, self.io, self.default_io, self.questionaire_io, self.m)
     
         # display the layer in the map
         cs.display_layer(layer, self.aoi_io, self.m)

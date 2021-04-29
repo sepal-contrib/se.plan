@@ -57,7 +57,7 @@ def sum_up(aoi_io, layer_io, output):
     
     return
     
-def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io):
+def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io, results_map):
     
     # use the layers io to produce a specific layer in the user assets 
     # for demo purposes I will only use a treecover asset that I found in GEE 
@@ -68,15 +68,22 @@ def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io):
         .mosaic()
     )
     selected_info = aoi_io.get_not_null_attrs()
-    
-    # we also need to create a dashboard in mkd to be displayer 
     geeio = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io)
     final_layer = geeio.wlc()
+    
+    if len(results_map.ee_layer_dict):
+        # compute stats for sub aois
+        compute_dashboard = cs.get_stats_w_sub_aoi(final_layer, geeio, selected_info, results_map)
+        # export sub aoi stats
+        cs.export_stats(compute_dashboard)
+        # grab csv and merge with other
+        
 
-    compute_dashboard = cs.get_stats_as_feature_collection(final_layer, geeio, selected_info)
-    # export to json
-    # cs.export_stats(compute_dashboard)
-    # grab csv from drive/sepal
+    else:
+        compute_dashboard = cs.get_stats_as_feature_collection(final_layer, geeio, selected_info)
+        # export to json
+        # cs.export_stats(compute_dashboard)
+        # grab csv from drive/sepal
 
 
 
