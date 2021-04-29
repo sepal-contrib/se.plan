@@ -1,8 +1,8 @@
 # vizualisation parameters of the final_layer 
 final_viz = {
   'min'    : 0.0,
-  'max'    : 0.001,
-  'palette': ['ff5050','ffbe4b','fff852','97ff45','5bff45'],
+  'max'    : 0.003,
+  'palette': ["#ff0000","#f2ff10","#08ff00"],
 }
 
 # matplotlib viz_param but in GEE
