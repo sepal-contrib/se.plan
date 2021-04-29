@@ -19,23 +19,59 @@ class DashThemeTile(sw.Tile):
             id_ = "dashboard_widget",
             title = cm.dashboard.theme.title,
         )
+    def clean_theme(self,json_dashboard):
+        """ Prepares the dashboard export for plotting on the theme area of the dashboard by appending values for each layer and AOI into a single dictionary. 
+        args:
+            json_dashboard (dict): The loaded geojson of the exported dashboard feature collection. Each feature with summary values for benefits, costs, risks and constraints. 
+
+        returns:
+            json_thmemes_values (dict):Theme formatted dictionay of {THEME: {LAYER: 'total':float, 'values':[float]}}
+        """
+        tmp_dict = {}
+        names = []
+
+        for feature in json_dashboard['features']:
+            for k,val in feature['properties'].items():
+                if k not in tmp_dict:
+                    tmp_dict[k] ={}
+                for layer in feature['properties'][k]:
+                    if isinstance(layer, str):
+                        names.append(layer)
+                        continue
+                    layer_name = next(iter(layer))
+                    layer_value = layer[layer_name]['values'][0]
+                    layer_total = layer[layer_name]['total'][0]
+
+                    if layer_name not in tmp_dict[k]:
+                        tmp_dict[k][layer_name] = {'values':[],'total':0}
+                        tmp_dict[k][layer_name]['values'].append(layer_value)
+                        tmp_dict[k][layer_name]['total'] = layer_total
+                    else:
+                        tmp_dict[k][layer_name]['values'].append(layer_value)
+                        tmp_dict[k][layer_name]['total'] = max(layer_total,tmp_dict[k][layer_name]['total'])
+        tmp_dict['names'] = names
+        tmp_dict.pop('suitibility',None)
+        
+        return tmp_dict
+
     def dev_set_summary(self,json_themes_values):
         benefits_layer = []
         constraints_layer = []
         costs_layer = []
+        json_themes_values = self.clean_theme(json_themes_values)
         for k,val in json_themes_values.items():
             for layer in json_themes_values[k]:
-                if k == 'suitibility':
+                if k == 'name':
+                    # have name column as it will be good to add this while displaying at some point
                     continue
-
-                name = list(layer.keys())[0]
+                name = layer
                 try:
                     if k == 'benefits':
-                        benefits_layer.append(cw.LayerFull(name, layer[name]['values'],  layer[name]['total'][0]))
+                        benefits_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'],  json_themes_values[k][layer]['total']))
                     elif k == 'costs':
-                        costs_layer.append(cw.LayerFull(name, layer[name]['values'],  layer[name]['total'][0]))
+                        costs_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'],  json_themes_values[k][layer]['total']))
                     elif k == 'constraints':
-                        constraints_layer.append(cw.LayerPercentage(name, layer[name]['values']))
+                        constraints_layer.append(cw.LayerPercentage(name, json_themes_values[k][layer]['values']))
 
                 except Exception as e:
                     print(name, 'not found',e)
