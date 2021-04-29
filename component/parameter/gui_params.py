@@ -1,5 +1,6 @@
 # list of the available constraints types. They will be used in the criterias names 
 criteria_types = {
+    'geographical_scope': 'Geographic constraints',
     'land_use': 'Land use constraints',
     'bio': 'Biophysical constraints',
     'socio_eco': 'Socio-economic constraints',
@@ -15,6 +16,14 @@ criteria_types = {
     # dict for dropdown
     # integer for the max of a range input
 criterias = {
+    'Current forest or ubran landscape' : {
+        'header' : 'geographical_scope',
+        'content' : None
+    },
+    'Current tree cover less than potential' : {
+        'header' : 'geographical_scope',
+        'content' : None
+    },
     'Bare land': {
         'header': 'land_use',
         'content': None
@@ -71,7 +80,7 @@ criterias = {
         'header': 'socio_eco',
         'content': None
     },
-    'Opportunity cost': {
+    'Land opportunity cost': {
         'header': 'socio_eco',
         'content': [
             {'text': 'cost a lot',    'value': 100},
