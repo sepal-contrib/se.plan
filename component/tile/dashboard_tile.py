@@ -178,7 +178,8 @@ class DashRegionTile(sw.Tile):
                 }
             }
         else:
-           json_feature_values = json_feature_values['suitibility']
+            json_feature_values = json_feature_values['features'][0]['properties']
+            json_feature_values = json_feature_values['suitibility']
 
         feats = []
         for feat in json_feature_values:
