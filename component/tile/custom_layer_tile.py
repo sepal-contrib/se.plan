@@ -199,7 +199,7 @@ class CustomizeLayerTile(sw.Tile):
             self.recipe_output.add_msg('loaded', 'success')
 
         except Exception as e:
-            self.recipe_output.add_msg(str(e))
+            self.recipe_output.add_msg(str(e), 'error')
 
         # toogle the btns
         self.reset_to_questionnaire.toggle_loading()

@@ -65,6 +65,7 @@ def get_aoi_count(aoi, name):
                         'maxPixels':1e13,
                         })
     return count_aoi
+
 def get_image_percent_cover(image, aoi, name):
     """ computes the percent coverage of a constraint in relation to the total aoi. returns dict name:{value:[],total:[]}"""
     count_img = image.Not().selfMask().reduceRegion(**{

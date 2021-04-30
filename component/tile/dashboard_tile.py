@@ -54,7 +54,7 @@ class DashThemeTile(sw.Tile):
         
         return tmp_dict
 
-    def dev_set_summary(self,json_themes_values):
+    def dev_set_summary(self, json_themes_values):
         benefits_layer = []
         constraints_layer = []
         costs_layer = []
@@ -165,7 +165,7 @@ class DashRegionTile(sw.Tile):
         if json_feature_values == None:
             
             json_feature_values = {
-                "Colombia": {
+                "AOI": {
                     "values": [
                         int(random()*100), # very low 
                         int(random()*100), # low 
@@ -173,8 +173,7 @@ class DashRegionTile(sw.Tile):
                         int(random()*100), # high
                         int(random()*100), # very high
                         int(random()*100), # unsustainable land
-                    ],
-                    "total": 100 # total surface
+                    ]
                 }
             }
         else:
@@ -184,7 +183,7 @@ class DashRegionTile(sw.Tile):
         feats = []
         for feat in json_feature_values:
             
-            feats.append(cw.AreaSumUp(feat, json_feature_values[feat]['values'], json_feature_values[feat]['total']))
+            feats.append(cw.AreaSumUp(feat, json_feature_values[feat]['values']))
                          
         self.set_content(feats)
                          

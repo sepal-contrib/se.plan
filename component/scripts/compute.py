@@ -59,14 +59,7 @@ def sum_up(aoi_io, layer_io, output):
     
 def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io, results_map):
     
-    # use the layers io to produce a specific layer in the user assets 
-    # for demo purposes I will only use a treecover asset that I found in GEE 
-    final_layer = ( 
-        ee.ImageCollection('NASA/MEASURES/GFCC/TC/v3')
-        .filter(ee.Filter.date('2015-01-01', '2015-12-31'))
-        .select('tree_canopy_cover')
-        .mosaic()
-    )
+    # use the layers io to produce a specific layer in the user assets
     selected_info = aoi_io.get_not_null_attrs()
     geeio = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io)
     final_layer = geeio.wlc()
@@ -84,8 +77,6 @@ def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io, results
         # export to json
         # cs.export_stats(compute_dashboard)
         # grab csv from drive/sepal
-
-
 
     final_dashboard = sw.Markdown("**No dashboarding function yet**")
     

@@ -60,10 +60,11 @@
     },
     "dashboard": {
         "region": {
-            "title": "Area of Interest - Summary By Subthemes"
+            "title": "Summary of Restoration Suitability by Region",
+            "detail": "Details"
         },
         "theme": {
-            "title": "Summary of Restoration Suitability by Region",
+            "title": "Area of Interest - Summary By Subthemes",
             "txt": "To help disentangle the potential impacts from restoration at each candidate site, we estimate the individual benefits, costs, risks, and constraints in finer detail below.",
             "benefit": [
                 "Assessed benefits include improvements to wood production, local livelihoods, and non-timber resources, such as conservation of biodiversity. Each benefit is quantified in the original units (for example, C tons/ha). We also present the information in quintiles across the country.",
