@@ -39,9 +39,9 @@ def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwarg
     if 'aoi' in kwargs:
         aoi = kwargs['aoi']
     else:
-        aoi = geeio.selected_aoi
+        aoi = geeio.aoi_io.get_aoi_ee()
     
-    aoi_as_fc = ee.FeatureCollection(geeio.selected_aoi)
+    aoi_as_fc = ee.FeatureCollection(geeio.aoi_io.get_aoi_ee())
 
     # should move quintile norm out of geeio at some point...along with all other utilities
     image_quin, bad_features = geeio.quintile_normalization(image,aoi_as_fc)
@@ -149,7 +149,7 @@ def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
     if 'aoi' in kwargs:
         aoi = kwargs['aoi']
     else:
-        aoi = geeio.selected_aoi
+        aoi = geeio.aoi_io.get_aoi_ee()
     
     stats = get_summary_statistics(wlcoutputs, aoi, geeio, selected_info)
     geom = ee.Geometry.Point([0,0])

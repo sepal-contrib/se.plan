@@ -86,6 +86,7 @@
         "to_asset": "Download to GEE assets",
         "to_sepal": "Download to SEPAL",
         "draw_custom_area": "Draw sub AOI",
+        "compute_dashboard": "Compute dashboard",
         "low": "Low",
         "high": "High",
         "txt": [

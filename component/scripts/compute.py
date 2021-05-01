@@ -57,30 +57,13 @@ def sum_up(aoi_io, layer_io, output):
     
     return
     
-def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io, results_map):
-    
+def compute_layers(aoi_io, layers_io, default_layer_io, questionaire_io, results_map, geeio):
+    # maybe delete? idk if we need this now that treating as io...
     # use the layers io to produce a specific layer in the user assets
-    selected_info = aoi_io.get_not_null_attrs()
-    geeio = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io)
-    final_layer = geeio.wlc()
-    
-    if len(results_map.ee_layer_dict):
-        # compute stats for sub aois
-        compute_dashboard = cs.get_stats_w_sub_aoi(final_layer, geeio, selected_info, results_map)
-        # export sub aoi stats
-        cs.export_stats(compute_dashboard)
-        # grab csv and merge with other
-        
+    # geeio = cs.gee_compute(aoi_io, layers_io, default_layer_io, questionaire_io)
+    wlcoutputs = geeio.wlc()
 
-    else:
-        compute_dashboard = cs.get_stats_as_feature_collection(final_layer, geeio, selected_info)
-        # export to json
-        # cs.export_stats(compute_dashboard)
-        # grab csv from drive/sepal
-
-    final_dashboard = sw.Markdown("**No dashboarding function yet**")
-    
-    return (final_layer[0], final_dashboard)
+    return (wlcoutputs, geeio)
 
 def display_layer(layer, aoi_io, m):
     

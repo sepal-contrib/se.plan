@@ -22,10 +22,14 @@ ee.Initialize()
 class gee_compute:
     
     def __init__(self, rp_aoi_io, rp_layers_io, rp_default_layer_io, rp_questionaire_io):
-        self.selected_aoi = rp_aoi_io.get_aoi_ee()
+        self.aoi_io = rp_aoi_io
+        # self.selected_aoi = self.aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
         self.rp_default_layer = rp_default_layer_io.layer_list
+
+        # results
+        self.wlcoutputs = None
 
         self.landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30, 'Settlements':50}
     
@@ -210,7 +214,7 @@ class gee_compute:
         layer.update({'eeimage':eeimage})
 
     def normalize_benefits(self,benefits_layers,method='minmax'):
-        list(map(lambda i : self.normalize_image(i,self.selected_aoi, method), benefits_layers))
+        list(map(lambda i : self.normalize_image(i,self.aoi_io.get_aoi_ee(), method), benefits_layers))
 
     def make_benefit_expression(self,benefits_layers):
         # build expression for benefits
@@ -277,8 +281,10 @@ class gee_compute:
 
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
-        wlc_out = wlc_out.paint(ee.FeatureCollection(self.selected_aoi), 0).where(wlc_image, wlc_image)
+        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_io.get_aoi_ee()), 0).where(wlc_image, wlc_image)
+
+        setattr(self, 'wlcoutputs',(wlc_out, benefits_layers, constraints_layers, costs_layers))
         
-        return (wlc_out, benefits_layers, constraints_layers, costs_layers)
+        return  wlc_out
 
 

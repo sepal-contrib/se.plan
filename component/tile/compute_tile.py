@@ -55,14 +55,14 @@ class ValidationTile(sw.Tile):
     
 class ComputeTile(sw.Tile):
     
-    def __init__(self, io, default_io, aoi_io, m, area_tile, theme_tile, questionaire_io):
+    def __init__(self, io, default_io, aoi_io, m, area_tile, theme_tile, questionaire_io, rp_geeio):
         
         # gather the ios 
         self.io = io
         self.default_io = default_io
         self.aoi_io = aoi_io
         self.questionaire_io = questionaire_io
-        
+        self.geeio = rp_geeio
         # get the map
         self.m = m
         
@@ -94,14 +94,15 @@ class ComputeTile(sw.Tile):
         widget.toggle_loading()
     
         # create a layer and a dashboard 
-        layer, dashboard = cs.compute_layers(self.aoi_io, self.io, self.default_io, self.questionaire_io, self.m)
-    
+        layer = self.geeio.wlc()
+        # setattr(self, geeio, geeio)
         # display the layer in the map
+        # layer = wlcoutputs[0]
         cs.display_layer(layer, self.aoi_io, self.m)
         
         # display the dashboard 
-        self.area_tile.set_summary() # calling it without argument will lead to fake output
-        self.theme_tile.set_summary() # calling it without argument will lead to fake output
+        # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output
+        # self.theme_tile.dev_set_summary(dashboard) # calling it without argument will lead to fake output
     
         widget.toggle_loading()
         
