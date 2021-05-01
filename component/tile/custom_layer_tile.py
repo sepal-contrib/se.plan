@@ -138,7 +138,7 @@ class CustomizeLayerTile(sw.Tile):
         """
         
         # toggle the btns
-        self.reset_to_default.toggle_loading()
+
         self.reset_to_questionnaire.toggle_loading()
     
         # load a default layer_io 
@@ -150,7 +150,6 @@ class CustomizeLayerTile(sw.Tile):
         self.table.items = new_items
     
         # toggle the btns
-        self.reset_to_default.toggle_loading()
         self.reset_to_questionnaire.toggle_loading()
     
         return self 
@@ -159,7 +158,7 @@ class CustomizeLayerTile(sw.Tile):
         """apply the answer to the questionnaire to the datatable"""
         
         # toggle the btns
-        self.reset_to_default.toggle_loading()
+
         self.reset_to_questionnaire.toggle_loading()
     
         # process the questionnaire to produce a layer list 
@@ -172,7 +171,7 @@ class CustomizeLayerTile(sw.Tile):
         self.table.items = new_items
     
         # toggle the btns
-        self.reset_to_default.toggle_loading()
+
         self.reset_to_questionnaire.toggle_loading()
     
         return self 
