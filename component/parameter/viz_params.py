@@ -1,7 +1,7 @@
 # vizualisation parameters of the final_layer 
 final_viz = {
-  'min'    : 0.0,
-  'max'    : 0.003,
+  'min'    : 1,
+  'max'    : 5,
   'palette': ["#ff0000","#f2ff10","#08ff00"],
 }
 

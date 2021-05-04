@@ -277,7 +277,11 @@ class gee_compute:
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
+        # cal wlc image
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
+
+        # rescale wlc image from to
+        wlc_image = self.minmax_normalization(wlc_image,self.aoi_io.get_aoi_ee()).multiply(4).add(1)
 
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
