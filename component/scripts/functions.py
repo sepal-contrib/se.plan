@@ -289,7 +289,7 @@ class gee_compute:
         list(map(lambda i : i.update({'norm_weight': round(100 + (i['weight' ] / sum_weights), 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-        print(exp, exp_dict)
+
         # cal wlc image
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
 
