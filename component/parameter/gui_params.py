@@ -44,6 +44,16 @@ criterias = {
             {'text': 'low precipitaion',    'value': 0}
         ]
     },
+    'Water stress': {
+        'header': 'bio',
+        'content': [
+            {'text': 'very high water stress', 'value':5},
+            {'text': 'high water stress', 'value':4},
+            {'text': 'medium water stress', 'value':3},
+            {'text': 'some water stress', 'value':2},
+            {'text': 'little water stress', 'value':1},            
+        ]
+    },
     'Elevation': {
         'header': 'bio',
         'content': [
@@ -139,5 +149,4 @@ priorities = [
     'Local livelihoods',
     'Wood production',
     'Non-timber tree benefits',
-    'Water quality'
 ]
