@@ -156,9 +156,9 @@ class gee_compute:
         constraints_layers = constraints_layers + landcover_constraints
         return constraints_layers
 
-    def minmax_normalization(self,eeimage,region): 
+    def minmax_normalization(self,eeimage,region,scale = 10000): 
         mmvalues = eeimage.reduceRegion(
-            **{'reducer': ee.Reducer.minMax(), 'geometry': region, 'scale': 10000, 'maxPixels': 1e13, 'bestEffort': True,
+            **{'reducer': ee.Reducer.minMax(), 'geometry': region, 'scale': scale, 'maxPixels': 1e13, 'bestEffort': True,
             'tileScale': 4})
 
         bandname = ee.String(eeimage.bandNames().get(0))
@@ -169,6 +169,19 @@ class gee_compute:
         imgMax = ee.Number(mmvalues.get(keyMax) )
 
         return eeimage.unitScale(imgMin, imgMax).toFloat()
+
+    def percentile_normalization(self, eeimage, region, scale): #, percentiles):
+        # todo: make this more dynamic with dictionary regex. using quick fix for now
+
+        eeimagetmp = eeimage.rename("img")
+        percents = eeimagetmp.reduceRegion(geometry=region, 
+            reducer=ee.Reducer.percentile(percentiles=[1,98]), 
+            scale=scale)
+        
+        img0 = ee.Number(percents.get('img_p1') )
+        img98 = ee.Number(percents.get('img_p98') )
+        # print(img98.getInfo(),img0.getInfo())
+        return  eeimage.unitScale(img0,img98).clamp(img0, img98)
 
     def quintile_normalization(self, image, featurecollection, scale=100):
         quintile_collection = image.reduceRegions(collection=featurecollection, 
@@ -273,19 +286,19 @@ class gee_compute:
         
         # normalize benefit weights to 0 - 1 
         sum_weights =sum(i['weight'] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round(i['weight' ] / sum_weights, 5) }), benefits_layers))
+        list(map(lambda i : i.update({'norm_weight': round(100 + (i['weight' ] / sum_weights), 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-
+        print(exp, exp_dict)
         # cal wlc image
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
 
         # rescale wlc image from to
-        wlc_image = self.minmax_normalization(wlc_image,self.aoi_io.get_aoi_ee()).multiply(4).add(1)
+        wlc_image2 = self.percentile_normalization(wlc_image,self.aoi_io.get_aoi_ee(),10000).multiply(4).add(1)
 
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
-        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_io.get_aoi_ee()), 0).where(wlc_image, wlc_image)
+        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_io.get_aoi_ee()), 0).where(wlc_image2, wlc_image2)
 
         setattr(self, 'wlcoutputs',(wlc_out, benefits_layers, constraints_layers, costs_layers))
         
