@@ -2,7 +2,7 @@
     "app":{
         "title": "Restoration planning module",
         "drawer": {
-            "aoi": "AOI selection",
+            "aoi": "Area of interest selection",
             "question": "Questionnaire",
             "custom": "Manual selection",
             "compute": "Compute",
