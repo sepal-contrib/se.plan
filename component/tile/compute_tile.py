@@ -63,6 +63,7 @@ class ComputeTile(sw.Tile):
         self.aoi_io = aoi_io
         self.questionaire_io = questionaire_io
         self.geeio = rp_geeio
+        
         # get the map
         self.m = m
         
@@ -99,6 +100,9 @@ class ComputeTile(sw.Tile):
         # display the layer in the map
         # layer = wlcoutputs[0]
         cs.display_layer(layer, self.aoi_io, self.m)
+        
+        # add the possiblity to draw on the map and release the compute dashboard btn
+        self.m.show_dc()
         
         # display the dashboard 
         # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output

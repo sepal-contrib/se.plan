@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 from component import parameter as cp
 from component.message import cm
 
-
 class AreaSumUp(v.Layout):
     
     NAMES = ['restoration potential', 'surface (MHa)', 'ratio over total surface (%)']
@@ -33,7 +32,7 @@ class AreaSumUp(v.Layout):
 
             plt.show()
         
-        # init the table with 6 lines of value 0
+        # init the table 
         head = [v.Html(tag='thead', children = [v.Html(tag='tr', children = [v.Html(tag='th', children = [name]) for name in self.NAMES])])]
         
         self.rows = []
@@ -59,6 +58,7 @@ class AreaSumUp(v.Layout):
         # init the title 
         title = v.Html(xs12=True, class_='mb-2', tag="h2", children=[title])
         
+        # create the widget
         super().__init__(row=True, class_ = "ma-5", children=[
             v.Flex(xs12=True, children=[title]), 
             v.Flex(xs12=True, children=[chart]),

@@ -118,7 +118,7 @@ class CustomizeLayerTile(sw.Tile):
             # apply them to the table
             if tmp_table[i]['name'] == dict_['name']:
                 tmp_table[i].update(
-                    layer  = dict_['layer'],
+                    layer = dict_['layer'],
                     weight = dict_['weight'],
                     unit = dict_['unit']
                 )
@@ -129,35 +129,13 @@ class CustomizeLayerTile(sw.Tile):
         # notify the change to rest of the app 
         self.table.change_model += 1
                      
-        return self 
-    
-    def _apply_default(self, widget, data, event):
-        """
-        apply the default layer table to the layer_io
-        deprecated would need to be removed
-        """
-        
-        # toggle the btns
-
-        self.reset_to_questionnaire.toggle_loading()
-    
-        # load a default layer_io 
-        self.apply_values(cio.default_layer_io.layer_list)
-    
-        # manually change the items
-        # for no reason the display items doesn't upload programatically
-        new_items = self.table.items.copy()
-        self.table.items = new_items
-    
-        # toggle the btns
-        self.reset_to_questionnaire.toggle_loading()
-    
-        return self 
+        return self
     
     def _apply_questionnaire(self, widget, event, data):
         """apply the answer to the questionnaire to the datatable"""
         
         # toggle the btns
+        widget.toggle_loading()
 
         self.reset_to_questionnaire.toggle_loading()
     
@@ -171,6 +149,7 @@ class CustomizeLayerTile(sw.Tile):
         self.table.items = new_items
     
         # toggle the btns
+        widget.toggle_loading()
 
         self.reset_to_questionnaire.toggle_loading()
     

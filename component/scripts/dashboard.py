@@ -1,29 +1,43 @@
 import ee
 import json
-import datetime
+from datetime import datetime as dt
 # from component import utils
 import os
 
+import geemap
+
 def _quintile(image, geometry, scale=100):
-    """ computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties """ 
-    quintile_collection = image.reduceRegion(geometry=geometry, 
-                        reducer=ee.Reducer.percentile(percentiles=[20,40,60,80],outputNames=['low','lowmed','highmed','high']), 
-                        tileScale=2,
-                        scale=scale, 
-                        maxPixels=1e13)
+    """Computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties""" 
+    
+    quintile_collection = image.reduceRegion(
+        geometry=geometry, 
+        reducer=ee.Reducer.percentile(
+            percentiles=[20,40,60,80],
+            outputNames=['low','lowmed','highmed','high']
+        ), 
+        tileScale=2,
+        scale=scale, 
+        maxPixels=1e13
+    )
 
     return quintile_collection
 
 def count_quintiles(image, geometry, scale=100):
-    histogram_quintile = image.reduceRegion(reducer=ee.Reducer.frequencyHistogram().unweighted(),
-                        geometry=geometry,
-                        scale=scale, 
-                        # bestEffort=True, 
-                        maxPixels=1e13, 
-                        tileScale=2)
+    
+    histogram_quintile = image.reduceRegion(
+        reducer=ee.Reducer.frequencyHistogram().unweighted(),
+        geometry=geometry,
+        scale=scale, 
+        # bestEffort=True, 
+        maxPixels=1e13, 
+        tileScale=2
+    )
+    
     return histogram_quintile
 
 def get_aoi_name(selected_info):
+    # i think this is useless as the aoi_io embed a get_aoi_name method
+    
     if 'country_code' in selected_info:
         selected_name = selected_info['country_code']
     elif isinstance(selected_info,str):
@@ -31,10 +45,12 @@ def get_aoi_name(selected_info):
     else:
         # TODO : add this to lang.json 
         selected_name = 'Custom Area of Interest'
+        
     return selected_name
 
-def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwargs) :
+def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwargs):
     """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
+    
     # check if aoi other than whole area is being summarized.
     if 'aoi' in kwargs:
         aoi = kwargs['aoi']
@@ -51,75 +67,90 @@ def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwarg
     selected_name = get_aoi_name(selected_info)
     list_values = ee.Dictionary(quintile_frequency.values().get(0)).values()
 
-    out_dict = ee.Dictionary({'suitibility':{
-        selected_name :{'values':list_values,
-        'total' : total,'geedic':quintile_frequency}
-        }})
+    out_dict = ee.Dictionary({
+        'suitibility':{
+            selected_name :{
+                'values':list_values,
+                'total' : total,
+                'geedic':quintile_frequency
+            }
+        }
+    })
+    
     return out_dict
 
 def get_aoi_count(aoi, name):
-    count_aoi = ee.Image.constant(1).rename(name).reduceRegion(**{
-                        'reducer':ee.Reducer.count(), 
-                        'geometry':aoi,
-                        'scale':100,
-                        'maxPixels':1e13,
-                        })
+    
+    count_aoi = ee.Image.constant(1).rename(name).reduceRegion(
+        reducer = ee.Reducer.count(), 
+        geometry = aoi,
+        scale = 100,
+        maxPixels = 1e13
+    )
+    
     return count_aoi
 
 def get_image_percent_cover(image, aoi, name):
     """ computes the percent coverage of a constraint in relation to the total aoi. returns dict name:{value:[],total:[]}"""
-    count_img = image.Not().selfMask().reduceRegion(**{
-                    'reducer':ee.Reducer.count(), 
-                    'geometry':aoi,
-                    'scale':100,
-                    'maxPixels':1e13,
-                    })
-    total_img = image.reduceRegion(**{
-                    'reducer':ee.Reducer.count(), 
-                    'geometry':aoi,
-                    'scale':100,
-                    'maxPixels':1e13,
-                    })
+    
+    count_img = image.Not().selfMask().reduceRegion(
+        reducer = ee.Reducer.count(), 
+        geometry = aoi,
+        scale = 100,
+        maxPixels = 1e13,
+    )
+    
+    total_img = image.reduceRegion(
+        reducer = ee.Reducer.count(), 
+        geometry= aoi,
+        scale = 100,
+        maxPixels = 1e13,
+    )
+    
     total_val = ee.Number(total_img.values().get(0))
     count_val = ee.Number(count_img.values().get(0))
 
     percent = count_val.divide(total_val).multiply(100)
-    value = ee.Dictionary({'values':[percent],
-                            'total':[total_val]})
-    out_dict = ee.Dictionary({name:value})
-    return out_dict
+    
+    value = ee.Dictionary({
+        'values':[percent],
+        'total':[total_val]
+    })
+    
+    return ee.Dictionary({name:value})
     
 def get_image_sum(image, aoi, name, mask):
     """ computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
      
-    sum_img = image.updateMask(mask).reduceRegion(**{
-                    'reducer':ee.Reducer.sum(), 
-                    'geometry':aoi,
-                    'scale':100,
-                    'maxPixels':1e13,
-                    })
-    total_img = image.reduceRegion(**{
-                    'reducer':ee.Reducer.sum(), 
-                    'geometry':aoi,
-                    'scale':100,
-                    'maxPixels':1e13,
-                    })
+    sum_img = image.updateMask(mask).reduceRegion(
+        reducer = ee.Reducer.sum(), 
+        geometry = aoi,
+        scale = 100,
+        maxPixels = 1e13,
+    )
+    
+    total_img = image.reduceRegion(
+        reducer = ee.Reducer.sum(), 
+        geometry = aoi,
+        scale = 100,
+        maxPixels = 1e13,
+    )
 
-    value = ee.Dictionary({'values':sum_img.values(),
-                            'total':total_img.values()})
-    out_dict = ee.Dictionary({name:value})
-    return out_dict
+    value = ee.Dictionary({
+        'values':sum_img.values(),
+        'total':total_img.values()
+    })
+    
+    return ee.Dictionary({name:value})
 
 def get_summary_statistics(wlcoutputs, aoi, geeio, selected_info):
-    # returns summarys for the dashboard. 
-    # {name: values: [],
-    #        total: int}
-    # aoi = geeio.selected_aoi
+    """returns summarys for the dashboard.""" 
+
     count_aoi = get_aoi_count(aoi, 'aoi_count')
 
     # restoration sutibuility
     wlc, benefits, constraints, costs = wlcoutputs
-    mask = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
+    mask = ee.ImageCollection(list(map(lambda i: ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
     wlc_summary = get_image_stats(wlc, geeio, selected_info, mask, count_aoi.values().get(0),aoi=aoi)
@@ -146,11 +177,14 @@ def get_summary_statistics(wlcoutputs, aoi, geeio, selected_info):
 
 
 def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
+    
+    # get the aoi 
     if 'aoi' in kwargs:
         aoi = kwargs['aoi']
     else:
         aoi = geeio.aoi_io.get_aoi_ee()
     
+    # compute the stats
     stats = get_summary_statistics(wlcoutputs, aoi, geeio, selected_info)
     geom = ee.Geometry.Point([0,0])
     feat = ee.Feature(geom).set(stats)
@@ -158,30 +192,42 @@ def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
 
     return fc
 
-def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, m):
+def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, features):
+    
     aoi_stats = get_stats_as_feature_collection(wlcoutputs, geeio, selected_info)
-    sub_stats = [get_stats_as_feature_collection(wlcoutputs, geeio, f'Sub region {m.draw_features.index(i)}',aoi=i.geometry()) for i in m.draw_features]
+    
+    ee_geom_list = [geemap.geojson_to_ee(feat).geometry() for feat in features['feature']]
+    sub_stats = [get_stats_as_feature_collection(wlcoutputs, geeio, f'Sub region {i}',aoi=geom) for i, geom in enumerate(ee_geom_list)]
+    
     sub_stats = ee.FeatureCollection(sub_stats).flatten()
+    
     combined = aoi_stats.merge(sub_stats)
+    
     return combined
 
 def export_stats(fc):
-    now = datetime.datetime.utcnow()
-    suffix = now.strftime("%Y%m%d%H%M%S")
+    
+    suffix = dt.now().strftime("%Y%m%d%H%M%S")
     desc = f"restoration_dashboard_{suffix}"
-    task = ee.batch.Export.table.toDrive(collection=fc, 
-                                     description=desc,
-                                     folder='restoration_dashboard',
-                                     fileFormat='GeoJSON'
-                                    )
+    task = ee.batch.Export.table.toDrive(
+        collection=fc, 
+        description=desc,
+        folder='restoration_dashboard',
+        fileFormat='GeoJSON'
+    )
+    
     task.start()
     # utils.gee.wait_for_completion(desc,"")
+    
     print(task.status())
 
 def getdownloadasurl(fc):
+    
+    # TODO update to send the files to the module_results folder 
+    # urlretreive can be used to avoid the call to os.system
+    
     # hacky way to download data until I can figure out downlading from drive
-    now = datetime.datetime.utcnow()
-    suffix = now.strftime("%Y%m%d%H%M%S")
+    suffix = dt.now().strftime("%Y%m%d%H%M%S")
     desc = f"restoration_dashboard_{suffix}"
     url = fc.getDownloadURL('GeoJSON', filename=desc)
     dest = r"."
@@ -195,10 +241,15 @@ def getdownloadasurl(fc):
     return json_features
 
 if __name__ == "__main__":
+    
+    # TODO are you still using it ? 
+    
     # dev
     from test_gee_compute_params import *
     from functions import *
+    
     ee.Initialize()
+    
     io = fake_io()
     io_default = fake_default_io()
     region = fake_aoi_io()
