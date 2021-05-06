@@ -188,7 +188,7 @@ class gee_compute:
             reducer = ee.Reducer.minMax(),
             geometry = region, 
             scale = scale, 
-            maxPixels = 1e13
+            maxPixels = 1e13,
             bestEffort = True,
             tileScale = 4
         )
