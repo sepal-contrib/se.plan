@@ -5,7 +5,6 @@ from pathlib import Path
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
 import ipyvuetify as v
-from faker import Faker
 import pandas as pd
 import ee
 
@@ -13,7 +12,6 @@ from component import parameter as cp
 from component.message import cm
 from .weight_slider import WeightSlider
 
-fake = Faker()
 ee.Initialize()
 
 class EditDialog(sw.SepalWidget, v.Dialog):
@@ -31,13 +29,15 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.init_layer = ''
         self.name = ''
         
+        # add all the standard placeholder, they will be replaced when a layer will be selected
         self.title = v.CardTitle(children=['Layer name'])
-        self.text = v.CardText(children = [fake.paragraph(13)])
+        self.text = v.CardText(children = [''])
         self.weight = WeightSlider('layer_name', 3)
         self.check_custom = v.Checkbox(v_model = False, label = cm.dial.layer)
         self.layer = v.TextField(v_model = None, color = 'warning', outlined = True, label = 'Layer')
         self.unit = v.TextField(v_model=None, color="warning", outlined=True, label="Unit")
         
+        # wrap the layer edition in an expansion panel
         self.ep = v.ExpansionPanels(accordion = True, children = [
             v.ExpansionPanel(children = [
                 v.ExpansionPanelHeader(
@@ -52,13 +52,16 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             ])
         ])
         
+        # add a map to display the layers
         self.m = sm.SepalMap()
         self.m.layout.height = '40vh'
         self.m.layout.margin = '2em'
         
+        # two button will be placed at the bottom of the panel
         self.cancel = v.Btn(color='primary', outlined = True, children = [cm.dial.cancel])
         self.save = v.Btn(color='primary', children = [cm.dial.save])        
         
+        # create the init card
         self.card = v.Card(
             children = [
                 self.title,
@@ -71,15 +74,16 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             ]
         )
         
+        # init the dialog
         super().__init__(
             custom_v_model = json.dumps(self._EMPTY_V_MODEL),
-            #persistent = True,
+            persistent = True,
             value = False,
             max_width = '700px',
             children = [self.card]
         )
         
-        # link some element together 
+        # js behaviours 
         self.layer.on_event('blur', self._on_layer_change)
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
@@ -102,7 +106,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             geometry = self.tile.io.get_aoi_ee()
             image = Path(widget.v_model)
             
-            # it the map cannot be displayed then return to init
+            # if the map cannot be displayed then return to init
             try:
                 self.display_on_map(image, geometry)
             except Exception as e:

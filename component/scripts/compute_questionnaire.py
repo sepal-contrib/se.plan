@@ -45,6 +45,4 @@ def compute_questionnaire(questionnaire_io):
     
     layers_values= [ assign_weights(i, row) for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows() ]
 
-    
-    
     return layers_values

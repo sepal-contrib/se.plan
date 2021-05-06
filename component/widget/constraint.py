@@ -97,19 +97,19 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         self.header = v.ExpansionPanelHeader(children=[cp.criteria_types[category]])
         
         # link the criterias to the select 
-        self.criterias = [c.disable() for c in criterias if c.header == category] 
+        self.criterias = [v.Flex(xs12=True, children=[c.disable()]) for c in criterias if c.header == category] 
         self.select = v.Select(
-             class_='mt-5',
-            small_chips    = True,
-            v_model  = None,
-            items    = [c.name for c in self.criterias],
-            label    = cm.constraints.criteria_lbl,
+            class_ = 'mt-5',
+            small_chips = True,
+            v_model = None,
+            items = [c.name for c in self.criterias],
+            label = cm.constraints.criteria_lbl,
             multiple = True,
             deletable_chips = True
         )
             
         # create the content, nothing is selected by default so Select should be empty and criterias hidden 
-        self.content = v.ExpansionPanelContent(children=[v.Layout(row=True, children=[self.select]+[v.Flex(xs12=True, children=[c]) for c in self.criterias])])
+        self.content = v.ExpansionPanelContent(children=[v.Layout(row=True, children=[self.select]+[self.criterias])])
         
         # create the actual panel
         super().__init__(children=[self.header, self.content])
