@@ -4,6 +4,8 @@ import datetime
 # from component import utils
 import os
 
+import geemap
+
 def _quintile(image, geometry, scale=100):
     """ computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties """ 
     quintile_collection = image.reduceRegion(geometry=geometry, 
@@ -158,11 +160,17 @@ def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
 
     return fc
 
-def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, m):
+def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, features):
+    
     aoi_stats = get_stats_as_feature_collection(wlcoutputs, geeio, selected_info)
-    sub_stats = [get_stats_as_feature_collection(wlcoutputs, geeio, f'Sub region {m.draw_features.index(i)}',aoi=i.geometry()) for i in m.draw_features]
+    
+    ee_geom_list = [geemap.geojson_to_ee(feat).geometry() for feat in features['feature']]
+    sub_stats = [get_stats_as_feature_collection(wlcoutputs, geeio, f'Sub region {i}',aoi=geom) for i, geom in enumerate(ee_geom_list)]
+    
     sub_stats = ee.FeatureCollection(sub_stats).flatten()
+    
     combined = aoi_stats.merge(sub_stats)
+    
     return combined
 
 def export_stats(fc):

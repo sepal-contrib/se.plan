@@ -29,6 +29,7 @@ class gee_compute:
         self.rp_default_layer = rp_default_layer_io.layer_list
 
         # results
+        self.result = None
         self.wlcoutputs = None
 
         self.landcover_default_object = {'Bare land':60,'Shrub land':20,'Agricultural land':40, 'Agriculture':40,'Rangeland':40,'Grassland':30, 'Settlements':50}
