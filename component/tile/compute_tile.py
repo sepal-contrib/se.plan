@@ -55,7 +55,7 @@ class ValidationTile(sw.Tile):
     
 class ComputeTile(sw.Tile):
     
-    def __init__(self, io, default_io, aoi_io, m, area_tile, theme_tile, questionaire_io, rp_geeio):
+    def __init__(self, io, default_io, aoi_io, m, questionaire_io, rp_geeio):
         
         # gather the ios 
         self.io = io
@@ -66,10 +66,6 @@ class ComputeTile(sw.Tile):
         
         # get the map
         self.m = m
-        
-        # get the dashboard tile 
-        self.area_tile = area_tile
-        self.theme_tile = theme_tile
         
         # add the widgets 
         compute_txt = sw.Markdown(cm.compute.desc)

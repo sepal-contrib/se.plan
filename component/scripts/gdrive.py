@@ -46,8 +46,8 @@ class gdrive(object):
         
         # get list of files
         results = service.files().list( 
-            q ="mimeType='image/tiff' and trashed = false",
-            pageSize=1000, 
+            q ="fullText contains 'restoration_dashboard_' and trashed = false",
+            pageSize=100, 
             fields="nextPageToken, files(id, name)").execute()
         items = results.get('files', [])
 
@@ -89,3 +89,13 @@ class gdrive(object):
             service.files().delete(fileId=f['id']).execute()
             
         return
+    
+if __name__ == "__main__":
+    print('ok')
+#     f = gdrive().get_files("restoration_dashboard_20210507153255")#("restoration_dashboard_20210507153255")
+#     print(f)
+#     gdrive().download_files(f,'/home/jdilger/respot2/')
+#     items = gdrive().get_items()
+#     files = []
+#     for item in items:
+#         print(item['name'])

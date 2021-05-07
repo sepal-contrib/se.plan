@@ -217,9 +217,8 @@ def export_stats(fc):
     )
     
     task.start()
-    # utils.gee.wait_for_completion(desc,"")
-    
     print(task.status())
+    return desc
 
 def getdownloadasurl(fc):
     

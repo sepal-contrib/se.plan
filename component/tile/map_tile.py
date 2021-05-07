@@ -5,6 +5,7 @@ from shapely import geometry as sg
 import geopandas as gpd
 import geemap
 import ee
+import json
 
 from component.message import cm
 from component import parameter as cp
@@ -12,7 +13,7 @@ from component import scripts as cs
 
 class MapTile(sw.Tile):
     
-    def __init__(self, geeio, aoi_io):
+    def __init__(self, geeio, aoi_io, area_tile, theme_tile):
         
         # add the explanation
         mkd = sw.Markdown('  \n'.join(cm.map.txt))
@@ -32,7 +33,10 @@ class MapTile(sw.Tile):
         # ios
         self.geeio = geeio
         self.aoi_io = aoi_io
-
+        
+        # get the dashboard tile 
+        self.area_tile = area_tile
+        self.theme_tile = theme_tile
         # create the tile
         super().__init__(
             id_ = "map_widget",
@@ -64,7 +68,8 @@ class MapTile(sw.Tile):
         ee_feature_collection = geemap.geojson_to_ee(self.draw_features)
 
         wlcoutputs = self.geeio.wlcoutputs
-        
+#         dev local path
+        DOWNLOADPATH = r'/home/jdilger//'
         if len(self.draw_features['features']) > 0:
             # compute stats for sub aois
             featurecol_dashboard = cs.get_stats_w_sub_aoi(wlcoutputs, self.geeio, selected_info, self.draw_features)
@@ -75,11 +80,22 @@ class MapTile(sw.Tile):
             
         else:
             featurecol_dashboard = cs.get_stats_as_feature_collection(wlcoutputs, self.geeio, selected_info)
-            # export to json
-            # cs.export_stats(featurecol_dashboard)
-            # grab csv from drive/sepal
+            exportname = cs.export_stats(featurecol_dashboard)
+            cs.gee.wait_for_completion(exportname, self.output)
+            # grab json
+            gdrive = cs.gdrive()
+            file = gdrive.get_files(f'{exportname}.geojson')
+            gdrive.download_files(file,DOWNLOADPATH)
         
-
+        
+        with open(f"{DOWNLOADPATH}{file[0]['name']}",'r') as f:
+            json_results = json.load(f)
+    
+        self.theme_tile.dev_set_summary(json_results)
+        self.area_tile.set_summary(json_results)
+        
+        self.output.add_live_msg('Downloaded to Sepal', 'success')
+        
         widget.toggle_loading()
         return self
 
