@@ -1,5 +1,8 @@
 from sepal_ui.aoi.tile_aoi import TileAoi
 from sepal_ui.scripts import run_aoi_selection
+import ee 
+
+ee.Initialize()
 
 class CustomTileAoi(TileAoi):
     
@@ -21,11 +24,22 @@ class CustomTileAoi(TileAoi):
             )
             
             # check if the aoi is in the LMIC
-            #lmic_ee = ee.FeatureCollection('users/bornToBeAlive/lmic').geometry()
-            #if not lmic_ee.contains(self.io.get_aoi_ee().geometry()):
-            #    self.io.clear_attributes()
-            #    raise Exception("Your AOI should be included in LMIC")
+            margin = 1000 # 1Km
+            lmic_ee = ee.FeatureCollection('users/bornToBeAlive/lmic')
+            aoi_ee_geom = self.io.get_aoi_ee().geometry()
+            test = lmic_ee \
+                .filterBounds(aoi_ee_geom) \
+                .geometry() \
+                .contains(aoi_ee_geom, margin)
             
+            # without .buffer(margin, margin/2) I have difficultied to get the aoi that cross borders
+            # if I add it it take ages
+            
+            if not test.getInfo():
+                self.io.clear_attributes()
+                self.aoi_select_method.v_model = None
+                raise Exception("Your AOI should be included in LMIC")
+                
             # display the resulting aoi on the map
             if self.io.get_aoi_ee():
                 self.m.hide_dc()
