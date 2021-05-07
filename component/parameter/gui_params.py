@@ -39,9 +39,9 @@ criterias = {
     'Annual rainfall': {
         'header': 'bio',
         'content': [
-            {'text': 'high precipitaion',    'value': 10},
-            {'text': 'medium precipitaion', 'value': 5},
-            {'text': 'low precipitaion',    'value': 0}
+            {'text': 'high precipitaion',    'value': 5000},
+            {'text': 'medium precipitaion', 'value': 2000},
+            {'text': 'low precipitaion',    'value': 500}
         ]
     },
     'Water stress': {
@@ -58,31 +58,31 @@ criterias = {
         'header': 'bio',
         'content': [
             {'text': 'high altitude',    'value': 1000},
-            {'text': 'medium altitude', 'value': 500},
-            {'text': 'low altitude',    'value': 0},
+            {'text': 'medium altitude', 'value': 750},
+            {'text': 'low altitude',    'value': 500},
         ]
     },
     'Slope': {
         'header': 'bio',
         'content': [
-            {'text': 'high slope',    'value': 100},
-            {'text': 'medium slope', 'value': 50},
+            {'text': 'high slope',    'value': 25},
+            {'text': 'medium slope', 'value': 17},
             {'text': 'low slope',    'value': 10},
         ]
     },
     'Accessibility to cities' : {
         'header': 'socio_eco',
         'content': [
-            {'text': 'high acessibility',    'value': 1140},
+            {'text': 'high acessibility',    'value': 180},
             {'text': 'medium acessibility', 'value': 600},
             {'text': 'low acessibility',    'value': 103},
         ]
     },
-    'Population': {
+    'Population density' : {
         'header': 'socio_eco',
         'content': [
-            {'text': 'high populated',    'value': 10e6},
-            {'text': 'medium populated', 'value': 10e3},
+            {'text': 'high populated',    'value': 100},
+            {'text': 'medium populated', 'value': 55},
             {'text': 'low populated',    'value': 10},
         ]
     },
@@ -96,6 +96,14 @@ criterias = {
             {'text': 'cost a lot',    'value': 100},
             {'text': 'medium cost', 'value': 50},
             {'text': 'low cost',    'value': 10},
+        ]
+    },
+    'Property rights': {
+        'header': 'socio_eco',
+        'content': [
+            {'text': 'high variation',    'value': -12},
+            {'text': 'medium variation', 'value': -53},
+            {'text': 'low variation',    'value': -95},
         ]
     },
     "Agriculture": {
@@ -117,9 +125,9 @@ criterias = {
     'Deforestation rate':{
         'header': 'env',
         'content': [
-            {'text': 'high change',    'value': 30},
-            {'text': 'medium change', 'value': 15},
-            {'text': 'low change',    'value': 5},
+            {'text': 'high change',    'value': 40},
+            {'text': 'medium change', 'value': 20},
+            {'text': 'low change',    'value': 0},
         ]
     },
     'Climate risk': {
@@ -133,9 +141,9 @@ criterias = {
     'Natural regeneration probability': {
         'header': 'no_money',
         'content': [
-            {'text': 'high variation',    'value': 92},
-            {'text': 'medium variation', 'value': 60},
-            {'text': 'low variation',    'value': 14},
+            {'text': 'high variation',    'value': 26},
+            {'text': 'medium variation', 'value': 22},
+            {'text': 'low variation',    'value': 19},
         ]
     },
     'Declining population': {
