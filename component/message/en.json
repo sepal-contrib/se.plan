@@ -30,7 +30,7 @@
     },
     "compute": {
         "title": "Launch computation",
-        "btn": "compute the restoration dashboard",
+        "btn": "compute the restoration map",
         "desc": "**The launch button will be available after you validate your inputs**"
     },
     "constraints": {

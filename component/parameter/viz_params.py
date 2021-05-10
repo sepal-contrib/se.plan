@@ -1,8 +1,10 @@
+from .color_gradient import red_to_green
+
 # vizualisation parameters of the final_layer 
 final_viz = {
   'min'    : 1,
   'max'    : 5,
-  'palette': ["#ff0000","#f2ff10","#08ff00"],
+  'palette': red_to_green,
 }
 
 # matplotlib viz_param but in GEE
