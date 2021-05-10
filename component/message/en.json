@@ -103,5 +103,16 @@
     },
     "priority": {
         "title": "Restoration priorities"
+    },
+    "export": {
+        "title": "Export map",
+        "scale": "scale",
+        "radio": {
+            "label": "Select export method",
+            "gee": "As a GEE asset",
+            "sepal": "As a sepal file"
+        },
+        "cancel": "cancel",
+        "apply": "apply"
     }
 }

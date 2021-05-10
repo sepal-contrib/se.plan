@@ -1,3 +1,5 @@
+from pathlib import Path
+
 from sepal_ui import sepalwidgets as sw 
 from sepal_ui import mapping as sm
 import ipyvuetify as v
@@ -6,10 +8,12 @@ import geopandas as gpd
 import geemap
 import ee
 import json
+from ipyleaflet import WidgetControl
 
 from component.message import cm
 from component import parameter as cp
 from component import scripts as cs
+from component import widget as cw
 
 class MapTile(sw.Tile):
     
@@ -18,8 +22,12 @@ class MapTile(sw.Tile):
         # add the explanation
         mkd = sw.Markdown('  \n'.join(cm.map.txt))
         
+        # create a save widget 
+        self.save = cw.ExportMap()
+        
         # create the map 
         self.m = sm.SepalMap(dc=True).hide_dc()
+        self.m.add_control(WidgetControl(widget=self.save, position='topleft'))
         self.m.add_colorbar(colors=cp.red_to_green, vmin=0, vmax=5)
         
         # drawing managment
@@ -28,10 +36,9 @@ class MapTile(sw.Tile):
         # create a layout with 2 btn 
         self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2', disabled=True)
         self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=False)
-        self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
-        self.to_sepal = sw.Btn(cm.map.to_sepal, class_='ma-2', disabled=True)
+        #self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
+        #self.to_sepal = sw.Btn(cm.map.to_sepal, class_='ma-2', disabled=True)
         
-
         # ios
         self.geeio = geeio
         self.aoi_io = aoi_io
@@ -39,6 +46,7 @@ class MapTile(sw.Tile):
         # get the dashboard tile 
         self.area_tile = area_tile
         self.theme_tile = theme_tile
+        
         # create the tile
         super().__init__(
             id_ = "map_widget",
@@ -48,14 +56,14 @@ class MapTile(sw.Tile):
             btn = v.Layout(children=[
                 self.map_btn, 
                 self.compute_dashboard,
-                self.to_asset, 
-                self.to_sepal,
+                #self.to_asset, 
+                #self.to_sepal,
             ])
         )
         
         # add js behaviour 
         self.compute_dashboard.on_event('click', self._dashboard)
-        self.m.dc.on_draw(self.handle_draw)
+        self.m.dc.on_draw(self._handle_draw)
         
     def _compute(self, widget, data, event):
         """compute the restoration plan and display both the maps and the dashboard content"""
@@ -68,6 +76,7 @@ class MapTile(sw.Tile):
         # display the layer in the map
         # layer = wlcoutputs[0]
         cs.display_layer(layer, self.aoi_io, self.m)
+        self.save(layer, aoi_io.get_aoi_ee().geometry, 'a fancy naming tool')
         
         # add the possiblity to draw on the map and release the compute dashboard btn
         self.m.show_dc()
@@ -95,7 +104,8 @@ class MapTile(sw.Tile):
 
         wlcoutputs = self.geeio.wlcoutputs
 #         dev local path
-        DOWNLOADPATH = r'/home/jdilger//'
+        DOWNLOADPATH = Path('~').expanduser()
+    
         if len(self.draw_features['features']) > 0:
             # compute stats for sub aois
             featurecol_dashboard = cs.get_stats_w_sub_aoi(wlcoutputs, self.geeio, selected_info, self.draw_features)
@@ -123,21 +133,8 @@ class MapTile(sw.Tile):
         self.output.add_live_msg('Downloaded to Sepal', 'success')
         
         widget.toggle_loading()
+        
         return self
-
-    def handle_draw(self, target, action, geo_json):
-
-        geom = geemap.geojson_to_ee(geo_json, False)
-        feature = ee.Feature(geom)
-        
-        if action == "deleted" and len(self.m.draw_features) > 0:
-            self.m.draw_features.remove(feature)
-        else:
-            self.m.draw_features.append(feature)
-
-        collection = ee.FeatureCollection(self.m.draw_features)
-        self.m.draw_collection = collection
-        
         
     def _handle_draw(self, target, action, geo_json):
         """handle the draw on map event"""
