@@ -19,7 +19,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
             {'text': 'Theme'     , 'value': 'theme'},
             {'text': 'Subtheme'  , 'value': 'subtheme'},
             {'text': 'Layer name', 'value': 'name'},
-            {'text': 'Weight'    , 'value': 'weight'},
+            #{'text': 'Weight'    , 'value': 'weight'},
             {'text': 'Layer'     , 'value': 'layer'},
             {'text': 'Unit'      , 'value': 'unit'},
             {'text': 'Action'    , 'value': 'action'},
@@ -30,7 +30,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
                 'theme'   : row.theme,
                 'subtheme': row.subtheme,
                 'name'    : row.layer_name,
-                'weight'  : 0,
+                #'weight'  : 0,
                 'layer'   : row.gee_asset,
                 'unit'    : row.unit
             } for i, row in pd.read_csv(cp.layer_list).fillna('').iterrows()
@@ -109,7 +109,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         for item in tmp_table:
             if item['name'] == data['name']:
                 item.update(
-                    weight = data['weight'],
+                    #weight = data['weight'],
                     layer = data['layer'],
                     unit = data['unit']
                 )

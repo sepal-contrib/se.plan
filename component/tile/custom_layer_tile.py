@@ -91,7 +91,7 @@ class CustomizeLayerTile(sw.Tile):
             
             io_item['layer'] = item['layer']
             io_item['unit'] = item['unit']
-            io_item['weight'] = item['weight']
+            #io_item['weight'] = item['weight']
             
         return self
         
@@ -119,7 +119,7 @@ class CustomizeLayerTile(sw.Tile):
             if tmp_table[i]['name'] == dict_['name']:
                 tmp_table[i].update(
                     layer = dict_['layer'],
-                    weight = dict_['weight'],
+                    #weight = dict_['weight'],
                     unit = dict_['unit']
                 )
             
