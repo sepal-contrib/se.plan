@@ -10,8 +10,9 @@ class Constraint(sw.SepalWidget):
     
     custom_v_model = Integer().tag(sync=True)
     
-    def __init__(self, name = 'name', header='header', **kwargs):
+    def __init__(self, name = 'name', header='header', id_='id', **kwargs):
         
+        self.id = id_
         self.header = header
         self.name = name
         self.custom_v_model = -1
@@ -55,7 +56,8 @@ class Binary(v.Switch, Constraint):
             name = name,
             header=header,
             label = name,
-            v_model = True
+            v_model = True,
+            **kwargs
         )
         
 class Dropdown(v.Select, Constraint):
@@ -67,7 +69,8 @@ class Dropdown(v.Select, Constraint):
             label = name,
             header = header,
             items = items,
-            v_model = int(items[0]['value'])
+            v_model = int(items[0]['value']),
+            **kwargs
         )
         
         
@@ -83,7 +86,8 @@ class Range(v.Slider, Constraint):
             label = name,
             max = max,
             v_model = 0,
-            thumb_label=True
+            thumb_label=True,
+            **kwargs
         )
         
 class CustomPanel(v.ExpansionPanel, sw.SepalWidget):

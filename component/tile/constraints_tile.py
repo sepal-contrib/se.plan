@@ -30,13 +30,14 @@ class ConstraintTile(sw.Tile, HasTraits):
             
             header = c['header']
             value = c['content']
+            id_ = c['layer']
             
             if value == None: # binary criteria 
-                crit = cw.Binary(key, header)
+                crit = cw.Binary(key, header, id_=id_)
             elif isinstance(value, list): # dropdown values
-                crit = cw.Dropdown(key, value, header)
+                crit = cw.Dropdown(key, value, header, id_=id_)
             elif isinstance(value, int): # range values
-                crit = cw.Range(key, value, header)
+                crit = cw.Range(key, value, header, id_=id_)
                 
             self.criterias.append(crit)
             

@@ -8,11 +8,12 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, io, aoi_io):#, compute_tile):
+    def __init__(self, layer_io, aoi_io, question_io):#, compute_tile):
         
         # gather the io 
-        self.io = io
+        self.layer_io = layer_io
         self.aoi_io = aoi_io
+        self.question_io = question_io
         #self.compute_tile = compute_tile
         
         # create the layer list widget 
@@ -58,11 +59,11 @@ class ValidationTile(sw.Tile):
         widget.toggle_loading()
     
         # watch the inputs
-        self.layers_recipe.digest_layers(self.io.layer_list)
+        self.layers_recipe.digest_layers(self.layer_io, self.question_io)
         self.layers_recipe.show()
         
         # save the inputs in a json
-        cs.save_recipe(self.io, self.aoi_io)
+        #cs.save_recipe(self.io, self.aoi_io)
     
         # free the computation btn
         #self.compute_tile.btn.disabled = False

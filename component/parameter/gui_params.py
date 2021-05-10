@@ -17,26 +17,32 @@ criteria_types = {
     # integer for the max of a range input
 criterias = {
     'Current forest or ubran landscape' : {
+        'layer': 'current_landscape',
         'header' : 'geographical_scope',
         'content' : None
     },
     'Current tree cover less than potential' : {
+        'layer': 'treecover_with_potential',
         'header' : 'geographical_scope',
         'content' : None
     },
     'Bare land': {
+        'layer': None,
         'header': 'land_use',
         'content': None
     },
     'Shrub land': {
+        'layer': None,
         'header': 'land_use',
         'content': None
     },
     'Agricultural land': {
+        'layer': None,
         'header': 'land_use',
         'content': None
     },
     'Annual rainfall': {
+        'layer': 'annual_rainfall',
         'header': 'bio',
         'content': [
             {'text': 'high precipitaion',    'value': 5000},
@@ -45,6 +51,7 @@ criterias = {
         ]
     },
     'Water stress': {
+        'layer': 'water_stress',
         'header': 'bio',
         'content': [
             {'text': 'very high water stress', 'value':5},
@@ -55,6 +62,7 @@ criterias = {
         ]
     },
     'Elevation': {
+        'layer': 'elevation',
         'header': 'bio',
         'content': [
             {'text': 'high altitude',    'value': 1000},
@@ -63,6 +71,7 @@ criterias = {
         ]
     },
     'Slope': {
+        'layer': 'slope',
         'header': 'bio',
         'content': [
             {'text': 'high slope',    'value': 25},
@@ -71,6 +80,7 @@ criterias = {
         ]
     },
     'Accessibility to cities' : {
+        'layer': 'city_access',
         'header': 'socio_eco',
         'content': [
             {'text': 'high acessibility',    'value': 180},
@@ -79,6 +89,7 @@ criterias = {
         ]
     },
     'Population density' : {
+        'layer': 'population_density',
         'header': 'socio_eco',
         'content': [
             {'text': 'high populated',    'value': 100},
@@ -87,10 +98,12 @@ criterias = {
         ]
     },
     'Protected areas': {
+        'layer': 'protected_areas',
         'header': 'socio_eco',
         'content': None
     },
     'Land opportunity cost': {
+        'layer': 'opportunity_cost',
         'header': 'socio_eco',
         'content': [
             {'text': 'cost a lot',    'value': 100},
@@ -99,6 +112,7 @@ criterias = {
         ]
     },
     'Property rights': {
+        'layer': 'property_rigths',
         'header': 'socio_eco',
         'content': [
             {'text': 'high variation',    'value': -12},
@@ -107,22 +121,27 @@ criterias = {
         ]
     },
     "Agriculture": {
+        'layer': None,
         'header': 'treecover',
         'content': 100
     },
     "Rangeland": {
+        'layer': None,
         'header': 'treecover',
         'content': 100
     },
     "Grassland": {
+        'layer': None,
         'header': 'treecover',
         'content': 100
     },
     "Settlements": {
+        'layer': None,
         'header': 'treecover',
         'content': 100
     },
     'Deforestation rate':{
+        'layer': 'deforestation_rate',
         'header': 'env',
         'content': [
             {'text': 'high change',    'value': 40},
@@ -131,6 +150,7 @@ criterias = {
         ]
     },
     'Climate risk': {
+        'layer': 'climate_risk',
         'header': 'env',
         'content': [
             {'text': 'high climate risk',    'value': 25},
@@ -139,6 +159,7 @@ criterias = {
         ]
     },
     'Natural regeneration probability': {
+        'layer': 'natural_regeneration',
         'header': 'no_money',
         'content': [
             {'text': 'high variation',    'value': 26},
@@ -147,6 +168,7 @@ criterias = {
         ]
     },
     'Declining population': {
+        'layer': 'declining_population',
         'header': 'no_money',
         'content': None
     }

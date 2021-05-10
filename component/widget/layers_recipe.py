@@ -1,3 +1,5 @@
+import json
+
 import ipyvuetify as v 
 from sepal_ui import sepalwidgets as sw
 import pandas as pd
@@ -22,15 +24,19 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
         # display the default values (all with default layer and 0 valued weight)
         self.digest_layers()
         
-    def digest_layers(self, layer_list=None):
+    def digest_layers(self, layer_io=None, question_io=None):
         """
-        Digest the layers as a json list. This list should be composed of at least 5 information : name, layer, weight, theme and subtheme
+        Digest the layers as a json list. This list should be composed of at least 5 information : name, layer, theme and subtheme
         When digestion, the layout will represent each layer sorted by categories
         fore each one of them if the layer used is the default one we'll write default, if not the name of the layer. 
         for each one of them the value of the weight will also be set
         """
         
+        if layer_io == None or question_io == None:
+            return self
+        
         # read the json str into a panda dataframe
+        layer_list = layer_io.layer_list
         layer_list = pd.DataFrame(layer_list) if layer_list else self.LAYER_LIST
         
         # get all the themes 
@@ -55,6 +61,11 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                 # cannot make the slots work with icons so I need to move to intermediate layout 
                 # the color have 7 values and there are only 5 weight 
                 if row['theme'] == 'benefits':
+                    
+                    # get the weight from questionnaire
+                    weight = json.loads(question_io.priorities)[row['subtheme']]
+                    
+                    # create the widget
                     theme_layer_widgets.append(v.Row(
                         class_ = 'ml-2 mr-2',
                         children = [
@@ -62,18 +73,22 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                                 small=True,
                                 hint = row["layer"] if row["layer"] != original_asset else "default",
                                 persistent_hint = True,
-                                color = cp.gradient(11)[row['weight']],
+                                color = cp.gradient(5)[weight],
                                 readonly = True,
                                 v_model = row['name']
                             ),
                             v.Icon(
                                 class_ = 'ml-2',
-                                color = cp.gradient(11)[row['weight']],
-                                children = [f"mdi-numeric-{row['weight']}-circle"]
+                                color = cp.gradient(5)[weight],
+                                children = [f"mdi-numeric-{weight}-circle"]
                             )
                         ]
                     ))
-                else:
+                elif row['name'] not in ["Terrestrial ecoregions", 'Current land cover', 'Establishment cost']:
+                    
+                    # get the activation from questionnaire_io 
+                    active = json.loads(question_io.constraints)[row['name']] == -1
+                    
                     theme_layer_widgets.append(v.Row(
                         class_ = 'ml-2 mr-2',
                         children = [
@@ -81,7 +96,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                                 small=True,
                                 hint = row["layer"] if row["layer"] != original_asset else "default",
                                 persistent_hint = True,
-                                color = cp.gradient(2)[row['weight']],
+                                color = cp.gradient(2)[active],
                                 readonly = True,
                                 v_model = row['name']
                             ),
