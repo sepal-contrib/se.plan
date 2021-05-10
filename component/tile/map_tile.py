@@ -26,9 +26,11 @@ class MapTile(sw.Tile):
         self.draw_features = {'type': 'FeatureCollection', 'features': []}
         
         # create a layout with 2 btn 
+        self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2', disabled=True)
+        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=False)
         self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
         self.to_sepal = sw.Btn(cm.map.to_sepal, class_='ma-2', disabled=True)
-        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=False)
+        
 
         # ios
         self.geeio = geeio
@@ -44,15 +46,39 @@ class MapTile(sw.Tile):
             inputs = [mkd, self.m],
             output = sw.Alert(),
             btn = v.Layout(children=[
+                self.map_btn, 
+                self.compute_dashboard,
                 self.to_asset, 
                 self.to_sepal,
-                self.compute_dashboard
             ])
         )
         
         # add js behaviour 
         self.compute_dashboard.on_event('click', self._dashboard)
         self.m.dc.on_draw(self.handle_draw)
+        
+    def _compute(self, widget, data, event):
+        """compute the restoration plan and display both the maps and the dashboard content"""
+    
+        widget.toggle_loading()
+    
+        # create a layer and a dashboard 
+        layer = self.geeio.wlc()
+        # setattr(self, geeio, geeio)
+        # display the layer in the map
+        # layer = wlcoutputs[0]
+        cs.display_layer(layer, self.aoi_io, self.m)
+        
+        # add the possiblity to draw on the map and release the compute dashboard btn
+        self.m.show_dc()
+        
+        # display the dashboard 
+        # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output
+        # self.theme_tile.dev_set_summary(dashboard) # calling it without argument will lead to fake output
+    
+        widget.toggle_loading()
+        
+        return self
     
     def _dashboard(self, widget, data, event):
         
