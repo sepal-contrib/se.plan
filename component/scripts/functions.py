@@ -60,7 +60,7 @@ class gee_compute:
 
         return layer
 
-    def constraints_hight_low_bool (self,value, contratint_bool, name, layer_id):
+    def constraints_hight_low_bool(self,value, contratint_bool, name, layer_id):
         
         layer = {'theme':'constraints'}
         layer['name'] = name 

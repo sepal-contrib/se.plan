@@ -47,6 +47,11 @@ class MapTile(sw.Tile):
         self.area_tile = area_tile
         self.theme_tile = theme_tile
         
+        #init the final layers 
+        self.final_layer = None
+        self.area_dashboard = None
+        self.theme_dashboard = None
+        
         # create the tile
         super().__init__(
             id_ = "map_widget",
@@ -67,19 +72,19 @@ class MapTile(sw.Tile):
         self.map_btn.on_event('click', self._compute)
         
     def _compute(self, widget, data, event):
-        """compute the restoration plan and display both the maps and the dashboard content"""
+        """compute the restoration plan and display the map"""
     
         widget.toggle_loading()
     
         try: 
         
             # create a layer and a dashboard 
-            layer = self.geeio.wlc()
+            self.final_layer = self.geeio.wlc()
             # setattr(self, geeio, geeio)
             # display the layer in the map
             # layer = wlcoutputs[0]
-            cs.display_layer(layer, self.aoi_io, self.m)
-            self.save.set_data(layer, self.aoi_io.get_aoi_ee().geometry())
+            cs.display_layer(self.final_layer, self.aoi_io, self.m)
+            self.save.set_data(self.final_layer, self.aoi_io.get_aoi_ee().geometry())
         
             # add the possiblity to draw on the map and release the compute dashboard btn
             self.m.show_dc()
@@ -100,42 +105,53 @@ class MapTile(sw.Tile):
         
         final_dashboard = sw.Markdown("**No dashboarding function yet**")
         
-        selected_info = self.aoi_io.get_not_null_attrs()
+        # useless we will use the get_aoi_name method included in the aoi_io object
+        #selected_info = self.aoi_io.get_not_null_attrs()
         
-        final_layer = self.m.ee_layer_dict['restoration layer']['ee_object']
-        
-        # convert the drawn features to ee.FeatureCollection 
-        ee_feature_collection = geemap.geojson_to_ee(self.draw_features)
+        # useless it is now saved as a member
+        #final_layer = self.m.ee_layer_dict['restoration layer']['ee_object']
+            
+        #ee_feature_collection = geemap.geojson_to_ee(self.draw_features)
 
-        wlcoutputs = self.geeio.wlcoutputs
+        # retreive the area and theme json result
+        self.area_dashboard, self.theme_dashboard = cs.get_stats(
+            self.geeio,
+            self.aoi_io,
+            self.draw_features
+        )
+        
+        
+        #wlcoutputs = self.geeio.wlcoutputs
 #         dev local path
-        DOWNLOADPATH = Path('~').expanduser()
+        #DOWNLOADPATH = Path('~').expanduser()
     
-        if len(self.draw_features['features']) > 0:
-            # compute stats for sub aois
-            featurecol_dashboard = cs.get_stats_w_sub_aoi(wlcoutputs, self.geeio, selected_info, self.draw_features)
+    
+    
+        #if len(self.draw_features['features']) > 0:
+        #    # compute stats for sub aois
+        #    featurecol_dashboard = cs.get_stats_w_sub_aoi(wlcoutputs, self.geeio, selected_info, self.draw_features)
 
             # export sub aoi stats
             # cs.export_stats(featurecol_dashboard)
             # grab csv 
             
-        else:
-            featurecol_dashboard = cs.get_stats_as_feature_collection(wlcoutputs, self.geeio, selected_info)
-            exportname = cs.export_stats(featurecol_dashboard)
-            cs.gee.wait_for_completion(exportname, self.output)
-            # grab json
-            gdrive = cs.gdrive()
-            file = gdrive.get_files(f'{exportname}.geojson')
-            gdrive.download_files(file,DOWNLOADPATH)
-        
-        
-        with open(f"{DOWNLOADPATH}{file[0]['name']}",'r') as f:
-            json_results = json.load(f)
+        #else:
+        #    featurecol_dashboard = cs.get_stats_as_feature_collection(wlcoutputs, self.geeio, selected_info)
+        #    exportname = cs.export_stats(featurecol_dashboard)
+        #    cs.gee.wait_for_completion(exportname, self.output)
+        #    # grab json
+        #    gdrive = cs.gdrive()
+        #    file = gdrive.get_files(f'{exportname}.geojson')
+        #    gdrive.download_files(file,DOWNLOADPATH)
+        #
+        #
+        #with open(f"{DOWNLOADPATH}{file[0]['name']}",'r') as f:
+        #    json_results = json.load(f)
     
-        self.theme_tile.dev_set_summary(json_results)
-        self.area_tile.set_summary(json_results)
+        #self.theme_tile.dev_set_summary(json_results)
+        #self.area_tile.set_summary(json_results)
         
-        self.output.add_live_msg('Downloaded to Sepal', 'success')
+        #self.output.add_live_msg('Downloaded to Sepal', 'success')
         
         widget.toggle_loading()
         

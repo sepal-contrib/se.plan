@@ -35,41 +35,35 @@ def count_quintiles(image, geometry, scale=100):
     
     return histogram_quintile
 
-def get_aoi_name(selected_info):
-    # i think this is useless as the aoi_io embed a get_aoi_name method
-    
-    if 'country_code' in selected_info:
-        selected_name = selected_info['country_code']
-    elif isinstance(selected_info,str):
-        selected_name = selected_info
-    else:
-        # TODO : add this to lang.json 
-        selected_name = 'Custom Area of Interest'
-        
-    return selected_name
+#def get_aoi_name(selected_info):
+#    # i think this is useless as the aoi_io embed a get_aoi_name method
+#    
+#    if 'country_code' in selected_info:
+#        selected_name = selected_info['country_code']
+#    elif isinstance(selected_info,str):
+#        selected_name = selected_info
+#    else:
+#        # TODO : add this to lang.json 
+#        selected_name = 'Custom Area of Interest'
+#        
+#    return selected_name
 
-def get_image_stats(image, geeio, selected_info, mask, total, scale=100, **kwargs):
-    """ computes quntile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
+def get_image_stats(image, geeio, name, mask, total, geom, scale=100):
+    """ computes quintile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
     
-    # check if aoi other than whole area is being summarized.
-    if 'aoi' in kwargs:
-        aoi = kwargs['aoi']
-    else:
-        aoi = geeio.aoi_io.get_aoi_ee()
-    
-    aoi_as_fc = ee.FeatureCollection(geeio.aoi_io.get_aoi_ee())
+    #aoi_as_fc = ee.FeatureCollection(geeio.aoi_io.get_aoi_ee())
 
     # should move quintile norm out of geeio at some point...along with all other utilities
-    image_quin, bad_features = geeio.quintile_normalization(image,aoi_as_fc)
+    image_quin, bad_features = geeio.quintile_normalization(image,geeio.aoi_io.get_aoi_ee())
     image_quin = image_quin.where(mask.eq(0),6)
-    quintile_frequency = count_quintiles(image_quin, aoi)
+    quintile_frequency = count_quintiles(image_quin, geom)
 
-    selected_name = get_aoi_name(selected_info)
+    #selected_name = get_aoi_name(selected_info)
     list_values = ee.Dictionary(quintile_frequency.values().get(0)).values()
 
     out_dict = ee.Dictionary({
         'suitibility':{
-            selected_name :{
+            name:{
                 'values':list_values,
                 'total' : total,
                 'geedic':quintile_frequency
@@ -120,7 +114,7 @@ def get_image_percent_cover(image, aoi, name):
     return ee.Dictionary({name:value})
     
 def get_image_sum(image, aoi, name, mask):
-    """ computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
+    """computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
      
     sum_img = image.updateMask(mask).reduceRegion(
         reducer = ee.Reducer.sum(), 
@@ -143,37 +137,40 @@ def get_image_sum(image, aoi, name, mask):
     
     return ee.Dictionary({name:value})
 
-def get_summary_statistics(wlcoutputs, aoi, geeio, selected_info):
+def get_summary_statistics(geeio, name, geom):
     """returns summarys for the dashboard.""" 
 
-    count_aoi = get_aoi_count(aoi, 'aoi_count')
+    count_aoi = get_aoi_count(geom, 'aoi_count')
 
-    # restoration sutibuility
-    wlc, benefits, constraints, costs = wlcoutputs
+    # restoration suitability
+    wlc, benefits, constraints, costs = geeio.wlcoutputs
     mask = ee.ImageCollection(list(map(lambda i: ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
-    wlc_summary = get_image_stats(wlc, geeio, selected_info, mask, count_aoi.values().get(0),aoi=aoi)
+    wlc_summary = get_image_stats(wlc, geeio, name, mask, count_aoi.values().get(0), geom)
 
-    try:
-        layer_list = geeio.rp_layers_io.layer_list
-    except:
-        layer_list = layerlist
+    #try:
+    layer_list = geeio.rp_layers_io.layer_list
+    #except:
+    #    layer_list = layerlist
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
     all_benefits_layers = [i for i in layer_list if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
-    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), all_benefits_layers))})
+    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
 
     # costs
-    costs_out = ee.Dictionary({'costs':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], mask), costs))})
+    costs_out = ee.Dictionary({'costs':list(map(lambda i : get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})
 
     #constraints
-    constraints_out =ee.Dictionary({'constraints':list(map(lambda i : get_image_percent_cover(i['eeimage'],aoi, i['name']), constraints))}) 
+    constraints_out =ee.Dictionary({'constraints':list(map(lambda i : get_image_percent_cover(i['eeimage'],geom, i['name']), constraints))}) 
 
-    return wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
+    #combine the result 
+    result = wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
+    
+    return ee.String.encodeJSON(result).getInfo()
 
 
 def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
@@ -204,6 +201,26 @@ def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, features):
     combined = aoi_stats.merge(sub_stats)
     
     return combined
+
+def get_stats(geeio, aoi_io, features):
+    
+    # create a name list
+    names = [aoi_io.get_aoi_name() if not i else f'Sub region {i}' for i in range(len(features['features']))]
+    
+    # create the final featureCollection 
+    # the first one is the aoi and the rest are sub areas
+    ee_aoi_list = [aoi_io.get_aoi_ee()]
+    for feat in  features['features']:
+        ee_aoi_list += geemap.geojson_to_ee(feat)
+        
+    # create the stats dictionnary
+    #stats = [get_summary_statistics(geom, geeio, selected_info)
+        
+    stats = [get_summary_statistics(geeio, names[i], geom) for i, geom in enumerate(ee_aoi_list)]
+    
+    print(stats)
+    
+    return None, None
 
 def export_stats(fc):
     
