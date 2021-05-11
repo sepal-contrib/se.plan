@@ -104,14 +104,6 @@ class MapTile(sw.Tile):
         widget.toggle_loading()
         
         final_dashboard = sw.Markdown("**No dashboarding function yet**")
-        
-        # useless we will use the get_aoi_name method included in the aoi_io object
-        #selected_info = self.aoi_io.get_not_null_attrs()
-        
-        # useless it is now saved as a member
-        #final_layer = self.m.ee_layer_dict['restoration layer']['ee_object']
-            
-        #ee_feature_collection = geemap.geojson_to_ee(self.draw_features)
 
         # retreive the area and theme json result
         self.area_dashboard, self.theme_dashboard = cs.get_stats(
@@ -120,38 +112,8 @@ class MapTile(sw.Tile):
             self.draw_features
         )
         
-        
-        #wlcoutputs = self.geeio.wlcoutputs
-#         dev local path
-        #DOWNLOADPATH = Path('~').expanduser()
-    
-    
-    
-        #if len(self.draw_features['features']) > 0:
-        #    # compute stats for sub aois
-        #    featurecol_dashboard = cs.get_stats_w_sub_aoi(wlcoutputs, self.geeio, selected_info, self.draw_features)
-
-            # export sub aoi stats
-            # cs.export_stats(featurecol_dashboard)
-            # grab csv 
-            
-        #else:
-        #    featurecol_dashboard = cs.get_stats_as_feature_collection(wlcoutputs, self.geeio, selected_info)
-        #    exportname = cs.export_stats(featurecol_dashboard)
-        #    cs.gee.wait_for_completion(exportname, self.output)
-        #    # grab json
-        #    gdrive = cs.gdrive()
-        #    file = gdrive.get_files(f'{exportname}.geojson')
-        #    gdrive.download_files(file,DOWNLOADPATH)
-        #
-        #
-        #with open(f"{DOWNLOADPATH}{file[0]['name']}",'r') as f:
-        #    json_results = json.load(f)
-    
-        #self.theme_tile.dev_set_summary(json_results)
-        #self.area_tile.set_summary(json_results)
-        
-        #self.output.add_live_msg('Downloaded to Sepal', 'success')
+        self.theme_tile.dev_set_summary(self.theme_dashboard)
+        self.area_tile.set_summary(self.area_dashboard)
         
         widget.toggle_loading()
         
