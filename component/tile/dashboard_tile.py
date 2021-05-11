@@ -19,46 +19,13 @@ class DashThemeTile(sw.Tile):
             id_ = "dashboard_widget",
             title = cm.dashboard.theme.title,
         )
-    def clean_theme(self,json_dashboard):
-        """ Prepares the dashboard export for plotting on the theme area of the dashboard by appending values for each layer and AOI into a single dictionary. 
-        args:
-            json_dashboard (dict): The loaded geojson of the exported dashboard feature collection. Each feature with summary values for benefits, costs, risks and constraints. 
 
-        returns:
-            json_thmemes_values (dict):Theme formatted dictionay of {THEME: {LAYER: 'total':float, 'values':[float]}}
-        """
-        tmp_dict = {}
-        names = []
-
-        for feature in json_dashboard['features']:
-            for k,val in feature['properties'].items():
-                if k not in tmp_dict:
-                    tmp_dict[k] ={}
-                for layer in feature['properties'][k]:
-                    if isinstance(layer, str):
-                        names.append(layer)
-                        continue
-                    layer_name = next(iter(layer))
-                    layer_value = layer[layer_name]['values'][0]
-                    layer_total = layer[layer_name]['total'][0]
-
-                    if layer_name not in tmp_dict[k]:
-                        tmp_dict[k][layer_name] = {'values':[],'total':0}
-                        tmp_dict[k][layer_name]['values'].append(layer_value)
-                        tmp_dict[k][layer_name]['total'] = layer_total
-                    else:
-                        tmp_dict[k][layer_name]['values'].append(layer_value)
-                        tmp_dict[k][layer_name]['total'] = max(layer_total,tmp_dict[k][layer_name]['total'])
-        tmp_dict['names'] = names
-        tmp_dict.pop('suitibility',None)
-        
-        return tmp_dict
 
     def dev_set_summary(self, json_themes_values):
         benefits_layer = []
         constraints_layer = []
         costs_layer = []
-        json_themes_values = self.clean_theme(json_themes_values)
+
         for k,val in json_themes_values.items():
             for layer in json_themes_values[k]:
                 if k == 'name':
@@ -176,12 +143,6 @@ class DashRegionTile(sw.Tile):
                     ]
                 }
             }
-        else:
-            tmp = {}
-            for k in json_feature_values['features']:
-                tmp.update(k['properties']['suitibility'])
-            json_feature_values = tmp
-
         feats = []
         for feat in json_feature_values:
             
