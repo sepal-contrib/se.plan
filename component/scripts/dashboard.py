@@ -87,6 +87,7 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
         scale= 100,
         maxPixels = 1e12
     ).get('groups')
+
     areas_list = ee.List(areas).map(lambda i : ee.Dictionary(i).get('sum'))
     total = areas_list.reduce(ee.Reducer.sum())
 
@@ -302,63 +303,3 @@ def export_stats(fc):
 
     return desc
 
-
-if __name__ == "__main__":
-    
-    # TODO are you still using it ? 
-    
-    # dev
-    from test_gee_compute_params import *
-    from functions import *
-    
-    ee.Initialize()
-    
-    io = fake_io()
-    io_default = fake_default_io()
-    region = fake_aoi_io()
-    layerlist = io.layer_list
-
-    aoi = region.get_aoi_ee()
-    geeio = gee_compute(region,io,io_default,io)
-    wlcoutputs= geeio.wlc()
-    wlc_out = wlcoutputs[0]
-    selected_info = [None]
-    # test getting as fc for export
-    t7 = get_stats_as_feature_collection(wlcoutputs,geeio,selected_info)
-    # print(t7.getInfo())
-    f = getdownloadasurl(t7)
-    print(f, type(f))
-
-    # test wrapper
-    # t0 = get_summary_statistics(wlcoutputs,geeio)
-    # print(t0.getInfo())
-    # get wlc quntiles  
-    # t1 = get_image_stats(wlc_out, geeio, selected_info)
-    # print(t1.getInfo())
-
-    # get dict of quintile counts for wlc
-    # print(type(wlc_out),wlc_out.bandNames().getInfo())
-    # wlc_quintile, bad_features = geeio.quintile_normalization(wlc_out,ee.FeatureCollection(aoi))
-    # t2 = count_quintiles(wlc_quintile, aoi)
-    # print(ee.Dictionary(t2.get('constant')).values().getInfo())
-
-    # test getting aoi count
-    # count_aoi = get_aoi_count(aoi, 'aoi_count')
-    # print(count_aoi.values().getInfo())
-    
-    # c = wlcoutputs[2]
-    # # print(c)
-    # cimg = ee.ImageCollection(list(map(lambda i : ee.Image(i['eeimage']).byte(), c))).min()
-    # # print(cimg)
-
-    # a = wlcoutputs[1][0]
-    # # print(a)
-
-    # # b = get_image_count(a['eeimage'],aoi, a['name'])
-    # # # print(b.getInfo())
-    # all_benefits_layers = [i for i in layerlist if i['theme'] == 'benefits']
-    # list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
-
-    # t = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],aoi, i['name'], cimg), all_benefits_layers))})
-    # # # seemingly works... worried a bout total areas all being same, but might be aoi
-    # print(t.getInfo())
