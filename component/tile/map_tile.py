@@ -34,8 +34,8 @@ class MapTile(sw.Tile):
         self.draw_features = {'type': 'FeatureCollection', 'features': []}
         
         # create a layout with 2 btn 
-        self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2', disabled=True)
-        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=False)
+        self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')#, disabled=True)
+        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2')#, disabled=False)
         #self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
         #self.to_sepal = sw.Btn(cm.map.to_sepal, class_='ma-2', disabled=True)
         
@@ -64,27 +64,32 @@ class MapTile(sw.Tile):
         # add js behaviour 
         self.compute_dashboard.on_event('click', self._dashboard)
         self.m.dc.on_draw(self._handle_draw)
+        self.map_btn.on_event('click', self._compute)
         
     def _compute(self, widget, data, event):
         """compute the restoration plan and display both the maps and the dashboard content"""
     
         widget.toggle_loading()
     
-        # create a layer and a dashboard 
-        layer = self.geeio.wlc()
-        # setattr(self, geeio, geeio)
-        # display the layer in the map
-        # layer = wlcoutputs[0]
-        cs.display_layer(layer, self.aoi_io, self.m)
-        self.save(layer, aoi_io.get_aoi_ee().geometry, 'a fancy naming tool')
+        try: 
         
-        # add the possiblity to draw on the map and release the compute dashboard btn
-        self.m.show_dc()
+            # create a layer and a dashboard 
+            layer = self.geeio.wlc()
+            # setattr(self, geeio, geeio)
+            # display the layer in the map
+            # layer = wlcoutputs[0]
+            cs.display_layer(layer, self.aoi_io, self.m)
+            self.save.set_data(layer, self.aoi_io.get_aoi_ee().geometry())
         
-        # display the dashboard 
-        # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output
-        # self.theme_tile.dev_set_summary(dashboard) # calling it without argument will lead to fake output
-    
+            # add the possiblity to draw on the map and release the compute dashboard btn
+            self.m.show_dc()
+        
+            # display the dashboard 
+            # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output
+            # self.theme_tile.dev_set_summary(dashboard) # calling it without argument will lead to fake output
+        except Exception as e:
+            self.output.add_msg(f'{e}', 'error')
+            
         widget.toggle_loading()
         
         return self

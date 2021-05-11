@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pathlib import Path
 
 import ee
 import io
@@ -40,14 +41,15 @@ class gdrive(object):
             for item in items:
                 print('{0} ({1})'.format(item['name'], item['id']))
 
-    def get_items(self):
+    def get_items(self, mimeType='image/tiff'):
         """ get all the items in the Gdrive, items will have 2 columns, 'name' and 'id' """ 
+        
         service = self.service
         
         # get list of files
         results = service.files().list( 
-            q ="fullText contains 'restoration_dashboard_' and trashed = false",
-            pageSize=100, 
+            q =f"mimeType='{mimeType}' and trashed = false",
+            pageSize=1000, 
             fields="nextPageToken, files(id, name)").execute()
         items = results.get('files', [])
 
@@ -66,7 +68,12 @@ class gdrive(object):
         return files
                                 
     def download_files(self, files, local_path):
+        """download the selected files to the selected local_path"""
+        
         service = self.service
+        
+        # cast as path
+        local_path = Path(local_path)
         
         for fId in files:
             request = service.files().get_media(fileId=fId['id'])
@@ -77,9 +84,12 @@ class gdrive(object):
                 status, done = downloader.next_chunk()
                 #print('Download %d%%.' % int(status.progress() * 100))
             
-            fo = open(local_path+fId['name'], 'wb')
-            fo.write(fh.getvalue())
-            fo.close()
+            with (local_path/fId['name']).open('wb') as fo:
+                fo.write(fh.getvalue())
+            
+            #fo = open(local_path+fId['name'], 'wb')
+            #fo.write(fh.getvalue())
+            #fo.close()
 
     def delete_files(self, files):
 

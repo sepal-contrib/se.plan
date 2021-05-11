@@ -95,6 +95,9 @@ class ValidationTile(sw.Tile):
 
             # validate the aoi 
             #self.aoi_tile.aoi_select_btn.fire_event('click','')
+        
+        # automatically validate them 
+        self.btn.fire_event('click', None)
 
         self.recipe_output.add_msg('loaded', 'success')
 

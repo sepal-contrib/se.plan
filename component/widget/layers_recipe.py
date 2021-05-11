@@ -19,7 +19,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
     
     def __init__(self):
         
-        super().__init__(class_='mt-5', accordion=True, focusable=True)
+        super().__init__(class_='mt-5 mb-5', accordion=True, focusable=True)
         
         # display the default values (all with default layer and 0 valued weight)
         self.digest_layers()

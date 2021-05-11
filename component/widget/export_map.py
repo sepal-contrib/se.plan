@@ -1,7 +1,9 @@
 from datetime import datetime as dt
+from pathlib import Path
 
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw 
+from sepal_ui.scripts import gee
 import ee 
 
 from component.message import cm
@@ -84,7 +86,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         #self.w_cancel.on_event('click', self._cancel)
         self.w_apply.on_event('click', self._apply)
         
-    def set_data(self, dataset, geometry, name):
+    def set_data(self, dataset, geometry, name=None):
         """set the dataset and the geometry to allow the download"""
         
         self.geometry = geometry
@@ -103,12 +105,18 @@ class ExportMap(v.Menu, sw.SepalWidget):
     def _apply(self, widget, event, data):
         """download the dataset using the given parameters"""
         
+        #print(self.dataset)
+        #print(self.geometry)
+        
+        folder = Path(ee.data.getAssetRoots()[0]['id'])
+        
         # check if a dataset is existing
         if self.dataset == None or self.geometry == None:
+            print('toto')
             return self
         
         # set the parameters
-        name = self.name or dt.now().strftime("%Y/%m/%d-%H:%M:%S")
+        name = self.name or dt.now().strftime("%Y-%m-%d_%H-%M-%S")
         export_params = {
             'image': self.dataset,
             'description': name,
@@ -117,20 +125,26 @@ class ExportMap(v.Menu, sw.SepalWidget):
         }
         
         # launch the task 
-        if self.w_method == 'gee':
-            export_params.update(assassetId=name)
-            task = ee.Batch.Export.image.toAsset(**export_params)
+        if self.w_method.v_model == 'gee':
+            export_params.update(assetId=str(folder/name))
+            task = ee.batch.Export.image.toAsset(**export_params)
             task.start()
-            self.alert("the task have been launched in your GEE acount", "success")
+            self.alert.add_msg("the task have been launched in your GEE acount", "success")
             
-        elif self.w_method == 'sepal':
-            task = ee.Batch.Export.image.toDrive(**export_params)
-            task.start()
-            cs.gee.wait_for_completion(name, self.alert)
+        elif self.w_method.v_model == 'sepal':
+            
             gdrive = cs.gdrive()
+            
             files = gdrive.get_files(name)
+            if files == []:
+                task = ee.batch.Export.image.toDrive(**export_params)
+                task.start()
+                gee.wait_for_completion(name, self.alert)
+                files = gdrive.get_files(name)
+                
             gdrive.download_files(files, cp.result_dir)
-            self.alert("map exported", "success")
+            gdrive.delete_files(files)
+            self.alert.add_msg("map exported", "success")
             
         return self
         

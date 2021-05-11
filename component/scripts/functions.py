@@ -4,7 +4,7 @@ try:
     from component import parameter as cp
 except:
     # TODO is there still configurations where you don't manage to load the parameters ? 
-    print('paramters not imported useing default range criterias list')
+    print('paramters not imported using default range criterias list')
     class cp:
         criterias = {
             'Landscape variation in natural regeneration success':[],
@@ -17,18 +17,20 @@ except:
             'Population':[],
             'Opportunity cost':[]
         }
+        
+from component import io
 
 ee.Initialize()
 
 class gee_compute:
     
-    def __init__(self, rp_aoi_io, rp_layers_io, rp_default_layer_io, rp_questionaire_io):
+    def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
         
         self.aoi_io = rp_aoi_io
         # self.selected_aoi = self.aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
-        self.rp_default_layer = rp_default_layer_io.layer_list
+        self.rp_default_layer = io.CustomizeLayerIo().layer_list #rp_default_layer_io.layer_list
 
         # results
         self.wlcoutputs = None
@@ -312,8 +314,10 @@ class gee_compute:
         
         layerlist = self.rp_layers_io.layer_list
         constraints = json.loads(self.rp_questionaire_io.constraints)
+        priorities = json.loads(self.rp_questionaire_io.priorities)
+        
         # load layers and create eeimages
-        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and i['weight'] != 0]
+        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and priorities[i['subtheme']] != 0]
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), benefits_layers))
 
         risks_layers = [i for i in layerlist if i['theme'] == 'risks']
@@ -327,11 +331,11 @@ class gee_compute:
         list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
         # note: need to have check for geometry either here or before it reaches here...
-        self.normalize_benefits(benefits_layers,method='quintile')
+        self.normalize_benefits(benefits_layers, method='quintile')
         
         # normalize benefit weights to 0 - 1 
-        sum_weights =sum(i['weight'] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round(100 + (i['weight' ] / sum_weights), 5) }), benefits_layers))
+        sum_weights =sum(priorities[i['subtheme']] for i in benefits_layers)
+        list(map(lambda i : i.update({'norm_weight': round(100 + (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
