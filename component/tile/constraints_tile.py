@@ -62,7 +62,26 @@ class ConstraintTile(sw.Tile, HasTraits):
         
         # link the visibility of each criteria to the select widget
         [c.observe(self._on_change, 'custom_v_model') for c in self.criterias]
-        self.panels.observe(self._on_panel_change, 'v_model')         
+        self.panels.observe(self._on_panel_change, 'v_model')   
+        
+    def load_data(self, data):
+        """load the data from a json string"""
+        
+        # load the data
+        data = json.loads(data)
+        
+        # activate every criteria via their panels selector
+        for p in self.panels.children:
+            for c in p.criterias:
+                criterias = []
+                for k, v in data.items():
+                    if c.name == k and v!= -1:
+                        c.v_model = v
+                        criterias.append(c.name)
+            p.select.v_model = criterias
+            p.shrunk()
+        
+        return self
     
     def _on_change(self, change):
         

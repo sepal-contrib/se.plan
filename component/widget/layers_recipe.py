@@ -87,7 +87,9 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                 elif row['name'] not in ["Terrestrial ecoregions", 'Current land cover', 'Establishment cost']:
                     
                     # get the activation from questionnaire_io 
-                    active = json.loads(question_io.constraints)[row['name']] == -1
+                    active = json.loads(question_io.constraints)[row['name']] != -1
+                    
+                    #print(f'{row["name"]}: {active}')
                     
                     theme_layer_widgets.append(v.Row(
                         class_ = 'ml-2 mr-2',
@@ -102,7 +104,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                             ),
                             v.Icon(
                                 class_ = 'ml-2',
-                                color = cp.gradient(2)[row['weight']],
+                                color = cp.gradient(2)[active],
                                 children = ["mdi-circle-slice-8"]
                             )
                         ]

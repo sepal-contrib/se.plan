@@ -8,13 +8,18 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, layer_io, aoi_io, question_io):#, compute_tile):
+    def __init__(self, aoi_tile, questionnaire_tile, layer_tile):#, compute_tile):
         
         # gather the io 
-        self.layer_io = layer_io
-        self.aoi_io = aoi_io
-        self.question_io = question_io
+        self.layer_io = layer_tile.io
+        self.aoi_io = aoi_tile.io
+        self.question_io = questionnaire_tile.io
         #self.compute_tile = compute_tile
+        
+        # gather the tiles that need to be filled
+        self.layer_tile = layer_tile
+        self.aoi_tile = aoi_tile
+        self.questionnaire_tile = questionnaire_tile
         
         # create the layer list widget 
         self.layers_recipe = cw.layerRecipe().hide()
@@ -51,7 +56,7 @@ class ValidationTile(sw.Tile):
         
         # js behaviours 
         self.btn.on_event('click', self._validate_data)
-        #self.reset_to_recipe.on_event('click', self.load_recipe)
+        self.reset_to_recipe.on_event('click', self.load_recipe)
         
     def _validate_data(self, widget, event, data):
         """validate the data and release the computation btn"""
@@ -63,7 +68,7 @@ class ValidationTile(sw.Tile):
         self.layers_recipe.show()
         
         # save the inputs in a json
-        #cs.save_recipe(self.io, self.aoi_io)
+        cs.save_recipe(self.layer_io, self.aoi_io, self.question_io)
     
         # free the computation btn
         #self.compute_tile.btn.disabled = False
@@ -72,35 +77,35 @@ class ValidationTile(sw.Tile):
         
         return self
     
-    #def load_recipe(self, widget, event, data, path=None):
-    #    """load the recipe file into the different io, then update the display of the table"""
-#
-    #    # toogle the btns
-    #    self.reset_to_questionnaire.toggle_loading()
-    #    widget.toggle_loading()
-#
-    #    # check if path is set, if not use the one frome file select 
-    #    path = path or self.file_select.v_model
-#
-    #    try:
-    #        cs.load_recipe(self.io, self.aoi_tile.io, path)
-#
-    #        # reload the values in the table
-    #        self.apply_values(self.io.layer_list)
-#
-    #        # validate the aoi 
-    #        self.aoi_tile.aoi_select_btn.fire_event('click','')
-#
-    #        self.recipe_output.add_msg('loaded', 'success')
-#
-    #    except Exception as e:
-    #        self.recipe_output.add_msg(str(e), 'error')
-#
-    #    # toogle the btns
-    #    self.reset_to_questionnaire.toggle_loading()
-    #    widget.toggle_loading()
-#
-    #    return self
+    def load_recipe(self, widget, event, data, path=None):
+        """load the recipe file into the different io, then update the display of the table"""
+        
+        # toogle the btns
+        #self.reset_to_questionnaire.toggle_loading()
+        #widget.toggle_loading()
+
+        # check if path is set, if not use the one frome file select 
+        path = path or self.file_select.v_model
+        
+        #try:
+        cs.load_recipe(self.layer_tile, self.aoi_tile, self.questionnaire_tile, path)
+
+            # reload the values in the table
+            #self.apply_values(self.layer_io.layer_list)
+
+            # validate the aoi 
+            #self.aoi_tile.aoi_select_btn.fire_event('click','')
+
+        self.recipe_output.add_msg('loaded', 'success')
+
+        #except Exception as e:
+        #    self.recipe_output.add_msg(str(e), 'error')
+
+        # toogle the btns
+        #self.reset_to_questionnaire.toggle_loading()
+        #widget.toggle_loading()
+
+        return self
     
 #class ComputeTile(sw.Tile):
 #    

@@ -64,7 +64,7 @@ class PriorityTable(v.SimpleTable):
         
         line = change['owner']._metadata['label']
         
-        # if checkbox is unique and chang == false recheck 
+        # if checkbox is unique and change == false recheck 
         if change['new'] == False:
             unique = True
             for check in self.checkbox_list[line]:
@@ -86,4 +86,15 @@ class PriorityTable(v.SimpleTable):
             self.v_model = json.dumps(tmp)
             
         return
+    
+    def load_data(self, data):
+        """load the data from a questionnaire io"""
+        
+        data = json.loads(data)
+        
+        # check the appropriate checkboxes 
+        for k, v in data.items():
+            self.checkbox_list[k][v].v_model = True
+        
+        return self
             

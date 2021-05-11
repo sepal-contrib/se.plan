@@ -95,41 +95,41 @@ class CustomizeLayerTile(sw.Tile):
             
         return self
         
-    #def apply_values(self, layers_values):
-    #    """Apply the value that are in the layer values table. layer_values should have the exact same structure as the io define in this file"""
-    #    
-    #    # small check on the layer_value structure
-    #    if len(layers_values) != len(self.io.layer_list):
-    #        return
-    #    
-    #    
-    #    # create a tmp list of items
-    #    # update it with the current values in self.table.items
-    #    tmp_table = []
-    #    for i, item in enumerate(self.table.items):
-    #        tmp_table.append({})
-    #        for k in item.keys():
-    #            tmp_table[i][k] = item[k]
-    #        
-    #    
-    #    # apply the modification to the widget (the io will follow with the observe methods)
-    #    for i, dict_ in enumerate(layers_values):
-    #        
-    #        # apply them to the table
-    #        if tmp_table[i]['name'] == dict_['name']:
-    #            tmp_table[i].update(
-    #                layer = dict_['layer'],
-    #                #weight = dict_['weight'],
-    #                unit = dict_['unit']
-    #            )
-    #        
-    #    # change the actual value of items 
-    #    self.table.items = tmp_table
-    #        
-    #    # notify the change to rest of the app 
-    #    self.table.change_model += 1
-    #                 
-    #    return self
+    def apply_values(self, layers_values):
+        """Apply the value that are in the layer values table. layer_values should have the exact same structure as the io define in this file"""
+        
+        # small check on the layer_value structure
+        if len(layers_values) != len(self.io.layer_list):
+            return
+        
+        
+        # create a tmp list of items
+        # update it with the current values in self.table.items
+        tmp_table = []
+        for i, item in enumerate(self.table.items):
+            tmp_table.append({})
+            for k in item.keys():
+                tmp_table[i][k] = item[k]
+            
+        
+        # apply the modification to the widget (the io will follow with the observe methods)
+        for i, dict_ in enumerate(layers_values):
+            
+            # apply them to the table
+            if tmp_table[i]['name'] == dict_['name']:
+                tmp_table[i].update(
+                    layer = dict_['layer'],
+                    #weight = dict_['weight'],
+                    unit = dict_['unit']
+                )
+            
+        # change the actual value of items 
+        self.table.items = tmp_table
+            
+        # notify the change to rest of the app 
+        self.table.change_model += 1
+                     
+        return self
     
     #def _apply_questionnaire(self, widget, event, data):
     #    """apply the answer to the questionnaire to the datatable"""

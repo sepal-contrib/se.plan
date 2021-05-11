@@ -51,6 +51,15 @@ class QuestionnaireTile (sw.Tile):
         self.constraint_tile.observe(self.__on_constraint, 'custom_v_model')
         self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
         
+    def load_data(self, data):
+        """load a questionnaire from a dict source"""
+        
+        # reload constraints 
+        self.constraint_tile.load_data(data.constraints)
+        
+        # reload priorities 
+        self.priority_tile.table.load_data(data.priorities)
+        
     def __on_constraint(self, change):
         self.io.constraints = change['new']
         return
