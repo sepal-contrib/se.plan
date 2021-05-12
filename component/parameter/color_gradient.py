@@ -1,7 +1,7 @@
 red_to_green = [
-    "#F21B1B", # red
-    "#F2BB16", # yellow
-    "#118EBF"   # blue
+    "#fc8d59", # red
+    "#ffffbf", # yellow
+    "#91bfdb"   # blue
 ]
 
 def hex_to_RGB(hex):
