@@ -21,7 +21,7 @@ class DashThemeTile(sw.Tile):
         )
 
 
-    def dev_set_summary(self, json_themes_values):
+    def dev_set_summary(self, json_themes_values, aoi_name):
         benefits_layer = []
         constraints_layer = []
         costs_layer = []
@@ -34,9 +34,9 @@ class DashThemeTile(sw.Tile):
                 name = layer
                 try:
                     if k == 'benefits':
-                        benefits_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'],  json_themes_values[k][layer]['total']))
+                        benefits_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'], aoi_name)) #json_themes_values[k][layer]['total']))
                     elif k == 'costs':
-                        costs_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'],  json_themes_values[k][layer]['total']))
+                        costs_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'], aoi_name)) #json_themes_values[k][layer]['total']))
                     elif k == 'constraints':
                         constraints_layer.append(cw.LayerPercentage(name, json_themes_values[k][layer]['values']))
 
@@ -45,77 +45,102 @@ class DashThemeTile(sw.Tile):
                     continue
         
         benefits = v.Html(tag='h2', children= ['Benefits'])
-
         benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
+        
         costs = v.Html(tag='h2', children= ['Costs'])
-            
         costs_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.cost))
+        
         constraints = v.Html(tag='h2', children=['Constraints'])
-            
         constraints_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.constraint))
-        self.set_content(
-               [benefits, benefits_txt] + benefits_layer \
-               + [costs, costs_txt] + costs_layer \
-               + [constraints, constraints_txt] + constraints_layer
-            )
+        
+        # create an expansion panel to store everything 
+        ep = v.ExpansionPanels(
+            children = [
+                v.ExpansionPanel(
+                    children = [
+                        v.ExpansionPanelHeader(children = [benefits, benefits_txt]),
+                        v.ExpansionPanelContent(children=benefits_layer)
+                    ]
+                ),
+                v.ExpansionPanel(
+                    children = [
+                        v.ExpansionPanelHeader(children = [costs, costs_txt]),
+                        v.ExpansionPanelContent(children=costs_layer)
+                    ]
+                ),
+                v.ExpansionPanel(
+                    children = [
+                        v.ExpansionPanelHeader(children = [constraints, constraints_txt]),
+                        v.ExpansionPanelContent(children=constraints_layer)
+                    ]
+                )
+            ]
+        )
+        
+        self.set_content([ep])
+        #self.set_content(
+        #       [benefits, benefits_txt] + benefits_layer \
+        #       + [costs, costs_txt] + costs_layer \
+        #       + [constraints, constraints_txt] + constraints_layer
+        #    )
         
         return self
             
 
-    def set_summary(self, json_themes_values=None):
-        
-        # if none create fake data 
-        if json_themes_values == None:
-            
-            json_themes_values = {'benefits': {}, 'costs': {}, 'constraint': {}}
-            
-            layer_list = pd.read_csv(cp.layer_list).fillna('')
-            
-            for row in layer_list.iterrows():
-                
-                if row[1].theme in ['benefits', 'costs']:
-                    
-                    json_themes_values[row[1].theme][row[1].layer_name] = {
-                        'values': [int(random()*100) for _ in range(6)],
-                        'total': 100
-                    }
-                    
-                elif row[1].theme == 'constraint': 
-                    json_themes_values[row[1].theme][row[1].layer_name] = {
-                        'values': [int(random()*100) for _ in range(6)]
-                    }
-                    
-            benefits = v.Html(tag='h2', children= ['Benefits'])
-
-            benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
-            
-            benefits_layer = []
-            for layer in json_themes_values['benefits']:
-                benefits_layer.append(cw.LayerFull(layer, json_themes_values['benefits'][layer]['values'], json_themes_values['benefits'][layer]['total']))
-                
-            costs = v.Html(tag='h2', children= ['Costs'])
-            
-            costs_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.cost))
-            
-            costs_layer= []
-            for layer in json_themes_values['costs']:
-                costs_layer.append(cw.LayerFull(layer, json_themes_values['costs'][layer]['values'], json_themes_values['costs'][layer]['total']))
-                
-            constraints = v.Html(tag='h2', children=['Constraints'])
-            
-            constraints_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.constraint))
-            
-            constraints_layer = []
-            for layer in json_themes_values['constraint']:
-                constraints_layer.append(cw.LayerPercentage(layer, json_themes_values['constraint'][layer]['values']))
-                                   
-            self.set_content(
-               [benefits, benefits_txt] + benefits_layer \
-               + [costs, costs_txt] + costs_layer \
-               + [constraints, constraints_txt] + constraints_layer
-            )
-        
-        return self
+    #def set_summary(self, json_themes_values=None):
+    #    
+    #    # if none create fake data 
+    #    if json_themes_values == None:
+    #        
+    #        json_themes_values = {'benefits': {}, 'costs': {}, 'constraint': {}}
+    #        
+    #        layer_list = pd.read_csv(cp.layer_list).fillna('')
+    #        
+    #        for row in layer_list.iterrows():
+    #            
+    #            if row[1].theme in ['benefits', 'costs']:
+    #                
+    #                json_themes_values[row[1].theme][row[1].layer_name] = {
+    #                    'values': [int(random()*100) for _ in range(6)],
+    #                    'total': 100
+    #                }
+    #                
+    #            elif row[1].theme == 'constraint': 
+    #                json_themes_values[row[1].theme][row[1].layer_name] = {
+    #                    'values': [int(random()*100) for _ in range(6)]
+    #                }
+    #                
+    #        benefits = v.Html(tag='h2', children= ['Benefits'])
+#
+    #        benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
+    #        
+    #        benefits_layer = []
+    #        for layer in json_themes_values['benefits']:
+    #            benefits_layer.append(cw.LayerFull(layer, json_themes_values['benefits'][layer]['values'], json_themes_values['benefits'][layer]['total']))
+    #            
+    #        costs = v.Html(tag='h2', children= ['Costs'])
+    #        
+    #        costs_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.cost))
+    #        
+    #        costs_layer= []
+    #        for layer in json_themes_values['costs']:
+    #            costs_layer.append(cw.LayerFull(layer, json_themes_values['costs'][layer]['values'], json_themes_values['costs'][layer]['total']))
+    #            
+    #        constraints = v.Html(tag='h2', children=['Constraints'])
+    #        
+    #        constraints_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.constraint))
+    #        
+    #        constraints_layer = []
+    #        for layer in json_themes_values['constraint']:
+    #            constraints_layer.append(cw.LayerPercentage(layer, json_themes_values['constraint'][layer]['values']))
+    #                               
+    #        self.set_content(
+    #           [benefits, benefits_txt] + benefits_layer \
+    #           + [costs, costs_txt] + costs_layer \
+    #           + [constraints, constraints_txt] + constraints_layer
+    #        )
+    #    
+    #    return self
             
 class DashRegionTile(sw.Tile):
     

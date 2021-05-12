@@ -112,7 +112,7 @@ class MapTile(sw.Tile):
             self.draw_features
         )
         
-        self.theme_tile.dev_set_summary(self.theme_dashboard)
+        self.theme_tile.dev_set_summary(self.theme_dashboard, self.aoi_io.get_aoi_name())
         self.area_tile.set_summary(self.area_dashboard)
         
         widget.toggle_loading()

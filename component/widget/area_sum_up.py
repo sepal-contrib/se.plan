@@ -16,19 +16,25 @@ class AreaSumUp(v.Layout):
         # get the total surface for ratio
         total_surface = sum(surfaces)
         
+        # normalize surfaces 
+        norm_surfaces = [(s/total_surface)*100 for s in surfaces] 
+        #print(norm_surfaces)
+        
         # create a matplotlib stack horizontal bar chart 
         chart = Output()
         with chart:
             
             # create the chart
-            fig, ax = plt.subplots(figsize=[50, 2])
+            fig, ax = plt.subplots(figsize=[50, 2], facecolor=((0,0,0,0)))
             
             # add the axis
-            for i, surface in enumerate(surfaces):
-                ax.barh(title, surface, left=sum(surfaces[:i]), color=self.COLORS[i])
+            for i, surface in enumerate(norm_surfaces):
+                ax.barh(title, surface, left=sum(norm_surfaces[:i]), color=self.COLORS[i])
             
             # cosmetic tuning
+            ax.set_xlim(0, 100)
             ax.set_axis_off()
+            #ax.set_facecolor((.0, .0, .0, .0))
 
             plt.show()
         
@@ -36,12 +42,12 @@ class AreaSumUp(v.Layout):
         head = [v.Html(tag='thead', children = [v.Html(tag='tr', children = [v.Html(tag='th', children = [name]) for name in self.NAMES])])]
         
         self.rows = []
-        for clr, ptl, val in zip(self.COLORS, self.POTENTIALS, surfaces):
+        for clr, ptl, val, norm in zip(self.COLORS, self.POTENTIALS, surfaces, norm_surfaces):
     
             row = v.Html(tag='tr', children=[
                 v.Html(tag='td', children=[ptl], style_=f"color: {clr}",),
                 v.Html(tag='td', children=[f'{float(val):.1f}']),
-                v.Html(tag='td', children=[f'{float(val/sum(surfaces)):.1f}'])
+                v.Html(tag='td', children=[f'{float(norm):.1f}'])
             ])
     
             self.rows.append(row)
