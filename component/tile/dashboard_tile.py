@@ -145,11 +145,21 @@ class DashRegionTile(sw.Tile):
             }
         feats = []
         for feat in json_feature_values:
-            
-            feats.append(cw.AreaSumUp(feat, json_feature_values[feat]['values']))
+            raw = json_feature_values[feat]['values']
+            feats.append(cw.AreaSumUp(feat, self.format_values(raw)))
                          
         self.set_content(feats)
                          
         return self
                          
-         
+    def format_values(self, raw):
+        computed = [i['image'] for i in raw]
+        out_values = []
+        for i in range(1,7):
+            if i in computed:
+                index_i = next(item['sum'] for item in raw if item['image'] == i)
+            else:
+                index_i = 0
+            out_values.append(index_i)
+
+        return out_values
