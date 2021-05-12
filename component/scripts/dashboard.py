@@ -35,9 +35,10 @@ def get_areas(image, geometry, scale=100):
         maxPixels = 1e12
     ).get('groups')
     areas_list = ee.List(areas).map(lambda i : ee.Dictionary(i).get('sum'))
+
     total = areas_list.reduce(ee.Reducer.sum())
 
-    return areas_list, total
+    return areas, total
 
 def get_image_stats(image, geeio, name, mask, total, geom, scale=100):
     """ computes quintile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
