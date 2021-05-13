@@ -4,36 +4,58 @@ import ipyvuetify as v
 from component import scripts as cs
 from component.message import cm
 from component import widget as cw
+from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, io, aoi_io, compute_tile):
+    def __init__(self, aoi_tile, questionnaire_tile, layer_tile):
         
         # gather the io 
-        self.io = io
-        self.aoi_io = aoi_io
-        self.compute_tile = compute_tile
+        self.layer_io = layer_tile.io
+        self.aoi_io = aoi_tile.io
+        self.question_io = questionnaire_tile.io
+        
+        # gather the tiles that need to be filled
+        self.layer_tile = layer_tile
+        self.aoi_tile = aoi_tile
+        self.questionnaire_tile = questionnaire_tile
         
         # create the layer list widget 
-        self.layers_recipe = cw.layerRecipe()
+        self.layers_recipe = cw.layerRecipe().hide()
         mkd = sw.Markdown('  \n'.join(cm.valid.txt))
         
         # add the btn and output 
         self.valid = sw.Btn(cm.valid.display, class_ = 'ma-1')
-        self.save = sw.Btn(cm.valid.save, class_ = 'ma-1', disabled = True)
         self.output = sw.Alert()
+        
+        # add the recipe loader
+        self.reset_to_recipe = sw.Btn(text=cm.custom.recipe.apply,icon='mdi-download', class_='ml-2')
+        self.file_select = sw.FileInput(['.json'], cp.result_dir, cm.custom.recipe.file)
+        self.recipe_output = sw.Alert()
+        ep = v.ExpansionPanels(class_="mt-5", children=[v.ExpansionPanel(children=[
+            v.ExpansionPanelHeader(
+                disable_icon_rotate = True,
+                children=[cm.custom.recipe.title],
+                v_slots = [{
+                    'name': 'actions',
+                    'children' : v.Icon(children=['mdi-download'])
+                }]
+            ),
+            v.ExpansionPanelContent(children=[self.file_select, self.reset_to_recipe, self.recipe_output])
+        ])])
         
         # create the tile 
         super().__init__(
-            id_ = compute_tile._metadata['mount_id'],
-            inputs= [self.layers_recipe, mkd],
+            id_ = "compute_widget",
+            inputs= [ep, mkd, self.layers_recipe],
             title = cm.valid.title,
-            btn = v.Row(children = [self.valid, self.save]),
+            btn = sw.Btn(cm.valid.display, class_ = 'ma-1'),
             output = self.output
         )
         
         # js behaviours 
-        self.valid.on_event('click', self._validate_data)
+        self.btn.on_event('click', self._validate_data)
+        self.reset_to_recipe.on_event('click', self.load_recipe)
         
     def _validate_data(self, widget, event, data):
         """validate the data and release the computation btn"""
@@ -41,67 +63,38 @@ class ValidationTile(sw.Tile):
         widget.toggle_loading()
     
         # watch the inputs
-        #cs.sum_up(self.aoi_io, self.io, self.output)
-        self.layers_recipe.digest_layers(self.io.layer_list)
-    
-        # free the computation btn
-        self.compute_tile.btn.disabled = False
-        self.save.disabled = False
+        self.layers_recipe.digest_layers(self.layer_io, self.question_io)
+        self.layers_recipe.show()
+        
+        # save the inputs in a json
+        cs.save_recipe(self.layer_io, self.aoi_io, self.question_io)
     
         widget.toggle_loading()
         
         return self
     
-class ComputeTile(sw.Tile):
-    
-    def __init__(self, io, default_io, aoi_io, m, area_tile, theme_tile, questionaire_io):
+    def load_recipe(self, widget, event, data, path=None):
+        """load the recipe file into the different io, then update the display of the table"""
         
-        # gather the ios 
-        self.io = io
-        self.default_io = default_io
-        self.aoi_io = aoi_io
-        self.questionaire_io = questionaire_io
-        
-        # get the map
-        self.m = m
-        
-        # get the dashboard tile 
-        self.area_tile = area_tile
-        self.theme_tile = theme_tile
-        
-        # add the widgets 
-        compute_txt = sw.Markdown(cm.compute.desc)
-        
-        self.btn = sw.Btn(cm.compute.btn, disabled=True)
-        self.output = sw.Alert()
-        
-        # create the tile 
-        super().__init__(
-            id_ = "compute_widget",
-            title = cm.compute.title,
-            inputs = [compute_txt],
-            btn = self.btn,
-            output = self.output
-        )
-        
-        # add the js behaviours 
-        self.btn.on_event('click', self._compute)
-        
-    def _compute(self, widget, data, event):
-        """compute the restoration plan and display both the maps and the dashboard content"""
-    
+        # toogle the btns
         widget.toggle_loading()
-    
-        # create a layer and a dashboard 
-        layer, dashboard = cs.compute_layers(self.aoi_io, self.io, self.default_io, self.questionaire_io)
-    
-        # display the layer in the map
-        cs.display_layer(layer, self.aoi_io, self.m)
+
+        # check if path is set, if not use the one frome file select 
+        path = path or self.file_select.v_model
         
-        # display the dashboard 
-        self.area_tile.set_summary() # calling it without argument will lead to fake output
-        self.theme_tile.set_summary() # calling it without argument will lead to fake output
-    
+        try:
+            
+            cs.load_recipe(self.layer_tile, self.aoi_tile, self.questionnaire_tile, path)
+
+            # automatically validate them 
+            self.btn.fire_event('click', None)
+
+            self.recipe_output.add_msg('loaded', 'success')
+
+        except Exception as e:
+            self.recipe_output.add_msg(str(e), 'error')
+
+        # toogle the btns
         widget.toggle_loading()
-        
+
         return self

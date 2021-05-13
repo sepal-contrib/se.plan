@@ -1,6 +1,8 @@
 import json
 
 import ipyvuetify as v
+import pandas as pd 
+import numpy as np
 
 from component import parameter as cp
 
@@ -16,14 +18,17 @@ class PriorityTable(v.SimpleTable):
         
     _colors = cp.gradient(5)
     
-    _DEFAULT_V_MODEL = {name: 0 for name in cp.priorities}
+    _BENEFITS = pd.read_csv(cp.layer_list).fillna('')
+    _BENEFITS = _BENEFITS[_BENEFITS.theme == 'benefits'].subtheme.unique()
+    
+    _DEFAULT_V_MODEL = {name: 0 for name in _BENEFITS}
     
     def __init__(self):
         
         
         # construct the checkbox list
         self.checkbox_list = {}
-        for name in cp.priorities:
+        for name in self._BENEFITS:
             line = []
             for i, color in enumerate(self._colors):
                 line.append(v.Checkbox(
@@ -35,7 +40,7 @@ class PriorityTable(v.SimpleTable):
             
         # construct the rows of the table
         rows = []
-        for name in cp.priorities:
+        for name in self._BENEFITS:
             row  = [v.Html(tag = 'td', children = [name])]
             for j in range(len(self._colors)):
                 row.append(v.Html(tag = 'td', children = [self.checkbox_list[name][j]]))
@@ -56,7 +61,7 @@ class PriorityTable(v.SimpleTable):
         )
         
         # link the checks with the v_model
-        for name in cp.priorities:
+        for name in self._BENEFITS:
             for check in self.checkbox_list[name]:
                 check.observe(self._on_check_change, 'v_model')
         
@@ -64,7 +69,7 @@ class PriorityTable(v.SimpleTable):
         
         line = change['owner']._metadata['label']
         
-        # if checkbox is unique and chang == false recheck 
+        # if checkbox is unique and change == false recheck 
         if change['new'] == False:
             unique = True
             for check in self.checkbox_list[line]:
@@ -86,4 +91,15 @@ class PriorityTable(v.SimpleTable):
             self.v_model = json.dumps(tmp)
             
         return
+    
+    def load_data(self, data):
+        """load the data from a questionnaire io"""
+        
+        data = json.loads(data)
+        
+        # check the appropriate checkboxes 
+        for k, v in data.items():
+            self.checkbox_list[k][v].v_model = True
+        
+        return self
             

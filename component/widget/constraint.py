@@ -10,8 +10,9 @@ class Constraint(sw.SepalWidget):
     
     custom_v_model = Integer().tag(sync=True)
     
-    def __init__(self, name = 'name', header='header', **kwargs):
+    def __init__(self, name = 'name', header='header', id_='id', **kwargs):
         
+        self.id = id_
         self.header = header
         self.name = name
         self.custom_v_model = -1
@@ -55,7 +56,8 @@ class Binary(v.Switch, Constraint):
             name = name,
             header=header,
             label = name,
-            v_model = True
+            v_model = True,
+            **kwargs
         )
         
 class Dropdown(v.Select, Constraint):
@@ -67,7 +69,8 @@ class Dropdown(v.Select, Constraint):
             label = name,
             header = header,
             items = items,
-            v_model = int(items[0]['value'])
+            v_model = int(items[0]['value']),
+            **kwargs
         )
         
         
@@ -83,7 +86,8 @@ class Range(v.Slider, Constraint):
             label = name,
             max = max,
             v_model = 0,
-            thumb_label=True
+            thumb_label=True,
+            **kwargs
         )
         
 class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
@@ -99,17 +103,18 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         # link the criterias to the select 
         self.criterias = [c.disable() for c in criterias if c.header == category] 
         self.select = v.Select(
-             class_='mt-5',
-            small_chips    = True,
-            v_model  = None,
-            items    = [c.name for c in self.criterias],
-            label    = cm.constraints.criteria_lbl,
+            class_ = 'mt-5',
+            small_chips = True,
+            v_model = None,
+            items = [c.name for c in self.criterias],
+            label = cm.constraints.criteria_lbl,
             multiple = True,
             deletable_chips = True
         )
             
         # create the content, nothing is selected by default so Select should be empty and criterias hidden 
-        self.content = v.ExpansionPanelContent(children=[v.Layout(row=True, children=[self.select]+[v.Flex(xs12=True, children=[c]) for c in self.criterias])])
+        criteria_flex = [v.Flex(xs12=True, children=[c]) for c in self.criterias]
+        self.content = v.ExpansionPanelContent(children=[v.Layout(row=True, children=[self.select]+criteria_flex)])
         
         # create the actual panel
         super().__init__(children=[self.header, self.content])

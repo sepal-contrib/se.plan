@@ -30,18 +30,20 @@ class ConstraintTile(sw.Tile, HasTraits):
             
             header = c['header']
             value = c['content']
+            id_ = c['layer']
             
             if value == None: # binary criteria 
-                crit = cw.Binary(key, header)
+                crit = cw.Binary(key, header, id_=id_)
             elif isinstance(value, list): # dropdown values
-                crit = cw.Dropdown(key, value, header)
+                crit = cw.Dropdown(key, value, header, id_=id_)
             elif isinstance(value, int): # range values
-                crit = cw.Range(key, value, header)
+                crit = cw.Range(key, value, header, id_=id_)
                 
             self.criterias.append(crit)
             
         # create the each expansion-panel content 
         self.panels = v.ExpansionPanels(
+            focusable=True,
             v_model=None, 
             hover=True,
             accordion=True,
@@ -60,7 +62,26 @@ class ConstraintTile(sw.Tile, HasTraits):
         
         # link the visibility of each criteria to the select widget
         [c.observe(self._on_change, 'custom_v_model') for c in self.criterias]
-        self.panels.observe(self._on_panel_change, 'v_model')         
+        self.panels.observe(self._on_panel_change, 'v_model')   
+        
+    def load_data(self, data):
+        """load the data from a json string"""
+        
+        # load the data
+        data = json.loads(data)
+        
+        # activate every criteria via their panels selector
+        for p in self.panels.children:
+            for c in p.criterias:
+                criterias = []
+                for k, v in data.items():
+                    if c.name == k and v!= -1:
+                        c.v_model = v
+                        criterias.append(c.name)
+            p.select.v_model = criterias
+            p.shrunk()
+        
+        return self
     
     def _on_change(self, change):
         

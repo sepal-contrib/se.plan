@@ -1,11 +1,17 @@
+from pathlib import Path 
+import json 
+
 from sepal_ui import sepalwidgets as sw 
 import ipyvuetify as v
+import ee 
 
 from component import widget as cw
 from component.message import cm
 from component import io as cio
 from component import scripts as cs
 from component import parameter as cp
+
+ee.Initialize()
         
 class CustomizeLayerTile(sw.Tile):
     
@@ -14,52 +20,30 @@ class CustomizeLayerTile(sw.Tile):
         # link the ios to the tile
         self.io = io
         self.questionnaire_io = questionnaire_io
-        
-        # name the tile
-        id_ = "manual_widget"
-        title = cm.custom.title
-        
-        # create the btns
-        self.reset_to_questionnaire = sw.Btn(
-            text   = cm.custom.question_btn, 
-            icon   = 'mdi-file-question-outline',
-            class_ = 'ml-5 mr-2'
-        )
-        self.reset_to_questionnaire.color = 'success'
-        
-        self.reset_to_default = sw.Btn(
-            text   = cm.custom.default_btn,
-            icon   = 'mdi-restore', 
-            class_ = 'ml-2'
-        )
-        self.reset_to_default.color = 'warning'
-        
-        self.btn_line = v.Row(
-            class_   = 'mb-3',
-            children = [self.reset_to_questionnaire, self.reset_to_default]
-        )
+        self.aoi_tile = aoi_tile
         
         self.table = cw.LayerTable(aoi_tile)
         
         # create the txt 
         self.txt = sw.Markdown(cm.custom.desc)
+
+        self.reset_to_recipe = sw.Btn(
+            text   = cm.custom.recipe.apply,
+            icon   = 'mdi-download', 
+            class_ = 'ml-2',
+            color = 'success'
+        )
         
         # build the tile 
         super().__init__(
-            id_, 
-            title,
-            inputs = [
-                self.txt,
-                self.btn_line,
-                self.table
-            ],
+            "manual_widget", 
+            cm.custom.title,
+            inputs = [self.txt, self.table],
             **kwargs
         )
         
         # js behaviours
         self.table.observe(self._on_item_change, 'change_model')
-        self.reset_to_default.on_event('click', self._apply_default)
-        self.reset_to_questionnaire.on_event('click', self._apply_questionnaire)
         
     def _on_item_change(self, change):
             
@@ -70,7 +54,6 @@ class CustomizeLayerTile(sw.Tile):
             
             io_item['layer'] = item['layer']
             io_item['unit'] = item['unit']
-            io_item['weight'] = item['weight']
             
         return self
         
@@ -80,7 +63,6 @@ class CustomizeLayerTile(sw.Tile):
         # small check on the layer_value structure
         if len(layers_values) != len(self.io.layer_list):
             return
-        
         
         # create a tmp list of items
         # update it with the current values in self.table.items
@@ -97,8 +79,7 @@ class CustomizeLayerTile(sw.Tile):
             # apply them to the table
             if tmp_table[i]['name'] == dict_['name']:
                 tmp_table[i].update(
-                    layer  = dict_['layer'],
-                    weight = dict_['weight'],
+                    layer = dict_['layer'],
                     unit = dict_['unit']
                 )
             
@@ -108,49 +89,4 @@ class CustomizeLayerTile(sw.Tile):
         # notify the change to rest of the app 
         self.table.change_model += 1
                      
-        return self 
-    
-    def _apply_default(self, widget, data, event):
-        """apply the default layer table to the layer_io"""
-        
-        # toggle the btns
-        self.reset_to_default.toggle_loading()
-        self.reset_to_questionnaire.toggle_loading()
-    
-        # load a default layer_io 
-        self.apply_values(cio.default_layer_io.layer_list)
-    
-        # manually change the items
-        # for no reason the display items doesn't upload programatically
-        new_items = self.table.items.copy()
-        self.table.items = new_items
-    
-        # toggle the btns
-        self.reset_to_default.toggle_loading()
-        self.reset_to_questionnaire.toggle_loading()
-    
-        return self 
-    
-    def _apply_questionnaire(self, widget, event, data):
-        """apply the answer to the questionnaire to the datatable"""
-        
-        # toggle the btns
-        self.reset_to_default.toggle_loading()
-        self.reset_to_questionnaire.toggle_loading()
-    
-        # process the questionnaire to produce a layer list 
-        layers_values = cs.compute_questionnaire(self.questionnaire_io)
-        self.apply_values(layers_values)
-    
-        # manually change the items
-        # for no reason the display items doesn't upload programatically
-        new_items = self.table.items.copy()
-        self.table.items = new_items
-    
-        # toggle the btns
-        self.reset_to_default.toggle_loading()
-        self.reset_to_questionnaire.toggle_loading()
-    
-        return self 
-        
-        
+        return self
