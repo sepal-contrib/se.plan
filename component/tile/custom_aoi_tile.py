@@ -32,7 +32,7 @@ class CustomTileAoi(TileAoi):
                 .geometry() \
                 .contains(aoi_ee_geom, margin)
             
-            # without .buffer(margin, margin/2) I have difficultied to get the aoi that cross borders
+            # without .buffer(margin, margin/2) I have difficulties to get the aoi that cross borders
             # if I add it it take ages
             
             if not test.getInfo():

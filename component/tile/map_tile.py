@@ -38,10 +38,8 @@ class MapTile(sw.Tile):
         self.colors = []
         
         # create a layout with 2 btn 
-        self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')#, disabled=True)
-        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2')#, disabled=False)
-        #self.to_asset = sw.Btn(cm.map.to_asset, class_='ma-2', disabled=True)
-        #self.to_sepal = sw.Btn(cm.map.to_sepal, class_='ma-2', disabled=True)
+        self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')
+        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2')
         
         # ios
         self.geeio = geeio
@@ -84,18 +82,14 @@ class MapTile(sw.Tile):
         
             # create a layer and a dashboard 
             self.final_layer = self.geeio.wlc()
-            # setattr(self, geeio, geeio)
+            
             # display the layer in the map
-            # layer = wlcoutputs[0]
             cs.display_layer(self.final_layer, self.aoi_io, self.m)
             self.save.set_data(self.final_layer, self.aoi_io.get_aoi_ee().geometry())
         
             # add the possiblity to draw on the map and release the compute dashboard btn
             self.m.show_dc()
         
-            # display the dashboard 
-            # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output
-            # self.theme_tile.dev_set_summary(dashboard) # calling it without argument will lead to fake output
         except Exception as e:
             self.output.add_msg(f'{e}', 'error')
             
@@ -133,8 +127,6 @@ class MapTile(sw.Tile):
     def _dashboard(self, widget, data, event):
         
         widget.toggle_loading()
-        
-        #final_dashboard = sw.Markdown("**No dashboarding function yet**")
         
         # handle the drawing features, affect them with a color an display them on the map as layers
         self._save_features()

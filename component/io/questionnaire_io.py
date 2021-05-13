@@ -1,6 +1,8 @@
 import random 
 import json
 
+import pandas as pd 
+
 from component import parameter as cp
 
 class QuestionnaireIo():
@@ -36,5 +38,7 @@ for name, dict_ in cp.criterias.items():
 default_questionnaire_io.constraints = json.dumps(criterias)
 
 # questionnaire_io.priorities = { priorityName: value from 0 to 4 } for each priority as json dict
-priorities = {p: random.randint(0,4) for p in cp.priorities}
+benefits = pd.read_csv(cp.layer_list).fillna('')
+benefits = benefits[benefits.theme == 'benefits'].subtheme.unique() 
+priorities = {p: random.randint(0,4) for p in benefits}
 default_questionnaire_io.priorities = json.dumps(priorities)

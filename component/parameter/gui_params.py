@@ -11,6 +11,7 @@ criteria_types = {
 
 # list of the available constraint criteria
 # the "header" describe the category of the concstraint 
+# the "layer" describe the layer to use 
 # the "content" how it should be used
     # None for binary inputs 
     # dict for dropdown
@@ -173,10 +174,3 @@ criterias = {
         'content': None
     }
 }
-
-# list of the available priorities for the priority tile
-priorities = [
-    'Local livelihoods',
-    'Wood production',
-    'Non-timber tree benefits',
-]

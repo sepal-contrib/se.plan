@@ -27,7 +27,6 @@ class gee_compute:
     def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
         
         self.aoi_io = rp_aoi_io
-        # self.selected_aoi = self.aoi_io.get_aoi_ee()
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
         self.rp_default_layer = io.CustomizeLayerIo().layer_list #rp_default_layer_io.layer_list

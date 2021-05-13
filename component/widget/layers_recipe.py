@@ -89,8 +89,6 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                     # get the activation from questionnaire_io 
                     active = json.loads(question_io.constraints)[row['name']] != -1
                     
-                    #print(f'{row["name"]}: {active}')
-                    
                     theme_layer_widgets.append(v.Row(
                         class_ = 'ml-2 mr-2',
                         children = [

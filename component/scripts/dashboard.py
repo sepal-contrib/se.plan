@@ -1,7 +1,6 @@
 import ee
 import json
 from datetime import datetime as dt
-
 import os
 
 import geemap
@@ -42,23 +41,17 @@ def get_areas(image, geometry, scale=100):
 
 def get_image_stats(image, geeio, name, mask, total, geom, scale=100):
     """ computes quintile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
-    
-    #aoi_as_fc = ee.FeatureCollection(geeio.aoi_io.get_aoi_ee())
 
     # should move quintile norm out of geeio at some point...along with all other utilities
     image_quin, bad_features = geeio.quintile_normalization(image,geeio.aoi_io.get_aoi_ee())
     image_quin = image_quin.where(mask.eq(0),6)
     list_values, total = get_areas(image_quin, geom)
 
-    #selected_name = get_aoi_name(selected_info)
-    # list_values = ee.Dictionary(quintile_frequency.values().get(0)).values()
-
     out_dict = ee.Dictionary({
         'suitibility':{
             name:{
                 'values':list_values,
                 'total' : total
-                # 'geedic':quintile_frequency
             }
         }
     })
@@ -170,10 +163,7 @@ def get_summary_statistics(geeio, name, geom):
     # restoration pot. stats
     wlc_summary = get_image_stats(wlc, geeio, name, mask, count_aoi.values().get(0), geom)
 
-    #try:
     layer_list = geeio.rp_layers_io.layer_list
-    #except:
-    #    layer_list = layerlist
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
@@ -192,36 +182,6 @@ def get_summary_statistics(geeio, name, geom):
     result = wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
     
     return ee.String.encodeJSON(result).getInfo()
-
-
-def get_stats_as_feature_collection(wlcoutputs, geeio, selected_info,**kwargs):
-    
-    # get the aoi 
-    if 'aoi' in kwargs:
-        aoi = kwargs['aoi']
-    else:
-        aoi = geeio.aoi_io.get_aoi_ee()
-    
-    # compute the stats
-    stats = get_summary_statistics(wlcoutputs, aoi, geeio, selected_info)
-    geom = ee.Geometry.Point([0,0])
-    feat = ee.Feature(geom).set(stats)
-    fc = ee.FeatureCollection(feat)
-
-    return fc
-
-def get_stats_w_sub_aoi(wlcoutputs, geeio, selected_info, features):
-    
-    aoi_stats = get_stats_as_feature_collection(wlcoutputs, geeio, selected_info)
-    
-    ee_geom_list = [geemap.geojson_to_ee(feat).geometry() for feat in features['feature']]
-    sub_stats = [get_stats_as_feature_collection(wlcoutputs, geeio, f'Sub region {i}',aoi=geom) for i, geom in enumerate(ee_geom_list)]
-    
-    sub_stats = ee.FeatureCollection(sub_stats).flatten()
-    
-    combined = aoi_stats.merge(sub_stats)
-    
-    return combined
 
 def get_area_dashboard(stats):
 
@@ -279,28 +239,11 @@ def get_stats(geeio, aoi_io, features):
     for feat in  features['features']:
         ee_aoi_list.append(geemap.geojson_to_ee(feat))
         
-    # create the stats dictionnary
-    #stats = [get_summary_statistics(geom, geeio, selected_info)
-        
+    # create the stats dictionnary        
     stats = [get_summary_statistics(geeio, names[i], geom) for i, geom in enumerate(ee_aoi_list)]
     
     area_dashboard = get_area_dashboard(stats)
     theme_dashboard = get_theme_dashboard(stats)
 
     return area_dashboard, theme_dashboard
-
-def export_stats(fc):
-    
-    suffix = dt.now().strftime("%Y%m%d%H%M%S")
-    desc = f"restoration_dashboard_{suffix}"
-    task = ee.batch.Export.table.toDrive(
-        collection=fc, 
-        description=desc,
-        folder='restoration_dashboard',
-        fileFormat='GeoJSON'
-    )
-    
-    task.start()
-
-    return desc
 

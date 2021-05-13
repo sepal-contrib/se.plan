@@ -66,45 +66,8 @@ class LayerFull(v.Layout):
             ax.tick_params(axis='x', bottom=False, labelbottom=False)
             ax.set_frame_on(False)
 
-            #ax.set_axis_off()
-            #ax.set_facecolor((0, 0, 0, 0))
 
             plt.show()
-        
-        # create the result table
-        #head = [v.Html(tag='thead', children=[v.Html(tag='tr', children=[
-        #    v.Html(tag='th', children = [f"value ()"]),
-        #    v.Html(tag='th', children = ["ratio"])
-        #])])]
-        
-        
-        
-        #rows = []
-        #for val, clr in zip(values, self.COLORS):
-        #    
-        ##    if val != 0:
-         #       row = v.Html(tag='tr', children=[
-         #           v.Html(
-         #               style_=f"color: {clr}",
-         #               color= clr, 
-         #               tag='td', 
-         #               children=[f"{human_format(val)}"]
-         #           ),
-         #           v.Html(tag='td', children=[v.ProgressLinear(
-         #               v_model=int(val/total*100), 
-         #               color=clr, 
-         #               background_opacity=0.1, 
-         #               height=10, 
-         #               rounded=True, 
-         #               background_color='grey', 
-         #               dense=True
-         #           )])
-         #       ])
-         #   
-         #       rows.append(row)
-#
-        #body = [v.Html(tag='tbody', children = rows)]
-        #table = v.SimpleTable(xs12=True, children = head + body)
         
         super().__init__(
             class_ = "ma-5",

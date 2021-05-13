@@ -8,13 +8,12 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, aoi_tile, questionnaire_tile, layer_tile):#, compute_tile):
+    def __init__(self, aoi_tile, questionnaire_tile, layer_tile):
         
         # gather the io 
         self.layer_io = layer_tile.io
         self.aoi_io = aoi_tile.io
         self.question_io = questionnaire_tile.io
-        #self.compute_tile = compute_tile
         
         # gather the tiles that need to be filled
         self.layer_tile = layer_tile
@@ -70,9 +69,6 @@ class ValidationTile(sw.Tile):
         # save the inputs in a json
         cs.save_recipe(self.layer_io, self.aoi_io, self.question_io)
     
-        # free the computation btn
-        #self.compute_tile.btn.disabled = False
-    
         widget.toggle_loading()
         
         return self
@@ -81,86 +77,24 @@ class ValidationTile(sw.Tile):
         """load the recipe file into the different io, then update the display of the table"""
         
         # toogle the btns
-        #self.reset_to_questionnaire.toggle_loading()
-        #widget.toggle_loading()
+        widget.toggle_loading()
 
         # check if path is set, if not use the one frome file select 
         path = path or self.file_select.v_model
         
-        #try:
-        cs.load_recipe(self.layer_tile, self.aoi_tile, self.questionnaire_tile, path)
+        try:
+            
+            cs.load_recipe(self.layer_tile, self.aoi_tile, self.questionnaire_tile, path)
 
-            # reload the values in the table
-            #self.apply_values(self.layer_io.layer_list)
+            # automatically validate them 
+            self.btn.fire_event('click', None)
 
-            # validate the aoi 
-            #self.aoi_tile.aoi_select_btn.fire_event('click','')
-        
-        # automatically validate them 
-        self.btn.fire_event('click', None)
+            self.recipe_output.add_msg('loaded', 'success')
 
-        self.recipe_output.add_msg('loaded', 'success')
-
-        #except Exception as e:
-        #    self.recipe_output.add_msg(str(e), 'error')
+        except Exception as e:
+            self.recipe_output.add_msg(str(e), 'error')
 
         # toogle the btns
-        #self.reset_to_questionnaire.toggle_loading()
-        #widget.toggle_loading()
+        widget.toggle_loading()
 
         return self
-    
-#class ComputeTile(sw.Tile):
-#    
-#    def __init__(self, io, default_io, aoi_io, m, questionaire_io, rp_geeio):
-#        
-#        # gather the ios 
-#        self.io = io
-#        self.default_io = default_io
-#        self.aoi_io = aoi_io
-#        self.questionaire_io = questionaire_io
-#        self.geeio = rp_geeio
-#        
-#        # get the map
-#        self.m = m
-#        
-#        # add the widgets 
-#        compute_txt = sw.Markdown(cm.compute.desc)
-#        
-#        self.btn = sw.Btn(cm.compute.btn, disabled=True)
-#        self.output = sw.Alert()
-#        
-#        # create the tile 
-#        super().__init__(
-#            id_ = "compute_widget",
-#            title = cm.compute.title,
-#            inputs = [compute_txt],
-#            btn = self.btn,
-#            output = self.output
-#        )
-#        
-#        # add the js behaviours 
-#        self.btn.on_event('click', self._compute)
-#        
-#    def _compute(self, widget, data, event):
-#        """compute the restoration plan and display both the maps and the dashboard content"""
-#    
-#        widget.toggle_loading()
-#    
-#        # create a layer and a dashboard 
-#        layer = self.geeio.wlc()
-#        # setattr(self, geeio, geeio)
-#        # display the layer in the map
-#        # layer = wlcoutputs[0]
-#        cs.display_layer(layer, self.aoi_io, self.m)
-#        
-#        # add the possiblity to draw on the map and release the compute dashboard btn
-#        self.m.show_dc()
-#        
-#        # display the dashboard 
-#        # self.area_tile.set_summary(dashboard) # calling it without argument will lead to fake output
-#        # self.theme_tile.dev_set_summary(dashboard) # calling it without argument will lead to fake output
-#    
-#        widget.toggle_loading()
-#        
-#        return self

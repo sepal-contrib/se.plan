@@ -10,7 +10,6 @@ import ee
 
 from component import parameter as cp
 from component.message import cm
-from .weight_slider import WeightSlider
 
 ee.Initialize()
 
@@ -32,25 +31,8 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         # add all the standard placeholder, they will be replaced when a layer will be selected
         self.title = v.CardTitle(children=['Layer name'])
         self.text = v.CardText(children = [''])
-        #self.weight = WeightSlider('layer_name', 3)
-        #self.check_custom = v.Checkbox(v_model = False, label = cm.dial.layer)
         self.layer = v.TextField(class_='ma-5', v_model = None, color = 'warning', outlined = True, label = 'Layer')
         self.unit = v.TextField(class_='ma-5', v_model=None, color="warning", outlined=True, label="Unit")
-        
-        # wrap the layer edition in an expansion panel
-        #self.ep = v.ExpansionPanels(accordion = True, children = [
-        #    v.ExpansionPanel(children = [
-        #        v.ExpansionPanelHeader(
-        #            disable_icon_rotate = True,
-        #            children = [cm.dial.change],
-        #            v_slots = [{
-        #                'name': 'actions',
-        #                'children' : v.Icon(color = 'warning', children = ['mdi-alert-circle'])
-        #            }]
-        #        ),
-        #        v.ExpansionPanelContent(children = [self.layer, self.unit])
-        #    ])
-        #])
         
         # add a map to display the layers
         self.m = sm.SepalMap()
@@ -66,9 +48,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             children = [
                 self.title,
                 self.text,
-                #v.Subheader(children = [cm.dial.weight]),
-                #self.weight,
-                #v.Row(align_end = True, class_ = 'px-5', children = [self.ep]),
                 self.layer,
                 self.unit,
                 self.m,
@@ -172,10 +151,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             # default text
             self.text.children = [cm.dial.disc]
             
-            # mute all the component 
-            #self.weight.v_model = 5
-            #self.weight.disabled = True
-            
+            # mute all the widgets
             self.layer.v_model = 'no Layer'
             self.layer.disabled = True
             
@@ -202,10 +178,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             # change text 
             layer_df_line = layer_list[layer_list.layer_name == data[0]['name']].iloc[0]
             self.text.children = [layer_df_line.layer_info]
-            
-            # enable slider 
-            #self.weight.disabled = False
-            #self.weight.v_model = data[0]['weight']
             
             # enable textFields
             self.layer.disabled = False
@@ -254,10 +226,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         
         # update viz_params acordingly
         viz_params = cp.plt_viz['viridis']
-        viz_params.update(
-            min = min_,
-            max = max_
-        )
+        viz_params.update(min=min_, max=max_)
         
         # dispaly on map
         self.m.addLayer(ee_image, viz_params, image.stem)

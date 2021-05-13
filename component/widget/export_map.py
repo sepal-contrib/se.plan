@@ -41,7 +41,6 @@ class ExportMap(v.Menu, sw.SepalWidget):
         
         self.alert = sw.Alert()
         
-        #self.w_cancel = sw.Btn(cm.export.cancel, outlined=True, small=True)
         self.w_apply = sw.Btn(cm.export.apply, small=True)
         
         export_data = v.Card(
@@ -54,10 +53,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
                     self.w_method,
                     self.alert
                 ]),
-                v.CardActions(children=[
-                    #self.w_cancel, 
-                    self.w_apply
-                ])
+                v.CardActions(children=[ self.w_apply])
             ]
         )
 
@@ -83,7 +79,6 @@ class ExportMap(v.Menu, sw.SepalWidget):
         )
         
         # add js behaviour 
-        #self.w_cancel.on_event('click', self._cancel)
         self.w_apply.on_event('click', self._apply)
         
     def set_data(self, dataset, geometry, name=None):
@@ -95,18 +90,8 @@ class ExportMap(v.Menu, sw.SepalWidget):
         
         return self
     
-    def _cancel(self, widget, event, data):
-        "close the menu and do nothing"
-        
-        self.value = False
-        
-        return self
-    
     def _apply(self, widget, event, data):
         """download the dataset using the given parameters"""
-        
-        #print(self.dataset)
-        #print(self.geometry)
         
         folder = Path(ee.data.getAssetRoots()[0]['id'])
         

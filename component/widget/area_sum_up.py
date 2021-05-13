@@ -18,7 +18,6 @@ class AreaSumUp(v.Layout):
         
         # normalize surfaces 
         norm_surfaces = [(s/total_surface)*100 for s in surfaces] 
-        #print(norm_surfaces)
         
         # create a matplotlib stack horizontal bar chart 
         chart = Output()
@@ -34,7 +33,6 @@ class AreaSumUp(v.Layout):
             # cosmetic tuning
             ax.set_xlim(0, 100)
             ax.set_axis_off()
-            #ax.set_facecolor((.0, .0, .0, .0))
 
             plt.show()
         
