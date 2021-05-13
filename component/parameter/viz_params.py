@@ -15,3 +15,14 @@ plt_viz = {
     'plasma': {'min': 0, 'max':10, 'palette': ['#0D0887', '#5B02A3', '#9A179B', '#CB4678', '#EB7852', '#FBB32F', '#F0F921']}, 
     'viridis': {'min': 0, 'max':10, 'palette': ['#440154', '#433982', '#30678D', '#218F8B', '#36B677', '#8ED542', '#FDE725']} 
 }
+
+# the vizaulization paramters for aoi
+aoi_style = { # default styling of the layer
+    "stroke": True,
+    "color": 'black',
+    "weight": 2,
+    "opacity": 1,
+    "fill": True,
+    "fillColor": 'black',
+    "fillOpacity": 0.4,
+}

@@ -15,7 +15,7 @@ class PriorityTile (sw.Tile, HasTraits):
     def __init__(self, **kwargs):
         
         # name the tile
-        title = cm.priority.title
+        title = cm.benefits.title
         id_ = "nested_widget"
         
         # create the sliders

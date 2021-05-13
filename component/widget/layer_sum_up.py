@@ -9,7 +9,7 @@ class LayerFull(v.Layout):
     
     COLORS = cp.gradient(5) + ['grey']
     
-    def __init__(self, layer_name, values, aoi_name):
+    def __init__(self, layer_name, values, aoi_name, colors):
         
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna('')
@@ -51,7 +51,7 @@ class LayerFull(v.Layout):
             norm_values = [v/values[0]*100 for v in reversed(values)]
             names = [f'Sub area {i}' if i else aoi_name for i in range(len(values))][::-1]
             human_values = [f"{human_format(val)}" for val in reversed(values)]
-            colors = ['grey' if i else v.theme.themes.dark.primary for i in range(len(values))][::-1]
+            colors = [colors[i-1] if i else v.theme.themes.dark.primary for i in range(len(values))][::-1]
             
             # add the axes
             ax.barh(names, norm_values, color=colors)
@@ -118,7 +118,7 @@ class LayerFull(v.Layout):
         
 class LayerPercentage(v.Layout):
     
-    def __init__(self, layer_name, pcts):
+    def __init__(self, layer_name, pcts, colors):
         
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna('')
@@ -146,7 +146,7 @@ class LayerPercentage(v.Layout):
                 spans.append(v.Html(
                     tag='span',
                     class_ = 'ml-1 mr-1',
-                    style_ = f'color: {"grey" if i else v.theme.themes.dark.primary}',
+                    style_ = f'color: {colors[i-1] if i else v.theme.themes.dark.primary}',
                     children=[f'{round(val,2)}%']
                 ))
                 

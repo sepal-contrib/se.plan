@@ -9,6 +9,9 @@ import geemap
 import ee
 import json
 from ipyleaflet import WidgetControl
+from ipyleaflet import GeoJSON
+from matplotlib import pyplot as plt
+from matplotlib.colors import to_hex
 
 from component.message import cm
 from component import parameter as cp
@@ -32,6 +35,7 @@ class MapTile(sw.Tile):
         
         # drawing managment
         self.draw_features = {'type': 'FeatureCollection', 'features': []}
+        self.colors = []
         
         # create a layout with 2 btn 
         self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')#, disabled=True)
@@ -99,11 +103,41 @@ class MapTile(sw.Tile):
         
         return self
     
+    def _save_features(self):
+        """save the features as layers on the map"""
+        
+        # remove any sub aoi layer
+        [self.m.remove_layer(l) for l in self.m.layers if "sub aoi" in l.name]
+        
+        # save the drawn features 
+        draw_features = self.draw_features 
+        
+        # remove the shapes from the dc 
+        # as a side effect the draw_feature member will be emptied
+        self.m.dc.clear()
+        
+        # reset the draw_features 
+        self.draw_features = draw_features
+        
+        # set up the colors using the tab10 matplotlib colormap
+        self.colors = [to_hex(plt.cm.tab10(i)) for i in range(len(self.draw_features['features']))]
+        
+        # create a layer for each aoi 
+        for i, (feat, color) in enumerate(zip(self.draw_features['features'], self.colors)):
+            style = {**cp.aoi_style, 'color': color, 'fillColor': color}
+            layer = GeoJSON(data=feat, style=style, name = f'sub aoi {i}')
+            self.m.add_layer(layer)
+            
+        return self
+    
     def _dashboard(self, widget, data, event):
         
         widget.toggle_loading()
         
-        final_dashboard = sw.Markdown("**No dashboarding function yet**")
+        #final_dashboard = sw.Markdown("**No dashboarding function yet**")
+        
+        # handle the drawing features, affect them with a color an display them on the map as layers
+        self._save_features()
 
         # retreive the area and theme json result
         self.area_dashboard, self.theme_dashboard = cs.get_stats(
@@ -112,7 +146,7 @@ class MapTile(sw.Tile):
             self.draw_features
         )
         
-        self.theme_tile.dev_set_summary(self.theme_dashboard, self.aoi_io.get_aoi_name())
+        self.theme_tile.dev_set_summary(self.theme_dashboard, self.aoi_io.get_aoi_name(), self.colors)
         self.area_tile.set_summary(self.area_dashboard)
         
         widget.toggle_loading()

@@ -21,7 +21,7 @@ class DashThemeTile(sw.Tile):
         )
 
 
-    def dev_set_summary(self, json_themes_values, aoi_name):
+    def dev_set_summary(self, json_themes_values, aoi_name, colors):
         benefits_layer = []
         constraints_layer = []
         costs_layer = []
@@ -34,11 +34,11 @@ class DashThemeTile(sw.Tile):
                 name = layer
                 try:
                     if k == 'benefits':
-                        benefits_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'], aoi_name)) #json_themes_values[k][layer]['total']))
+                        benefits_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'], aoi_name, colors)) #json_themes_values[k][layer]['total']))
                     elif k == 'costs':
-                        costs_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'], aoi_name)) #json_themes_values[k][layer]['total']))
+                        costs_layer.append(cw.LayerFull(name, json_themes_values[k][layer]['values'], aoi_name, colors)) #json_themes_values[k][layer]['total']))
                     elif k == 'constraints':
-                        constraints_layer.append(cw.LayerPercentage(name, json_themes_values[k][layer]['values']))
+                        constraints_layer.append(cw.LayerPercentage(name, json_themes_values[k][layer]['values'], colors))
 
                 except Exception as e:
                     print(name, 'not found',e)
@@ -58,20 +58,20 @@ class DashThemeTile(sw.Tile):
             children = [
                 v.ExpansionPanel(
                     children = [
-                        v.ExpansionPanelHeader(children = [benefits, benefits_txt]),
-                        v.ExpansionPanelContent(children=benefits_layer)
+                        v.ExpansionPanelHeader(children = [benefits]),
+                        v.ExpansionPanelContent(children=[benefits_txt] + benefits_layer)
                     ]
                 ),
                 v.ExpansionPanel(
                     children = [
-                        v.ExpansionPanelHeader(children = [costs, costs_txt]),
-                        v.ExpansionPanelContent(children=costs_layer)
+                        v.ExpansionPanelHeader(children = [costs]),
+                        v.ExpansionPanelContent(children= [costs_txt] + costs_layer)
                     ]
                 ),
                 v.ExpansionPanel(
                     children = [
-                        v.ExpansionPanelHeader(children = [constraints, constraints_txt]),
-                        v.ExpansionPanelContent(children=constraints_layer)
+                        v.ExpansionPanelHeader(children = [constraints]),
+                        v.ExpansionPanelContent(children=[constraints_txt] + constraints_layer)
                     ]
                 )
             ]

@@ -101,8 +101,8 @@
         "land_use_lbl": "Which land uses allow restoration?",
         "treecover_lbl": "treecover in {}"
     },
-    "priority": {
-        "title": "Restoration priorities"
+    "benefits": {
+        "title": "Restoration benefits"
     },
     "export": {
         "title": "Export map",
