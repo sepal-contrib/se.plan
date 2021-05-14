@@ -1,23 +1,7 @@
 import ee
 import json
-try:
-    from component import parameter as cp
-except:
-    # TODO is there still configurations where you don't manage to load the parameters ? 
-    print('paramters not imported using default range criterias list')
-    class cp:
-        criterias = {
-            'Landscape variation in natural regeneration success':[],
-            'Climate risk':[], 
-            'Forest cover change in 5 km buffer':[],
-            'Annual rainfall':[], 
-            'Elevation':[], 
-            'Slope':[],
-            'Accessibility to major cities':[],
-            'Population':[],
-            'Opportunity cost':[]
-        }
-        
+
+from component import parameter as cp 
 from component import io
 
 ee.Initialize()
@@ -179,7 +163,10 @@ class gee_compute:
                 eeimage = {'eeimage' : ee.Image(layer_id)}
                 constraint_layer.update(eeimage)
 
-        constraints_layers = constraints_layers + landcover_constraints
+        default_geographic = next(item for item in constraints_layers if item["name"] == 'Current tree cover less than potential')
+        default_geographic.update({'eeimage' : ee.Image(default_geographic['layer'])})
+
+        constraints_layers = constraints_layers + landcover_constraints + [default_geographic]
         
         return constraints_layers
 
@@ -208,12 +195,11 @@ class gee_compute:
 
         eeimagetmp = eeimage.rename("img")
         percents = eeimagetmp.reduceRegion(geometry=region, 
-            reducer=ee.Reducer.percentile(percentiles=[1,98]), 
+            reducer=ee.Reducer.percentile(percentiles=[2,98]), 
             scale=scale)
         
-        img0 = ee.Number(percents.get('img_p1') )
+        img0 = ee.Number(percents.get('img_p2') )
         img98 = ee.Number(percents.get('img_p98') )
-        # print(img98.getInfo(),img0.getInfo())
         
         return  eeimage.unitScale(img0,img98).clamp(img0, img98)
 
