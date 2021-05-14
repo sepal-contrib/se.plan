@@ -69,6 +69,9 @@ def get_aoi_count(aoi, name):
     
     return count_aoi
 
+def ee_isequal(left, right):
+    return ee.Algorithms.IsEqual(left, right)
+
 def get_image_percent_cover_pixelarea(image, aoi, name):
     
     image = image.rename("image")
@@ -81,15 +84,20 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
         scale= 100,
         maxPixels = 1e12
     ).get('groups')
-
-    areas_list = ee.List(areas).map(lambda i : ee.Dictionary(i).get('sum'))
+    areas = ee.List(areas)
+    areas_list = areas.map(lambda i : ee.Dictionary(i).get('sum'))
     total = areas_list.reduce(ee.Reducer.sum())
 
     total_val = ee.Number(total)
     # get constraint area (e.g. groups class 0)
-    count_val = ee.Number(areas_list.get(0))
+    # if the first group is 0 use it to calculate percent, else 0 
+    count_val = ee.Algorithms.If(
+        ee_isequal(ee.Dictionary(areas.get(0)).get('image'),0),
+        areas_list.get(0),
+        0)
 
-    percent = count_val.divide(total_val).multiply(100)
+
+    percent = ee.Number(count_val).divide(total_val).multiply(100)
     
     value = ee.Dictionary({
         'values':[percent],
