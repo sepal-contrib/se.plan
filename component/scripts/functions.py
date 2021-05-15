@@ -95,6 +95,7 @@ class gee_compute:
         constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
         
         # apply any preprocessing 
+        #TODO : export images with 100 multiplication factor....
         if name == 'Slope' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id)
             image = ee.Algorithms.Terrain(image).select('slope')
@@ -102,16 +103,20 @@ class gee_compute:
             image = ee.Image(layer_id).multiply(100)
         elif name == 'Natural regeneration probability' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id).multiply(100)
+        elif name == 'Property rights protection' and self.is_default_layer(name, layer_id):
+            image = ee.Image(layer_id).multiply(100)
         else:
             image = ee.Image(layer_id)
         
-        eeimage = {'eeimage': image.lt(value)}
+        if constraint_layer['operator'] == 'gt':
+            eeimage = {'eeimage': image.gt(value)}
+        elif constraint_layer['operator'] == 'lt':
+            eeimage = {'eeimage': image.gt(value)}
+        else:
+            raise RuntimeError(f"The layer {name} does not have a logical operator assigned. Please contact our maintainer.")
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):
-        
-        # TODO add in default check for protected areas, and location w decline pop
-        
         landcover_constraints = []
         default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]['content']) is list]
 
@@ -142,6 +147,7 @@ class gee_compute:
                 self.update_range_constraint(value, name, constraints_layers)
 
             # protected areas masking
+            # TODO : export this and remove 
             elif name == 'Protected areas' and self.is_default_layer(name, layer_id):
                 protected_feature = ee.FeatureCollection(layer_id)
                 protected_image = protected_feature \
@@ -152,7 +158,8 @@ class gee_compute:
                     .rename('wdpa')
                 eeimage = {'eeimage':protected_image}
                 constraint_layer.update(eeimage)
- 
+
+            # TODO : export and remove
             elif name == 'Declining population' and self.is_default_layer(name,layer_id):
                 # Loctions w declining pop is 1,2 in not declining - binary 
                 eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
