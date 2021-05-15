@@ -84,11 +84,33 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                             )
                         ]
                     ))
+
+                elif row['theme'] == 'costs':
+                    active = True
+                    theme_layer_widgets.append(v.Row(
+                        class_ = 'ml-2 mr-2',
+                        children = [
+                            v.TextField(
+                                small=True,
+                                hint = row["layer"] if row["layer"] != original_asset else "default",
+                                persistent_hint = True,
+                                color = cp.gradient(2)[active],
+                                readonly = True,
+                                v_model = row['name']
+                            ),
+                            v.Icon(
+                                class_ = 'ml-2',
+                                color = cp.gradient(2)[active],
+                                children = ["mdi-circle-slice-8"]
+                            )
+                        ]
+                    ))
+                        
                 elif row['name'] not in ["Terrestrial ecoregions", 'Current land cover', 'Current tree cover less than potential']:
                     
-                    # get the activation from questionnaire_io 
+                    # get the activation from questionnaire_io if constraint
                     active = json.loads(question_io.constraints)[row['name']] != -1
-                    
+
                     theme_layer_widgets.append(v.Row(
                         class_ = 'ml-2 mr-2',
                         children = [
