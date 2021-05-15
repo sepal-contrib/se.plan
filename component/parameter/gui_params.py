@@ -35,29 +35,27 @@ criterias = {
         'layer': 'annual_rainfall',
         'header': 'bio',
         'content': [
-            {'text': 'high precipitaion',    'value': 5000},
-            {'text': 'medium precipitaion', 'value': 2000},
-            {'text': 'low precipitaion',    'value': 500}
+            {'text': 'high precipitaion',    'value': 1000},
+            {'text': 'medium precipitaion', 'value': 500},
+            {'text': 'low precipitaion',    'value': 200}
         ]
     },
     'Water stress': {
         'layer': 'water_stress',
         'header': 'bio',
         'content': [
-            {'text': 'very high water stress', 'value':5},
-            {'text': 'high water stress', 'value':4},
-            {'text': 'medium water stress', 'value':3},
-            {'text': 'some water stress', 'value':2},
-            {'text': 'little water stress', 'value':1},            
+            {'text': 'high water stress', 'value':3},
+            {'text': 'medium water stress', 'value':2},
+            {'text': 'low water stress', 'value':1},      
         ]
     },
     'Elevation': {
         'layer': 'elevation',
         'header': 'bio',
         'content': [
-            {'text': 'high altitude',    'value': 1000},
-            {'text': 'medium altitude', 'value': 750},
-            {'text': 'low altitude',    'value': 500},
+            {'text': 'high altitude',    'value': 3000},
+            {'text': 'medium altitude', 'value': 1000},
+            {'text': 'low altitude',    'value': 300},
         ]
     },
     'Slope': {
@@ -65,17 +63,17 @@ criterias = {
         'header': 'bio',
         'content': [
             {'text': 'high slope',    'value': 25},
-            {'text': 'medium slope', 'value': 17},
-            {'text': 'low slope',    'value': 10},
+            {'text': 'medium slope', 'value': 10},
+            {'text': 'low slope',    'value': 5},
         ]
     },
     'Accessibility to cities' : {
         'layer': 'city_access',
         'header': 'socio_eco',
         'content': [
-            {'text': 'high acessibility',    'value': 180},
-            {'text': 'medium acessibility', 'value': 600},
-            {'text': 'low acessibility',    'value': 103},
+            {'text': 'high acessibility',    'value': 360},
+            {'text': 'medium acessibility', 'value': 180},
+            {'text': 'low acessibility',    'value': 60},
         ]
     },
     'Population density' : {
@@ -83,8 +81,8 @@ criterias = {
         'header': 'socio_eco',
         'content': [
             {'text': 'high populated',    'value': 100},
-            {'text': 'medium populated', 'value': 55},
-            {'text': 'low populated',    'value': 10},
+            {'text': 'medium populated', 'value': 10},
+            {'text': 'low populated',    'value': 1},
         ]
     },
     'Protected areas': {
@@ -92,20 +90,11 @@ criterias = {
         'header': 'socio_eco',
         'content': None
     },
-    'Land opportunity cost': {
-        'layer': 'opportunity_cost',
-        'header': 'socio_eco',
-        'content': [
-            {'text': 'cost a lot',    'value': 100},
-            {'text': 'medium cost', 'value': 50},
-            {'text': 'low cost',    'value': 10},
-        ]
-    },
-    'Property rights': {
+    'Property rights protection': {
         'layer': 'property_rigths',
         'header': 'socio_eco',
         'content': [
-            {'text': 'high variation',    'value': -12},
+            {'text': 'high variation',    'value': -11},
             {'text': 'medium variation', 'value': -53},
             {'text': 'low variation',    'value': -95},
         ]
@@ -134,9 +123,9 @@ criterias = {
         'layer': 'deforestation_rate',
         'header': 'env',
         'content': [
-            {'text': 'high change',    'value': 40},
-            {'text': 'medium change', 'value': 20},
-            {'text': 'low change',    'value': 0},
+            {'text': 'high change',    'value': 92},
+            {'text': 'medium change', 'value': 43},
+            {'text': 'low change',    'value': 21},
         ]
     },
     'Climate risk': {
@@ -153,8 +142,8 @@ criterias = {
         'header': 'no_money',
         'content': [
             {'text': 'high variation',    'value': 26},
-            {'text': 'medium variation', 'value': 22},
-            {'text': 'low variation',    'value': 19},
+            {'text': 'medium variation', 'value': 16},
+            {'text': 'low variation',    'value': 10},
         ]
     },
     'Declining population': {
