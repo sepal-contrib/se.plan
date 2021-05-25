@@ -37,4 +37,12 @@ This tool facilitates the creation of maps and related information most relevant
             class="ma-3"
         />
     </a>
+    <a href="https://www.maff.go.jp/e/">
+        <img 
+            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/MAFF.png" 
+            alt="SEPAL_logo" 
+            height="100" 
+            class="ma-3"
+        />
+    </a>
 </div>
