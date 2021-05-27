@@ -17,7 +17,8 @@ class CustomizeLayerIo:
                 'unit':     row.unit,
                 'weight' :  0,
                 'theme' :   row.theme,
-                'subtheme': row.subtheme
+                'subtheme': row.subtheme,
+                'operator' : row.operator,
             } for i, row in layer_list.iterrows()
         ]
         

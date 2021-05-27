@@ -4,6 +4,10 @@ Restoration of forests and other key ecosystems is a major nature-based solution
 This mapping tool combines ecological data on forest restoration with data on its benefits, costs, and risks. The tool is intended to support the preparation of strategic restoration plans for a given region—a country, group of countries, or region within a country—by providing improved, spatially explicit information on restoration suitability and impacts. The results are intended to aid decision makers in identifying promising, cost-effective restoration locations, and with identifying tradeoffs among impacts that might require further attention.   
 This tool facilitates the creation of maps and related information most relevant to the user’s restoration region and objectives, through a user-friendly dashboard. For example, maps might show where potential carbon storage increases (or livelihood benefits, etc.) are greatest relative to restoration costs and risks. Users have the choice of using default weights for the different data layers or specifying their own weights, and they can impose constraints that are relevant for their region and objectives (e.g., restrict restoration to locations where forests naturally occur).
 
+## Partners
+
+This tool has been developed by FAO in close collaboration with Spatial Informatics Group (SIG), SilvaCarbon and researchers at Peking University and Duke University, with financial support from the Government of Japan.
+
 <div style="inline-block">
     <a href="https://duke.edu">
         <img 

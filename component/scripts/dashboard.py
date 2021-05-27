@@ -23,7 +23,7 @@ def _quintile(image, geometry, scale=100):
 
 
 def get_areas(image, geometry, scale=100):
-    image = image.rename("image")
+    image = image.rename("image").round()
     pixelArea = ee.Image.pixelArea().divide(10000)
     reducer = ee.Reducer.sum().group(1, 'image')
 
@@ -33,19 +33,19 @@ def get_areas(image, geometry, scale=100):
         scale= 100,
         maxPixels = 1e12
     ).get('groups')
+
     areas_list = ee.List(areas).map(lambda i : ee.Dictionary(i).get('sum'))
 
     total = areas_list.reduce(ee.Reducer.sum())
 
     return areas, total
 
-def get_image_stats(image, geeio, name, mask, total, geom, scale=100):
+def get_image_stats(image, name, mask, geom, scale=100):
     """ computes quintile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
-
-    # should move quintile norm out of geeio at some point...along with all other utilities
-    image_quin, bad_features = geeio.quintile_normalization(image,geeio.aoi_io.get_aoi_ee())
-    image_quin = image_quin.where(mask.eq(0),6)
-    list_values, total = get_areas(image_quin, geom)
+    
+    image = image.where(mask.eq(0),6)
+    
+    list_values, total = get_areas(image, geom)
 
     out_dict = ee.Dictionary({
         'suitibility':{
@@ -69,6 +69,9 @@ def get_aoi_count(aoi, name):
     
     return count_aoi
 
+def ee_isequal(left, right):
+    return ee.Algorithms.IsEqual(left, right)
+
 def get_image_percent_cover_pixelarea(image, aoi, name):
     
     image = image.rename("image")
@@ -81,15 +84,20 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
         scale= 100,
         maxPixels = 1e12
     ).get('groups')
-
-    areas_list = ee.List(areas).map(lambda i : ee.Dictionary(i).get('sum'))
+    areas = ee.List(areas)
+    areas_list = areas.map(lambda i : ee.Dictionary(i).get('sum'))
     total = areas_list.reduce(ee.Reducer.sum())
 
     total_val = ee.Number(total)
     # get constraint area (e.g. groups class 0)
-    count_val = ee.Number(areas_list.get(0))
+    # if the first group is 0 use it to calculate percent, else 0 
+    count_val = ee.Algorithms.If(
+        ee_isequal(ee.Dictionary(areas.get(0)).get('image'),0),
+        areas_list.get(0),
+        0)
 
-    percent = count_val.divide(total_val).multiply(100)
+
+    percent = ee.Number(count_val).divide(total_val).multiply(100)
     
     value = ee.Dictionary({
         'values':[percent],
@@ -126,6 +134,30 @@ def get_image_percent_cover(image, aoi, name):
     })
     
     return ee.Dictionary({name:value})
+
+def get_image_mean(image, aoi, name, mask):
+    """computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
+     
+    mean_img = image.updateMask(mask).reduceRegion(
+        reducer = ee.Reducer.mean(), 
+        geometry = aoi,
+        scale = 100,
+        maxPixels = 1e13,
+    )
+    
+    total_img = image.reduceRegion(
+        reducer = ee.Reducer.mean(), 
+        geometry = aoi,
+        scale = 100,
+        maxPixels = 1e13,
+    )
+
+    value = ee.Dictionary({
+        'values':mean_img.values(),
+        'total':total_img.values()
+    })
+    
+    return ee.Dictionary({name:value})
     
 def get_image_sum(image, aoi, name, mask):
     """computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
@@ -154,14 +186,14 @@ def get_image_sum(image, aoi, name, mask):
 def get_summary_statistics(geeio, name, geom):
     """returns summarys for the dashboard.""" 
 
-    count_aoi = get_aoi_count(geom, 'aoi_count')
+    # count_aoi = get_aoi_count(geom, 'aoi_count')
 
     # restoration suitability
     wlc, benefits, constraints, costs = geeio.wlcoutputs
     mask = ee.ImageCollection(list(map(lambda i: ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
-    wlc_summary = get_image_stats(wlc, geeio, name, mask, count_aoi.values().get(0), geom)
+    wlc_summary = get_image_stats(wlc, name, mask, geom)
 
     layer_list = geeio.rp_layers_io.layer_list
 
@@ -170,7 +202,7 @@ def get_summary_statistics(geeio, name, geom):
     all_benefits_layers = [i for i in layer_list if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
-    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_sum(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
+    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_mean(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
 
     # costs
     costs_out = ee.Dictionary({'costs':list(map(lambda i : get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})

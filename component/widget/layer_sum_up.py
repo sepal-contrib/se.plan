@@ -105,13 +105,13 @@ class LayerPercentage(v.Layout):
         # create the list of value
         spans = []
         for i, val in enumerate(pcts):
-            if val != 0:
-                spans.append(v.Html(
-                    tag='span',
-                    class_ = 'ml-1 mr-1',
-                    style_ = f'color: {colors[i-1] if i else v.theme.themes.dark.primary}',
-                    children=[f'{round(val,2)}%']
-                ))
+            # if val != 0: #TODO: do we need this still?
+            spans.append(v.Html(
+                tag='span',
+                class_ = 'ml-1 mr-1',
+                style_ = f'color: {colors[i-1] if i else v.theme.themes.dark.primary}',
+                children=[f'{round(val,2)}%']
+            ))
                 
         super().__init__(
             class_ = "ma-5",
