@@ -41,9 +41,20 @@ def get_areas(image, geometry, scale=100):
     return areas, total
 
 def get_image_stats(image, name, mask, geom, scale=100):
-    """ computes quintile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
+    """Computes the summary areas of suitability image based on region and masked land in HA.
+
+    Args:
+        image (eeimage): restoration suitability values 1 to 5
+        name (string): name of the area of interst 
+        mask (eeimage): mask of unsuitable land 
+        geom (eegeomerty): an earth engine geometry 
+        scale (int, optional): scale to reduce area by. Defaults to 100.
+
+    Returns:
+        eedictionary : a dictionary of suitability with the name of the region of intrest, list of values for each category, and total area.
+    """
     
-    image = image.where(mask.eq(0),5)
+    image = image.where(mask.eq(0),6)
     
     list_values, total = get_areas(image, geom)
 
