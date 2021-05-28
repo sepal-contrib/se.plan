@@ -18,7 +18,7 @@ def display_layer(layer, aoi_io, m):
     
     aoi_ee = aoi_io.get_aoi_ee()
     m.zoom_ee_object(aoi_ee.geometry())
-    m.addLayer(layer.clip(aoi_ee.geometry()), cp.final_viz, 'restoration layer')
+    m.addLayer(layer.round().clip(aoi_ee.geometry()), cp.final_viz, 'restoration layer')
     
     return
     

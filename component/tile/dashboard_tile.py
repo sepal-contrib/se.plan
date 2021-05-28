@@ -111,7 +111,5 @@ class DashRegionTile(sw.Tile):
             else:
                 index_i = 0
             out_values.append(index_i)
-            
-        print(out_values)
 
         return out_values

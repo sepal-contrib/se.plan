@@ -186,8 +186,6 @@ def get_image_sum(image, aoi, name, mask):
 def get_summary_statistics(geeio, name, geom):
     """returns summarys for the dashboard.""" 
 
-    # count_aoi = get_aoi_count(geom, 'aoi_count')
-
     # restoration suitability
     wlc, benefits, constraints, costs = geeio.wlcoutputs
     mask = ee.ImageCollection(list(map(lambda i: ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
@@ -207,16 +205,13 @@ def get_summary_statistics(geeio, name, geom):
     # costs
     costs_out = ee.Dictionary({'costs':list(map(lambda i : get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})
 
-    #constraints
+    # constraints
     constraints_out =ee.Dictionary({'constraints':list(map(lambda i : get_image_percent_cover_pixelarea(i['eeimage'],geom, i['name']), constraints))}) 
 
-    #combine the result 
+    # combine the result 
     result = wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
     
-    out = ee.String.encodeJSON(result).getInfo()
-    print(out)
-    
-    return out
+    return ee.String.encodeJSON(result).getInfo()
 
 def get_area_dashboard(stats):
 

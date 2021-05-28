@@ -62,9 +62,7 @@ class MapTile(sw.Tile):
             output = sw.Alert(),
             btn = v.Layout(children=[
                 self.map_btn, 
-                self.compute_dashboard,
-                #self.to_asset, 
-                #self.to_sepal,
+                self.compute_dashboard
             ])
         )
         
