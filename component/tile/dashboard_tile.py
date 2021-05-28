@@ -106,8 +106,9 @@ class DashRegionTile(sw.Tile):
         computed = [int(i['image']) for i in raw]
         out_values = []
         for i in range(0,6):
-            if i in computed:
-                index_i = next(item['sum'] for item in raw if item['image'] == i)
+            class_value = i + 1
+            if class_value in computed:
+                index_i = next(item['sum'] for item in raw if item['image'] == class_value)
             else:
                 index_i = 0
             out_values.append(index_i)
