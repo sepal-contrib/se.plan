@@ -43,7 +43,7 @@ def get_areas(image, geometry, scale=100):
 def get_image_stats(image, name, mask, geom, scale=100):
     """ computes quintile breaks and count of pixels within input image. returns feature with quintiles and frequency count"""
     
-    image = image.where(mask.eq(0),6)
+    image = image.where(mask.eq(0),5)
     
     list_values, total = get_areas(image, geom)
 
@@ -213,7 +213,10 @@ def get_summary_statistics(geeio, name, geom):
     #combine the result 
     result = wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
     
-    return ee.String.encodeJSON(result).getInfo()
+    out = ee.String.encodeJSON(result).getInfo()
+    print(out)
+    
+    return out
 
 def get_area_dashboard(stats):
 

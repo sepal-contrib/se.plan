@@ -2,7 +2,7 @@ from .color_gradient import red_to_green
 
 # vizualisation parameters of the final_layer 
 final_viz = {
-  'min'    : 1,
+  'min'    : 0,
   'max'    : 5,
   'palette': red_to_green,
 }

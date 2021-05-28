@@ -106,7 +106,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                         ]
                     ))
                         
-                elif row['name'] not in ["Terrestrial ecoregions", 'Current land cover', 'Current tree cover less than potential']:
+                elif row['name'] not in ["Terrestrial ecoregion", 'Current land cover', 'Current tree cover less than potential']:
                     
                     # get the activation from questionnaire_io if constraint
                     active = json.loads(question_io.constraints)[row['name']] != -1

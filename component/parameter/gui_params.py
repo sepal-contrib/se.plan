@@ -4,8 +4,8 @@ criteria_types = {
     'bio': 'Biophysical constraints',
     'socio_eco': 'Socio-economic constraints',
     'treecover': 'Tree cover constraints within land cover classes',
-    'env': 'Environmental indicators',
-    'no_money': 'Non-monetary'
+    'no_money': 'Non-monetary',
+    'forest': 'Forest change'
 }
 
 # list of the available constraint criteria
@@ -40,7 +40,7 @@ criterias = {
             {'text': 'low precipitaion',    'value': 200}
         ]
     },
-    'Water stress': {
+    'Baseline water stress': {
         'layer': 'water_stress',
         'header': 'bio',
         'content': [
@@ -121,7 +121,7 @@ criterias = {
     },
     'Deforestation rate':{
         'layer': 'deforestation_rate',
-        'header': 'env',
+        'header': 'forest',
         'content': [
             {'text': 'high change',    'value': 92},
             {'text': 'medium change', 'value': 43},
@@ -130,16 +130,16 @@ criterias = {
     },
     'Climate risk': {
         'layer': 'climate_risk',
-        'header': 'env',
+        'header': 'forest',
         'content': [
             {'text': 'high climate risk',    'value': 25},
             {'text': 'medium climate risk', 'value': -2},
             {'text': 'low climate risk',    'value': -24},
         ]
     },
-    'Natural regeneration probability': {
+    'Natural regeneration variability': {
         'layer': 'natural_regeneration',
-        'header': 'no_money',
+        'header': 'forest',
         'content': [
             {'text': 'high variation',    'value': 26},
             {'text': 'medium variation', 'value': 16},
@@ -148,7 +148,7 @@ criterias = {
     },
     'Declining population': {
         'layer': 'declining_population',
-        'header': 'no_money',
+        'header': 'socio_eco',
         'content': None
     }
 }
