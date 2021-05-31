@@ -208,7 +208,7 @@ class gee_compute:
         img0 = ee.Number(percents.get('img_p2') )
         img98 = ee.Number(percents.get('img_p98') )
         
-        return  eeimage.unitScale(img0,img98).clamp(img0, img98)
+        return  eeimage.unitScale(img0,img98).clamp(0, 1)
 
     def quintile_normalization(self, image, featurecollection, scale=100):
         
@@ -339,9 +339,10 @@ class gee_compute:
 
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
-        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_io.get_aoi_ee()), 0).where(wlc_image2, wlc_image2)
+        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_io.get_aoi_ee()), 0).where(wlc_image2, wlc_image2).selfMask()
 
         setattr(self, 'wlcoutputs',(wlc_out, benefits_layers, constraints_layers, costs_layers))
+        setattr(self, 'wlc_debug',(wlc_image,wlc_image2, wlc_out))
         
         return  wlc_out
 
