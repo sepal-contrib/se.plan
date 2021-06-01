@@ -3,8 +3,7 @@ criteria_types = {
     'land_use': 'Land use constraints',
     'bio': 'Biophysical constraints',
     'socio_eco': 'Socio-economic constraints',
-    'treecover': 'Tree cover constraints within land cover classes',
-    'no_money': 'Non-monetary',
+    #'treecover': 'Tree cover constraints within land cover classes',
     'forest': 'Forest change'
 }
 
@@ -99,26 +98,26 @@ criterias = {
             {'text': 'low variation',    'value': -95},
         ]
     },
-    "Agriculture": {
-        'layer': None,
-        'header': 'treecover',
-        'content': 100
-    },
-    "Rangeland": {
-        'layer': None,
-        'header': 'treecover',
-        'content': 100
-    },
-    "Grassland": {
-        'layer': None,
-        'header': 'treecover',
-        'content': 100
-    },
-    "Settlements": {
-        'layer': None,
-        'header': 'treecover',
-        'content': 100
-    },
+    #"Agriculture": {
+    #    'layer': None,
+    #    'header': 'treecover',
+    #    'content': 100
+    #},
+    #"Rangeland": {
+    #    'layer': None,
+    #    'header': 'treecover',
+    #    'content': 100
+    #},
+    #"Grassland": {
+    #    'layer': None,
+    #    'header': 'treecover',
+    #    'content': 100
+    #},
+    #"Settlements": {
+    #    'layer': None,
+    #    'header': 'treecover',
+    #    'content': 100
+    #},
     'Deforestation rate':{
         'layer': 'deforestation_rate',
         'header': 'forest',
