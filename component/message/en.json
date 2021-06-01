@@ -1,6 +1,6 @@
 {
     "app":{
-        "title": "Restoration planning module",
+        "title": "se.plan",
         "drawer": {
             "aoi": "Area of interest selection",
             "question": "Questionnaire",
