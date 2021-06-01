@@ -202,13 +202,13 @@ class gee_compute:
 
         eeimagetmp = eeimage.rename("img")
         percents = eeimagetmp.reduceRegion(geometry=region, 
-            reducer=ee.Reducer.percentile(percentiles=[2,98]), 
+            reducer=ee.Reducer.percentile(percentiles=[3,97]), 
             scale=scale)
         
-        img0 = ee.Number(percents.get('img_p2') )
-        img98 = ee.Number(percents.get('img_p98') )
+        img_low = ee.Number(percents.get('img_p3') )
+        img_high = ee.Number(percents.get('img_p97') ).add(0.1e-13)
         
-        return  eeimage.unitScale(img0,img98).clamp(0, 1)
+        return  eeimage.unitScale(img_low,img_high).clamp(0, 1)
 
     def quintile_normalization(self, image, featurecollection, scale=100):
         
