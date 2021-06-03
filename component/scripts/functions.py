@@ -322,12 +322,12 @@ class gee_compute:
         constraints_layers = [i for i in layerlist if i['theme'] == 'constraint']
         list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
-        # note: need to have check for geometry either here or before it reaches here...
+
         self.normalize_benefits(benefits_layers, method='quintile')
         
         # normalize benefit weights to 0 - 1 
         sum_weights =sum(priorities[i['subtheme']] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round(100 + (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
+        list(map(lambda i : i.update({'norm_weight': round( (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
