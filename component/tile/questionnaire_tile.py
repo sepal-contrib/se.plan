@@ -7,7 +7,7 @@ from .priority_tile import PriorityTile
 
 class QuestionnaireTile (sw.Tile):
     
-    def __init__(self, io, **kwargs):
+    def __init__(self, model, **kwargs):
         
         # name the tile 
         title = cm.questionnaire.title
@@ -41,13 +41,13 @@ class QuestionnaireTile (sw.Tile):
         # build the tile 
         super().__init__(id_, title, inputs=[tabs], **kwargs)
         
-        # save the associated io and set the default value
-        self.io = io
-        self.io.constraints = self.constraint_tile.custom_v_model
-        self.io.priorities = self.priority_tile.v_model
+        # save the associated model and set the default value
+        self.model = model
+        self.model.constraints = self.constraint_tile.custom_v_model
+        self.model.priorities = self.priority_tile.v_model
         
         
-        # link the variable to the io 
+        # link the variable to the model 
         self.constraint_tile.observe(self.__on_constraint, 'custom_v_model')
         self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
         
@@ -61,11 +61,11 @@ class QuestionnaireTile (sw.Tile):
         self.priority_tile.table.load_data(data.priorities)
         
     def __on_constraint(self, change):
-        self.io.constraints = change['new']
+        self.model.constraints = change['new']
         return
     
     def __on_priority_tile(self, change):
-        self.io.priorities = change['new']
+        self.model.priorities = change['new']
         return
         
         
