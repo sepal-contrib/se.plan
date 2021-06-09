@@ -14,9 +14,9 @@ ee.Initialize()
 def add_area(feature):
     return feature.set({'rp_area': feature.geometry().area()})
 
-def display_layer(layer, aoi_io, m):
+def display_layer(layer, aoi_model, m):
     
-    aoi_ee = aoi_io.get_aoi_ee()
+    aoi_ee = aoi_model.feature_collection
     m.zoom_ee_object(aoi_ee.geometry())
     m.addLayer(layer.round().clip(aoi_ee.geometry()), cp.final_viz, 'restoration layer')
     

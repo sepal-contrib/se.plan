@@ -194,17 +194,17 @@ def get_image_sum(image, aoi, name, mask):
     
     return ee.Dictionary({name:value})
 
-def get_summary_statistics(geeio, name, geom):
+def get_summary_statistics(gee_model, name, geom):
     """returns summarys for the dashboard.""" 
 
     # restoration suitability
-    wlc, benefits, constraints, costs = geeio.wlcoutputs
+    wlc, benefits, constraints, costs = gee_model.wlcoutputs
     mask = ee.ImageCollection(list(map(lambda i: ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
     wlc_summary = get_image_stats(wlc, name, mask, geom)
 
-    layer_list = geeio.rp_layers_io.layer_list
+    layer_list = gee_model.rp_layers_model.layer_list
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
@@ -269,14 +269,14 @@ def get_theme_dashboard(stats):
 
     return tmp_dict
 
-def get_stats(geeio, aoi_io, features):
+def get_stats(geeio, aoi_model, features):
     
     # create a name list
-    names = [aoi_io.get_aoi_name() if not i else f'Sub region {i}' for i in range(len(features['features'])+ 1)]
+    names = [aoi_model.name if not i else f'Sub region {i}' for i in range(len(features['features'])+ 1)]
     
     # create the final featureCollection 
     # the first one is the aoi and the rest are sub areas
-    ee_aoi_list = [aoi_io.get_aoi_ee()]
+    ee_aoi_list = [aoi_model.feature_collection]
     for feat in  features['features']:
         ee_aoi_list.append(geemap.geojson_to_ee(feat))
         

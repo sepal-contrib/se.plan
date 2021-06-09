@@ -4,6 +4,7 @@ from pathlib import Path
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
+from sepal_ui import color
 import ipyvuetify as v
 import pandas as pd
 import ee
@@ -68,7 +69,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.layer.on_event('blur', self._on_layer_change)
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
-        self.tile.aoi_select_btn.observe(self._update_aoi, 'loading')
+        self.tile.view.observe(self._update_aoi, 'updated')
         
     def _on_layer_change(self, widget, event, data):
         
@@ -84,7 +85,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         elif widget.v_model != self.init_layer:
             
             # display it on the map
-            geometry = self.tile.io.get_aoi_ee()
+            geometry = self.tile.view.model.feature_collection
             image = Path(widget.v_model)
             
             # if the map cannot be displayed then return to init
@@ -120,23 +121,20 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         return
     
     def _update_aoi(self, change):
-        
-        # the toggle btn has changed let's see if it's for a good reason
-        if self.tile.aoi_output.type == 'success':
-            
-            # get the aoi
-            aoi_ee = self.tile.io.get_aoi_ee()
-            
-            # draw an outline 
-            outline = ee.Image().byte().paint(
-              featureCollection =  aoi_ee,
-              color = 1,
-              width = 3
-            )
-            
-            # update the map
-            self.m.addLayer(outline, {'palette': v.theme.themes.dark.accent[1:]}, 'aoi')
-            self.m.zoom_ee_object(aoi_ee.geometry())
+           
+        # get the aoi
+        aoi_ee = self.tile.view.model.feature_collection
+
+        # draw an outline 
+        outline = ee.Image().byte().paint(
+          featureCollection =  aoi_ee,
+          color = 1,
+          width = 3
+        )
+
+        # update the map
+        self.m.addLayer(outline, {'palette': color.accent}, 'aoi')
+        self.m.zoom_ee_object(aoi_ee.geometry())
             
         return
         
@@ -190,7 +188,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.init_layer = layer_df_line.gee_asset
             
             # add the custom layer if existing 
-            geometry = self.tile.io.get_aoi_ee()
+            geometry = self.tile.view.model.feature_collection
             if data[0]['layer'] != self.init_layer:
                 custom_img = Path(data[0]['layer'])
                 self.display_on_map(custom_img, geometry)

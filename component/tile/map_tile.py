@@ -2,6 +2,7 @@ from pathlib import Path
 
 from sepal_ui import sepalwidgets as sw 
 from sepal_ui import mapping as sm
+from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 from shapely import geometry as sg 
 import geopandas as gpd
@@ -20,7 +21,7 @@ from component import widget as cw
 
 class MapTile(sw.Tile):
     
-    def __init__(self, geeio, aoi_io, area_tile, theme_tile):
+    def __init__(self, gee_model, aoi_model, area_tile, theme_tile):
         
         # add the explanation
         mkd = sw.Markdown('  \n'.join(cm.map.txt))
@@ -39,11 +40,11 @@ class MapTile(sw.Tile):
         
         # create a layout with 2 btn 
         self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')
-        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2')
+        self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=True)
         
         # ios
-        self.geeio = geeio
-        self.aoi_io = aoi_io
+        self.gee_model = gee_model
+        self.aoi_model = aoi_model
         
         # get the dashboard tile 
         self.area_tile = area_tile
@@ -66,32 +67,31 @@ class MapTile(sw.Tile):
             ])
         )
         
+        # decorate the function
+        #self._compute = su.loading_button(debug=True, button=self.map_btn)(self._compute)
+        #self._dashboard = su.loading_button(debug=True, button=self.compute_dashboard)(self._dashboard)
+        
         # add js behaviour 
         self.compute_dashboard.on_event('click', self._dashboard)
         self.m.dc.on_draw(self._handle_draw)
         self.map_btn.on_event('click', self._compute)
-        
+    
+    #@su.loading_button(debug=False)
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map"""
-    
-        widget.toggle_loading()
-    
-        try: 
         
-            # create a layer and a dashboard 
-            self.final_layer = self.geeio.wlc()
-            
-            # display the layer in the map
-            cs.display_layer(self.final_layer, self.aoi_io, self.m)
-            self.save.set_data(self.final_layer, self.aoi_io.get_aoi_ee().geometry())
+        # create a layer and a dashboard 
+        self.final_layer = self.gee_model.wlc()
+
+        # display the layer in the map
+        cs.display_layer(self.final_layer, self.aoi_model, self.m)
+        self.save.set_data(self.final_layer, self.aoi_model.feature_collection.geometry())
+
+        # add the possiblity to draw on the map and release the compute dashboard btn
+        self.m.show_dc()
         
-            # add the possiblity to draw on the map and release the compute dashboard btn
-            self.m.show_dc()
-        
-        except Exception as e:
-            self.output.add_msg(f'{e}', 'error')
-            
-        widget.toggle_loading()
+        # enable the dashboard computation 
+        self.compute_dashboard.disabled = False
         
         return self
     
@@ -122,24 +122,21 @@ class MapTile(sw.Tile):
             
         return self
     
+    #@su.loading_button()
     def _dashboard(self, widget, data, event):
-        
-        widget.toggle_loading()
         
         # handle the drawing features, affect them with a color an display them on the map as layers
         self._save_features()
 
         # retreive the area and theme json result
         self.area_dashboard, self.theme_dashboard = cs.get_stats(
-            self.geeio,
-            self.aoi_io,
+            self.gee_model,
+            self.aoi_model,
             self.draw_features
         )
         
-        self.theme_tile.dev_set_summary(self.theme_dashboard, self.aoi_io.get_aoi_name(), self.colors)
+        self.theme_tile.dev_set_summary(self.theme_dashboard, self.aoi_model.name, self.colors)
         self.area_tile.set_summary(self.area_dashboard)
-        
-        widget.toggle_loading()
         
         return self
         
