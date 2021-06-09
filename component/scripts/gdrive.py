@@ -99,13 +99,3 @@ class gdrive(object):
             service.files().delete(fileId=f['id']).execute()
             
         return
-    
-if __name__ == "__main__":
-    print('ok')
-#     f = gdrive().get_files("restoration_dashboard_20210507153255")#("restoration_dashboard_20210507153255")
-#     print(f)
-#     gdrive().download_files(f,'/home/jdilger/respot2/')
-#     items = gdrive().get_items()
-#     files = []
-#     for item in items:
-#         print(item['name'])

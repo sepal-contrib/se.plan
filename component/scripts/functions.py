@@ -2,18 +2,18 @@ import ee
 import json
 
 from component import parameter as cp 
-from component import io
+from component import model
 
 ee.Initialize()
 
 class gee_compute:
     
-    def __init__(self, rp_aoi_io, rp_layers_io, rp_questionaire_io):
+    def __init__(self, rp_aoi_model, rp_layers_model, rp_questionaire_model):
         
-        self.aoi_io = rp_aoi_io
-        self.rp_layers_io = rp_layers_io
-        self.rp_questionaire_io = rp_questionaire_io
-        self.rp_default_layer = io.CustomizeLayerIo().layer_list #rp_default_layer_io.layer_list
+        self.aoi_model = rp_aoi_model
+        self.rp_layers_model = rp_layers_model
+        self.rp_questionaire_model = rp_questionaire_model
+        self.rp_default_layer = model.CustomizeLayerModel().layer_list
 
         # results
         self.wlcoutputs = None
@@ -202,13 +202,13 @@ class gee_compute:
 
         eeimagetmp = eeimage.rename("img")
         percents = eeimagetmp.reduceRegion(geometry=region, 
-            reducer=ee.Reducer.percentile(percentiles=[2,98]), 
+            reducer=ee.Reducer.percentile(percentiles=[3,97]), 
             scale=scale)
         
-        img0 = ee.Number(percents.get('img_p2') )
-        img98 = ee.Number(percents.get('img_p98') )
+        img_low = ee.Number(percents.get('img_p3') )
+        img_high = ee.Number(percents.get('img_p97') ).add(0.1e-13)
         
-        return  eeimage.unitScale(img0,img98).clamp(0, 1)
+        return  eeimage.unitScale(img_low,img_high).clamp(0, 1)
 
     def quintile_normalization(self, image, featurecollection, scale=100):
         
@@ -261,7 +261,7 @@ class gee_compute:
 
     def normalize_benefits(self,benefits_layers,method='minmax'):
         
-        list(map(lambda i : self.normalize_image(i,self.aoi_io.get_aoi_ee(), method), benefits_layers))
+        list(map(lambda i : self.normalize_image(i,self.aoi_model.feature_collection, method), benefits_layers))
 
     def make_benefit_expression(self,benefits_layers):
         
@@ -304,9 +304,9 @@ class gee_compute:
 
     def wlc(self):
         
-        layerlist = self.rp_layers_io.layer_list
-        constraints = json.loads(self.rp_questionaire_io.constraints)
-        priorities = json.loads(self.rp_questionaire_io.priorities)
+        layerlist = self.rp_layers_model.layer_list
+        constraints = json.loads(self.rp_questionaire_model.constraints)
+        priorities = json.loads(self.rp_questionaire_model.priorities)
         
         # load layers and create eeimages
         benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and priorities[i['subtheme']] != 0]
@@ -322,12 +322,12 @@ class gee_compute:
         constraints_layers = [i for i in layerlist if i['theme'] == 'constraint']
         list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
-        # note: need to have check for geometry either here or before it reaches here...
+
         self.normalize_benefits(benefits_layers, method='quintile')
         
         # normalize benefit weights to 0 - 1 
         sum_weights =sum(priorities[i['subtheme']] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round(100 + (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
+        list(map(lambda i : i.update({'norm_weight': round( (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
@@ -335,11 +335,11 @@ class gee_compute:
         wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
 
         # rescale wlc image from to
-        wlc_image2 = self.percentile_normalization(wlc_image,self.aoi_io.get_aoi_ee(),10000).multiply(4).add(1)
+        wlc_image2 = self.percentile_normalization(wlc_image,self.aoi_model.feature_collection,10000).multiply(4).add(1)
 
         # rather than clipping paint wlc to region
         wlc_out = ee.Image().float()
-        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_io.get_aoi_ee()), 0).where(wlc_image2, wlc_image2).selfMask()
+        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_model.feature_collection), 0).where(wlc_image2, wlc_image2).selfMask()
 
         setattr(self, 'wlcoutputs',(wlc_out, benefits_layers, constraints_layers, costs_layers))
         setattr(self, 'wlc_debug',(wlc_image,wlc_image2, wlc_out))
