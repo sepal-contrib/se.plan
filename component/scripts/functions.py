@@ -84,6 +84,18 @@ class gee_compute:
         return layer
 
     def get_layer_and_id(self, layername, constraints_layers):
+        '''Gets the layer name and dictionary. Handels cases when the layer name is a land cover constraint and not a constraint layer.
+
+        Args:
+            layername (str): the layer name
+            constraints_layers (list[dict]]): The list of constaints
+
+        Raises:
+            Exception: A layer does not exist 
+
+        Returns:
+            dict, str: Dictionary of named layer, layer name
+        '''
         
         try:
             if layername in  self.landcover_default_object.keys():
@@ -106,6 +118,16 @@ class gee_compute:
 
 
     def update_range_constraint(self, value, name, constraints_layers):
+        '''Updates the constraint layer with images for ranged values. 
+
+        Args:
+            value (int): The values to to mask gt/lt from GUI params
+            name (str): The layer name
+            constraints_layers (list[dict]]):  List of constraints
+
+        Raises:
+            RuntimeError: Errors if a layer does not have a locigal opperator in the layer_list
+        '''
         
         constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
         
@@ -132,6 +154,15 @@ class gee_compute:
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):
+        '''Makes the constraints images according to answers from the constraints questionare. Constraints are handeled either as a bool, range, or percent cover of land use. Adds background geographic constraint (where restoration potential is greater than current cover, and is urban).
+
+        Args:
+            constraints (dict): constraints selected from questionare
+            constraints_layers (list[dict]):  List of constraints
+
+        Returns:
+            list[dict]:  List of constraints with their ee images
+        '''
         landcover_constraints = []
         default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]['content']) is list]
 
@@ -212,7 +243,17 @@ class gee_compute:
 
         return eeimage.unitScale(imgMin, imgMax).toFloat()
 
-    def percentile_normalization(self, eeimage, region, scale): #, percentiles):
+    def percentile_normalization(self, eeimage, region, scale):
+        '''Calculates the 3rd and 97th percentiles of input image to rescale to 0 - 1. 
+
+        Args:
+            eeimage (ee.Image): Image to scale
+            region (ee.Geometry): The region to calculate percentiles
+            scale (int): scale to calculate percentiles
+
+        Returns:
+            ee.Image: Image rescaled by the 3rd and 97th percentiles
+        '''
         # todo: make this more dynamic with dictionary regex. using quick fix for now
 
         eeimagetmp = eeimage.rename("img")
@@ -226,7 +267,16 @@ class gee_compute:
         return  eeimage.unitScale(img_low,img_high).clamp(0, 1)
 
     def quintile_normalization(self, image, featurecollection, scale=100):
-        
+        '''Calculates a standard quintile normalization (20,40,60,80) for each region in a feature collection and combines into a single image.
+
+        Args:
+            image (ee.Image): The image to calculate quintiles of
+            featurecollection (ee.FeatureCollection): FeatureCollection of 1 or more features 
+            scale (int, optional): Scale to calculate quintiles. Defaults to 100.
+
+        Returns:
+            tuple[ee.Image, ee.FeatureCollection]: returns the image with valid areas normalized by quintile, and a featurecollection of any invalid areas.
+        '''
         quintile_collection = image.reduceRegions(collection=featurecollection, 
         reducer=ee.Reducer.percentile(percentiles=[20,40,60,80],outputNames=['low','lowmed','highmed','high']), 
         tileScale=2,scale=scale)
@@ -265,7 +315,13 @@ class gee_compute:
 
 
     def normalize_image(self,layer, region, method='mixmax'):
-        
+        '''Normalization of an image by the region of interst
+
+        Args:
+            layer (dict): dictionary that has 'eeimage' key
+            region (ee.Geometry): An earthengine geometry objet
+            method (str, optional): method to normalize image. Either 'minmax' or 'quintile' . Defaults to 'mixmax'.
+        '''
         eeimage = layer['eeimage']
         if method == 'minmax': 
             eeimage = self.minmax_normalization(eeimage,region)
@@ -279,6 +335,14 @@ class gee_compute:
         list(map(lambda i : self.normalize_image(i,self.aoi_io.get_aoi_ee(), method), benefits_layers))
 
     def make_benefit_expression(self,benefits_layers):
+        '''Makes the benefits portion of the WLC expression. Denoted as (Benefit_i * weight_i)+...(Benefit_n * weight_n)
+
+        Args:
+            benefits_layers (list[dict]): List of benefits 
+
+        Returns:
+           dict, str: dictionary of earthengine images for expression, string representation of the expression
+        '''
         
         # build expression for benefits
         fdict_bene = {'f' + str(index): element['norm_weight'] for index, element in enumerate(benefits_layers)}
@@ -291,7 +355,14 @@ class gee_compute:
         return fdict_bene, idict_bene, benefits_exp 
 
     def make_cost_expression(self,costs_layers):
-        
+        '''Makes the costs portion of the WLC expression. Denoted as (Cost_i + ... + Cost_n)
+
+        Args:
+            costs_layers(list[dict]): List of costs
+
+        Returns:
+           dict, str: dictionary of earthengine images for expression, string representation of the expression
+        '''
         idict = {'c' + str(index):element['eeimage'] for index, element in enumerate(costs_layers)}
         exp = ['(c' + str(index) + ')' for index, element in enumerate(costs_layers)]
         exp_string = '+'.join(exp).join(['(', ')'])
@@ -299,7 +370,14 @@ class gee_compute:
         return idict, exp_string
 
     def make_constraint_expression(self,constraints_layers):
-        
+        '''Makes the constraints portion of the WLC expression. Denoted as (Constraints_i * ... * Constraint_n)
+
+        Args:
+            constraints_layers (list[dict]): List of constraints
+
+        Returns:
+           dict, str: dictionary of earthengine images for expression, string representation of the expression
+        '''
         idict = {'cn' + str(index):element['eeimage'] for index, element in enumerate(constraints_layers)}
         exp = ['(cn' + str(index) + ')' for index, element in enumerate(constraints_layers)]
         exp_string = '*'.join(exp).join(['(', ')'])
@@ -307,7 +385,16 @@ class gee_compute:
         return idict, exp_string
 
     def make_expression(self,benefits_layers,costs_layers,constraints_layers):
-        
+        '''Makes the final expression used to calculate the WLC. The weighted sum benefits divided by the costs multiplied by constraints. 
+
+        Args:
+            benefits_layers (list[dict[]]): List of benefits 
+            costs_layers (list[dict[]]): List of costs
+            constraints_layers (list[dict[]]): List of constraints
+
+        Returns:
+            str, dict: string representation of the expression, dictionary of earthengine images for expression
+        '''
         fdict_bene, idict_bene, benefits_exp = self.make_benefit_expression(benefits_layers)
         idict_cost, costs_exp = self.make_cost_expression(costs_layers)
         idict_cons, constraint_exp = self.make_constraint_expression(constraints_layers)
