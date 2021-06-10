@@ -13,7 +13,7 @@ class gee_compute:
         self.aoi_io = rp_aoi_io
         self.rp_layers_io = rp_layers_io
         self.rp_questionaire_io = rp_questionaire_io
-        self.rp_default_layer = io.CustomizeLayerIo().layer_list #rp_default_layer_io.layer_list
+        self.rp_default_layer = io.CustomizeLayerIo().layer_list
 
         # results
         self.wlcoutputs = None
@@ -29,7 +29,22 @@ class gee_compute:
         }
     
     def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
+        '''builds and updates categorical constraints. assumes landcover  follows the copernicus landcover product schema.
 
+        Args:
+            cat_value ([int]): the value associated with a land cover class
+            contratint_bool ([bool]): true the land cover is not equal to a value, false the land cover value is equal 
+            name ([string]): a name to associate with the layer to build
+            layer_id ([string]): 
+
+        Returns:
+            dict: returns layer dictionary with eeimage
+            {name:str,
+            theme:str.
+            eeimage: earthengine image object}
+                
+        '''
+      
         layer = {'theme':'constraints'}
         layer['name'] = name 
         image = ee.Image(layer_id)
@@ -44,7 +59,7 @@ class gee_compute:
         return layer
 
     def constraints_hight_low_bool(self,value, contratint_bool, name, layer_id):
-        
+
         layer = {'theme':'constraints'}
         layer['name'] = name 
         
@@ -100,7 +115,7 @@ class gee_compute:
             image = ee.Image(layer_id)
             image = ee.Algorithms.Terrain(image).select('slope')
         elif name == 'Deforestation rate' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
+            image = ee.Image(layer_id).multiply(1000)
         elif name == 'Natural regeneration probability' and self.is_default_layer(name, layer_id):
             image = ee.Image(layer_id).multiply(100)
         elif name == 'Property rights protection' and self.is_default_layer(name, layer_id):
@@ -111,7 +126,7 @@ class gee_compute:
         if constraint_layer['operator'] == 'gt':
             eeimage = {'eeimage': image.gt(value)}
         elif constraint_layer['operator'] == 'lt':
-            eeimage = {'eeimage': image.gt(value)}
+            eeimage = {'eeimage': image.lt(value)}
         else:
             raise RuntimeError(f"The layer {name} does not have a logical operator assigned. Please contact our maintainer.")
         constraint_layer.update(eeimage)
@@ -303,7 +318,11 @@ class gee_compute:
         return expression, expression_dict
 
     def wlc(self):
-        
+        '''Calculates the weighted linear combination using benefits, risks, costs, and constraints. Creates ee images for each input. Normalizes benefit inputs for Aoi by quintile and normalizes weights to 0 - 1. WLC image is rescaled by the 3rd and 97th percentiles after calculation then converted to 1 - 5  scale.
+
+        Returns:
+            earthengine image: WLC restoration suitability image
+        '''
         layerlist = self.rp_layers_io.layer_list
         constraints = json.loads(self.rp_questionaire_io.constraints)
         priorities = json.loads(self.rp_questionaire_io.priorities)
