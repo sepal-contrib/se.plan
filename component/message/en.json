@@ -37,7 +37,12 @@
     "constraints": {
         "title": "Constraints",
         "desc": "Select your constraints for the analysis. Constraints are grouped by theme. Click on the arrow to expand the menu and select the constraint you want to activate. By selecting a constraint in the dropdown menu, you will activate it. Constraints can then be further customized, if eligible.",
-        "criteria_lbl": "Criteria"
+        "criteria_lbl": "Criteria",
+        "info": [
+            "Using {} constraint, selecting Low will exclude the fewest sites and selecting High will exclude the most sites. Low, Medium, and High refer to levels of the variable named by the constraint; see se.plan documentation for the levels’ numerical values. To exclude no sites at all, do not select the constraint.",
+            "Using {} constraint, selecting High will exclude the fewest sites and selecting Low will exclude the most sites. Low, Medium, and High refer to levels of the variable named by the constraint; see se.plan documentation for the levels’ numerical values. To exclude no sites at all, do not select the constraint.",
+            "Using {} constraint, selecting the constraint will exclude all sites whose characteristics match the variable named by the constraint. To exclude no sites at all, do not select the constraint."
+        ]
     },
     "custom": {
         "title": "Customize layers input",

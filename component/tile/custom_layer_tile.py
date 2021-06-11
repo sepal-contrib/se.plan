@@ -7,7 +7,6 @@ import ee
 
 from component import widget as cw
 from component.message import cm
-from component import io as cio
 from component import scripts as cs
 from component import parameter as cp
 
@@ -15,11 +14,11 @@ ee.Initialize()
         
 class CustomizeLayerTile(sw.Tile):
     
-    def __init__(self, aoi_tile, io, questionnaire_io, **kwargs):
+    def __init__(self, aoi_tile, model, questionnaire_model, **kwargs):
         
         # link the ios to the tile
-        self.io = io
-        self.questionnaire_io = questionnaire_io
+        self.model = model
+        self.questionnaire_model = questionnaire_model
         self.aoi_tile = aoi_tile
         
         self.table = cw.LayerTable(aoi_tile)
@@ -44,12 +43,12 @@ class CustomizeLayerTile(sw.Tile):
         
         # js behaviours
         self.table.observe(self._on_item_change, 'change_model')
-        
+
     def _on_item_change(self, change):
             
         # normally io and the table have the same indexing so I can take advantage of it 
-        for i in range (len(self.io.layer_list)):
-            io_item = self.io.layer_list[i]
+        for i in range (len(self.model.layer_list)):
+            io_item = self.model.layer_list[i]
             item = self.table.items[i]
             
             io_item['layer'] = item['layer']
@@ -61,7 +60,7 @@ class CustomizeLayerTile(sw.Tile):
         """Apply the value that are in the layer values table. layer_values should have the exact same structure as the io define in this file"""
         
         # small check on the layer_value structure
-        if len(layers_values) != len(self.io.layer_list):
+        if len(layers_values) != len(self.model.layer_list):
             return
         
         # create a tmp list of items

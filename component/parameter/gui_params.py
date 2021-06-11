@@ -14,23 +14,31 @@ criteria_types = {
     # None for binary inputs 
     # dict for dropdown
     # integer for the max of a range input
+# the number of the "tooltip" text:
+    # 0: less than 
+    # 1: more than 
+    # 2 binary
 criterias = {
     'Bare land': {
+        'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
     'Shrub land': {
+        'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
     'Agricultural land': {
+        'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
     'Annual rainfall': {
+        'tooltip': 1,
         'layer': 'annual_rainfall',
         'header': 'bio',
         'content': [
@@ -40,6 +48,7 @@ criterias = {
         ]
     },
     'Baseline water stress': {
+        'tooltip': 0,
         'layer': 'water_stress',
         'header': 'bio',
         'content': [
@@ -49,6 +58,7 @@ criterias = {
         ]
     },
     'Elevation': {
+        'tooltip': 1,
         'layer': 'elevation',
         'header': 'bio',
         'content': [
@@ -58,6 +68,7 @@ criterias = {
         ]
     },
     'Slope': {
+        'tooltip': 1,
         'layer': 'slope',
         'header': 'bio',
         'content': [
@@ -67,6 +78,7 @@ criterias = {
         ]
     },
     'Accessibility to cities' : {
+        'tooltip': 0,
         'layer': 'city_access',
         'header': 'socio_eco',
         'content': [
@@ -76,6 +88,7 @@ criterias = {
         ]
     },
     'Population density' : {
+        'tooltip': 0,
         'layer': 'population_density',
         'header': 'socio_eco',
         'content': [
@@ -85,11 +98,13 @@ criterias = {
         ]
     },
     'Protected areas': {
+        'tooltip': 2,
         'layer': 'protected_areas',
         'header': 'socio_eco',
         'content': None
     },
     'Property rights protection': {
+        'tooltip': 1,
         'layer': 'property_rigths',
         'header': 'socio_eco',
         'content': [
@@ -119,6 +134,7 @@ criterias = {
     #    'content': 100
     #},
     'Deforestation rate':{
+        'tooltip': 0,
         'layer': 'deforestation_rate',
         'header': 'forest',
         'content': [
@@ -128,6 +144,7 @@ criterias = {
         ]
     },
     'Climate risk': {
+        'tooltip': 1,
         'layer': 'climate_risk',
         'header': 'forest',
         'content': [
@@ -137,6 +154,7 @@ criterias = {
         ]
     },
     'Natural regeneration variability': {
+        'tooltip': 0,
         'layer': 'natural_regeneration',
         'header': 'forest',
         'content': [
@@ -146,6 +164,7 @@ criterias = {
         ]
     },
     'Declining population': {
+        'tooltip': 2,
         'layer': 'declining_population',
         'header': 'socio_eco',
         'content': None

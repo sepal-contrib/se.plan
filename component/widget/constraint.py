@@ -16,6 +16,8 @@ class Constraint(sw.SepalWidget):
         self.header = header
         self.name = name
         self.custom_v_model = -1
+        self.persistent_hint=True
+        self.class_ = 'ma-5'
         
         super().__init__(**kwargs)
         
