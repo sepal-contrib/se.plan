@@ -1,4 +1,4 @@
-SE.PLAN
+se.plan
 =======
 
 Spatialy explicit, Socio-economic, sepal planning tool
@@ -12,27 +12,27 @@ This mapping tool combines ecological data on forest restoration with data on re
   
 Before running the tool, users select their areas of interest, provide information on their ratings of different prospective restoration benefits (i.e., the relative importance of the benefits to them), and have the option to impose constraints that exclude locations they view as unsuitable for restoration due to ecological or socioeconomic risks. The tool then generates maps and related information on restoration’s benefits, costs, and risks in the areas of interest. It provides an overall suitability index, on a scale of 1 to 5, that indicates the relative benefit-cost ratio for each location within the areas of interest. By varying the benefit ratings and constraints, users can investigate the sensitivity of model output to these input choices. They also have the option to use customized data for their areas of interest instead of the default data build into the tool.
 
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/duke.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/duke.png
     :alt: duke_logo
     :height: 100
     :target: https://duke.edu
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/peking.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/peking.png
     :alt: pku_logo
     :height: 100
     :target: http://english.pku.edu.cn
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/sig.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/sig.png
     :alt: sig-gis_logo
     :height: 100
     :target: https://sig-gis.com
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/SilvaCarbon.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/SilvaCarbon.png
     :alt: silvacarbon_logo
     :height: 100
     :target: https://www.silvacarbon.org
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/MAFF.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/MAFF.png
     :alt: MAFF_logo
     :height: 100
     :target: https://www.maff.go.jp/e/
