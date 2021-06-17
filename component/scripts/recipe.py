@@ -52,7 +52,7 @@ def load_recipe(layer_tile, aoi_tile, questionnaire_tile, path):
         aoi_tile.view.model.import_data(data['aoi_model'])
         
         # reload the aoi tile values 
-        aoi_tile.btn.fire_event('click', None)
+        aoi_tile.view.btn.fire_event('click', None)
                     
         # load the layer_io
         layer_tile.model.import_data(data['layer_model'])

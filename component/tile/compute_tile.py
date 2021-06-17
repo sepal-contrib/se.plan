@@ -78,6 +78,6 @@ class ValidationTile(sw.Tile):
         # automatically validate them 
         self.btn.fire_event('click', None)
 
-        self.recipe_output.add_msg('loaded', 'success')
+        self.alert.add_msg('loaded', 'success')
 
         return self
