@@ -47,8 +47,9 @@ class LayerFull(v.Layout):
             # create the chart
             fig, ax = plt.subplots(figsize=[50, len(values)*2], facecolor=((0,0,0,0)))
             
-            # set the datas 
-            norm_values = [v/values[0]*100 for v in reversed(values)]
+            # set the datas
+            max_value = max(values)
+            norm_values = [v/max_value*100 for v in reversed(values)]
             names = [f'Sub area {i}' if i else aoi_name for i in range(len(values))][::-1]
             human_values = [f"{human_format(val)}" for val in reversed(values)]
             colors = [colors[i-1] if i else v.theme.themes.dark.primary for i in range(len(values))][::-1]
