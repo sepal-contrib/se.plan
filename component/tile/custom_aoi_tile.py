@@ -16,17 +16,22 @@ class CustomAoiTile(aoi.AoiTile):
         """Every time a new aoi is set check if it fits the LMIC country list"""
         
         # check if the aoi is in the LMIC
-        margin = 1000 # 1Km
-        lmic_ee = ee.FeatureCollection('users/bornToBeAlive/lmic')
+        lmic_raster = ee.Image("projects/john-ee-282116/assets/fao-restoration/misc/lmic_global_1k")
         aoi_ee_geom = self.view.model.feature_collection.geometry()
-        test = lmic_ee \
-            .filterBounds(aoi_ee_geom) \
-            .geometry() \
-            .contains(aoi_ee_geom, margin)
-            
-        # without .buffer(margin, margin/2) I have difficulties to get the aoi that cross borders
-        # if I add it it take ages
-            
+
+        empt = ee.Image().byte()
+        aoi_ee_raster = empt.paint(aoi_ee_geom,1)
+
+        bit_test = aoi_ee_raster.add(lmic_raster).reduceRegion(
+            reducer=ee.Reducer.bitwiseAnd(),
+            geometry=aoi_ee_geom, 
+            scale=1000,
+            bestEffort=True,
+            maxPixels=1e13
+            )
+        # test if bitwiseAnd is 2 (1 is partial coverage, 0 no coverage)
+        test = ee.Algorithms.IsEqual(bit_test.getNumber('constant'), 2)
+        
         if not test.getInfo():
             self.view.reset()
             raise Exception("Your AOI should be included in LMIC")
