@@ -37,6 +37,7 @@ class MapTile(sw.Tile):
         # drawing managment
         self.draw_features = {'type': 'FeatureCollection', 'features': []}
         self.colors = []
+        self.name_dialog = cw.CustomAoiDialog()
         
         # create a layout with 2 btn 
         self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')
@@ -62,7 +63,7 @@ class MapTile(sw.Tile):
         super().__init__(
             id_ = "map_widget",
             title = cm.map.title,
-            inputs = [mkd, self.load_shape, self.m],
+            inputs = [mkd, self.load_shape, self.m, self.name_dialog],
             output = sw.Alert(),
             btn = v.Layout(children=[
                 self.map_btn, 
@@ -79,6 +80,7 @@ class MapTile(sw.Tile):
         self.m.dc.on_draw(self._handle_draw)
         self.map_btn.on_event('click', self._compute)
         self.load_shape.w_btn.on_event('click', self._load_shapes)
+        self.name_dialog.observe(self.save_draw, 'value')
         
     def _load_shapes(self, widget, event, data):
         
@@ -96,8 +98,6 @@ class MapTile(sw.Tile):
         return
         
     def _add_geom(self, geo_json, name):
-        
-        print(geo_json)
         
         geo_json['properties']['name'] = name
         self.draw_features['features'].append(geo_json)
@@ -143,9 +143,10 @@ class MapTile(sw.Tile):
         self.colors = [to_hex(plt.cm.tab10(i)) for i in range(len(self.draw_features['features']))]
         
         # create a layer for each aoi 
-        for i, (feat, color) in enumerate(zip(self.draw_features['features'], self.colors)):
+        for feat, color in zip(self.draw_features['features'], self.colors):
+            name = feat['properties']['name']
             style = {**cp.aoi_style, 'color': color, 'fillColor': color}
-            layer = GeoJSON(data=feat, style=style, name = f'sub aoi {i}')
+            layer = GeoJSON(data=feat, style=style, name = f'sub aoi {name}')
             self.m.add_layer(layer)
             
         return self
@@ -155,15 +156,24 @@ class MapTile(sw.Tile):
         
         # handle the drawing features, affect them with a color an display them on the map as layers
         self._save_features()
+        
+        # create a name list 
+        names = [self.aoi_model.name] + [feat['properties']['name'] for feat in self.draw_features['features']]
 
         # retreive the area and theme json result
         self.area_dashboard, self.theme_dashboard = cs.get_stats(
             self.gee_model,
             self.aoi_model,
-            self.draw_features
+            self.draw_features,
+            names
         )
         
-        self.theme_tile.dev_set_summary(self.theme_dashboard, self.aoi_model.name, self.colors)
+        self.theme_tile.dev_set_summary(
+            self.theme_dashboard, 
+            names, 
+            self.colors
+        )
+        
         self.area_tile.set_summary(self.area_dashboard)
         
         return self
@@ -176,10 +186,26 @@ class MapTile(sw.Tile):
             geo_json = self.polygonize(geo_json)
         
         if action == 'created': # no edit as you don't know which one to change
-            self.draw_features['features'].append(geo_json)
-        elif action == 'deleted':
-            self.draw_features['features'].remove(geo_json)
             
+            # open the naming dialog (the popup will do the saving instead of this function)
+            self.name_dialog.update_aoi(geo_json, len(self.draw_features['features']) + 1)
+            
+        elif action == 'deleted':
+            
+            for feat in self.draw_features['features']:
+                if feat['geometry'] == geo_json['geometry']:
+                    self.draw_features['features'].remove(feat)
+            
+        return self
+    
+    def save_draw(self, change):
+        """save the geojson after the click on the button with it's custom name"""
+        
+        if change['new'] == True:
+            return self
+        
+        self._add_geom(self.name_dialog.feature, self.name_dialog.w_name.v_model)
+        
         return self
     
     @staticmethod

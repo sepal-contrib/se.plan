@@ -211,13 +211,13 @@ def get_summary_statistics(gee_model, name, geom):
     all_benefits_layers = [i for i in layer_list if i['theme'] == 'benefits']
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
-    benefits_out = ee.Dictionary({'benefits':list(map(lambda i : get_image_mean(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
+    benefits_out = ee.Dictionary({'benefits':list(map(lambda i: get_image_mean(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
 
     # costs
-    costs_out = ee.Dictionary({'costs':list(map(lambda i : get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})
+    costs_out = ee.Dictionary({'costs':list(map(lambda i: get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})
 
     # constraints
-    constraints_out =ee.Dictionary({'constraints':list(map(lambda i : get_image_percent_cover_pixelarea(i['eeimage'],geom, i['name']), constraints))}) 
+    constraints_out =ee.Dictionary({'constraints':list(map(lambda i: get_image_percent_cover_pixelarea(i['eeimage'],geom, i['name']), constraints))}) 
 
     # combine the result 
     result = wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
@@ -269,10 +269,10 @@ def get_theme_dashboard(stats):
 
     return tmp_dict
 
-def get_stats(geeio, aoi_model, features):
+def get_stats(geeio, aoi_model, features, names):
     
     # create a name list
-    names = [aoi_model.name if not i else f'Sub region {i}' for i in range(len(features['features'])+ 1)]
+    #names = [aoi_model.name if not i else f'Sub region {i}' for i in range(len(features['features'])+ 1)]
     
     # create the final featureCollection 
     # the first one is the aoi and the rest are sub areas
