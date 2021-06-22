@@ -12,15 +12,14 @@ class CustomAoiDialog(v.Dialog):
             v_model = None
         )
         
-        self.btn = sw.Btn("validate")
+        self.btn = sw.Btn("validate", "mdi-check")
         
         card = v.Card(
+            class_="ma-5",
             children = [
-                self.w_name,
-                v.CardActions(
-                    class_ = "ma-5", 
-                    children = [self.btn]
-                )
+                v.CardTitle(children = ["Select sub AOI name"]),
+                v.CardText(children = [self.w_name]),
+                v.CardActions(children = [self.btn])
             ]
         )
         
