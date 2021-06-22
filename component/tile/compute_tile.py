@@ -26,7 +26,7 @@ class ValidationTile(sw.Tile):
         
         # add the naming textField
         self.w_name = v.TextField(
-            label = "Recipe name",
+            label = cm.custom.recipe.name,
             v_model = None
         )
         

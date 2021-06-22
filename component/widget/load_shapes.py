@@ -3,19 +3,21 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 import geopandas as gpd
 
+from component.message import cm
+
 class LoadShapes(v.ExpansionPanels):
 
     def __init__(self):
 
         # add a btn to click 
-        self.w_btn = sw.Btn("load shapes", icon='mdi-download', class_='ml-2')
+        self.w_btn = sw.Btn(cm.map.shapes.btn, icon='mdi-download', class_='ml-2')
 
         # and the file selector
-        self.w_file = sw.FileInput(['.shp', '.geojson', '.gpkg', '.kml'], label='select file')
+        self.w_file = sw.FileInput(['.shp', '.geojson', '.gpkg', '.kml'], label=cm.map.shapes.file)
 
         # and the feature selection 
         self.w_feature = v.Select(
-            label = "select the ID feature",
+            label = cm.map.shapes.feature,
             items = None,
             v_model = None
         )
@@ -24,7 +26,7 @@ class LoadShapes(v.ExpansionPanels):
 
         header = v.ExpansionPanelHeader(
             disable_icon_rotate = True,
-            children=["Load existing shapes"],
+            children=[cm.map.shapes.title],
             v_slots = [{
                 'name': 'actions',
                 'children' : v.Icon(children=['mdi-download'])
@@ -41,7 +43,6 @@ class LoadShapes(v.ExpansionPanels):
         
         # add js behaviour 
         self.w_file.observe(self._load_features, 'v_model')
-        #self.w_btn.on_event('click', self.load_features)
         
     def _load_features(self, change):
         

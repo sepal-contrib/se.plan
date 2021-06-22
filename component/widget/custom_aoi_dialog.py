@@ -1,5 +1,7 @@
 from sepal_ui import sepalwidgets as sw 
-import ipyvuetify as v 
+import ipyvuetify as v
+
+from component.message import cm
 
 class CustomAoiDialog(v.Dialog):
     
@@ -8,16 +10,16 @@ class CustomAoiDialog(v.Dialog):
         self.feature = None
         
         self.w_name = v.TextField(
-            label = "Sub aoi name",
+            label = cm.map.dialog.label,
             v_model = None
         )
         
-        self.btn = sw.Btn("validate", "mdi-check")
+        self.btn = sw.Btn(cm.map.dialog.btn, "mdi-check")
         
         card = v.Card(
             class_="ma-5",
             children = [
-                v.CardTitle(children = ["Select sub AOI name"]),
+                v.CardTitle(children = [cm.map.dialog.title]),
                 v.CardText(children = [self.w_name]),
                 v.CardActions(children = [self.btn])
             ]
