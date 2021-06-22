@@ -42,9 +42,12 @@ class MapTile(sw.Tile):
         self.map_btn = sw.Btn(cm.compute.btn, class_='ma-2')
         self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=True)
         
-        # ios
+        # models
         self.gee_model = gee_model
         self.aoi_model = aoi_model
+        
+        # create the shape loader
+        self.load_shape = cw.LoadShapes()
         
         # get the dashboard tile 
         self.area_tile = area_tile
@@ -59,7 +62,7 @@ class MapTile(sw.Tile):
         super().__init__(
             id_ = "map_widget",
             title = cm.map.title,
-            inputs = [mkd, self.m],
+            inputs = [mkd, self.load_shape, self.m],
             output = sw.Alert(),
             btn = v.Layout(children=[
                 self.map_btn, 
@@ -75,7 +78,32 @@ class MapTile(sw.Tile):
         self.compute_dashboard.on_event('click', self._dashboard)
         self.m.dc.on_draw(self._handle_draw)
         self.map_btn.on_event('click', self._compute)
-    
+        self.load_shape.w_btn.on_event('click', self._load_shapes)
+        
+    def _load_shapes(self, widget, event, data):
+        
+        # get the data from the selected file
+        gdf, column = self.load_shape.read_data()
+        gdf = gdf.filter(items=[column, 'geometry'])
+        
+        # add them to the map 
+        for i, row in gdf.iterrows():
+            
+            # transform the data into a feature
+            feat = {"type": "Feature", "properties": {"style": {}}, "geometry": row.geometry.__geo_interface__}
+            self._add_geom(feat, row[column])
+            
+        return
+        
+    def _add_geom(self, geo_json, name):
+        
+        print(geo_json)
+        
+        geo_json['properties']['name'] = name
+        self.draw_features['features'].append(geo_json)
+        
+        return self
+        
     #@su.loading_button(debug=False)
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map"""
