@@ -3,12 +3,13 @@ from datetime import datetime
 from copy import copy
 from pathlib import Path
 import ee
+from sepal_ui.scripts import utils
 
 from component import parameter as cp
 
 ee.Initialize()
 
-def save_recipe(layer_model, aoi_model, question_model):
+def save_recipe(layer_model, aoi_model, question_model, recipe_name):
     """save the recipe in a json file with a timestamp"""
     
     # get the result folder
@@ -16,8 +17,7 @@ def save_recipe(layer_model, aoi_model, question_model):
     res_dir.mkdir(exist_ok=True)
     
     # create the json file 
-    now = datetime.now()
-    json_file = res_dir/f'recipe_{now.strftime("%Y-%m-%d")}.json'
+    json_file = res_dir/f'{utils.normalize_str(recipe_name)}.json'
     
     with json_file.open('w') as f:
         
@@ -52,7 +52,7 @@ def load_recipe(layer_tile, aoi_tile, questionnaire_tile, path):
         aoi_tile.view.model.import_data(data['aoi_model'])
         
         # reload the aoi tile values 
-        aoi_tile.btn.fire_event('click', None)
+        aoi_tile.view.btn.fire_event('click', None)
                     
         # load the layer_io
         layer_tile.model.import_data(data['layer_model'])
