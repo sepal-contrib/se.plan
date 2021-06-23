@@ -5,22 +5,36 @@ import geopandas as gpd
 
 from component.message import cm
 
+class CustomVector(sw.VectorField):
+    
+    def _update_file(self, change):
+        """remove the select 'all feature' option as feature is used to name the AOIs"""
+        
+        def __init__(self, **kwargs):
+            
+            super().__init__(**kwargs)
+            
+            self.w_column.v_model = None
+            self.w_column.items = None
+            
+
+        super()._update_file(change)
+
+        # update the columns
+        self.w_column.v_model = None
+        self.w_column.items = self.w_column.items[1:]
+        
+        return self
+
 class LoadShapes(v.ExpansionPanels):
 
     def __init__(self):
 
         # add a btn to click 
-        self.w_btn = sw.Btn(cm.map.shapes.btn, icon='mdi-download', class_='ml-2')
+        self.btn = sw.Btn(cm.map.shapes.btn, icon='mdi-download', class_='ml-2')
 
-        # and the file selector
-        self.w_file = sw.FileInput(['.shp', '.geojson', '.gpkg', '.kml'], label=cm.map.shapes.file)
-
-        # and the feature selection 
-        self.w_feature = v.Select(
-            label = cm.map.shapes.feature,
-            items = None,
-            v_model = None
-        )
+        # and the vector selector
+        self.w_vector = CustomVector(label=cm.map.shapes.file)
         
         self.alert = sw.Alert()
 
@@ -33,37 +47,27 @@ class LoadShapes(v.ExpansionPanels):
             }]
         )
 
-        content = v.ExpansionPanelContent(children=[self.w_file, self.w_feature, self.w_btn, self.alert])
+        content = v.ExpansionPanelContent(children=[self.w_vector, self.btn, self.alert])
 
         #create the widget 
         super().__init__(
             class_="mb-5 mt-2", 
             children=[v.ExpansionPanel(children=[header, content])]
         )
-        
-        # add js behaviour 
-        self.w_file.observe(self._load_features, 'v_model')
-        
-    def _load_features(self, change):
-        
-        #empty the feature widget 
-        self.w_feature.v_model = None 
-        self.w_feature.items = None
-        
-        # load the features from the selected file
-        df = gpd.read_file(self.w_file.v_model, ignore_geometry=True)
-        
-        # load the properties 
-        self.w_feature.items = sorted(set(df.columns.to_list()))
-        
-        return self
     
+    @su.loading_button(debug=False)
     def read_data(self):
         
-        if self.w_feature.v_model == None:
-            self.alert.add_msg("Please select data")
-            return (None, None)
+        if self.w_vector.v_model['column'] in ['ALL', None]:
+            raise Exception("Please select data")
         
-        return gpd.read_file(self.w_file.v_model), self.w_feature.v_model
+        gdf = gpd.read_file(self.w_vector.v_model['pathname'])
+        
+        # filter if necessary 
+        if self.w_vector.v_model['value']:
+            gdf = gdf[gdf[self.w_vector.v_model['column']] == self.w_vector.v_model['value']]
+        
+        
+        return gdf, self.w_vector.v_model['column']
         
         

@@ -79,13 +79,14 @@ class MapTile(sw.Tile):
         self.compute_dashboard.on_event('click', self._dashboard)
         self.m.dc.on_draw(self._handle_draw)
         self.map_btn.on_event('click', self._compute)
-        self.load_shape.w_btn.on_event('click', self._load_shapes)
+        self.load_shape.btn.on_event('click', self._load_shapes)
         self.name_dialog.observe(self.save_draw, 'value')
         
     def _load_shapes(self, widget, event, data):
         
         # get the data from the selected file
         gdf, column = self.load_shape.read_data()
+        
         gdf = gdf.filter(items=[column, 'geometry'])
         
         # add them to the map 
