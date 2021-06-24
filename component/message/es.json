@@ -38,10 +38,10 @@
     "constraints": {
         "title": "Restricciones",
         "desc": "Selecciona las restricciones para el análisis. Las restricciones se agrupan por tema. Haz clic en la flecha para expandir el menú y selecciona la restricción que deseas activar. Al seleccionar una restricción en el menú desplegable, esta se activará. Las restricciones se pueden personalizar aún más, si son elegibles.",
-        "criteria_lbl": "Criteria",
+        "criteria_lbl": "Criterio",
         "info" : [
             "Usar restricción de {}: al seleccionar bajo, se excluirá la menor cantidad de sitios mientras que alto, excluirá la mayor cantidad. Bajo, medio y alto hacen referencia a los niveles de la variable nombrada por la restricción. Para mayor información, referirse a la documentación de se.plan. Si no desea excluir ningún sitio, no seleccione esta restricción.",
-            "Usar la restricción de {}: al seleccionar Alto, se excluirá la mejor cantidad de sitios, mientras que seleccionando Bajo, se excluirá la mayoría de los sitios. Los niveles bajo, medio y alto hacen referencia a los nombres de la variable de la restricción. Para mayor información, referirse a la documentación de se.plan. Si no desea excluir ningún sitio, no seleccione esta restricción.",
+            "Usar la restricción de {}: al seleccionar Alto, se excluirá la menor cantidad de sitios, mientras que seleccionando Bajo, se excluirá la mayoría de los sitios. Los niveles bajo, medio y alto hacen referencia a los nombres de la variable de la restricción. Para mayor información, referirse a la documentación de se.plan. Si no desea excluir ningún sitio, no seleccione esta restricción.",
             "Usar la restricción de {}: al seleccionar esta restricción, se excluirán todos los sitios en los cuales sus características coincidan con la variable nombrada por la restricción. Si no desea excluir ningún sitio, no seleccione esta restricción."
         ]
     },
@@ -55,7 +55,18 @@
             "apply": "Aplicar flijo de trabajo seleccionado",
             "file": "Seleccione un archivo de flujo de trabajo",
             "name": "Nombre de flujo de trabajo"
-        }
+        },
+        "headers" : {
+            "theme" : "Temática",
+            "subtheme" : "Subtemática",
+            "name" : "Nombre",
+            "layer" : "Capa",
+            "unit" : "Unidad",
+            "action" : "Acción"
+        },
+        "search": "Buscar",
+        "items_per_page" : "Capas por página",
+        "no_data_text" : "Sin capas disponibles"
     },
     "dial": {
         "layer": "Usar capa personalizada",

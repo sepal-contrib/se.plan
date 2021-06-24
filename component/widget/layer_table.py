@@ -6,6 +6,8 @@ import ipyvuetify as v
 import pandas as pd
 
 from component import parameter as cp
+from component.message import cm
+
 from .edit_dialog import EditDialog
 
 class LayerTable(v.DataTable, sw.SepalWidget):
@@ -15,13 +17,16 @@ class LayerTable(v.DataTable, sw.SepalWidget):
     
     def __init__(self, aoi_tile):
         
+        self.footer_props = {'itemsPerPageText': cm.custom.items_per_page}
+        self.no_data_text = cm.custom.no_data_text
+        
         self.headers = [
-            {'text': 'Theme'     , 'value': 'theme'},
-            {'text': 'Subtheme'  , 'value': 'subtheme'},
-            {'text': 'Layer name', 'value': 'name'},
-            {'text': 'Layer'     , 'value': 'layer'},
-            {'text': 'Unit'      , 'value': 'unit'},
-            {'text': 'Action'    , 'value': 'action'},
+            {'text': cm.custom.headers.theme, 'value': 'theme'},
+            {'text': cm.custom.headers.subtheme, 'value': 'subtheme'},
+            {'text': cm.custom.headers.name, 'value': 'name'},
+            {'text': cm.custom.headers.layer, 'value': 'layer'},
+            {'text': cm.custom.headers.unit, 'value': 'unit'},
+            {'text': cm.custom.headers.action, 'value': 'action'},
         ]
         
         self.items = [
@@ -36,7 +41,7 @@ class LayerTable(v.DataTable, sw.SepalWidget):
         
         self.search_field = v.TextField(
             v_model=None,
-            label = 'Search',
+            label = cm.custom.search,
             clearable = True,
             append_icon = 'mdi-magnify'
         )

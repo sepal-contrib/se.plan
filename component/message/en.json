@@ -55,7 +55,18 @@
             "apply": "Apply the selected recipe",
             "file": "Select recipe file",
             "name": "Recipe name"
-        }
+        },
+        "headers" : {
+            "theme" : "Theme",
+            "subtheme" : "Subtheme",
+            "name" : "Layer name",
+            "layer" : "Layer",
+            "unit" : "Unit",
+            "action" : "Action"
+        },
+        "search": "Search",
+        "items_per_page" : "Layers per page",
+        "no_data_text" : "No data available"
     },
     "dial": {
         "layer": "Use custom layer",
