@@ -51,24 +51,24 @@ class Constraint(sw.SepalWidget):
 
 class Binary(v.Switch, Constraint):
     
-    def __init__(self, name, header, **kwargs):
+    def __init__(self, name, header, label, **kwargs):
         
         super().__init__(
             disabled = True,
             name = name,
             header=header,
-            label = name,
+            label = label,
             v_model = True,
             **kwargs
         )
         
 class Dropdown(v.Select, Constraint):
     
-    def __init__(self, name, items, header, **kwargs):
+    def __init__(self, name, items, header, label, **kwargs):
         
         super().__init__(
             name = name,
-            label = name,
+            label = label,
             header = header,
             items = items,
             v_model = int(items[0]['value']),
@@ -78,14 +78,14 @@ class Dropdown(v.Select, Constraint):
         
 class Range(v.Slider, Constraint):
     
-    def __init__(self, name, max, header, **kwargs):
+    def __init__(self, name, max, header, label, **kwargs):
         
         super().__init__(
             persistent_hint = True,
             hint = cm.questionnaire.slider_hint,
             name = name, 
             header = header,
-            label = name,
+            label = label,
             max = max,
             v_model = 0,
             thumb_label=True,
@@ -108,7 +108,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
             class_ = 'mt-5',
             small_chips = True,
             v_model = None,
-            items = [c.name for c in self.criterias],
+            items = [{'text':c.label, 'value':c.name} for c in self.criterias],
             label = cm.constraints.criteria_lbl,
             multiple = True,
             deletable_chips = True

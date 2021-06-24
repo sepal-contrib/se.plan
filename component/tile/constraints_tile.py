@@ -31,14 +31,16 @@ class ConstraintTile(sw.Tile, HasTraits):
             header = c['header']
             value = c['content']
             id_ = c['layer']
+            label = c['label']
+            
             hint = cm.constraints.info[c['tooltip']].format(key)
             
             if value == None: # binary criteria 
-                crit = cw.Binary(key, header, id_=id_, hint=hint)
+                crit = cw.Binary(key, header, id_=id_, hint=hint, label=label)
             elif isinstance(value, list): # dropdown values
-                crit = cw.Dropdown(key, value, header, id_=id_, hint=hint)
+                crit = cw.Dropdown(key, value, header, id_=id_, hint=hint, label=label)
             elif isinstance(value, int): # range values
-                crit = cw.Range(key, value, header, id_=id_, hint=hint)
+                crit = cw.Range(key, value, header, id_=id_, hint=hint, label=label)
                 
             self.criterias.append(crit)
             

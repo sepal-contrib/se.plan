@@ -21,25 +21,29 @@ criteria_types = {
     # 1: more than 
     # 2 binary
 criterias = {
-    cm.param.criteria.bare_land: {
+    'Bare land': {
+        'label' : cm.param.criteria.bare_land,
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
-    cm.param.criteria.shrub_land: {
+    'Shrub land': {
+        'label' : cm.param.criteria.shrub_land,
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
-    cm.param.criteria.agriculture_land: {
+    'Agricultural land' : {
+        'label': cm.param.criteria.agriculture_land,
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
-    cm.param.criteria.rainfall.name: {
+    'Annual rainfall': {
+        'label' : cm.param.criteria.rainfall.name,
         'tooltip': 1,
         'layer': 'annual_rainfall',
         'header': 'bio',
@@ -49,7 +53,8 @@ criterias = {
             {'text': cm.param.criteria.rainfall.low,    'value': 200}
         ]
     },
-    cm.param.criteria.water_stress.name: {
+    'Baseline water stress': {
+        'label' : cm.param.criteria.water_stress.name,
         'tooltip': 0,
         'layer': 'water_stress',
         'header': 'bio',
@@ -59,7 +64,8 @@ criterias = {
             {'text': cm.param.criteria.water_stress.low, 'value':1},      
         ]
     },
-    cm.param.criteria.elevation.name: {
+    'Elevation' : {
+        'label' : cm.param.criteria.elevation.name,
         'tooltip': 1,
         'layer': 'elevation',
         'header': 'bio',
@@ -69,7 +75,8 @@ criterias = {
             {'text': cm.param.criteria.elevation.low,    'value': 300},
         ]
     },
-    cm.param.criteria.slope.name: {
+    'Slope' : {
+        'label' : cm.param.criteria.slope.name,
         'tooltip': 1,
         'layer': 'slope',
         'header': 'bio',
@@ -79,7 +86,8 @@ criterias = {
             {'text': cm.param.criteria.slope.low,    'value': 5},
         ]
     },
-    cm.param.criteria.city_access.name: {
+    'Accessibility to cities' : {
+        'label' : cm.param.criteria.city_access.name,
         'tooltip': 0,
         'layer': 'city_access',
         'header': 'socio_eco',
@@ -89,7 +97,8 @@ criterias = {
             {'text': cm.param.criteria.city_access.low,    'value': 60},
         ]
     },
-    cm.param.criteria.population_density.name: {
+    'Population density': {
+        'label' : cm.param.criteria.population_density.name,
         'tooltip': 0,
         'layer': 'population_density',
         'header': 'socio_eco',
@@ -99,13 +108,15 @@ criterias = {
             {'text': cm.param.criteria.population_density.low,    'value': 1},
         ]
     },
-    cm.param.criteria.protected_areas: {
+    'Protected areas' : {
+        'label' : cm.param.criteria.protected_areas,
         'tooltip': 2,
         'layer': 'protected_areas',
         'header': 'socio_eco',
         'content': None
     },
-    cm.param.criteria.property_rigths.name: {
+    'Property rights protection' : {
+        'label' : cm.param.criteria.property_rigths.name,
         'tooltip': 1,
         'layer': 'property_rigths',
         'header': 'socio_eco',
@@ -115,7 +126,8 @@ criterias = {
             {'text': cm.param.criteria.property_rigths.low,    'value': -95},
         ]
     },
-    cm.param.criteria.deforestation_rate.name: {
+    'Deforestation rate' : {
+        'label' : cm.param.criteria.deforestation_rate.name,
         'tooltip': 0,
         'layer': 'deforestation_rate',
         'header': 'forest',
@@ -125,7 +137,8 @@ criterias = {
             {'text': cm.param.criteria.deforestation_rate.low,    'value': 21},
         ]
     },
-    cm.param.criteria.climate_risk.name: {
+    'Climate risk' : {
+        'label' : cm.param.criteria.climate_risk.name,
         'tooltip': 1,
         'layer': 'climate_risk',
         'header': 'forest',
@@ -135,7 +148,8 @@ criterias = {
             {'text': cm.param.criteria.climate_risk.low,    'value': -24},
         ]
     },
-    cm.param.criteria.natural_regeneration.name: {
+    'Natural regeneration variability' : {
+        'label' : cm.param.criteria.natural_regeneration.name,
         'tooltip': 0,
         'layer': 'natural_regeneration',
         'header': 'forest',
@@ -145,7 +159,8 @@ criterias = {
             {'text': cm.param.criteria.natural_regeneration.low,    'value': 10},
         ]
     },
-    cm.param.criteria.declining_population: {
+    'Declining population': {
+        'label' : cm.param.criteria.declining_population,
         'tooltip': 2,
         'layer': 'declining_population',
         'header': 'socio_eco',
