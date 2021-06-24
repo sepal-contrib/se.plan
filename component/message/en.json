@@ -133,5 +133,81 @@
         },
         "cancel": "Cancel",
         "apply": "Apply"
+    },
+    "param" : {
+        "criteria_types" : {
+            "land_use" : "Land use constraints",
+            "bio" : "Biophysical constraints",
+            "socio_eco" : "Socio-economic constraints",
+            "forest" : "Forest change"
+        },
+        "criteria": {
+            "bare_land" : "Bare land",
+            "shrub_land" : "Shrub land",
+            "agriculture_land": "Agricultural land",
+            "declining_population" : "Declining population",
+            "protected_areas" : "Protected areas",
+            "rainfall" : {
+                "name" : "Annual rainfall",
+                "high" : "High precipitaion",
+                "medium" : "Medium precipitaion",
+                "low" :"Low precipitaion"
+            },
+            "water_stress" : {
+                "name" : "Baseline water stress",
+                "high" : "High water stress",
+                "medium" : "Medium water stress",
+                "low" :"Low water stress"
+            },
+            "elevation" : {
+                "name" : "Elevation",
+                "high" : "High altitude",
+                "medium" : "Medium altitude",
+                "low" :"Low altitude"
+            },
+            "slope" : {
+                "name" : "Slope",
+                "high" : "High slope",
+                "medium" : "Medium slope",
+                "low" :"Low slope"
+            },
+            "city_access" : {
+                "name" : "Accessibility to cities",
+                "high" : "High accessibility",
+                "medium" : "Medium accessibility",
+                "low" :"Low accessibility"
+            },
+            "population_density" : {
+                "name" : "Population density",
+                "high" : "High populated",
+                "medium" : "Medium populated",
+                "low" :"Low populated"
+            },
+            "property_rigths" : {
+                "name" : "Property rights protection",
+                "high" : "High variation",
+                "medium" : "Medium variation",
+                "low" :"Low variation"
+            },
+            "deforestation_rate" : {
+                "name" : "Deforestation rate",
+                "high" : "High change",
+                "medium" : "Medium change",
+                "low" :"Low change"
+            },
+            "climate_risk" : {
+                "name" : "Climate risk",
+                "high" : "High climate risk",
+                "medium" : "Medium climate risk",
+                "low" :"Low climate risk"
+            },
+            "natural_regeneration" : {
+                "name" : "Natural regeneration variability",
+                "high" : "High variation",
+                "medium" : "Medium variation",
+                "low" :"Low variation"
+            }
+
+        }
     }
 }

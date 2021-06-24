@@ -1,10 +1,12 @@
+from component.message import cm
+
 # list of the available constraints types. They will be used in the criterias names 
 criteria_types = {
-    'land_use': 'Land use constraints',
-    'bio': 'Biophysical constraints',
-    'socio_eco': 'Socio-economic constraints',
+    'land_use': cm.param.criteria_types.land_use,
+    'bio': cm.param.criteria_types.bio,
+    'socio_eco': cm.param.criteria_types.socio_eco,
+    'forest': cm.param.criteria_types.forest
     #'treecover': 'Tree cover constraints within land cover classes',
-    'forest': 'Forest change'
 }
 
 # list of the available constraint criteria
@@ -19,100 +21,136 @@ criteria_types = {
     # 1: more than 
     # 2 binary
 criterias = {
-    'Bare land': {
+    cm.param.criteria.bare_land: {
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
-    'Shrub land': {
+    cm.param.criteria.shrub_land: {
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
-    'Agricultural land': {
+    cm.param.criteria.agriculture_land: {
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
         'content': None
     },
-    'Annual rainfall': {
+    cm.param.criteria.rainfall.name: {
         'tooltip': 1,
         'layer': 'annual_rainfall',
         'header': 'bio',
         'content': [
-            {'text': 'high precipitaion',    'value': 1000},
-            {'text': 'medium precipitaion', 'value': 500},
-            {'text': 'low precipitaion',    'value': 200}
+            {'text': cm.param.criteria.rainfall.high,    'value': 1000},
+            {'text': cm.param.criteria.rainfall.medium, 'value': 500},
+            {'text': cm.param.criteria.rainfall.low,    'value': 200}
         ]
     },
-    'Baseline water stress': {
+    cm.param.criteria.water_stress.name: {
         'tooltip': 0,
         'layer': 'water_stress',
         'header': 'bio',
         'content': [
-            {'text': 'high water stress', 'value':3},
-            {'text': 'medium water stress', 'value':2},
-            {'text': 'low water stress', 'value':1},      
+            {'text': cm.param.criteria.water_stress.high, 'value':3},
+            {'text': cm.param.criteria.water_stress.medium, 'value':2},
+            {'text': cm.param.criteria.water_stress.low, 'value':1},      
         ]
     },
-    'Elevation': {
+    cm.param.criteria.elevation.name: {
         'tooltip': 1,
         'layer': 'elevation',
         'header': 'bio',
         'content': [
-            {'text': 'high altitude',    'value': 3000},
-            {'text': 'medium altitude', 'value': 1000},
-            {'text': 'low altitude',    'value': 300},
+            {'text': cm.param.criteria.elevation.high,    'value': 3000},
+            {'text': cm.param.criteria.elevation.medium, 'value': 1000},
+            {'text': cm.param.criteria.elevation.low,    'value': 300},
         ]
     },
-    'Slope': {
+    cm.param.criteria.slope.name: {
         'tooltip': 1,
         'layer': 'slope',
         'header': 'bio',
         'content': [
-            {'text': 'high slope',    'value': 25},
-            {'text': 'medium slope', 'value': 10},
-            {'text': 'low slope',    'value': 5},
+            {'text': cm.param.criteria.slope.high,    'value': 25},
+            {'text': cm.param.criteria.slope.medium, 'value': 10},
+            {'text': cm.param.criteria.slope.low,    'value': 5},
         ]
     },
-    'Accessibility to cities' : {
+    cm.param.criteria.city_access.name: {
         'tooltip': 0,
         'layer': 'city_access',
         'header': 'socio_eco',
         'content': [
-            {'text': 'high acessibility',    'value': 360},
-            {'text': 'medium acessibility', 'value': 180},
-            {'text': 'low acessibility',    'value': 60},
+            {'text': cm.param.criteria.city_access.high,    'value': 360},
+            {'text': cm.param.criteria.city_access.medium, 'value': 180},
+            {'text': cm.param.criteria.city_access.low,    'value': 60},
         ]
     },
-    'Population density' : {
+    cm.param.criteria.population_density.name: {
         'tooltip': 0,
         'layer': 'population_density',
         'header': 'socio_eco',
         'content': [
-            {'text': 'high populated',    'value': 100},
-            {'text': 'medium populated', 'value': 10},
-            {'text': 'low populated',    'value': 1},
+            {'text': cm.param.criteria.population_density.high,    'value': 100},
+            {'text': cm.param.criteria.population_density.medium, 'value': 10},
+            {'text': cm.param.criteria.population_density.low,    'value': 1},
         ]
     },
-    'Protected areas': {
+    cm.param.criteria.protected_areas: {
         'tooltip': 2,
         'layer': 'protected_areas',
         'header': 'socio_eco',
         'content': None
     },
-    'Property rights protection': {
+    cm.param.criteria.property_rigths.name: {
         'tooltip': 1,
         'layer': 'property_rigths',
         'header': 'socio_eco',
         'content': [
-            {'text': 'high variation',    'value': -11},
-            {'text': 'medium variation', 'value': -53},
-            {'text': 'low variation',    'value': -95},
+            {'text': cm.param.criteria.property_rigths.high,    'value': -11},
+            {'text': cm.param.criteria.property_rigths.medium, 'value': -53},
+            {'text': cm.param.criteria.property_rigths.low,    'value': -95},
         ]
     },
+    cm.param.criteria.deforestation_rate.name: {
+        'tooltip': 0,
+        'layer': 'deforestation_rate',
+        'header': 'forest',
+        'content': [
+            {'text': cm.param.criteria.deforestation_rate.high,    'value': 92},
+            {'text': cm.param.criteria.deforestation_rate.medium, 'value': 43},
+            {'text': cm.param.criteria.deforestation_rate.low,    'value': 21},
+        ]
+    },
+    cm.param.criteria.climate_risk.name: {
+        'tooltip': 1,
+        'layer': 'climate_risk',
+        'header': 'forest',
+        'content': [
+            {'text': cm.param.criteria.climate_risk.high,    'value': 25},
+            {'text': cm.param.criteria.climate_risk.medium, 'value': -2},
+            {'text': cm.param.criteria.climate_risk.low,    'value': -24},
+        ]
+    },
+    cm.param.criteria.natural_regeneration.name: {
+        'tooltip': 0,
+        'layer': 'natural_regeneration',
+        'header': 'forest',
+        'content': [
+            {'text': cm.param.criteria.natural_regeneration.high,    'value': 26},
+            {'text': cm.param.criteria.natural_regeneration.medium, 'value': 16},
+            {'text': cm.param.criteria.natural_regeneration.low,    'value': 10},
+        ]
+    },
+    cm.param.criteria.declining_population: {
+        'tooltip': 2,
+        'layer': 'declining_population',
+        'header': 'socio_eco',
+        'content': None
+    }
     #"Agriculture": {
     #    'layer': None,
     #    'header': 'treecover',
@@ -133,40 +171,4 @@ criterias = {
     #    'header': 'treecover',
     #    'content': 100
     #},
-    'Deforestation rate':{
-        'tooltip': 0,
-        'layer': 'deforestation_rate',
-        'header': 'forest',
-        'content': [
-            {'text': 'high change',    'value': 92},
-            {'text': 'medium change', 'value': 43},
-            {'text': 'low change',    'value': 21},
-        ]
-    },
-    'Climate risk': {
-        'tooltip': 1,
-        'layer': 'climate_risk',
-        'header': 'forest',
-        'content': [
-            {'text': 'high climate risk',    'value': 25},
-            {'text': 'medium climate risk', 'value': -2},
-            {'text': 'low climate risk',    'value': -24},
-        ]
-    },
-    'Natural regeneration variability': {
-        'tooltip': 0,
-        'layer': 'natural_regeneration',
-        'header': 'forest',
-        'content': [
-            {'text': 'high variation',    'value': 26},
-            {'text': 'medium variation', 'value': 16},
-            {'text': 'low variation',    'value': 10},
-        ]
-    },
-    'Declining population': {
-        'tooltip': 2,
-        'layer': 'declining_population',
-        'header': 'socio_eco',
-        'content': None
-    }
 }
