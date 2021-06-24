@@ -148,7 +148,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         title = cp.criteria_types[self.title]
         
         # get the chips
-        chips = v.Flex(children=[v.Chip(class_='ml-1 mr-1', small=True, children=[c.name]) for c in self.criterias if c.viz])
+        chips = v.Flex(children=[v.Chip(class_='ml-1 mr-1', small=True, children=[c.label]) for c in self.criterias if c.viz])
 
         # write the new header content 
         self.header.children = [title, chips]
