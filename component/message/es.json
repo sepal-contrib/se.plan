@@ -1,0 +1,137 @@
+{
+    "app":{
+        "title": "se.plan",
+        "drawer": {
+            "aoi": "Selección de área de interés",
+            "question": "Cuestionario",
+            "custom": "Selección manual",
+            "compute": "Ejecutar",
+            "dashboard": "Tablero resumen",
+            "map": "Mapa de resultados",
+            "about": "Acerca",
+            "recipe": "Flujo de trabajo",
+            "feedback": "Feedback"
+        }
+        
+    },
+    "questionnaire": {
+        "title": "Cuestionario sobre prioridades y restricciones de restauración",
+        "max_treecover": "Porcentaje máximo permitido de cobertura arbórea en {}:",
+        "default_layer": "Usar capas por defecto",
+        "custom_layer": "Usar capas personalizadas",
+        "questionnaire_btn": "Aplicar respuestas",
+        "slider_hint": "Porcentaje % de cobertura arbórea en la clase"
+    },
+    "valid":{
+        "title": "Flujo de trabajo del modelo (beneficios, costos y restricciones de entrada)",
+        "display": "Validar datos",
+        "save": "Guardar flujo de trabajo",
+        "txt": ["La herramienta utiliza un enfoque de suma ponderada para generar un mapa que indique cómo se comparan los beneficios netos de la restauración en diferentes lugares del paisaje. Este enfoque es un método simple de análisis de decisiones de múltiples atributos mediante el cual los mapas digitales (a menudo llamados \"capas espaciales\") de los posibles beneficios de la restauración, como la mejora de la extracción de madera, el secuestro de carbono o la conservación de la biodiversidad, se ponderan de acuerdo con la importancia relativa (es decir, calificación) que un usuario les atribuye. La herramienta crea una única capa de beneficios ponderada multiplicando cada capa de beneficios por su peso asignado por el usuario y luego sumando todas las capas de beneficios. A continuación, calcula una relación costo-beneficio dividiendo la capa de beneficio ponderado por los costos estimados de restauración, que al igual que los beneficios pueden variar según la ubicación. Finalmente, enmascara de los resultados cualquier lugar que el usuario haya indicado no apto para restauración debido a riesgos ecológicos o socioeconómicos. Por lo tanto, los usuarios proporcionan dos tipos importantes de información antes de ejecutar la herramienta: los pesos relativos de los diferentes beneficios de restauración y las restricciones que excluyen ubicaciones específicas de la restauración.",
+                "Recomendamos que los usuarios exploren diferentes combinaciones de ponderación para examinar cómo pueden cambiar las áreas de restauración recomendadas. Para ayudar a comparar las calificaciones y las restricciones de los beneficios alternativos, hemos incluido una instantánea de la configuración de su modelo en la parte superior. También tiene la opción de guardar este flujo de trabajo en SEPAL para que pueda volver a recrealo en otro momento."
+        ]
+    },
+    "compute": {
+        "title": "Ejecutar proceso",
+        "btn": "Ejecutar mapa de restauración",
+        "desc": "**El botón de ejecutar estará habilitado después de que valides las entradas**"
+    },
+    "constraints": {
+        "title": "Restricciones",
+        "desc": "Selecciona las restricciones para el análisis. Las restricciones se agrupan por tema. Haz clic en la flecha para expandir el menú y selecciona la restricción que deseas activar. Al seleccionar una restricción en el menú desplegable, esta se activará. Las restricciones se pueden personalizar aún más, si son elegibles.",
+        "criteria_lbl": "Criteria",
+        "info" : [
+            "Usar restricción de {}: al seleccionar bajo, se excluirá la menor cantidad de sitios mientras que alto, excluirá la mayor cantidad. Bajo, medio y alto hacen referencia a los niveles de la variable nombrada por la restricción. Para mayor información, referirse a la documentación de se.plan. Si no desea excluir ningún sitio, no seleccione esta restricción.",
+            "Usar la restricción de {}: al seleccionar Alto, se excluirá la mejor cantidad de sitios, mientras que seleccionando Bajo, se excluirá la mayoría de los sitios. Los niveles bajo, medio y alto hacen referencia a los nombres de la variable de la restricción. Para mayor información, referirse a la documentación de se.plan. Si no desea excluir ningún sitio, no seleccione esta restricción.",
+            "Usar la restricción de {}: al seleccionar esta restricción, se excluirán todos los sitios en los cuales sus características coincidan con la variable nombrada por la restricción. Si no desea excluir ningún sitio, no seleccione esta restricción."
+        ]
+    },
+    "custom": {
+        "title": "Personalizar capas de entrada",
+        "desc": "Al hacer clic en el botón 'Aplicar respuestas', las capas se ponderarán de acuerdo con las respuestas seleccionadas. Sin embargo, aún puede cambiar el valor de cualquier peso. En el segundo panel, encontrarás todas las capas que se pueden reemplazar con versiones personalizadas. Ten cuidado al cambiar los pesos y utilizar capas personalizadas, ya que esto puede dar lugar a resultados imprecisos.",
+        "question_btn": "Aplicar respuestas",
+        "default_btn": "Aplicar parámetros por defecto",
+        "recipe": {
+            "title": "Cargar flujo de trabajo existente",
+            "apply": "Aplicar flijo de trabajo seleccionado",
+            "file": "Seleccione un archivo de flujo de trabajo",
+            "name": "Nombre de flujo de trabajo"
+        }
+    },
+    "dial": {
+        "layer": "Usar capa personalizada",
+        "change": "Cambiar capa usada para el análisis",
+        "cancel": "Cancelar",
+        "save": "Guardar",
+        "weight": "Peso",
+        "no_layer": "Sin capa",
+        "disc": "Necesitas seleccionar una capa antes de hacer modificaciones"
+    },
+    "dashboard": {
+        "region": {
+            "title": "Resumen de idoneidad de restauración por región",
+            "detail": "Detalles"
+        },
+        "theme": {
+            "title": "Área de interés - resumen por sub-temas",
+            "txt": "Ayuda a comprender los impactos potenciales de la restauración en cada sitio candidato, se reportan los beneficios, costos y riesgos individuales (poer ejemplo, restricciones) con mayor detalle.",
+            "benefit": [
+                "Los beneficios evaluados incluyen mejoras en la producción de madera, los medios de subsistencia locales y los recursos no maderables, incluida la conservación de la biodiversidad y el secuestro de carbono. Cada beneficio se cuantifica en sus unidades originales (por ejemplo, C t/ha). También se presenta la información en quintiles a lo largo del país.",
+                "Para cualquiera de estas capas temáticas, si utilizas tus propios datos en el modelo, consulta los métodos utilizados para crear esa capa."
+            ],
+            "cost": [
+                "La herramienta incluye datos sobre dos tipos de costos: costos de oportunidad y costos de establecimiento. El costo de oportunidad se basa en el valor de la tierra para la producción de cultivos, a menos que falten datos sobre la producción de cultivos, en cuyo caso el costo de oportunidad se basa en el valor de los pastizales. Los costos de establecimiento se refieren a la regeneración artificial, que generalmente significa plantar plántulas o sembrar semillas.",
+                "Nota: La información sobre variabilidad del éxito de la regeneración natural se incluye en la categoría de \" Restricciones \"." 
+            ],
+            "constraint": ["Los resultados indican el porcentaje del área total de la región de interés que está sujeta a cada restricción particular (es decir, que está excluida de la restauración)."]
+        }
+    },
+    "goal": {
+        "title": "Metas de restauración",
+        "goal_lbl": "metas de restauración"
+    },
+    "map": {
+        "title": "Mapa de resultados",
+        "to_asset": "Descargar como asset de GEE",
+        "to_sepal": "Descargar a SEPAL",
+        "draw_custom_area": "Dibujar una sub área de interés",
+        "compute_dashboard": "Ejecutar tablero",
+        "low": "Bajo",
+        "high": "Alto",
+        "txt": [
+            "El siguiente mapa muestra la conveniencia de diferentes zonas para restauración, basadas en la calificación otorgada a los beneficios y las restricciones seleccionadas. Las áreas azules indican un mayor retorno de la inversión, mientras que las áreas rojas indican un menor retorno.",
+            "Inspecciona el mapa de idoneidad de restauración e identifica algunas áreas que parecen prometedoras para una planificación más detallada. Una vez que hayas identificado éstas áreas, puedes dibujar un límite alrededor de ellas y obtener estadísticas resumidas de sus beneficios, costos y riesgos estimados (es decir, restricciones). Esta información puede ayudarte a evaluar las compensaciones y establecer prioridades de restauración para las regiones de interés.",
+            "La idoneidad de la restauración está dada en función de beneficios y costos. Es la relación de la suma ponderada de beneficios, escalada de 1 a 5, dividida por los costos. Los costos incluyen tanto los de oportunidad como los de establecimiento. Este indicador le permite comparar la idoneidad de restauración de diferentes sitios y determinar cuáles ofrecen mayores retornos de la inversión."
+            ],
+        "dialog": {
+            "title" : "Nombre de subárea de interés",
+            "label" : "Elija un nombre",
+            "btn" : "Validar"
+        },
+        "shapes": {
+            "btn" : "Cargar shapefile",
+            "file" : "Seleccionar archivo",
+            "feature" : "Seleccionar ID del feature",
+            "title" : "Cargar shapefile existente"
+        }
+    },
+    "potential": {
+        "title": "Potencial de restauración y uso del suelo",
+        "desc": "Máximo porcentaje de cobertura arbórea en clases de uso del suelo",
+        "land_use_lbl": "¿Qué usos del suelo permiten restauración?",
+        "treecover_lbl": "Cobertura arbórea en {}"
+    },
+    "benefits": {
+        "title": "Beneficios"
+    },
+    "export": {
+        "title": "Exportar mapa",
+        "scale": "Escala",
+        "radio": {
+            "label": "Seleccione método de exportación",
+            "gee": "Como asset de GEE",
+            "sepal": "Como archivo SEPAL"
+        },
+        "cancel": "Cancelar",
+        "apply": "Aplicar"
+    }
+}
