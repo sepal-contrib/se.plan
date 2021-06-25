@@ -5,17 +5,19 @@ import pandas as pd
 import numpy as np
 
 from component import parameter as cp
+from component.message import cm
+
 
 class PriorityTable(v.SimpleTable):
     
     _labels = [
-        'no importance',
-        'low importance',
-        'neutral',
-        'important',
-        'very important',
+        cm.benefits.no_importance,
+        cm.benefits.low_importance,
+        cm.benefits.neutral,
+        cm.benefits.important,
+        cm.benefits.very_important,
     ]
-        
+            
     _colors = cp.gradient(5)
     
     _BENEFITS = pd.read_csv(cp.layer_list).fillna('')
@@ -52,8 +54,8 @@ class PriorityTable(v.SimpleTable):
             children = [
                 v.Html(tag = 'thead', children = [
                     v.Html(tag = 'tr', children = (
-                        [ v.Html(tag = 'th', children = ['priority'])]
-                        + [v.Html(tag = 'th', children = [label]) for label in self._labels]
+                        [ v.Html(tag = 'th', children = [cm.benefits.priority])]
+                        + [v.Html(tag = 'th', children = [label]) for label  in self._labels]
                     ))
                 ]),
                 v.Html(tag = 'tbody', children = rows)

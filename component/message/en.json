@@ -132,7 +132,13 @@
         "treecover_lbl": "Tree cover in {}"
     },
     "benefits": {
-        "title": "Restoration benefits"
+        "title": "Restoration benefits",
+        "no_importance": "No importance",
+        "low_importance": "Low importance",
+        "neutral": "Neutral",
+        "important": "Important",
+        "very_important": "Very important",
+        "priority": "Priority"
     },
     "export": {
         "title": "Export map",

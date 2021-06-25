@@ -132,7 +132,13 @@
         "treecover_lbl": "Cobertura arbórea en {}"
     },
     "benefits": {
-        "title": "Beneficios"
+        "title": "Beneficios",
+        "no_importance": "Sin importancia",
+        "low_importance": "Baja importancia",
+        "neutral": "Neutral",
+        "important": "Importante",
+        "very_important": "Muy importante",
+        "priority": "Prioridad"
     },
     "export": {
         "title": "Exportar mapa",
