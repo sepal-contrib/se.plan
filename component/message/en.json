@@ -1,4 +1,9 @@
 {
+    "var" : {
+        "constraints" : "constraints",
+        "benefits" : "benefits",
+        "costs" : "costs"
+    },
     "app":{
         "title": "se.plan",
         "drawer": {
