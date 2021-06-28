@@ -4,8 +4,8 @@ import ipyvuetify as v
 import pandas as pd 
 import numpy as np
 
-from component import parameter as cp
 from component.message import cm
+from component import parameter as cp
 
 
 class PriorityTable(v.SimpleTable):
@@ -21,7 +21,7 @@ class PriorityTable(v.SimpleTable):
     _colors = cp.gradient(5)
     
     _BENEFITS = pd.read_csv(cp.layer_list).fillna('')
-    _BENEFITS = _BENEFITS[_BENEFITS.theme == 'benefits'].subtheme.unique()
+    _BENEFITS = _BENEFITS[_BENEFITS.theme == cm.var.benefits].subtheme.unique()
     
     _DEFAULT_V_MODEL = {name: 0 for name in _BENEFITS}
     

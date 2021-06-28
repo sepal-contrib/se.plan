@@ -33,7 +33,7 @@ class ConstraintTile(sw.Tile, HasTraits):
             id_ = c['layer']
             label = c['label']
             
-            hint = cm.constraints.info[c['tooltip']].format(key)
+            hint = cm.constraints.info[c['tooltip']].format(c['label'].lower())
             
             if value == None: # binary criteria 
                 crit = cw.Binary(key, header, id_=id_, hint=hint, label=label)

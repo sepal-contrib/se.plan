@@ -4,6 +4,8 @@ from datetime import datetime as dt
 import os
 
 import geemap
+from component.message import cm
+
 
 def _quintile(image, geometry, scale=100):
     """Computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties""" 
@@ -208,16 +210,16 @@ def get_summary_statistics(gee_model, name, geom):
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
-    all_benefits_layers = [i for i in layer_list if i['theme'] == 'benefits']
+    all_benefits_layers = [i for i in layer_list if i['theme'] == cm.var.benefits]
     list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), all_benefits_layers))
 
-    benefits_out = ee.Dictionary({'benefits':list(map(lambda i: get_image_mean(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
+    benefits_out = ee.Dictionary({cm.var.benefits:list(map(lambda i: get_image_mean(i['eeimage'],geom, i['name'], mask), all_benefits_layers))})
 
     # costs
-    costs_out = ee.Dictionary({'costs':list(map(lambda i: get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})
+    costs_out = ee.Dictionary({cm.var.costs:list(map(lambda i: get_image_sum(i['eeimage'],geom, i['name'], mask), costs))})
 
     # constraints
-    constraints_out =ee.Dictionary({'constraints':list(map(lambda i: get_image_percent_cover_pixelarea(i['eeimage'],geom, i['name']), constraints))}) 
+    constraints_out =ee.Dictionary({cm.var.constraints:list(map(lambda i: get_image_percent_cover_pixelarea(i['eeimage'],geom, i['name']), constraints))}) 
 
     # combine the result 
     result = wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)

@@ -26,6 +26,7 @@ class DashThemeTile(sw.Tile):
         constraints_layer = []
         costs_layer = []
 
+        print(json_themes_values.items())
         for k,val in json_themes_values.items():
             for layer in json_themes_values[k]:
                 if k == 'name':
@@ -34,24 +35,24 @@ class DashThemeTile(sw.Tile):
                 name = layer
                 try:
                     values = json_themes_values[k][layer]['values']
-                    if k == 'benefits':
+                    if k == cm.var.benefits:
                         benefits_layer.append(cw.LayerFull(name, values, aoi_names[::-1], colors))
-                    elif k == 'costs':
+                    elif k == cm.var.costs:
                         costs_layer.append(cw.LayerFull(name, values, aoi_names[::-1], colors))
-                    elif k == 'constraints':
+                    elif k == cm.var.constraints:
                         constraints_layer.append(cw.LayerPercentage(name, values, colors))
 
                 except Exception as e:
                     print(name, 'not found',e)
                     continue
         
-        benefits = v.Html(tag='h2', children= ['Benefits'])
+        benefits = v.Html(tag='h2', children= [cm.var.benefits.capitalize()])
         benefits_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.benefit))
         
-        costs = v.Html(tag='h2', children= ['Costs'])
+        costs = v.Html(tag='h2', children= [cm.var.costs.capitalize()])
         costs_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.cost))
         
-        constraints = v.Html(tag='h2', children=['Constraints'])
+        constraints = v.Html(tag='h2', children=[cm.var.constraints.capitalize()])
         constraints_txt = sw.Markdown('  /n'.join(cm.dashboard.theme.constraint))
         
         # create an expansion panel to store everything 

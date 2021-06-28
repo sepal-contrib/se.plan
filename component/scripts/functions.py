@@ -3,6 +3,8 @@ import json
 
 from component import parameter as cp 
 from component import model
+from component.message import cm
+
 
 ee.Initialize()
 
@@ -13,28 +15,28 @@ class gee_compute:
         self.aoi_model = rp_aoi_model
         self.rp_layers_model = rp_layers_model
         self.rp_questionaire_model = rp_questionaire_model
-        self.rp_default_layer = model.CustomizeLayerModel().layer_list
+        self.rp_default_layer = model.CustomizeLayerModel().layer_list        
 
         # results
         self.wlcoutputs = None
 
         self.landcover_default_object = {
-            'Bare land':60,
-            'Shrub land':20,
-            'Agricultural land':40, 
-            'Agriculture':40,
-            'Rangeland':40,
-            'Grassland':30, 
-            'Settlements':50
+            'bare_land':60,
+            'shrub_land':20,
+            'agricultural_land':40, 
+            'agriculture':40,
+            'rangeland':40,
+            'grassland':30, 
+            'settlements':50
         }
     
-    def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
+    def constraints_catagorical(self, cat_value,contratint_bool,layer_id,asset_id):
 
-        layer = {'theme':'constraints'}
-        layer['name'] = name 
-        image = ee.Image(layer_id)
+        layer = {'theme':cm.var.constraints}
+        layer['layer_id'] = layer_id
+        image = ee.Image(asset_id)
 
-        if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
+        if asset_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
             image = image.select("discrete_classification")
         if contratint_bool:
             layer['eeimage'] = image.neq(cat_value)
@@ -43,23 +45,23 @@ class gee_compute:
 
         return layer
 
-    def constraints_hight_low_bool(self,value, contratint_bool, name, layer_id):
+    def constraints_hight_low_bool(self,value, contratint_bool, layer_id, asset_id):
         
-        layer = {'theme':'constraints'}
-        layer['name'] = name 
+        layer = {'theme':cm.var.constraints}
+        layer['layer_id'] = layer_id 
         
         if contratint_bool:
-            layer['eeimage'] = ee.Image(layer_id).gt(value)
+            layer['eeimage'] = ee.Image(asset_id).gt(value)
         else:
-            layer['eeimage'] = ee.Image(layer_id).lt(value)
+            layer['eeimage'] = ee.Image(asset_id).lt(value)
 
-    def constraints_tree_cover(self, cat_value, value, name, layer_id):
+    def constraints_tree_cover(self, cat_value, value, layer_id, asset_id):
         
-        layer = {'theme':'constraints'}
-        layer['name'] = name 
-        image = ee.Image(layer_id)
+        layer = {'theme':cm.var.constraints}
+        layer['layer_id'] = layer_id 
+        image = ee.Image(asset_id)
 
-        if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
+        if asset_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
             image = image.select("discrete_classification")
 
         treecoverpotential = ee.Image('projects/john-ee-282116/assets/fao-restoration/features/RestorePotential')
@@ -68,88 +70,91 @@ class gee_compute:
         layer['eeimage'] = ee.Image.constant(1).where(image.eq(cat_value).And(treecoverpotential.gt(threshold_max)), 0)
         return layer
 
-    def get_layer_and_id(self, layername, constraints_layers):
+    def get_layer_and_id(self, layer_id, constraints_layers):
         
         try:
-            if layername in  self.landcover_default_object.keys():
-                constraint_layer = next(item for item in constraints_layers if item["name"] == 'Current land cover')
+            if layer_id in  self.landcover_default_object.keys():
+                constraint_layer = next(item for item in constraints_layers if item["layer_id"] == 'land_cover')
             else:
-                constraint_layer = next(item for item in constraints_layers if item["name"] == layername)
+                constraint_layer = next(item for item in constraints_layers if item["layer_id"] == layer_id)
             
             layer_id = constraint_layer['layer']
             
         except:
-            raise Exception(f"Layer {layername} does not exsit.")
+            raise Exception(f"Layer {layer_id} does not exsit.")
             
         return constraint_layer, layer_id
     
-    def is_default_layer(self, name, layer_id):
+    def is_default_layer(self, layer_id, asset_id):
         
-        default_layer_id = next(item['layer'] for item in self.rp_default_layer if item["name"] == name)
+        default_layer_id = next(item['layer'] for item in self.rp_default_layer if item["layer_id"] == layer_id)
         
         return layer_id == default_layer_id
 
 
-    def update_range_constraint(self, value, name, constraints_layers):
+    def update_range_constraint(self, value, layer_id, constraints_layers):
         
-        constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
+        constraint_layer, asset_id = self.get_layer_and_id(layer_id, constraints_layers)
         
         # apply any preprocessing 
         #TODO : export images with 100 multiplication factor....
-        if name == 'Slope' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id)
+        if layer_id == 'slope' and self.is_default_layer(layer_id, asset_id):
+            image = ee.Image(asset_id)
             image = ee.Algorithms.Terrain(image).select('slope')
-        elif name == 'Deforestation rate' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        elif name == 'Natural regeneration probability' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        elif name == 'Property rights protection' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
+        elif layer_id == 'deforestation_rate' and self.is_default_layer(layer_id, asset_id):
+            image = ee.Image(asset_id).multiply(100)
+        elif layer_id == 'natural_regeneration' and self.is_default_layer(layer_id, asset_id):
+            image = ee.Image(asset_id).multiply(100)
+        elif layer_id == 'property_rights' and self.is_default_layer(layer_id, asset_id):
+            image = ee.Image(asset_id).multiply(100)
         else:
-            image = ee.Image(layer_id)
+            image = ee.Image(asset_id)
+            
+        
+        print(constraint_layer)
         
         if constraint_layer['operator'] == 'gt':
             eeimage = {'eeimage': image.gt(value)}
         elif constraint_layer['operator'] == 'lt':
             eeimage = {'eeimage': image.gt(value)}
         else:
-            raise RuntimeError(f"The layer {name} does not have a logical operator assigned. Please contact our maintainer.")
+            raise RuntimeError(f"The layer {layer_id} does not have a logical operator assigned. Please contact our maintainer.")
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):
         landcover_constraints = []
         default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]['content']) is list]
-
+        print(constraints)
         for i in constraints:
             value = constraints[i]
-            name = i
+            layer_id = i
             
             if value == None or value == -1 : continue 
                 
             try:
-                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
+                constraint_layer, asset_id = self.get_layer_and_id(layer_id, constraints_layers)
             except:
-                print(name,value)
+                print(layer_id,value)
                 continue
                 
             # boolean masking lc
-            if name in self.landcover_default_object.keys() and type(value) is bool:
-                landcover_value = self.landcover_default_object[name] 
-                landcover_constraints.append(self.constraints_catagorical(landcover_value, value, name, layer_id))
+            if layer_id in self.landcover_default_object.keys() and type(value) is bool:
+                landcover_value = self.landcover_default_object[layer_id] 
+                landcover_constraints.append(self.constraints_catagorical(landcover_value, value, layer_id, asset_id))
 
             # restoration coverage % masking by lc
-            elif name in self.landcover_default_object.keys() and type(value) is int:
-                landcover_value = self.landcover_default_object[name] 
-                landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, name, layer_id))
+            elif layer_id in self.landcover_default_object.keys() and type(value) is int:
+                landcover_value = self.landcover_default_object[layer_id] 
+                landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, layer_id, asset_id))
 
             # high med lowe constraints (rain, elevation, slope, ect)
-            elif name in default_range_constraints:
-                self.update_range_constraint(value, name, constraints_layers)
+            elif layer_id in default_range_constraints:
+                self.update_range_constraint(value, layer_id, constraints_layers)
 
             # protected areas masking
             # TODO : export this and remove 
-            elif name == 'Protected areas' and self.is_default_layer(name, layer_id):
-                protected_feature = ee.FeatureCollection(layer_id)
+            elif layer_id == 'protected_areas' and self.is_default_layer(layer_id, asset_id):
+                protected_feature = ee.FeatureCollection(asset_id)
                 protected_image = protected_feature \
                     .filter(ee.Filter.neq('WDPAID', {})) \
                     .reduceToImage(properties = ['WDPAID'], reducer = ee.Reducer.first()) \
@@ -160,17 +165,17 @@ class gee_compute:
                 constraint_layer.update(eeimage)
 
             # TODO : export and remove
-            elif name == 'Declining population' and self.is_default_layer(name,layer_id):
+            elif layer_id == 'declining_population' and self.is_default_layer(layer_id, asset_id):
                 # Loctions w declining pop is 1,2 in not declining - binary 
-                eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
+                eeimage = {'eeimage':ee.Image(asset_id).eq(1)}
                 constraint_layer.update(eeimage)
             
             else:
                 # asummes 0 is constraint, 1 is keep
-                eeimage = {'eeimage' : ee.Image(layer_id)}
+                eeimage = {'eeimage' : ee.Image(asset_id)}
                 constraint_layer.update(eeimage)
 
-        default_geographic = next(item for item in constraints_layers if item["name"] == 'Current tree cover less than potential')
+        default_geographic = next(item for item in constraints_layers if item["layer_id"] == 'treecover_with_potential')
         default_geographic.update({'eeimage' : ee.Image(default_geographic['layer'])})
 
         constraints_layers = constraints_layers + landcover_constraints + [default_geographic]
@@ -309,17 +314,17 @@ class gee_compute:
         priorities = json.loads(self.rp_questionaire_model.priorities)
         
         # load layers and create eeimages
-        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and priorities[i['subtheme']] != 0]
+        benefits_layers = [i for i in layerlist if i['theme'] == cm.var.benefits and priorities[i['subtheme']] != 0]
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), benefits_layers))
 
         risks_layers = [i for i in layerlist if i['theme'] == 'risks']
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), risks_layers))
 
-        costs_layers = [i for i in layerlist if i['theme'] == 'costs']
+        costs_layers = [i for i in layerlist if i['theme'] == cm.var.costs]
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), costs_layers))
 
         # constraint_layer, initialize with constant value 1 
-        constraints_layers = [i for i in layerlist if i['theme'] == 'constraint']
+        constraints_layers = [i for i in layerlist if i['theme'] == cm.var.constraints]
         list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
         constraints_layers = self.make_constraints(constraints, constraints_layers)
 
