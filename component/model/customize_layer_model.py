@@ -12,6 +12,7 @@ class CustomizeLayerModel(model.Model):
     
     layer_list = Any([
             {
+                'layer_id' : row.layer_id,
                 'name':     row.layer_name,
                 'layer':    row.gee_asset,
                 'unit':     row.unit,
