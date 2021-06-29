@@ -6,3 +6,5 @@ from .link_dialog import *
 from .area_sum_up import *
 from .layer_sum_up import *
 from .export_map import *
+from .load_shapes import *
+from .custom_aoi_dialog import *

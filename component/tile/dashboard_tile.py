@@ -21,7 +21,7 @@ class DashThemeTile(sw.Tile):
         )
 
 
-    def dev_set_summary(self, json_themes_values, aoi_name, colors):
+    def dev_set_summary(self, json_themes_values, aoi_names, colors):
         benefits_layer = []
         constraints_layer = []
         costs_layer = []
@@ -35,9 +35,9 @@ class DashThemeTile(sw.Tile):
                 try:
                     values = json_themes_values[k][layer]['values']
                     if k == 'benefits':
-                        benefits_layer.append(cw.LayerFull(name, values, aoi_name, colors))
+                        benefits_layer.append(cw.LayerFull(name, values, aoi_names[::-1], colors))
                     elif k == 'costs':
-                        costs_layer.append(cw.LayerFull(name, values, aoi_name, colors))
+                        costs_layer.append(cw.LayerFull(name, values, aoi_names[::-1], colors))
                     elif k == 'constraints':
                         constraints_layer.append(cw.LayerPercentage(name, values, colors))
 

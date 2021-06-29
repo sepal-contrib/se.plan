@@ -1,3 +1,6 @@
+from datetime import datetime
+from pathlib import Path
+
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 import ipyvuetify as v
@@ -21,6 +24,12 @@ class ValidationTile(sw.Tile):
         self.aoi_tile = aoi_tile
         self.questionnaire_tile = questionnaire_tile
         
+        # add the naming textField
+        self.w_name = v.TextField(
+            label = cm.custom.recipe.name,
+            v_model = None
+        )
+        
         # create the layer list widget 
         self.layers_recipe = cw.layerRecipe().hide()
         mkd = sw.Markdown('  \n'.join(cm.valid.txt)) 
@@ -43,15 +52,25 @@ class ValidationTile(sw.Tile):
         # create the tile 
         super().__init__(
             id_ = "compute_widget",
-            inputs= [ep, mkd, self.layers_recipe],
+            inputs= [ep, mkd, self.w_name, self.layers_recipe],
             title = cm.valid.title,
             btn = sw.Btn(cm.valid.display, class_ = 'ma-1'),
             alert = sw.Alert()
         )
         
         # js behaviours 
+        aoi_tile.view.observe(self._recipe_placeholder, 'updated')
         self.btn.on_event('click', self._validate_data)
         self.reset_to_recipe.on_event('click', self.load_recipe)
+        
+    def _recipe_placeholder(self, change):
+        """name the recipe with the date"""
+        
+        now = datetime.now()
+        
+        self.w_name.v_model = f'recipe_{now.strftime("%Y-%m-%d")}'
+        
+        return self
     
     @su.loading_button(debug=True)
     def _validate_data(self, widget, event, data):
@@ -62,7 +81,7 @@ class ValidationTile(sw.Tile):
         self.layers_recipe.show()
         
         # save the inputs in a json
-        cs.save_recipe(self.layer_model, self.aoi_model, self.question_model)
+        cs.save_recipe(self.layer_model, self.aoi_model, self.question_model, self.w_name.v_model)
         
         return self
     
@@ -74,10 +93,11 @@ class ValidationTile(sw.Tile):
         path = path or self.file_select.v_model
             
         cs.load_recipe(self.layer_tile, self.aoi_tile, self.questionnaire_tile, path)
+        self.w_name.v_model = Path(path).stem
 
         # automatically validate them 
         self.btn.fire_event('click', None)
 
-        self.recipe_output.add_msg('loaded', 'success')
+        self.alert.add_msg('loaded', 'success')
 
         return self

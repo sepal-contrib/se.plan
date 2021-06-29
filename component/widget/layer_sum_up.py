@@ -9,7 +9,7 @@ class LayerFull(v.Layout):
     
     COLORS = cp.gradient(5) + ['grey']
     
-    def __init__(self, layer_name, values, aoi_name, colors):
+    def __init__(self, layer_name, values, aoi_names, colors):
         
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna('')
@@ -47,17 +47,17 @@ class LayerFull(v.Layout):
             # create the chart
             fig, ax = plt.subplots(figsize=[50, len(values)*2], facecolor=((0,0,0,0)))
             
-            # set the datas 
-            norm_values = [v/values[0]*100 for v in reversed(values)]
-            names = [f'Sub area {i}' if i else aoi_name for i in range(len(values))][::-1]
+            # set the datas
+            max_value = max(values)
+            norm_values = [v/max_value*100 for v in reversed(values)]
             human_values = [f"{human_format(val)}" for val in reversed(values)]
             colors = [colors[i-1] if i else v.theme.themes.dark.primary for i in range(len(values))][::-1]
             
             # add the axes
-            ax.barh(names, norm_values, color=colors)
+            ax.barh(aoi_names, norm_values, color=colors)
             
             # add the text
-            for i, (norm, name, val, color) in enumerate(zip(norm_values, names, human_values, colors)):
+            for i, (norm, name, val, color) in enumerate(zip(norm_values, aoi_names, human_values, colors)):
                 ax.text(norm+1, i, val, fontsize=40, color=color)
             
             # cosmetic tuning
