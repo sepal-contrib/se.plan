@@ -40,11 +40,7 @@ class LoadShapes(v.ExpansionPanels):
 
         header = v.ExpansionPanelHeader(
             disable_icon_rotate = True,
-            children=[cm.map.shapes.title],
-            v_slots = [{
-                'name': 'actions',
-                'children' : v.Icon(children=['mdi-download'])
-            }]
+            children=[cm.map.shapes.title]
         )
 
         content = v.ExpansionPanelContent(children=[self.w_vector, self.btn, self.alert])

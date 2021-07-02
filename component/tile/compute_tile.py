@@ -40,11 +40,7 @@ class ValidationTile(sw.Tile):
         ep = v.ExpansionPanels(class_="mt-5", children=[v.ExpansionPanel(children=[
             v.ExpansionPanelHeader(
                 disable_icon_rotate = True,
-                children=[cm.custom.recipe.title],
-                v_slots = [{
-                    'name': 'actions',
-                    'children' : v.Icon(children=['mdi-download'])
-                }]
+                children=[cm.custom.recipe.title]
             ),
             v.ExpansionPanelContent(children=[self.file_select, self.reset_to_recipe])
         ])])

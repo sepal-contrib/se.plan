@@ -39,4 +39,26 @@ Before running the tool, users select their areas of interest, provide informati
     
 .. Warning::
 
-    The english **Usage** and **Method** sections of the documentation will be released soon.
+Usage
+-----
+
+Select AOI
+^^^^^^^^^^
+
+Select constraints
+^^^^^^^^^^^^^^^^^^
+
+Select Benefits 
+^^^^^^^^^^^^^^^
+
+Customize layers
+^^^^^^^^^^^^^^^^
+
+Create Recipe
+^^^^^^^^^^^^^
+
+Compute the map
+^^^^^^^^^^^^^^^
+
+Compute the dashboard
+^^^^^^^^^^^^^^^^^^^^^
