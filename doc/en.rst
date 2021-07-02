@@ -62,3 +62,6 @@ Compute the map
 
 Compute the dashboard
 ^^^^^^^^^^^^^^^^^^^^^
+
+Method
+------

@@ -8,6 +8,7 @@ from sepal_ui import color
 import ipyvuetify as v
 import pandas as pd
 import ee
+from ipyleaflet import WidgetControl
 
 from component import parameter as cp
 from component.message import cm
@@ -61,7 +62,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             custom_v_model = json.dumps(self._EMPTY_V_MODEL),
             persistent = True,
             value = False,
-            max_width = '700px',
+            max_width = '50vw',
             children = [self.card]
         )
         
@@ -225,6 +226,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         # update viz_params acordingly
         viz_params = cp.plt_viz['viridis']
         viz_params.update(min=min_, max=max_)
+        
+        # create a colorbar 
+        for c in self.m.controls:
+            if type(c) == WidgetControl: self.m.remove_control(c)
+        self.m.add_colorbar(colors=cp.plt_viz['viridis']['palette'], vmin=round(min_,2), vmax=round(max_,2), discrete=True)
         
         # dispaly on map
         self.m.addLayer(ee_image, viz_params, image.stem)
