@@ -39,29 +39,4 @@ Before running the tool, users select their areas of interest, provide informati
     
 .. Warning::
 
-Usage
------
-
-Select AOI
-^^^^^^^^^^
-
-Select constraints
-^^^^^^^^^^^^^^^^^^
-
-Select Benefits 
-^^^^^^^^^^^^^^^
-
-Customize layers
-^^^^^^^^^^^^^^^^
-
-Create Recipe
-^^^^^^^^^^^^^
-
-Compute the map
-^^^^^^^^^^^^^^^
-
-Compute the dashboard
-^^^^^^^^^^^^^^^^^^^^^
-
-Method
-------
+    The usage and method documentation are in elaboration
