@@ -9,6 +9,7 @@ import ee
 from component.message import cm
 from component import scripts as cs
 from component import parameter as cp
+from component.parameter.color_gradient import red_to_green
 
 ee.Initialize()
 
@@ -87,6 +88,17 @@ class ExportMap(v.Menu, sw.SepalWidget):
         self.geometry = geometry
         self.dataset = dataset
         self.name = name
+        
+        # add vizualization properties to the image
+        # cast to image as set is a ee.Element method
+        self.dataset = ee.Image(dataset.set({
+            "visualization_0_bands": 'constant',
+            "visualization_0_max": 5,
+            "visualization_0_min": 0,
+            "visualization_0_name": "restauration index",
+            "visualization_0_palette": ','.join(red_to_green),
+            "visualization_0_type": "continuous"
+        }))
         
         return self
     
