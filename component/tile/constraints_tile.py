@@ -15,7 +15,10 @@ class ConstraintTile(sw.Tile, HasTraits):
     
     custom_v_model = Unicode('').tag(sync=True)
     
-    def __init__(self):
+    def __init__(self, aoi_view):
+        
+        # get the aoi model 
+        self.aoi_model = aoi_view.model
         
         # name the tile 
         title = cm.constraints.title 
@@ -33,12 +36,12 @@ class ConstraintTile(sw.Tile, HasTraits):
             id_ = c['layer']
             hint = cm.constraints.info[c['tooltip']].format(key)
             
-            if value == None: # binary criteria 
+            if value == 'BINARY': # binary criteria 
                 crit = cw.Binary(key, header, id_=id_, hint=hint)
             elif isinstance(value, list): # dropdown values
                 crit = cw.Dropdown(key, value, header, id_=id_, hint=hint)
-            elif isinstance(value, int): # range values
-                crit = cw.Range(key, value, header, id_=id_, hint=hint)
+            elif value == 'RANGE': # range values
+                crit = cw.Range(key, header, id_=id_, hint=hint)
                 
             self.criterias.append(crit)
             
@@ -64,6 +67,12 @@ class ConstraintTile(sw.Tile, HasTraits):
         # link the visibility of each criteria to the select widget
         [c.observe(self._on_change, 'custom_v_model') for c in self.criterias]
         self.panels.observe(self._on_panel_change, 'v_model')   
+        aoi_view.observe(self._update_constraints, 'updated')
+        
+    def _update_constraints(self, change):
+        """update all the constraints using sliders based on the geometry and the layer they use"""
+        
+    
         
     def load_data(self, data):
         """load the data from a json string"""

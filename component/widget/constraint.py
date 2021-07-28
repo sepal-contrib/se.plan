@@ -1,4 +1,4 @@
-from traitlets import HasTraits, Integer, observe
+from traitlets import HasTraits, Any, observe
 
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
@@ -8,7 +8,7 @@ from component import parameter as cp
 
 class Constraint(sw.SepalWidget):
     
-    custom_v_model = Integer().tag(sync=True)
+    custom_v_model = Any().tag(sync=True)
     
     def __init__(self, name = 'name', header='header', id_='id', **kwargs):
         
@@ -78,20 +78,55 @@ class Dropdown(v.Select, Constraint):
         
 class Range(v.Slider, Constraint):
     
-    def __init__(self, name, max, header, **kwargs):
+    ticks_label = ['low, medium, hight']
+    
+    def __init__(self, name, header, **kwargs):
         
         super().__init__(
             persistent_hint = True,
-            hint = cm.questionnaire.slider_hint,
             name = name, 
             header = header,
             label = name,
-            max = max,
+            max = 1,
+            step = .1,
             v_model = 0,
             thumb_label=True,
             **kwargs
         )
         
+        
+    def set_values(geometry, layer):
+        
+        # compute the min and the max for the specific geometry and layer
+        ee_image = ee.Image(layer)
+        
+        # get min 
+        min_ = ee_image.reduceRegion(
+            reducer = ee.Reducer.min(),
+            geometry = geometry,
+            scale = 250
+        )
+        min_ = list(min_.getInfo().values())[0]
+        
+        # get max 
+        max_ = ee_image.reduceRegion(
+            reducer = ee.Reducer.max(),
+            geometry = geometry,
+            scale = 250
+        )
+        max_ = list(max_.getInfo().values())[0]
+        
+        self.min = round(min_, 2)
+        self.max = round(max_, 2)
+        
+        # set the number of steps by stting the step aparameter (100)
+        self.step = round((self.max-self.min)/100, 2)
+        
+        # display ticks label with low medium and high values
+        self.tick_labels = [ticks_label[i//4] if i%4 == 0 and not (i in [0,100]) else '' for i in range(101)]
+        
+        return self
+    
 class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
     
     def __init__(self, category, criterias):

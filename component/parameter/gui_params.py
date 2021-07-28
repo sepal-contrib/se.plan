@@ -23,19 +23,19 @@ criterias = {
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
-        'content': None
+        'content': 'BINARY'
     },
     'Shrub land': {
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
-        'content': None
+        'content': 'BINARY'
     },
     'Agricultural land': {
         'tooltip': 2,
         'layer': None,
         'header': 'land_use',
-        'content': None
+        'content': 'BINARY'
     },
     'Annual rainfall': {
         'tooltip': 1,
@@ -71,11 +71,7 @@ criterias = {
         'tooltip': 1,
         'layer': 'slope',
         'header': 'bio',
-        'content': [
-            {'text': 'high slope',    'value': 25},
-            {'text': 'medium slope', 'value': 10},
-            {'text': 'low slope',    'value': 5},
-        ]
+        'content': 'RANGE'
     },
     'Accessibility to cities' : {
         'tooltip': 0,
@@ -101,7 +97,7 @@ criterias = {
         'tooltip': 2,
         'layer': 'protected_areas',
         'header': 'socio_eco',
-        'content': None
+        'content': 'BINARY'
     },
     'Property rights protection': {
         'tooltip': 1,
@@ -113,26 +109,6 @@ criterias = {
             {'text': 'low variation',    'value': -95},
         ]
     },
-    #"Agriculture": {
-    #    'layer': None,
-    #    'header': 'treecover',
-    #    'content': 100
-    #},
-    #"Rangeland": {
-    #    'layer': None,
-    #    'header': 'treecover',
-    #    'content': 100
-    #},
-    #"Grassland": {
-    #    'layer': None,
-    #    'header': 'treecover',
-    #    'content': 100
-    #},
-    #"Settlements": {
-    #    'layer': None,
-    #    'header': 'treecover',
-    #    'content': 100
-    #},
     'Deforestation rate':{
         'tooltip': 0,
         'layer': 'deforestation_rate',
@@ -167,6 +143,6 @@ criterias = {
         'tooltip': 2,
         'layer': 'declining_population',
         'header': 'socio_eco',
-        'content': None
+        'content': 'BINARY'
     }
 }
