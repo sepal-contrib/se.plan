@@ -64,7 +64,7 @@ class MapTile(sw.Tile):
             id_ = "map_widget",
             title = cm.map.title,
             inputs = [mkd, self.load_shape, self.m, self.name_dialog],
-            output = sw.Alert(),
+            alert = sw.Alert(),
             btn = v.Layout(children=[
                 self.map_btn, 
                 self.compute_dashboard
@@ -72,8 +72,8 @@ class MapTile(sw.Tile):
         )
         
         # decorate the function
-        #self._compute = su.loading_button(debug=True, button=self.map_btn)(self._compute)
-        #self._dashboard = su.loading_button(debug=True, button=self.compute_dashboard)(self._dashboard)
+        self._compute = su.loading_button(self.alert, self.map_btn, debug=True)(self._compute)
+        self._dashboard = su.loading_button(self.alert, self.compute_dashboard, debug=True)(self._dashboard)
         
         # add js behaviour 
         self.compute_dashboard.on_event('click', self._dashboard)

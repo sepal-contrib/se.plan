@@ -54,6 +54,9 @@ class ValidationTile(sw.Tile):
             alert = sw.Alert()
         )
         
+        # decorate the custom recipe btn 
+        self.load_recipe = su.loading_button(self.alert, self.reset_to_recipe, debug=False)(self.load_recipe)
+        
         # js behaviours 
         aoi_tile.view.observe(self._recipe_placeholder, 'updated')
         self.btn.on_event('click', self._validate_data)
@@ -81,7 +84,6 @@ class ValidationTile(sw.Tile):
         
         return self
     
-    @su.loading_button(debug=True)
     def load_recipe(self, widget, event, data, path=None):
         """load the recipe file into the different io, then update the display of the table"""
 
