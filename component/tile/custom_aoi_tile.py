@@ -51,8 +51,7 @@ class CustomAoiTile(aoi.AoiTile):
             included = ee.Algorithms.IsEqual(bit_test.getNumber('constant'), 2).getInfo()
         
         if not included:
-            self.view.reset()
-            raise Exception("Your AOI should be included in LMIC")
+            self.view.alert.add_msg("The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information", "warning")
                 
         return self
     
