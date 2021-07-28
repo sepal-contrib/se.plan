@@ -118,7 +118,8 @@ class ExportMap(v.Menu, sw.SepalWidget):
             'image': self.dataset,
             'description': name,
             'scale': self.w_scale.v_model,
-            'region': self.geometry
+            'region': self.geometry,
+            'maxPixels': 1e13
         }
         
         # launch the task 

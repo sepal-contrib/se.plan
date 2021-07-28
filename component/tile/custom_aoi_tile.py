@@ -54,5 +54,3 @@ class CustomAoiTile(aoi.AoiTile):
             self.view.alert.add_msg("The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information", "warning")
                 
         return self
-    
-    
