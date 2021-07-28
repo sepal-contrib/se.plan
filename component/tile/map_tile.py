@@ -114,7 +114,10 @@ class MapTile(sw.Tile):
 
         # display the layer in the map
         cs.display_layer(self.final_layer, self.aoi_model, self.m)
-        self.save.set_data(self.final_layer, self.aoi_model.feature_collection.geometry())
+        self.save.set_data(
+            self.final_layer, 
+            self.aoi_model.feature_collection.geometry(),
+            self.gee_model.recipe_name)
 
         # add the possiblity to draw on the map and release the compute dashboard btn
         self.m.show_dc()

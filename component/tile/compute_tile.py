@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from traitlets import link
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
@@ -12,7 +13,7 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, aoi_tile, questionnaire_tile, layer_tile):
+    def __init__(self, aoi_tile, questionnaire_tile, layer_tile, gee_model):
         
         # gather the io 
         self.layer_model = layer_tile.model
@@ -61,6 +62,7 @@ class ValidationTile(sw.Tile):
         aoi_tile.view.observe(self._recipe_placeholder, 'updated')
         self.btn.on_event('click', self._validate_data)
         self.reset_to_recipe.on_event('click', self.load_recipe)
+        link((self.w_name, 'v_model'),(gee_model, 'recipe_name'))
         
     def _recipe_placeholder(self, change):
         """name the recipe with the date"""
