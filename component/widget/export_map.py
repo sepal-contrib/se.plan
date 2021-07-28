@@ -4,6 +4,7 @@ from pathlib import Path
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw 
 from sepal_ui.scripts import gee
+from sepal_ui.scripts import utils as su
 import ee 
 
 from component.message import cm
@@ -42,7 +43,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         
         self.alert = sw.Alert()
         
-        self.w_apply = sw.Btn(cm.export.apply, small=True)
+        self.btn = sw.Btn(cm.export.apply, small=True)
         
         export_data = v.Card(
             children = [
@@ -54,12 +55,12 @@ class ExportMap(v.Menu, sw.SepalWidget):
                     self.w_method,
                     self.alert
                 ]),
-                v.CardActions(children=[ self.w_apply])
+                v.CardActions(children=[ self.btn])
             ]
         )
 
         # the clickable icon
-        self.btn = v.Btn(
+        self.download_btn = v.Btn(
             v_on='menu.on', 
             color='primary', 
             icon = True, 
@@ -75,13 +76,13 @@ class ExportMap(v.Menu, sw.SepalWidget):
             v_slots = [{
                 'name': 'activator',
                 'variable': 'menu',
-                'children': self.btn
+                'children': self.download_btn
             }]
         )
         
         # add js behaviour 
-        self.w_apply.on_event('click', self._apply)
-        
+        self.btn.on_event('click', self._apply)
+    
     def set_data(self, dataset, geometry, name=None):
         """set the dataset and the geometry to allow the download"""
         
@@ -102,6 +103,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         
         return self
     
+    @su.loading_button(debug=False)
     def _apply(self, widget, event, data):
         """download the dataset using the given parameters"""
         
