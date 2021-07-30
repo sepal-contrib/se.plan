@@ -1,4 +1,4 @@
-from traitlets import HasTraits, Any, observe
+from traitlets import HasTraits, Any, observe, dlink
 
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
@@ -6,20 +6,33 @@ import ipyvuetify as v
 from component.message import cm
 from component import parameter as cp
 
-class Constraint(sw.SepalWidget):
+class Constraint(sw.SepalWidget, v.Row):
     
-    custom_v_model = Any().tag(sync=True)
+    custom_v_model = Any(-1).tag(sync=True)
     
-    def __init__(self, name = 'name', header='header', id_='id', **kwargs):
+    def __init__(self, widget, name = 'name', header='header', id_='id', **kwargs):
         
+        # default
         self.id = id_
         self.header = header
         self.name = name
-        self.custom_v_model = -1
-        self.persistent_hint=True
         self.class_ = 'ma-5'
+        self.widget = widget
+        self.align_center = True
         
+        # creat a pencil btn 
+        self.btn = v.Icon(children=['mdi-pencil'])
+        
+        # create the row 
         super().__init__(**kwargs)
+        
+        self.children = [
+            v.Flex(xs1=True, children=[self.btn]),
+            v.Flex(xs11=True, children=[self.widget])
+        ]
+        
+        # link widget and custom_v_model
+        dlink((self.widget, 'v_model'), (self, 'custom_v_model'))
         
     @observe('v_model')
     def _on_change(self, change):
@@ -42,50 +55,51 @@ class Constraint(sw.SepalWidget):
     def unable(self):
         
         # update the custom v_model
-        self.custom_v_model = self.v_model
+        self.custom_v_model = self.widget.v_model
         
         # show the component 
         self.show()
         
         return self
 
-class Binary(v.Switch, Constraint):
+class Binary(Constraint):
     
     def __init__(self, name, header, **kwargs):
         
-        super().__init__(
+        widget = v.Switch(
             readonly = True,
-            name = name,
-            header=header,
+            persistent_hint=True,
+            v_model=True,
             label = name,
-            v_model = True,
             **kwargs
         )
         
-class Dropdown(v.Select, Constraint):
+        super().__init__(widget, name=name, header=header)
+        
+class Dropdown(Constraint):
     
     def __init__(self, name, items, header, **kwargs):
         
-        super().__init__(
-            name = name,
+        widget = v.Select(
             label = name,
-            header = header,
+            persistent_hint=True,
             items = items,
             v_model = int(items[0]['value']),
             **kwargs
+            
         )
         
+        super().__init__(widget, name=name, header=header)
         
-class Range(v.Slider, Constraint):
+        
+class Range(Constraint):
     
     ticks_label = ['low, medium, hight']
     
     def __init__(self, name, header, **kwargs):
         
-        super().__init__(
-            persistent_hint = True,
-            name = name, 
-            header = header,
+        widget = v.Slider(
+        persistent_hint = True,
             label = name,
             max = 1,
             step = .1,
@@ -93,6 +107,8 @@ class Range(v.Slider, Constraint):
             thumb_label=True,
             **kwargs
         )
+        
+        super().__init__(widget, name = name, header = header)
         
         
     def set_values(geometry, layer):
@@ -119,7 +135,7 @@ class Range(v.Slider, Constraint):
         self.min = round(min_, 2)
         self.max = round(max_, 2)
         
-        # set the number of steps by stting the step aparameter (100)
+        # set the number of steps by stting the step parameter (100)
         self.step = round((self.max-self.min)/100, 2)
         
         # display ticks label with low medium and high values
