@@ -54,7 +54,7 @@ class Binary(v.Switch, Constraint):
     def __init__(self, name, header, **kwargs):
         
         super().__init__(
-            disabled = True,
+            readonly = True,
             name = name,
             header=header,
             label = name,
