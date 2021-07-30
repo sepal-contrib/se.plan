@@ -22,6 +22,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         self.geometry = None
         self.dataset = None
         self.name = None
+        self.aoi_name = None
         
         # create the useful widgets 
         self.w_scale = v.Slider(
@@ -83,12 +84,13 @@ class ExportMap(v.Menu, sw.SepalWidget):
         # add js behaviour 
         self.btn.on_event('click', self._apply)
     
-    def set_data(self, dataset, geometry, name=None):
+    def set_data(self, dataset, geometry, name, aoi_name):
         """set the dataset and the geometry to allow the download"""
         
         self.geometry = geometry
         self.dataset = dataset
         self.name = name
+        self.aoi_name = aoi_name
         
         # add vizualization properties to the image
         # cast to image as set is a ee.Element method
@@ -141,8 +143,12 @@ class ExportMap(v.Menu, sw.SepalWidget):
                 task.start()
                 gee.wait_for_completion(name, self.alert)
                 files = gdrive.get_files(name)
-                
-            gdrive.download_files(files, cp.result_dir)
+            
+            # save everything in the same folder as the json file
+            # no need to create it it's created when the recipe is saved
+            result_dir = cp.result_dir/aoi_name
+            
+            gdrive.download_files(files, result_dir)
             gdrive.delete_files(files)
             self.alert.add_msg("map exported", "success")
             

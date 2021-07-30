@@ -63,6 +63,14 @@ class ValidationTile(sw.Tile):
         self.btn.on_event('click', self._validate_data)
         self.reset_to_recipe.on_event('click', self.load_recipe)
         link((self.w_name, 'v_model'),(gee_model, 'recipe_name'))
+        self.w_name.on_event('blur', self._normalize_name)
+        
+    def _normalize_name(self, widget, event, data):
+        """normalize the recipe name on blur as it will be used everywhere else"""
+        
+        widget.v_model = su.normalize_str(widget.v_model)
+        
+        return self
         
     def _recipe_placeholder(self, change):
         """name the recipe with the date"""
