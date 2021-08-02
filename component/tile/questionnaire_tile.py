@@ -15,7 +15,7 @@ class QuestionnaireTile (sw.Tile):
         id_ = "questionnaire_widget"
         
         # build the tiles
-        self.constraint_tile = ConstraintTile(aoi_view)
+        self.constraint_tile = ConstraintTile(aoi_view, layer_model)
         self.priority_tile   = PriorityTile()
         
         self.tiles = [
@@ -40,7 +40,7 @@ class QuestionnaireTile (sw.Tile):
         )
         
         # create a dialog widget 
-        self.dialog = cw.EditDialog(aoi_view)
+        self.dialog = cw.EditDialog(aoi_view, layer_model)
         
         # build the tile 
         super().__init__(id_, title, inputs=[self.dialog, tabs])
@@ -57,11 +57,14 @@ class QuestionnaireTile (sw.Tile):
         [c.btn.on_event('click', self._open_dialog) for c in self.constraint_tile.criterias]
         self.constraint_tile.observe(self.__on_constraint, 'custom_v_model')
         self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
+        self.dialog.observe(self.constraint_tile._update_constraints, 'updated')
         
     def _open_dialog(self, widget, event, data):
         """populate and update the dialog"""
         
-        self.dialog.set_dialog()
+        # get the layer informations and 
+        
+        self.dialog.set_dialog(widget._metadata['layer'])
         
         return
         

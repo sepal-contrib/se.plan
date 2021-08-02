@@ -141,7 +141,10 @@ class Range(Constraint):
         self.widget.step = round((self.widget.max-self.widget.min)/100, 2)
         
         # display ticks label with low medium and high values            
-        self.widget.tick_labels = [self.LABEL[i//25 - 1] if i%25 == 0 and not (i in [0,100]) else '' for i in range(101)]
+        self.widget.tick_labels = [self.LABEL[i//25 - 1] if i in [25, 50, 75] else '' for i in range(101)]
+        
+        # set the v_model on the "low" value
+        self.widget.v_model = self.widget.min + self.widget.step * 25
         
         return self
     

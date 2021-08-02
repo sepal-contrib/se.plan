@@ -15,13 +15,13 @@ class ConstraintTile(sw.Tile, HasTraits):
     
     # create custom_v_model as a traitlet
     # the traitlet List cannot be listened to so we're force to use Unicode json instead
-    
     custom_v_model = Unicode('').tag(sync=True)
     
-    def __init__(self, aoi_view):
+    def __init__(self, aoi_view, layer_model):
         
-        # get the aoi model 
+        # get the models 
         self.aoi_model = aoi_view.model
+        self.layer_model = layer_model
         
         # name the tile 
         title = cm.constraints.title 
@@ -48,7 +48,7 @@ class ConstraintTile(sw.Tile, HasTraits):
                 
             self.criterias.append(crit)
             
-        # create the each expansion-panel content 
+        # create each expansion-panel content 
         self.panels = v.ExpansionPanels(
             focusable=True,
             v_model=None, 
@@ -85,7 +85,7 @@ class ConstraintTile(sw.Tile, HasTraits):
         for c in self.criterias:
             
             if isinstance(c, cw.Range):
-                layer = self._BENEFITS[self._BENEFITS.layer_id == c.id].iloc[0].gee_asset
+                layer = next(l['layer'] for l in self.layer_model.layer_list if l['id'] == c.id)
                 geometry = self.aoi_model.feature_collection.geometry()
                 c.set_values(geometry, layer)
         
