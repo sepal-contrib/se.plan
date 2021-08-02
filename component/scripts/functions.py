@@ -312,7 +312,7 @@ class gee_compute(HasTraits):
         priorities = json.loads(self.rp_questionaire_model.priorities)
         
         # load layers and create eeimages
-        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and priorities[i['subtheme']] != 0]
+        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and priorities[i['id']] != 0]
         list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), benefits_layers))
 
         risks_layers = [i for i in layerlist if i['theme'] == 'risks']
@@ -329,8 +329,8 @@ class gee_compute(HasTraits):
         self.normalize_benefits(benefits_layers, method='quintile')
         
         # normalize benefit weights to 0 - 1 
-        sum_weights =sum(priorities[i['subtheme']] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round( (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
+        sum_weights =sum(priorities[i['id']] for i in benefits_layers)
+        list(map(lambda i : i.update({'norm_weight': round( (priorities[i['id']] / sum_weights), 5) }), benefits_layers))
 
         exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
 
