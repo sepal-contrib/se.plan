@@ -18,7 +18,7 @@ class ValidationTile(sw.Tile):
         # gather the io 
         self.layer_model = layer_tile.model
         self.aoi_model = aoi_tile.view.model
-        self.question_model = questionnaire_tile.model
+        self.question_model = questionnaire_tile.question_model
         
         # gather the tiles that need to be filled
         self.layer_tile = layer_tile

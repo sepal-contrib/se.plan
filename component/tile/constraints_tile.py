@@ -85,7 +85,6 @@ class ConstraintTile(sw.Tile, HasTraits):
         for c in self.criterias:
             
             if isinstance(c, cw.Range):
-                print(c.id)
                 layer = self._BENEFITS[self._BENEFITS.layer_id == c.id].iloc[0].gee_asset
                 geometry = self.aoi_model.feature_collection.geometry()
                 c.set_values(geometry, layer)

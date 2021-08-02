@@ -115,8 +115,6 @@ class Range(Constraint):
         
     def set_values(self, geometry, layer):
         
-        print(self.name)
-        
         # compute the min and the max for the specific geometry and layer
         ee_image = ee.Image(layer)
         
@@ -127,7 +125,6 @@ class Range(Constraint):
             scale = 250
         )
         min_ = list(min_.getInfo().values())[0]
-        print(min_)
         
         # get max 
         max_ = ee_image.reduceRegion(
@@ -136,7 +133,6 @@ class Range(Constraint):
             scale = 250
         )
         max_ = list(max_.getInfo().values())[0]
-        print(max_)
         
         self.widget.min = round(min_, 2)
         self.widget.max = round(max_, 2)

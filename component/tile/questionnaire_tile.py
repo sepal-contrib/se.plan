@@ -2,12 +2,13 @@ from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
 
 from component.message import cm
+from component import widget as cw
 from .constraints_tile import ConstraintTile
 from .priority_tile import PriorityTile
 
 class QuestionnaireTile (sw.Tile):
     
-    def __init__(self, model, aoi_view):
+    def __init__(self, question_model, layer_model, aoi_view):
         
         # name the tile 
         title = cm.questionnaire.title
@@ -38,18 +39,31 @@ class QuestionnaireTile (sw.Tile):
             children = tab_content
         )
         
+        # create a dialog widget 
+        self.dialog = cw.EditDialog(aoi_view)
+        
         # build the tile 
-        super().__init__(id_, title, inputs=[tabs])
+        super().__init__(id_, title, inputs=[self.dialog, tabs])
         
         # save the associated model and set the default value
-        self.model = model
-        self.model.constraints = self.constraint_tile.custom_v_model
-        self.model.priorities = self.priority_tile.v_model
+        self.question_model = question_model
+        self.layer_model = layer_model
+        self.question_model.constraints = self.constraint_tile.custom_v_model
+        self.question_model.priorities = self.priority_tile.v_model
         
         
-        # link the variable to the model 
+        # js behaviours
+        [btn.on_event('click', self._open_dialog) for btn in self.priority_tile.table.btn_list]
+        [c.btn.on_event('click', self._open_dialog) for c in self.constraint_tile.criterias]
         self.constraint_tile.observe(self.__on_constraint, 'custom_v_model')
         self.priority_tile.table.observe(self.__on_priority_tile, 'v_model')
+        
+    def _open_dialog(self, widget, event, data):
+        """populate and update the dialog"""
+        
+        self.dialog.set_dialog()
+        
+        return
         
     def load_data(self, data):
         """load a questionnaire from a dict source"""
@@ -61,11 +75,11 @@ class QuestionnaireTile (sw.Tile):
         self.priority_tile.table.load_data(data.priorities)
         
     def __on_constraint(self, change):
-        self.model.constraints = change['new']
+        self.question_model.constraints = change['new']
         return
     
     def __on_priority_tile(self, change):
-        self.model.priorities = change['new']
+        self.question_model.priorities = change['new']
         return
         
         

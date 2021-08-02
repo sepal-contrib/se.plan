@@ -40,10 +40,10 @@ class PriorityTable(v.SimpleTable):
             
         # construct the rows of the table
         rows = []
-        edit_btn_list = []
+        self.btn_list = []
         for i, layer_row in self._BENEFITS.iterrows():
             edit_btn = v.Icon(children=['mdi-pencil'], _metadata={'layer': layer_row.layer_id}) 
-            edit_btn_list.append(edit_btn)
+            self.btn_list.append(edit_btn)
             row = [v.Html(tag='td', children=[edit_btn])]
             row.append(v.Html(tag = 'td', children = [layer_row.layer_name]))
             for j in range(len(self._colors)):
@@ -71,7 +71,7 @@ class PriorityTable(v.SimpleTable):
                 check.observe(self._on_check_change, 'v_model')
                 
         # action on clicks 
-        for icon in edit_btn_list:
+        for icon in self.btn_list:
             icon.on_event('click', lambda *args: print('toto'))
         
     def _on_check_change(self, change):

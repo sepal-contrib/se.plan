@@ -22,10 +22,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
     # use a custom v_model because the regular one set value automatically to 1 (display forever)
     custom_v_model = Unicode().tag(sync=True)
     
-    def __init__(self, aoi_tile):
+    def __init__(self, aoi_vew):
         
-        # listen to the aoi_tile to update the map
-        self.tile = aoi_tile
+        # listen to the aoi_vew to update the map
+        self.view = aoi_vew
         
         self.init_layer = ''
         self.name = ''
@@ -70,7 +70,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.layer.on_event('blur', self._on_layer_change)
         self.cancel.on_event('click', self._cancel_click)
         self.save.on_event('click', self._save_click)
-        self.tile.view.observe(self._update_aoi, 'updated')
+        self.view.observe(self._update_aoi, 'updated')
         
     def _on_layer_change(self, widget, event, data):
         
@@ -86,7 +86,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         elif widget.v_model != self.init_layer:
             
             # display it on the map
-            geometry = self.tile.view.model.feature_collection
+            geometry = self.view.model.feature_collection
             image = Path(widget.v_model)
             
             # if the map cannot be displayed then return to init
@@ -124,7 +124,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
     def _update_aoi(self, change):
            
         # get the aoi
-        aoi_ee = self.tile.view.model.feature_collection
+        aoi_ee = self.view.model.feature_collection
 
         # draw an outline 
         outline = ee.Image().byte().paint(
@@ -139,7 +139,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             
         return
         
-    def set_dialog(self, data):
+    def set_dialog(self, data=[]):
         
         # if data are empty
         if not len(data):
@@ -189,7 +189,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.init_layer = layer_df_line.gee_asset
             
             # add the custom layer if existing 
-            geometry = self.tile.view.model.feature_collection
+            geometry = self.view.model.feature_collection
             if data[0]['layer'] != self.init_layer:
                 custom_img = Path(data[0]['layer'])
                 self.display_on_map(custom_img, geometry)
@@ -199,6 +199,9 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             
             # enable save 
             self.save.disabled = False
+            
+        # show the dialog 
+        self.value = True
             
         return
     
@@ -230,7 +233,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         # create a colorbar 
         for c in self.m.controls:
             if type(c) == WidgetControl: self.m.remove_control(c)
-        self.m.add_colorbar(colors=cp.plt_viz['viridis']['palette'], vmin=round(min_,2), vmax=round(max_,2), discrete=True)
+        self.m.add_colorbar(colors=cp.plt_viz['viridis']['palette'], vmin=round(min_,2), vmax=round(max_,2))
         
         # dispaly on map
         self.m.addLayer(ee_image, viz_params, image.stem)
