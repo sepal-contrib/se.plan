@@ -2,9 +2,12 @@ from traitlets import HasTraits, Any, observe, dlink
 
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
+import ee
 
 from component.message import cm
 from component import parameter as cp
+
+ee.Initialize()
 
 class Constraint(sw.SepalWidget, v.Row):
     
@@ -21,14 +24,14 @@ class Constraint(sw.SepalWidget, v.Row):
         self.align_center = True
         
         # creat a pencil btn 
-        self.btn = v.Icon(children=['mdi-pencil'])
+        self.btn = v.Icon(children=['mdi-pencil'], _metadata={'layer': id_})
         
         # create the row 
         super().__init__(**kwargs)
         
         self.children = [
-            v.Flex(xs1=True, children=[self.btn]),
-            v.Flex(xs11=True, children=[self.widget])
+            v.Flex(align_center=True, xs1=True, children=[self.btn]),
+            v.Flex(align_center=True, xs11=True, children=[self.widget])
         ]
         
         # link widget and custom_v_model
@@ -64,7 +67,7 @@ class Constraint(sw.SepalWidget, v.Row):
 
 class Binary(Constraint):
     
-    def __init__(self, name, header, **kwargs):
+    def __init__(self, name, header, id_, **kwargs):
         
         widget = v.Switch(
             readonly = True,
@@ -74,7 +77,7 @@ class Binary(Constraint):
             **kwargs
         )
         
-        super().__init__(widget, name=name, header=header)
+        super().__init__(widget, name=name, header=header, id_=id_)
         
 class Dropdown(Constraint):
     
@@ -94,12 +97,11 @@ class Dropdown(Constraint):
         
 class Range(Constraint):
     
-    ticks_label = ['low, medium, hight']
+    LABEL = ['low', 'medium', 'hight']
     
-    def __init__(self, name, header, **kwargs):
+    def __init__(self, name, header, id_, **kwargs):
         
         widget = v.Slider(
-        persistent_hint = True,
             label = name,
             max = 1,
             step = .1,
@@ -108,10 +110,12 @@ class Range(Constraint):
             **kwargs
         )
         
-        super().__init__(widget, name = name, header = header)
+        super().__init__(widget, name = name, header = header, id_=id_)
         
         
-    def set_values(geometry, layer):
+    def set_values(self, geometry, layer):
+        
+        print(self.name)
         
         # compute the min and the max for the specific geometry and layer
         ee_image = ee.Image(layer)
@@ -123,6 +127,7 @@ class Range(Constraint):
             scale = 250
         )
         min_ = list(min_.getInfo().values())[0]
+        print(min_)
         
         # get max 
         max_ = ee_image.reduceRegion(
@@ -131,15 +136,16 @@ class Range(Constraint):
             scale = 250
         )
         max_ = list(max_.getInfo().values())[0]
+        print(max_)
         
-        self.min = round(min_, 2)
-        self.max = round(max_, 2)
+        self.widget.min = round(min_, 2)
+        self.widget.max = round(max_, 2)
         
         # set the number of steps by stting the step parameter (100)
-        self.step = round((self.max-self.min)/100, 2)
+        self.widget.step = round((self.widget.max-self.widget.min)/100, 2)
         
-        # display ticks label with low medium and high values
-        self.tick_labels = [ticks_label[i//4] if i%4 == 0 and not (i in [0,100]) else '' for i in range(101)]
+        # display ticks label with low medium and high values            
+        self.widget.tick_labels = [self.LABEL[i//25 - 1] if i%25 == 0 and not (i in [0,100]) else '' for i in range(101)]
         
         return self
     
@@ -156,13 +162,16 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         # link the criterias to the select 
         self.criterias = [c.disable() for c in criterias if c.header == category] 
         self.select = v.Select(
+            disabled=True, # disabled until the aoi is selected
             class_ = 'mt-5',
             small_chips = True,
             v_model = None,
             items = [c.name for c in self.criterias],
             label = cm.constraints.criteria_lbl,
             multiple = True,
-            deletable_chips = True
+            deletable_chips = True,
+            persistent_hint = True,
+            hint = "select an AOI first"
         )
             
         # create the content, nothing is selected by default so Select should be empty and criterias hidden 
