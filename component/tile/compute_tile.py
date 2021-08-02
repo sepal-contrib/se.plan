@@ -13,15 +13,14 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, aoi_tile, questionnaire_tile, layer_tile, gee_model):
+    def __init__(self, aoi_tile, questionnaire_tile, gee_model):
         
         # gather the io 
-        self.layer_model = layer_tile.model
+        self.layer_model = questionnaire_tile.layer_model
         self.aoi_model = aoi_tile.view.model
         self.question_model = questionnaire_tile.question_model
         
         # gather the tiles that need to be filled
-        self.layer_tile = layer_tile
         self.aoi_tile = aoi_tile
         self.questionnaire_tile = questionnaire_tile
         
@@ -56,7 +55,7 @@ class ValidationTile(sw.Tile):
         )
         
         # decorate the custom recipe btn 
-        self.load_recipe = su.loading_button(self.alert, self.reset_to_recipe, debug=False)(self.load_recipe)
+        self.load_recipe = su.loading_button(self.alert, self.reset_to_recipe, debug=True)(self.load_recipe)
         
         # js behaviours 
         aoi_tile.view.observe(self._recipe_placeholder, 'updated')
@@ -100,7 +99,7 @@ class ValidationTile(sw.Tile):
         # check if path is set, if not use the one frome file select 
         path = path or self.file_select.v_model
             
-        cs.load_recipe(self.layer_tile, self.aoi_tile, self.questionnaire_tile, path)
+        cs.load_recipe(self.aoi_tile, self.questionnaire_tile, path)
         self.w_name.v_model = Path(path).stem
 
         # automatically validate them 

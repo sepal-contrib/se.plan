@@ -21,22 +21,22 @@ class PriorityTable(v.SimpleTable):
     _BENEFITS = pd.read_csv(cp.layer_list).fillna('')
     _BENEFITS = _BENEFITS[_BENEFITS.theme == 'benefits']
     
-    _DEFAULT_V_MODEL = {name: 0 for name in _BENEFITS}
+    _DEFAULT_V_MODEL = {layer_id: 0 for layer_id in _BENEFITS.layer_id}
     
     def __init__(self):
         
         
         # construct the checkbox list
         self.checkbox_list = {}
-        for name in self._BENEFITS.layer_id.tolist():
+        for layer_id in self._BENEFITS.layer_id:
             line = []
             for i, color in enumerate(self._colors):
                 line.append(v.Checkbox(
                     color = color, 
-                    _metadata = {'label': name, 'val': i}, 
+                    _metadata = {'label': layer_id, 'val': i}, 
                     v_model = i==0
                 ))
-            self.checkbox_list[name] = line
+            self.checkbox_list[layer_id] = line
             
         # construct the rows of the table
         rows = []

@@ -26,7 +26,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
         
     def digest_layers(self, layer_io=None, question_io=None):
         """
-        Digest the layers as a json list. This list should be composed of at least 5 information : name, layer, theme and subtheme
+        Digest the layers as a json list. This list should be composed of at least 6 information : id, name, layer, theme and subtheme
         When digestion, the layout will represent each layer sorted by categories
         fore each one of them if the layer used is the default one we'll write default, if not the name of the layer. 
         for each one of them the value of the weight will also be set
@@ -56,14 +56,13 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
             for i, row in tmp_layers.iterrows():
                 
                 # get the original layer asset 
-                original_asset = self.LAYER_LIST[self.LAYER_LIST.name == row['name']]['layer'].values[0]
+                original_asset = self.LAYER_LIST[self.LAYER_LIST.layer_id == row['id']]['layer'].values[0]
 
-                # cannot make the slots work with icons so I need to move to intermediate layout 
-                # the color have 7 values and there are only 5 weight 
+                # cannot make the slots work with icons so I need to move to intermediate layout
                 if row['theme'] == 'benefits':
                     
                     # get the weight from questionnaire
-                    weight = json.loads(question_io.priorities)[row['subtheme']]
+                    weight = json.loads(question_io.priorities)[row['id']]
                     
                     # create the widget
                     theme_layer_widgets.append(v.Row(
@@ -71,7 +70,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                         children = [
                             v.TextField(
                                 small=True,
-                                hint = row["layer"] if row["layer"] != original_asset else "default",
+                                hint = row['layer'] if row['layer'] != original_asset else 'default',
                                 persistent_hint = True,
                                 color = cp.gradient(5)[weight],
                                 readonly = True,
@@ -106,7 +105,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                         ]
                     ))
                         
-                elif row['name'] not in ["Terrestrial ecoregion", 'Current land cover', 'Current tree cover less than potential']:
+                elif row['id'] not in ['ecozones', 'land_cover', 'treecover_with_potential']:
                     
                     # get the activation from questionnaire_io if constraint
                     active = json.loads(question_io.constraints)[row['name']] != -1

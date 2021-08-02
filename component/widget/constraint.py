@@ -144,7 +144,7 @@ class Range(Constraint):
         self.widget.tick_labels = [self.LABEL[i//25 - 1] if i in [25, 50, 75] else '' for i in range(101)]
         
         # set the v_model on the "low" value
-        self.widget.v_model = self.widget.min + self.widget.step * 25
+        
         
         return self
     

@@ -71,12 +71,17 @@ class QuestionnaireTile (sw.Tile):
     def load_data(self, data):
         """load a questionnaire from a dict source"""
         
+        # relaod the "range" constraints
+        self.constraint_tile._update_constraints()
+        
         # reload constraints 
         self.constraint_tile.load_data(data.constraints)
         
         # reload priorities 
         self.priority_tile.table.load_data(data.priorities)
         
+        return
+    
     def __on_constraint(self, change):
         self.question_model.constraints = change['new']
         return

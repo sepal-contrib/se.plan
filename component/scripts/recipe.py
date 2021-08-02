@@ -37,7 +37,7 @@ def save_recipe(layer_model, aoi_model, question_model, recipe_name):
         
     return 
 
-def load_recipe(layer_tile, aoi_tile, questionnaire_tile, path):
+def load_recipe(aoi_tile, questionnaire_tile, path):
     """load the recipe element in the different element of the app"""
     
     # cast to pathlib
@@ -55,17 +55,14 @@ def load_recipe(layer_tile, aoi_tile, questionnaire_tile, path):
         aoi_tile.view.btn.fire_event('click', None)
                     
         # load the layer_io
-        layer_tile.model.import_data(data['layer_model'])
-            
-        # reload the layer table
-        layer_tile.apply_values(layer_tile.model.layer_list)
+        questionnaire_tile.layer_model.import_data(data['layer_model'])
         
         # load the questionnaire 
-        questionnaire_tile.model.import_data(data['question_model'])
+        questionnaire_tile.question_model.import_data(data['question_model'])
             
         # reload the widgets
-        questionnaire_tile.constraint_tile.load_data(questionnaire_tile.model.constraints)
-        questionnaire_tile.priority_tile.table.load_data(questionnaire_tile.model.priorities)
+        questionnaire_tile.constraint_tile.load_data(questionnaire_tile.question_model.constraints)
+        questionnaire_tile.priority_tile.table.load_data(questionnaire_tile.question_model.priorities)
         
     return
     
