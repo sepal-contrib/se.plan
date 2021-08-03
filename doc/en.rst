@@ -39,4 +39,4 @@ Before running the tool, users select their areas of interest, provide informati
     
 .. Warning::
 
-    The english **Usage** and **Method** sections of the documentation will be released soon.
+    The usage and method documentation are in elaboration

@@ -7,14 +7,14 @@ from .priority_tile import PriorityTile
 
 class QuestionnaireTile (sw.Tile):
     
-    def __init__(self, model, **kwargs):
+    def __init__(self, model, aoi_view):
         
         # name the tile 
         title = cm.questionnaire.title
         id_ = "questionnaire_widget"
         
         # build the tiles
-        self.constraint_tile = ConstraintTile()
+        self.constraint_tile = ConstraintTile(aoi_view)
         self.priority_tile   = PriorityTile()
         
         self.tiles = [
@@ -39,7 +39,7 @@ class QuestionnaireTile (sw.Tile):
         )
         
         # build the tile 
-        super().__init__(id_, title, inputs=[tabs], **kwargs)
+        super().__init__(id_, title, inputs=[tabs])
         
         # save the associated model and set the default value
         self.model = model

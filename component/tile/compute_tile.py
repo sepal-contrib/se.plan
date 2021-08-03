@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from traitlets import link
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
@@ -12,7 +13,7 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, aoi_tile, questionnaire_tile, layer_tile):
+    def __init__(self, aoi_tile, questionnaire_tile, layer_tile, gee_model):
         
         # gather the io 
         self.layer_model = layer_tile.model
@@ -40,11 +41,7 @@ class ValidationTile(sw.Tile):
         ep = v.ExpansionPanels(class_="mt-5", children=[v.ExpansionPanel(children=[
             v.ExpansionPanelHeader(
                 disable_icon_rotate = True,
-                children=[cm.custom.recipe.title],
-                v_slots = [{
-                    'name': 'actions',
-                    'children' : v.Icon(children=['mdi-download'])
-                }]
+                children=[cm.custom.recipe.title]
             ),
             v.ExpansionPanelContent(children=[self.file_select, self.reset_to_recipe])
         ])])
@@ -58,10 +55,22 @@ class ValidationTile(sw.Tile):
             alert = sw.Alert()
         )
         
+        # decorate the custom recipe btn 
+        self.load_recipe = su.loading_button(self.alert, self.reset_to_recipe, debug=False)(self.load_recipe)
+        
         # js behaviours 
         aoi_tile.view.observe(self._recipe_placeholder, 'updated')
         self.btn.on_event('click', self._validate_data)
         self.reset_to_recipe.on_event('click', self.load_recipe)
+        link((self.w_name, 'v_model'),(gee_model, 'recipe_name'))
+        self.w_name.on_event('blur', self._normalize_name)
+        
+    def _normalize_name(self, widget, event, data):
+        """normalize the recipe name on blur as it will be used everywhere else"""
+        
+        widget.v_model = su.normalize_str(widget.v_model)
+        
+        return self
         
     def _recipe_placeholder(self, change):
         """name the recipe with the date"""
@@ -85,7 +94,6 @@ class ValidationTile(sw.Tile):
         
         return self
     
-    @su.loading_button(debug=True)
     def load_recipe(self, widget, event, data, path=None):
         """load the recipe file into the different io, then update the display of the table"""
 

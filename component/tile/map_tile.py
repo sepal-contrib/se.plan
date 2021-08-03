@@ -64,7 +64,7 @@ class MapTile(sw.Tile):
             id_ = "map_widget",
             title = cm.map.title,
             inputs = [mkd, self.load_shape, self.m, self.name_dialog],
-            output = sw.Alert(),
+            alert = sw.Alert(),
             btn = v.Layout(children=[
                 self.map_btn, 
                 self.compute_dashboard
@@ -72,20 +72,21 @@ class MapTile(sw.Tile):
         )
         
         # decorate the function
-        #self._compute = su.loading_button(debug=True, button=self.map_btn)(self._compute)
-        #self._dashboard = su.loading_button(debug=True, button=self.compute_dashboard)(self._dashboard)
+        self._compute = su.loading_button(self.alert, self.map_btn, debug=True)(self._compute)
+        self._dashboard = su.loading_button(self.alert, self.compute_dashboard, debug=True)(self._dashboard)
         
         # add js behaviour 
         self.compute_dashboard.on_event('click', self._dashboard)
         self.m.dc.on_draw(self._handle_draw)
         self.map_btn.on_event('click', self._compute)
-        self.load_shape.w_btn.on_event('click', self._load_shapes)
+        self.load_shape.btn.on_event('click', self._load_shapes)
         self.name_dialog.observe(self.save_draw, 'value')
         
     def _load_shapes(self, widget, event, data):
         
         # get the data from the selected file
         gdf, column = self.load_shape.read_data()
+        
         gdf = gdf.filter(items=[column, 'geometry'])
         
         # add them to the map 
@@ -113,7 +114,11 @@ class MapTile(sw.Tile):
 
         # display the layer in the map
         cs.display_layer(self.final_layer, self.aoi_model, self.m)
-        self.save.set_data(self.final_layer, self.aoi_model.feature_collection.geometry())
+        self.save.set_data(
+            self.final_layer, 
+            self.aoi_model.feature_collection.geometry(),
+            self.gee_model.recipe_name,
+            self.aoi_model.name)
 
         # add the possiblity to draw on the map and release the compute dashboard btn
         self.m.show_dc()

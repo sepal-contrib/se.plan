@@ -75,6 +75,7 @@ class gdrive(object):
         # cast as path
         local_path = Path(local_path)
         
+        local_files = []
         for fId in files:
             request = service.files().get_media(fileId=fId['id'])
             fh = io.BytesIO()
@@ -84,12 +85,13 @@ class gdrive(object):
                 status, done = downloader.next_chunk()
                 #print('Download %d%%.' % int(status.progress() * 100))
             
-            with (local_path/fId['name']).open('wb') as fo:
+            local_file = local_path/fId['name']
+            with local_file.open('wb') as fo:
                 fo.write(fh.getvalue())
             
-            #fo = open(local_path+fId['name'], 'wb')
-            #fo.write(fh.getvalue())
-            #fo.close()
+            local_files.append(local_file)
+            
+        return local_files
 
     def delete_files(self, files):
 

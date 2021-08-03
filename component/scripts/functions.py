@@ -1,12 +1,15 @@
 import ee
 import json
+from traitlets import Any, HasTraits
 
 from component import parameter as cp 
 from component import model
 
 ee.Initialize()
 
-class gee_compute:
+class gee_compute(HasTraits):
+    
+    recipe_name = Any(None).tag(sync=True)
     
     def __init__(self, rp_aoi_model, rp_layers_model, rp_questionaire_model):
         

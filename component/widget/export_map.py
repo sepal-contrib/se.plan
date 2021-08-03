@@ -4,11 +4,13 @@ from pathlib import Path
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw 
 from sepal_ui.scripts import gee
+from sepal_ui.scripts import utils as su
 import ee 
 
 from component.message import cm
 from component import scripts as cs
 from component import parameter as cp
+from component.parameter.color_gradient import red_to_green
 
 ee.Initialize()
 
@@ -20,6 +22,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         self.geometry = None
         self.dataset = None
         self.name = None
+        self.aoi_name = None
         
         # create the useful widgets 
         self.w_scale = v.Slider(
@@ -41,7 +44,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         
         self.alert = sw.Alert()
         
-        self.w_apply = sw.Btn(cm.export.apply, small=True)
+        self.btn = sw.Btn(cm.export.apply, small=True)
         
         export_data = v.Card(
             children = [
@@ -53,12 +56,12 @@ class ExportMap(v.Menu, sw.SepalWidget):
                     self.w_method,
                     self.alert
                 ]),
-                v.CardActions(children=[ self.w_apply])
+                v.CardActions(children=[ self.btn])
             ]
         )
 
         # the clickable icon
-        self.btn = v.Btn(
+        self.download_btn = v.Btn(
             v_on='menu.on', 
             color='primary', 
             icon = True, 
@@ -74,22 +77,35 @@ class ExportMap(v.Menu, sw.SepalWidget):
             v_slots = [{
                 'name': 'activator',
                 'variable': 'menu',
-                'children': self.btn
+                'children': self.download_btn
             }]
         )
         
         # add js behaviour 
-        self.w_apply.on_event('click', self._apply)
-        
-    def set_data(self, dataset, geometry, name=None):
+        self.btn.on_event('click', self._apply)
+    
+    def set_data(self, dataset, geometry, name, aoi_name):
         """set the dataset and the geometry to allow the download"""
         
         self.geometry = geometry
         self.dataset = dataset
         self.name = name
+        self.aoi_name = aoi_name
+        
+        # add vizualization properties to the image
+        # cast to image as set is a ee.Element method
+        self.dataset = ee.Image(dataset.set({
+            "visualization_0_bands": 'constant',
+            "visualization_0_max": 5,
+            "visualization_0_min": 0,
+            "visualization_0_name": "restauration index",
+            "visualization_0_palette": ','.join(red_to_green),
+            "visualization_0_type": "continuous"
+        }))
         
         return self
     
+    @su.loading_button(debug=False)
     def _apply(self, widget, event, data):
         """download the dataset using the given parameters"""
         
@@ -106,7 +122,8 @@ class ExportMap(v.Menu, sw.SepalWidget):
             'image': self.dataset,
             'description': name,
             'scale': self.w_scale.v_model,
-            'region': self.geometry
+            'region': self.geometry,
+            'maxPixels': 1e13
         }
         
         # launch the task 
@@ -126,8 +143,12 @@ class ExportMap(v.Menu, sw.SepalWidget):
                 task.start()
                 gee.wait_for_completion(name, self.alert)
                 files = gdrive.get_files(name)
-                
-            gdrive.download_files(files, cp.result_dir)
+            
+            # save everything in the same folder as the json file
+            # no need to create it it's created when the recipe is saved
+            result_dir = cp.result_dir/aoi_name
+            
+            gdrive.download_files(files, result_dir)
             gdrive.delete_files(files)
             self.alert.add_msg("map exported", "success")
             
