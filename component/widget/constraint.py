@@ -97,7 +97,7 @@ class Dropdown(Constraint):
         
 class Range(Constraint):
     
-    LABEL = ['low', 'medium', 'hight']
+    LABEL = ['low', 'medium', 'high']
     
     def __init__(self, name, header, id_, **kwargs):
         

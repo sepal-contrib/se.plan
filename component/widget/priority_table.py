@@ -57,7 +57,7 @@ class PriorityTable(v.SimpleTable):
                 v.Html(tag = 'thead', children = [
                     v.Html(tag = 'tr', children = (
                         [v.Html(tag='th', children=['action'])]
-                        + [v.Html(tag = 'th', children = ['priority'])]
+                        + [v.Html(tag = 'th', children = ['indicator'])]
                         + [v.Html(tag = 'th', children = [label]) for label in self._labels]
                     ))
                 ]),

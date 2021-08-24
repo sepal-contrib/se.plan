@@ -147,6 +147,11 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         
     def set_dialog(self, layer_id=None):
         
+        # remove the images 
+        for l in self.m.layers:
+            if not (l.name in ['aoi', 'CartoDB.DarkMatter']):
+                self.m.remove_layer(l)
+        
         # if data are empty
         if not layer_id:
             
@@ -170,11 +175,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             
             # disable save 
             self.save.disabled = True
-            
-            # remove the images 
-            for l in self.m.layers:
-                if not (l.name in ['aoi', 'CartoDB.DarkMatter']):
-                    self.m.remove_layer(l)
             
         else: 
             
