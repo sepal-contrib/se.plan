@@ -111,12 +111,9 @@ class gee_compute(HasTraits):
         else:
             image = ee.Image(layer_id)
         
-        if constraint_layer['operator'] == 'gt':
-            eeimage = {'eeimage': image.gt(value)}
-        elif constraint_layer['operator'] == 'lt':
-            eeimage = {'eeimage': image.gt(value)}
-        else:
-            raise RuntimeError(f"The layer {name} does not have a logical operator assigned. Please contact our maintainer.")
+        # filter the image according to min and max values set by the user 
+        eeimage = {'eeimage': image.gt(value[0]).And(image.lt(value[1]))}
+        
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):

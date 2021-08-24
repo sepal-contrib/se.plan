@@ -101,11 +101,11 @@ class Range(Constraint):
     
     def __init__(self, name, header, id_, **kwargs):
         
-        widget = v.Slider(
+        widget = v.RangeSlider(
             label = name,
             max = 1,
             step = .1,
-            v_model = 0,
+            v_model = [0, 1],
             thumb_label=True,
             **kwargs
         )
@@ -122,7 +122,8 @@ class Range(Constraint):
         min_ = ee_image.reduceRegion(
             reducer = ee.Reducer.min(),
             geometry = geometry,
-            scale = 250
+            scale = 250,
+            bestEffort = True
         )
         min_ = list(min_.getInfo().values())[0]
         
@@ -130,7 +131,8 @@ class Range(Constraint):
         max_ = ee_image.reduceRegion(
             reducer = ee.Reducer.max(),
             geometry = geometry,
-            scale = 250
+            scale = 250,
+            bestEffort = True
         )
         max_ = list(max_.getInfo().values())[0]
         
@@ -143,8 +145,8 @@ class Range(Constraint):
         # display ticks label with low medium and high values            
         self.widget.tick_labels = [self.LABEL[i//25 - 1] if i in [25, 50, 75] else '' for i in range(101)]
         
-        # set the v_model on the "low" value
-        
+        # set the v_model on the "min - max" value to select the whole image by default
+        self.widget.v_model = [self.widget.min, self.widget.max]
         
         return self
     
