@@ -116,7 +116,7 @@ class Range(Constraint):
     def set_values(self, geometry, layer):
         
         # compute the min and the max for the specific geometry and layer
-        ee_image = ee.Image(layer)
+        ee_image = ee.Image(layer).select(0)
         
         # get min 
         min_ = ee_image.reduceRegion(
@@ -136,17 +136,34 @@ class Range(Constraint):
         )
         max_ = list(max_.getInfo().values())[0]
         
-        self.widget.min = round(min_, 2)
-        self.widget.max = round(max_, 2)
+        # if noneType it means that my AOI is out of bounds with respect to my constraint
+        # as it won't be usable I need to add a hint to the end user
+        if not min_ or not max_:
+            
+            self.widget.error_messages = 'The aoi is out of the bounds of your constraint layer, use a custom one.'
+            self.widget.min = 0
+            self.widget.max = 1
+            self.widget.step = .1
+            self.widget.tick_labels = [] 
+            self.widget.v_model = [0, 1]
+            
+        else:
+            
+            # remove the error state 
+            self.widget.error_messages = []
         
-        # set the number of steps by stting the step parameter (100)
-        self.widget.step = round((self.widget.max-self.widget.min)/100, 2)
+            # set the min max
+            self.widget.min = round(min_, 2)
+            self.widget.max = round(max_, 2)
         
-        # display ticks label with low medium and high values            
-        self.widget.tick_labels = [self.LABEL[i//25 - 1] if i in [25, 50, 75] else '' for i in range(101)]
+            # set the number of steps by stting the step parameter (100)
+            self.widget.step = round((self.widget.max-self.widget.min)/100, 2)
         
-        # set the v_model on the "min - max" value to select the whole image by default
-        self.widget.v_model = [self.widget.min, self.widget.max]
+            # display ticks label with low medium and high values            
+            self.widget.tick_labels = [self.LABEL[i//25 - 1] if i in [25, 50, 75] else '' for i in range(101)]
+        
+            # set the v_model on the "min - max" value to select the whole image by default
+            self.widget.v_model = [self.widget.min, self.widget.max]
         
         return self
     

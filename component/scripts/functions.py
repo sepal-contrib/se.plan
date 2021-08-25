@@ -22,16 +22,16 @@ class gee_compute(HasTraits):
         self.wlcoutputs = None
 
         self.landcover_default_object = {
-            'Bare land':60,
-            'Shrub land':20,
-            'Agricultural land':40, 
-            'Agriculture':40,
-            'Rangeland':40,
-            'Grassland':30, 
-            'Settlements':50
+            'Bare land': 60,
+            'Shrub land': 20,
+            'Agricultural land': 40, 
+            'Agriculture': 40,
+            'Rangeland': 40,
+            'Grassland': 30, 
+            'Settlements': 50
         }
     
-    def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
+    def constraints_catagorical(self, cat_value, contratint_bool, name, layer_id):
 
         layer = {'theme':'constraints'}
         layer['name'] = name 
@@ -69,6 +69,7 @@ class gee_compute(HasTraits):
         threshold_max = value * 0.01
 
         layer['eeimage'] = ee.Image.constant(1).where(image.eq(cat_value).And(treecoverpotential.gt(threshold_max)), 0)
+        
         return layer
 
     def get_layer_and_id(self, layername, constraints_layers):
@@ -93,32 +94,30 @@ class gee_compute(HasTraits):
         return layer_id == default_layer_id
 
 
-    def update_range_constraint(self, value, name, constraints_layers):
+    def update_range_constraint(self, values, name, constraints_layers):
+        '''
+        create a contraint layer using the name provided by the criteria and the values provided by the user.
+        The function will find the layer in the list and create a ee.image mask
         
+        Args: 
+            values (list): the min and max value of the specified range
+            name (str): the name of the layer (as it is set in the layer_list)
+            constraints_layers (dict): the dict of the existing constraints. format []'''
+        
+        # get the layer 
         constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
         
-        # apply any preprocessing 
-        #TODO : export images with 100 multiplication factor....
-        if name == 'Slope' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id)
-            image = ee.Algorithms.Terrain(image).select('slope')
-        elif name == 'Deforestation rate' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        elif name == 'Natural regeneration probability' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        elif name == 'Property rights protection' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        else:
-            image = ee.Image(layer_id)
+        # extract an ee.Image
+        image = ee.Image(layer_id)
         
         # filter the image according to min and max values set by the user 
-        eeimage = {'eeimage': image.gt(value[0]).And(image.lt(value[1]))}
+        eeimage = {'eeimage': image.gt(values[0]).And(image.lt(values[1]))}
         
         constraint_layer.update(eeimage)
 
     def make_constraints(self, constraints, constraints_layers):
         landcover_constraints = []
-        default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]['content']) is list]
+        default_range_constraints = [i for i in cp.criterias if cp.criterias[i]['content'] == 'RANGE']
 
         for i in constraints:
             value = constraints[i]
@@ -136,11 +135,6 @@ class gee_compute(HasTraits):
             if name in self.landcover_default_object.keys() and type(value) is bool:
                 landcover_value = self.landcover_default_object[name] 
                 landcover_constraints.append(self.constraints_catagorical(landcover_value, value, name, layer_id))
-
-            # restoration coverage % masking by lc
-            elif name in self.landcover_default_object.keys() and type(value) is int:
-                landcover_value = self.landcover_default_object[name] 
-                landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, name, layer_id))
 
             # high med lowe constraints (rain, elevation, slope, ect)
             elif name in default_range_constraints:

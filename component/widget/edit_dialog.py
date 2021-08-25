@@ -240,6 +240,9 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
         max_ = list(max_.getInfo().values())[0]
         
+        min_ = min_ if min_ else 0
+        max_ = max_ if max_ else 1
+        
         # update viz_params acordingly
         viz_params = cp.plt_viz['viridis']
         viz_params.update(min=min_, max=max_)
