@@ -3,6 +3,7 @@ import json
 
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
+import pandas as pd
 
 from component.message import cm
 from component import parameter as cp
@@ -10,15 +11,17 @@ from component import widget as cw
 
 class ConstraintTile(sw.Tile, HasTraits):
     
+    _BENEFITS = pd.read_csv(cp.layer_list).fillna('').applymap(str.strip)
+    
     # create custom_v_model as a traitlet
     # the traitlet List cannot be listened to so we're force to use Unicode json instead
-    
     custom_v_model = Unicode('').tag(sync=True)
     
-    def __init__(self, aoi_view):
+    def __init__(self, aoi_view, layer_model):
         
-        # get the aoi model 
+        # get the models 
         self.aoi_model = aoi_view.model
+        self.layer_model = layer_model
         
         # name the tile 
         title = cm.constraints.title 
@@ -41,11 +44,11 @@ class ConstraintTile(sw.Tile, HasTraits):
             elif isinstance(value, list): # dropdown values
                 crit = cw.Dropdown(key, value, header, id_=id_, hint=hint)
             elif value == 'RANGE': # range values
-                crit = cw.Range(key, header, id_=id_, hint=hint)
+                crit = cw.Range(key, header, id_=id_)
                 
             self.criterias.append(crit)
             
-        # create the each expansion-panel content 
+        # create each expansion-panel content 
         self.panels = v.ExpansionPanels(
             focusable=True,
             v_model=None, 
@@ -72,8 +75,22 @@ class ConstraintTile(sw.Tile, HasTraits):
     def _update_constraints(self, change):
         """update all the constraints using sliders based on the geometry and the layer they use"""
         
-    
+        # unable constraint selection
+        for cp in self.panels.children:
+            cp.select.disabled = False
+            cp.select.persistent_hint = False
+            cp.select.hint = None
         
+        # reevaluate every layer over the AOI with the default layer
+        for c in self.criterias:
+            
+            if isinstance(c, cw.Range):
+                layer = next(l['layer'] for l in self.layer_model.layer_list if l['id'] == c.id)
+                geometry = self.aoi_model.feature_collection.geometry()
+                c.set_values(geometry, layer)
+        
+        return self
+    
     def load_data(self, data):
         """load the data from a json string"""
         

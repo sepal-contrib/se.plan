@@ -19,31 +19,35 @@ class PriorityTable(v.SimpleTable):
     _colors = cp.gradient(5)
     
     _BENEFITS = pd.read_csv(cp.layer_list).fillna('')
-    _BENEFITS = _BENEFITS[_BENEFITS.theme == 'benefits'].subtheme.unique()
+    _BENEFITS = _BENEFITS[_BENEFITS.theme == 'benefits']
     
-    _DEFAULT_V_MODEL = {name: 0 for name in _BENEFITS}
+    _DEFAULT_V_MODEL = {layer_id: 0 for layer_id in _BENEFITS.layer_id}
     
     def __init__(self):
         
         
         # construct the checkbox list
         self.checkbox_list = {}
-        for name in self._BENEFITS:
+        for layer_id in self._BENEFITS.layer_id:
             line = []
             for i, color in enumerate(self._colors):
                 line.append(v.Checkbox(
                     color = color, 
-                    _metadata = {'label': name, 'val': i}, 
+                    _metadata = {'label': layer_id, 'val': i}, 
                     v_model = i==0
                 ))
-            self.checkbox_list[name] = line
+            self.checkbox_list[layer_id] = line
             
         # construct the rows of the table
         rows = []
-        for name in self._BENEFITS:
-            row  = [v.Html(tag = 'td', children = [name])]
+        self.btn_list = []
+        for i, layer_row in self._BENEFITS.iterrows():
+            edit_btn = v.Icon(children=['mdi-pencil'], _metadata={'layer': layer_row.layer_id}) 
+            self.btn_list.append(edit_btn)
+            row = [v.Html(tag='td', children=[edit_btn])]
+            row.append(v.Html(tag = 'td', children = [layer_row.layer_name]))
             for j in range(len(self._colors)):
-                row.append(v.Html(tag = 'td', children = [self.checkbox_list[name][j]]))
+                row.append(v.Html(tag = 'td', children = [self.checkbox_list[layer_row.layer_id][j]]))
             rows.append(v.Html(tag = 'tr', children = row))
         
         # create the table
@@ -52,7 +56,8 @@ class PriorityTable(v.SimpleTable):
             children = [
                 v.Html(tag = 'thead', children = [
                     v.Html(tag = 'tr', children = (
-                        [ v.Html(tag = 'th', children = ['priority'])]
+                        [v.Html(tag='th', children=['action'])]
+                        + [v.Html(tag = 'th', children = ['indicator'])]
                         + [v.Html(tag = 'th', children = [label]) for label in self._labels]
                     ))
                 ]),
@@ -61,9 +66,13 @@ class PriorityTable(v.SimpleTable):
         )
         
         # link the checks with the v_model
-        for name in self._BENEFITS:
+        for name in self._BENEFITS.layer_id.tolist():
             for check in self.checkbox_list[name]:
                 check.observe(self._on_check_change, 'v_model')
+                
+        # action on clicks 
+        for icon in self.btn_list:
+            icon.on_event('click', lambda *args: print('toto'))
         
     def _on_check_change(self, change):
         

@@ -18,7 +18,7 @@ class PriorityTile (sw.Tile, HasTraits):
         title = cm.benefits.title
         id_ = "nested_widget"
         
-        # create the sliders
+        # create the table
         self.table = cw.PriorityTable()
         
         # build the tile

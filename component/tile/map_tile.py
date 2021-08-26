@@ -21,7 +21,7 @@ from component import widget as cw
 
 class MapTile(sw.Tile):
     
-    def __init__(self, gee_model, aoi_model, area_tile, theme_tile):
+    def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile):
         
         # add the explanation
         mkd = sw.Markdown('  \n'.join(cm.map.txt))
@@ -44,7 +44,8 @@ class MapTile(sw.Tile):
         self.compute_dashboard = sw.Btn(cm.map.compute_dashboard, class_= 'ma-2', disabled=True)
         
         # models
-        self.gee_model = gee_model
+        self.layer_model = questionnaire_tile.layer_model
+        self.question_model = questionnaire_tile.question_model
         self.aoi_model = aoi_model
         
         # create the shape loader
@@ -55,7 +56,7 @@ class MapTile(sw.Tile):
         self.theme_tile = theme_tile
         
         #init the final layers 
-        self.final_layer = None
+        self.wlc_outputs = None
         self.area_dashboard = None
         self.theme_dashboard = None
         
@@ -105,20 +106,26 @@ class MapTile(sw.Tile):
         
         return self
         
-    #@su.loading_button(debug=False)
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map"""
         
         # create a layer and a dashboard 
-        self.final_layer = self.gee_model.wlc()
+        self.wlc_outputs = cs.wlc(
+            self.layer_model.layer_list,
+            self.question_model.constraints, 
+            self.question_model.priorities, 
+            self.aoi_model.feature_collection
+        )
 
         # display the layer in the map
-        cs.display_layer(self.final_layer, self.aoi_model, self.m)
+        cs.display_layer(self.wlc_outputs[0], self.aoi_model, self.m)
+        
         self.save.set_data(
-            self.final_layer, 
+            self.wlc_outputs[0], 
             self.aoi_model.feature_collection.geometry(),
-            self.gee_model.recipe_name,
-            self.aoi_model.name)
+            self.question_model.recipe_name,
+            self.aoi_model.name
+        )
 
         # add the possiblity to draw on the map and release the compute dashboard btn
         self.m.show_dc()
@@ -156,7 +163,6 @@ class MapTile(sw.Tile):
             
         return self
     
-    #@su.loading_button()
     def _dashboard(self, widget, data, event):
         
         # handle the drawing features, affect them with a color an display them on the map as layers
@@ -167,17 +173,14 @@ class MapTile(sw.Tile):
 
         # retreive the area and theme json result
         self.area_dashboard, self.theme_dashboard = cs.get_stats(
-            self.gee_model,
+            self.wlc_outputs,
+            self.layer_model,
             self.aoi_model,
             self.draw_features,
             names
         )
         
-        self.theme_tile.dev_set_summary(
-            self.theme_dashboard, 
-            names, 
-            self.colors
-        )
+        self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
         
         self.area_tile.set_summary(self.area_dashboard)
         

@@ -1,25 +1,41 @@
-from traitlets import HasTraits, Any, observe
+from traitlets import HasTraits, Any, observe, dlink
 
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
+import ee
 
 from component.message import cm
 from component import parameter as cp
 
-class Constraint(sw.SepalWidget):
+ee.Initialize()
+
+class Constraint(sw.SepalWidget, v.Row):
     
-    custom_v_model = Any().tag(sync=True)
+    custom_v_model = Any(-1).tag(sync=True)
     
-    def __init__(self, name = 'name', header='header', id_='id', **kwargs):
+    def __init__(self, widget, name = 'name', header='header', id_='id', **kwargs):
         
+        # default
         self.id = id_
         self.header = header
         self.name = name
-        self.custom_v_model = -1
-        self.persistent_hint=True
         self.class_ = 'ma-5'
+        self.widget = widget
+        self.align_center = True
         
+        # creat a pencil btn 
+        self.btn = v.Icon(children=['mdi-pencil'], _metadata={'layer': id_})
+        
+        # create the row 
         super().__init__(**kwargs)
+        
+        self.children = [
+            v.Flex(align_center=True, xs1=True, children=[self.btn]),
+            v.Flex(align_center=True, xs11=True, children=[self.widget])
+        ]
+        
+        # link widget and custom_v_model
+        dlink((self.widget, 'v_model'), (self, 'custom_v_model'))
         
     @observe('v_model')
     def _on_change(self, change):
@@ -42,69 +58,72 @@ class Constraint(sw.SepalWidget):
     def unable(self):
         
         # update the custom v_model
-        self.custom_v_model = self.v_model
+        self.custom_v_model = self.widget.v_model
         
         # show the component 
         self.show()
         
         return self
 
-class Binary(v.Switch, Constraint):
+class Binary(Constraint):
     
-    def __init__(self, name, header, **kwargs):
+    def __init__(self, name, header, id_, **kwargs):
         
-        super().__init__(
-            disabled = True,
-            name = name,
-            header=header,
+        widget = v.Switch(
+            #readonly = True,
+            persistent_hint=True,
+            v_model=True,
             label = name,
-            v_model = True,
             **kwargs
         )
         
-class Dropdown(v.Select, Constraint):
+        super().__init__(widget, name=name, header=header, id_=id_)
+        
+class Dropdown(Constraint):
     
     def __init__(self, name, items, header, **kwargs):
         
-        super().__init__(
-            name = name,
+        widget = v.Select(
             label = name,
-            header = header,
+            persistent_hint=True,
             items = items,
             v_model = int(items[0]['value']),
             **kwargs
+            
         )
         
+        super().__init__(widget, name=name, header=header)
         
-class Range(v.Slider, Constraint):
-    
-    ticks_label = ['low, medium, hight']
-    
-    def __init__(self, name, header, **kwargs):
         
-        super().__init__(
-            persistent_hint = True,
-            name = name, 
-            header = header,
+class Range(Constraint):
+    
+    LABEL = ['low', 'medium', 'high']
+    
+    def __init__(self, name, header, id_, **kwargs):
+        
+        widget = v.RangeSlider(
             label = name,
             max = 1,
             step = .1,
-            v_model = 0,
+            v_model = [0, 1],
             thumb_label=True,
             **kwargs
         )
         
+        super().__init__(widget, name = name, header = header, id_=id_)
         
-    def set_values(geometry, layer):
+        
+    def set_values(self, geometry, layer):
         
         # compute the min and the max for the specific geometry and layer
-        ee_image = ee.Image(layer)
+        ee_image = ee.Image(layer).select(0)
         
         # get min 
         min_ = ee_image.reduceRegion(
             reducer = ee.Reducer.min(),
             geometry = geometry,
-            scale = 250
+            scale = 250,
+            bestEffort = True
         )
         min_ = list(min_.getInfo().values())[0]
         
@@ -112,18 +131,39 @@ class Range(v.Slider, Constraint):
         max_ = ee_image.reduceRegion(
             reducer = ee.Reducer.max(),
             geometry = geometry,
-            scale = 250
+            scale = 250,
+            bestEffort = True
         )
         max_ = list(max_.getInfo().values())[0]
         
-        self.min = round(min_, 2)
-        self.max = round(max_, 2)
+        # if noneType it means that my AOI is out of bounds with respect to my constraint
+        # as it won't be usable I need to add a hint to the end user
+        if not min_ or not max_:
+            
+            self.widget.error_messages = 'The aoi is out of the bounds of your constraint layer, use a custom one.'
+            self.widget.min = 0
+            self.widget.max = 1
+            self.widget.step = .1
+            self.widget.tick_labels = [] 
+            self.widget.v_model = [0, 1]
+            
+        else:
+            
+            # remove the error state 
+            self.widget.error_messages = []
         
-        # set the number of steps by stting the step aparameter (100)
-        self.step = round((self.max-self.min)/100, 2)
+            # set the min max
+            self.widget.min = round(min_, 2)
+            self.widget.max = round(max_, 2)
         
-        # display ticks label with low medium and high values
-        self.tick_labels = [ticks_label[i//4] if i%4 == 0 and not (i in [0,100]) else '' for i in range(101)]
+            # set the number of steps by stting the step parameter (100)
+            self.widget.step = round((self.widget.max-self.widget.min)/100, 2)
+        
+            # display ticks label with low medium and high values            
+            self.widget.tick_labels = [self.LABEL[i//25 - 1] if i in [25, 50, 75] else '' for i in range(101)]
+        
+            # set the v_model on the "min - max" value to select the whole image by default
+            self.widget.v_model = [self.widget.min, self.widget.max]
         
         return self
     
@@ -140,13 +180,16 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         # link the criterias to the select 
         self.criterias = [c.disable() for c in criterias if c.header == category] 
         self.select = v.Select(
+            disabled=True, # disabled until the aoi is selected
             class_ = 'mt-5',
             small_chips = True,
             v_model = None,
             items = [c.name for c in self.criterias],
             label = cm.constraints.criteria_lbl,
             multiple = True,
-            deletable_chips = True
+            deletable_chips = True,
+            persistent_hint = True,
+            hint = "select an AOI first"
         )
             
         # create the content, nothing is selected by default so Select should be empty and criterias hidden 
