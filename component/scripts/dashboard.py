@@ -80,9 +80,6 @@ def get_aoi_count(aoi, name):
     
     return count_aoi
 
-def ee_isequal(left, right):
-    return ee.Algorithms.IsEqual(left, right)
-
 def get_image_percent_cover_pixelarea(image, aoi, name):
     
     image = image.rename("image")
@@ -103,7 +100,7 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
     # get constraint area (e.g. groups class 0)
     # if the first group is 0 use it to calculate percent, else 0 
     count_val = ee.Algorithms.If(
-        ee_isequal(ee.Dictionary(areas.get(0)).get('image'),0),
+        ee.Algorithms.IsEqual(ee.Dictionary(areas.get(0)).get('image'),0),
         areas_list.get(0),
         0)
 
@@ -194,17 +191,15 @@ def get_image_sum(image, aoi, name, mask):
     
     return ee.Dictionary({name:value})
 
-def get_summary_statistics(gee_model, name, geom):
+def get_summary_statistics(wlc_outputs, name, geom, layer_list):
     """returns summarys for the dashboard.""" 
 
     # restoration suitability
-    wlc, benefits, constraints, costs = gee_model.wlcoutputs
+    wlc, benefits, constraints, costs = wlc_outputs
     mask = ee.ImageCollection(list(map(lambda i: ee.Image(i['eeimage']).rename('c').byte(), constraints))).min()
 
     # restoration pot. stats
     wlc_summary = get_image_stats(wlc, name, mask, geom)
-
-    layer_list = gee_model.rp_layers_model.layer_list
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
@@ -269,10 +264,7 @@ def get_theme_dashboard(stats):
 
     return tmp_dict
 
-def get_stats(geeio, aoi_model, features, names):
-    
-    # create a name list
-    #names = [aoi_model.name if not i else f'Sub region {i}' for i in range(len(features['features'])+ 1)]
+def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
     
     # create the final featureCollection 
     # the first one is the aoi and the rest are sub areas
@@ -281,7 +273,7 @@ def get_stats(geeio, aoi_model, features, names):
         ee_aoi_list.append(geemap.geojson_to_ee(feat))
         
     # create the stats dictionnary        
-    stats = [get_summary_statistics(geeio, names[i], geom) for i, geom in enumerate(ee_aoi_list)]
+    stats = [get_summary_statistics(wlc_outputs, names[i], geom, layer_model.layer_list) for i, geom in enumerate(ee_aoi_list)]
     
     area_dashboard = get_area_dashboard(stats)
     theme_dashboard = get_theme_dashboard(stats)

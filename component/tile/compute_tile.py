@@ -13,7 +13,7 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     
-    def __init__(self, aoi_tile, questionnaire_tile, gee_model):
+    def __init__(self, aoi_tile, questionnaire_tile):
         
         # gather the io 
         self.layer_model = questionnaire_tile.layer_model
@@ -29,6 +29,9 @@ class ValidationTile(sw.Tile):
             label = cm.custom.recipe.name,
             v_model = None
         )
+        
+        # link the widget to the model 
+        self.question_model.bind(self.w_name, 'recipe_name')
         
         # create the layer list widget 
         self.layers_recipe = cw.layerRecipe().hide()
@@ -61,7 +64,6 @@ class ValidationTile(sw.Tile):
         aoi_tile.view.observe(self._recipe_placeholder, 'updated')
         self.btn.on_event('click', self._validate_data)
         self.reset_to_recipe.on_event('click', self.load_recipe)
-        link((self.w_name, 'v_model'),(gee_model, 'recipe_name'))
         self.w_name.on_event('blur', self._normalize_name)
         
     def _normalize_name(self, widget, event, data):
@@ -105,6 +107,7 @@ class ValidationTile(sw.Tile):
         # automatically validate them 
         self.btn.fire_event('click', None)
 
+        # send a message to the end user
         self.alert.add_msg('loaded', 'success')
 
         return self
