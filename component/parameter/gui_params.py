@@ -1,3 +1,23 @@
+# value of each land cover category 
+landcover_default_cat = {
+    'Bare land': 60,
+    'Shrub land': 20,
+    'Agricultural land': 40, 
+    'Agriculture': 40,
+    'Rangeland': 40,
+    'Grassland': 30, 
+    'Settlements': 50
+}
+
+land_use_criterias = {
+    k: {
+        'tooltip': 2,
+        'layer': None,
+        'header': 'land_use',
+        'content': 'BINARY'
+    } for k in landcover_default_cat
+}
+
 # list of the available constraints types. They will be used in the criterias names 
 criteria_types = {
     'land_use': 'Land use constraints',
@@ -19,24 +39,7 @@ criteria_types = {
     # 1: more than 
     # 2 binary
 criterias = {
-    'Bare land': {
-        'tooltip': 2,
-        'layer': None,
-        'header': 'land_use',
-        'content': 'BINARY'
-    },
-    'Shrub land': {
-        'tooltip': 2,
-        'layer': None,
-        'header': 'land_use',
-        'content': 'BINARY'
-    },
-    'Agricultural land': {
-        'tooltip': 2,
-        'layer': None,
-        'header': 'land_use',
-        'content': 'BINARY'
-    },
+    ** land_use_criterias,
     'Annual rainfall': {
         'tooltip': 1,
         'layer': 'annual_rainfall',

@@ -113,7 +113,6 @@ class ExportMap(v.Menu, sw.SepalWidget):
         
         # check if a dataset is existing
         if self.dataset == None or self.geometry == None:
-            print('toto')
             return self
         
         # set the parameters
@@ -148,8 +147,21 @@ class ExportMap(v.Menu, sw.SepalWidget):
             # no need to create it it's created when the recipe is saved
             result_dir = cp.result_dir/aoi_name
             
-            gdrive.download_files(files, result_dir)
+            tile_list = gdrive.download_files(files, result_dir)
             gdrive.delete_files(files)
+            
+            # add the colormap to each tile
+            colormap = {}
+            for code, item in self.dst_class.items():
+                        colormap[code] = tuple(int(c * 255) for c in to_rgba(item[1]))
+            
+            for tile in tile_list:
+                
+                with rio.open(tile) as f: 
+
+                    dst_f.write_colormap(self.band, colormap)
+
+
             self.alert.add_msg("map exported", "success")
             
         return self
