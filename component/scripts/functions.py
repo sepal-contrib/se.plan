@@ -137,7 +137,6 @@ def get_layer(layer_name, constraint_list):
     else:
         constraint_layer = next(i for i in constraint_list if i["name"] == layer_name)
 
-
     return constraint_layer
 
 def get_cat_constraint(cat_id, value, name, layer_id):
@@ -172,7 +171,7 @@ def get_range_constraint(values, layer_id):
     Return:
         (ee.Image): the masked gee image
     '''
-
+    
     # extract an ee.Image
     image = ee.Image(layer_id)
 
