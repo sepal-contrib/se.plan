@@ -70,7 +70,7 @@ class Binary(Constraint):
     def __init__(self, name, header, id_, **kwargs):
         
         widget = v.Switch(
-            readonly = True,
+            #readonly = True,
             persistent_hint=True,
             v_model=True,
             label = name,
