@@ -1,12 +1,13 @@
 # value of each land cover category 
 landcover_default_cat = {
-    'Bare land': 60,
     'Shrub land': 20,
+    'Herbaceous vegetation': 30, 
     'Agricultural land': 40, 
-    'Agriculture': 40,
-    'Rangeland': 40,
-    'Grassland': 30, 
-    'Settlements': 50
+    'Urban / built up': 50,
+    'Bare / sparse vegetation': 60,
+    'Snow and ice':70,
+    'Herbaceous wetland':90,
+    'Moss and lichen': 100
 }
 
 land_use_criterias = {
