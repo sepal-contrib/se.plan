@@ -153,7 +153,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
             # add the colormap to each tile
             colormap = {}
             for code, item in self.dst_class.items():
-                        colormap[code] = tuple(int(c * 255) for c in to_rgba(item[1]))
+                colormap[code] = tuple(int(c * 255) for c in to_rgba(item[1]))
             
             for tile in tile_list:
                 
