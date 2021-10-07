@@ -7,7 +7,7 @@ Introduction
 Overview
 ^^^^^^^^
 
-**se.plan** is a spatially explicit online tool designed to support forest restoration planning decisions by restoration stakeholders. It is part of `SEPAL <https://sepal.io/>`_ (System for Earth Observation Data Access, Processing and Analysis for Land Monitoring), a component of UN FAO’s free, open-source software suite, `Open Foris <http://www.openforis.org>`_. It aims to identify locations where the benefits of forest restoration are high relative to restoration costs, subject to biophysical and socioeconomic constraints that users impose to define the areas where restoration is allowable. The computation is performed using cloud-based supercomputing and geospatial datasets from Google Earth Engine available through SEPAL. As a decision-support tool, it is intended to be used in combination with other information users may have that provides greater detail on planning areas and features of those areas that **se.plan** might not adequately include. It offers users the option to replace its built-in data layers, which are based on publicly available global datasets, with users’ own customized layers. Please see :ref:`Appendix A <#>` for a list of **se.plan**’s built-in data layers and their sources.
+**se.plan** is a spatially explicit online tool designed to support forest restoration planning decisions by restoration stakeholders. It is part of `SEPAL <https://sepal.io/>`_ (System for Earth Observation Data Access, Processing and Analysis for Land Monitoring), a component of UN FAO’s free, open-source software suite, `Open Foris <http://www.openforis.org>`_. It aims to identify locations where the benefits of forest restoration are high relative to restoration costs, subject to biophysical and socioeconomic constraints that users impose to define the areas where restoration is allowable. The computation is performed using cloud-based supercomputing and geospatial datasets from Google Earth Engine available through SEPAL. As a decision-support tool, it is intended to be used in combination with other information users may have that provides greater detail on planning areas and features of those areas that **se.plan** might not adequately include. It offers users the option to replace its built-in data layers, which are based on publicly available global datasets, with users’ own customized layers. Please see :ref:`Appendix A` for a list of **se.plan**’s built-in data layers and their sources.
 
 The sections below highlight key features of **se.plan**. A high-level view of using the tool can be described as follows: 
 
@@ -15,14 +15,14 @@ The sections below highlight key features of **se.plan**. A high-level view of u
 
     Users start by (i) selecting their geographical planning area, (ii) rating the relative importance of different restoration benefits from their perspective, and (iii) imposing constraints that limit restoration to only those sites they view as suitable, in view of ecological and socioeconomic risks. **se.plan** then generates maps and related information on restoration’s benefits, costs, and risks for all suitable sites within the planning area. 
 
-In addition to reading this manual, we encourage users to watch **se.plan** YouTube videos: `video being shot <#>`_.
+In addition to reading this manual, we encourage users to watch **se.plan** YouTube videos: `video being shot`_.
 
 Geographical resolution and scope
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **se.plan** divides the Earth’s surface into grid cells with 30 arc-second resolution (≈1km at the equator). It includes only grid cells that satisfy the following four criteria:
 
--   They are in countries or territories of Africa and the Near East, Asia and the Pacific, and Latin America and the Caribbean that the World Bank classified as *low or middle-income countries* or territories (LMICs) during most years during 2000–2020. These countries and territories number 139 and are listed in :ref:`Appendix B <#>`.
+-   They are in countries or territories of Africa and the Near East, Asia and the Pacific, and Latin America and the Caribbean that the World Bank classified as *low or middle-income countries* or territories (LMICs) during most years during 2000–2020. These countries and territories number 139 and are listed in :ref:`Appendix B`.
 -   They include areas where tree cover can potentially occur under current climatic conditions, as determined by `Bastin et al. (2019) <https://doi.org/10.1126/science.aax0848>`_.
 -   Their current tree cover, as measured by the European Space Agency’s Copernicus Programme (`Buchhorn et al. 2020 <https://doi.org/10.3390/rs12061044>`_), is less than their potential tree cover.
 -   They are not in urban use.
@@ -35,7 +35,7 @@ Methodology
 Selection of planning area
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`Usage section <#>`. 
+**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`Usage section`. 
 
 Restoration indicators
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -47,7 +47,7 @@ Restoration offers many potential benefits. In its current form, **se.plan** pro
 -   Local livelihoods
 -   Wood production
 
-**se.plan** includes two indicators each for biodiversity conservation and local livelihoods and one indicator each for carbon sequestration and wood production. Each indicator is associated with a data layer that estimates each grid cell’s relative potential to provide each benefit if the grid cell is restored;  the relative potential is measured on a scale of 1 (low) to 5 (high). Please see :ref:`Appendix C <#>` for more detail on the interpretation and generation of the data layers for the benefit indicators.
+**se.plan** includes two indicators each for biodiversity conservation and local livelihoods and one indicator each for carbon sequestration and wood production. Each indicator is associated with a data layer that estimates each grid cell’s relative potential to provide each benefit if the grid cell is restored;  the relative potential is measured on a scale of 1 (low) to 5 (high). Please see :ref:`Appendix C` for more detail on the interpretation and generation of the data layers for the benefit indicators.
 
 Users rate the relative importance of these benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an index that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. This restoration value index is a weighted average of the benefits, with user ratings serving as the weights. It therefore accounts for not only the potential of a grid cell to provide each benefit but also the relative importance that a user assigns to each benefit. It is scaled from 1 (low restoration value) to 5 (high restoration value). Please see Appendix D for more detail on the generation of the index.
 
@@ -81,14 +81,14 @@ Constraint
 
 **se.plan** enables the user to adjust the values that will be masked from the analysis for most of these constraints. Some of the constraints are binary variables, with a value of 1 if a site has the characteristic associated with the variable and 0 if it does not. For these constraints, users can choose if they want to keep zeros or ones.
 
-Please see :ref:`Appendix F <#>` for more detail on the interpretation and generation of the data layers for the constraints.
+Please see :ref:`Appendix F` for more detail on the interpretation and generation of the data layers for the constraints.
 
 Customization
 ^^^^^^^^^^^^^
 
 Every Constraints and benefits are based on layers provided within the tools. These layer may not be covering the AOI selected by the user or provide less accurate/updated data than the National datasets available. To allow user to improve the quality of the analysis **se.plan** provides the possiblity of replacing these datasets by any layer available with Google Earth Engine.
 
-Please see :ref:`Usage <#>`for more details on the customization process.
+Please see :ref:`Usage`for more details on the customization process.
 
 Output
 ^^^^^^
@@ -98,6 +98,84 @@ The output provides two outputs:
 - A map of the Restoration suitability index scaled from 1 (low suitability) to 5 (high suitability). This map, generated within the Google Earth Engine API can be displayed in the app but also exported as a GEE asset or a .tif file in your SEPAL folders. 
 
 - A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
+
+.. Appendix E:
+
+Cost data layers
+----------------
+
+In the cases of benefits (:ref:`Appendix C`) and constraints (:ref:`Appendix F`), the **se.plan** team adopted the tool’s data layers primarily from existing sources, with little or no modification of the original layers. In contrast, it developed wholly new data layers for both the *opportunity cost* and the *implementation cost* of forest restoration. Developing these layers involved multiple steps, which are described below.
+
+Opportunity cost
+^^^^^^^^^^^^^^^^
+
+*pportunity cost* in **se.plan** refers to the value of land if it is not restored to forest: i.e., the value of land in its current use. A higher opportunity cost tends to make restoration less feasible, although restoration can nevertheless be feasible on land with a high opportunity cost if it generates sufficiently large benefits. se.plan assumes that the alternative land use would be some form of agriculture, either cropland or pastureland. It sets the *opportunity cost* of potential restoration sites equal to the value of cropland for all sites where crops can be grown, with the opportunity cost for any remaining sites set equal to the value of pastureland. 
+
+The value of land in agricultural use is defined as the portion of agricultural profit that is attributable to land as a production input. Economists label this portion “land rent”. Agricultural profit is the difference between the gross revenue a farmer receives from selling agricultural products (= product price × quantity sold) and the expenditures the farmer makes on variable inputs, such as seeds and fertilizer, used in production. It is the return earned by fixed inputs, which include labor and capital (e.g., equipment, structures) in addition to land. These relationships imply that the **se.plan** team needed to sequentially estimate gross revenue, profit, and land rent. 
+
+The team assumed that forest restoration is intended to be permanent, and so it estimated land rent in perpetuity: the opportunity cost of forgoing agricultural use of a restored site forever, not just for a single year. The estimates of this long-run opportunity cost in **se.plan** are expressed in US dollars per hectare for reference year 2017. 
+
+Cropland
+********
+
+The workflow to develop cropland opportunity cost can be summarized as follows:
+
+#.  The se.plan team obtained gridded data on 2010 value of crop production per hectare (i.e., gross revenue per hectare) from the International Food Policy Research Institute’s MapSPAM project (International Food Policy Research Institute, 2019; Yu et al., 2020). The resolution of this layer was 5 arc-minutes (~10 km at the equator).
+#.  The team updated the MapSPAM data to 2017 using  country-specific data on total cereal yield from FAOSTAT (UN FAO, 2020a) and the global producer price index for total cereals, also from FAOSTAT. The MapSPAM data reflect gross revenue from a much wider range of crops than cereals, but cereals are the dominant crops in most countries. 
+#.  The team multiplied the data from step 2 by an estimate of the share of crop revenue that was attributable to land, i.e., the land-rent share. The rent-share estimates differed across countries and, where data permitted, by first-level administrative subdivisions (e.g., states, provinces) within countries. The team developed the rent-share estimates through a two-step procedure:
+    
+    #.  It used 229,859 annual survey observations spanning 2004–2017 from 196,327 unique farm households (UN FAO, 2020c) in 32 low- and middle-income countries (LMICs) to statistically estimate a model that related profit from growing crops to fixed inputs. Table E1 shows the distribution of observations by country in the statistical model, and Table E2 shows the estimation results for the model. The dependent variable in the model was the natural logarithm of profit (lnQuasiRent in the table), and fixed inputs were represented by the natural logarithms of cultivated area (lncultivated) and family labor (lnfamlabor) and a binary (“dummy”) variable that indicated whether the farm was mechanized (dmechuse). The model also included year dummies and fixed effects for regions (countries or first-level subdivisions, depending on the survey), which controlled for unobserved factors that varied across time but not regions (the year dummies) and unobserved factors that varied across regions but not time (the region fixed effects). Post-estimation, the team calculated land rent for each observation by multiplying profit by 0.325, the estimated coefficient on the log cultivated area variable. This procedure assumes that the coefficients on inputs in the log-log profit model can be interpreted as profit shares. This assumption is valid if production has constant returns to scale: i.e., if the coefficients sum to 1, which they approximately do in the model. 
+    #.  The team used sampling weights from the surveys to calculate mean values of crop revenue and land rent for each region in the sample. It then calculated the ratio of mean land rent to mean crop revenue—i.e., the land-rent share—for each region, and it statistically related the rent shares to a set of spatial variables, which included the region’s gross domestic product per capita in 2015 (Kummu et al., 2018), its population density in 2015 (CIESIN, 2018), the strength of property rights in it (see discussion of this variable in Appendix F), area shares of terrestrial ecoregions in it (Olson and Dinerstein, 2002), and its classification by World Bank region. Table E3 shows the estimation results for the rent-share model. The team used this model to predict rent shares for the LMICs spanned by se.plan and, where possible, first-level subdivisions within them.
+
+#. The team estimated the value of cropland in perpetuity by dividing the annual land rent estimates from step 3 by 0.07, under the assumption that the financial discount rate is 7%. It based this assumption on the mean value of real interest rates across the LMICs in the tool (World Bank, 2020).
+
+Pastureland
+***********
+
+The se.plan team used similar procedures to estimate the value of pastureland. In place of cropland steps 1 and 2, it:
+
+#.  Predicted pastureland area in 2015 by first statistically relating pastureland percentage in 2000 (UN FAO, 2007, van Velthuizen et al., 2007) to a set of land-cover variables for 2000 at 300m resolution from the European Space Agency (ESA, 2017), and then using the resulting statistical model and 2015 values of the land-cover variables to predict 2015 pastureland area within each 300m grid cell.
+#.  Calculated gross revenue from livestock in ~2017 by multiplying gridded data on livestock numbers (buffaloes, cattle, goats, horses, sheep) in 2010 at 10km resolution (UN FAO, 2018) by 2017 estimates of production value per animal, calculated by using country-specific data on stocks of animals and production value of livestock products from FAOSTAT (UN FAO, 2020b). It adjusted the resulting estimates of gross revenue per grid cell to include production only from grazing lands, not from feedlots, by using FAO estimates of national shares of meat production from grazing lands provided by the World Bank.
+#.  Calculated gross revenue per hectare in ~2017 by dividing gross revenue from step b by pastureland area from step a. 
+
+Compared to cropland step 3, household survey data on livestock production on pastureland (FAO, 2020c) were too limited to estimate land-rent shares that varied across countries or first-level subdivisions. Instead, the statistical rent-share estimate used in the tool, 6.1% of gross revenue, is identical across all countries and first-level subdivisions.
+
+Step 4 was the same as for cropland.
+
+Implementation costs
+^^^^^^^^^^^^^^^^^^^^
+
+Implementation costs refer to the expense of activities required to regenerate forests. They include both: (i) initial expenses incurred in the first year of restoration (establishment costs), which are associated with such activities as site preparation, planting, and fencing; and (ii) expenses associated with monitoring, protection, and other activities in years following establishment (operating costs), which are required to enable the regenerated stand to reach the “free to grow” stage. se.plan does not report these two components of implementation costs separately. Instead, it reports the aggregate cost of restoring a site, in 2017 US dollars per hectare, by summing the estimates of opportunity cost and implementation costs. This aggregate cost is the cost variable that it includes in the benefit-cost ratio (Appendix D). The estimates of implementation costs vary by country and, for countries with sufficient data, by first-level subdivision.
+
+As discussed above, se.plan assumes that current land use is some form of agriculture. It therefore also assumes that regeneration requires planting, as sources of propagules for natural regeneration are often not adequate on land that has been cleared for agriculture. se.plan does not ignore natural regeneration as a restoration option, however, as it includes a constraint layer that predicts the variability of natural regeneration success (see :ref:`Appendix E`).
+
+The se.plan team estimated implementation costs in three steps:
+
+#.  It extracted data on implementation costs from project appraisal reports and implementation completion reports for 50 World Bank afforestation and reforestation projects spanning 24 LMICs during the past 2-3 decades. Afforestation refers to regeneration of sites where the most recent land use was not forest, e.g., agriculture, while reforestation refers to regeneration of sites that only recently lost their forest cover, e.g., due to harvesting or wildfire. Whenever possible, the team extracted data on operating costs in addition to data on establishment costs, with operating costs typically extending up to 3–5 years after establishment (depending on project and site). It converted all estimates to a per-hectare basis, expressed in constant 2011 US dollars. It classified the estimates by country and, where possible, first-level subdivision. 
+
+#.  It statistically related the natural logarithm of implementation cost per hectare to a set of variables hypothesized to explain it, including: (i) GDP per capita, also natural log transformed (Kummu et al., 2018); (ii) a dummy variable distinguishing reforestation from afforestation (regeneration of sites where the most recent land use was not forest, e.g., agriculture); (iii) a dummy variable distinguishing natural regeneration from planting; (iv) the total regenerated area (natural log transformed); (v) dummy variables giving the dominant biome in the region (tropical or subtropical, vs. temperate/boreal; (UN FAO, 2013); (vi) a dummy variable indicating whether the project began pre- or post-2010; (vii) a dummy variable that can be interpreted as indicating whether the cost estimate accounted for project overhead costs or not (“UnitArea”); and (viii) a set of dummy variables that indicated projects that included special types of regeneration that did not commonly occur in the dataset, which mainly referred to regeneration of small to large stands of trees on interior sites. Table E4 shows estimation results for the model.
+
+#.  The team predicted spatial estimates of implementation costs by region (country or first-level subdivision) by inserting into the model gridded GDP estimates for 2011, the mean of project area in the estimation sample, and the biome variables. All of the other binary variables were set to 0. As a final step, the team converted the predicted implementation costs to constant 2017 US dollars using annual inflation rates between 2012 and 2017. 
+
+
+References
+^^^^^^^^^^
+
+-   CIESIN (Center for International Earth Science Information Network). 2018. Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11. NASA Socioeconomic Data and Applications Center (SEDAC). https://doi.org/10.7927/H49C6VHW. 
+-   ESA. 2017. Land Cover CCI Product User Guide, Version2. maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf. 
+-   International Food Policy Research Institute. 2019. Global Spatially-Disaggregated Crop Production Statistics Data for 2010 Version 2.0. https://doi.org/10.7910/DVN/PRFF8V, Harvard Dataverse, V4.
+-   Kummu, M., Taka, M. & Guillaume, J. 2018. Gridded global datasets for Gross Domestic Product and Human Development Index over 1990–2015. Sci Data 5, 180004. https://doi.org/10.1038/sdata.2018.4. 
+-   Olson, D. M., and E. Dinerstein. 2002. The Global 200: Priority ecoregions for global conservation. Annals of the Missouri Botanical Garden 89:125-126. https://geospatial.tnc.org/datasets/7b7fb9d945544d41b3e7a91494c42930_0.
+-   van Velthuizen, H., Huddleston, B., Fischer, G., Salvatore, M., Ataman, E., et al. 2007. Mapping biophysical factors that influence agricultural production and rural vulnerability. Environment and Natural Resources Series No. 11. FAO, Rome.
+-   Yu, Q., You, L., Wood-Sichra, U., Ru, Y., Joglekar, A. K. B., et al. 2020 (in review). A cultivated planet in 2010: 2. the global gridded agricultural production maps. Earth Syst. Sci. Data Discuss. https://doi.org/10.5194/essd-2020-11.
+-   UN FAO. 2007. Occurrence of Pasture and Browse (FGGD). https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/913e79a0-7591-11db-b9b2-000d939bc5d8. 
+-   UN FAO. 2013. Global Ecological Zones (second edition). https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/2fb209d0-fd34-4e5e-a3d8-a13c241eb61b. 
+-   UN FAO. 2018. Gridded Livestock of the World – Latest – 2010 (GLW 3). https://dataverse.harvard.edu/dataverse/glw_3, Harvard Dataverse, V3. 
+-   UN FAO. 2020a. FAOSTAT: Crops. http://www.fao.org/faostat/en/#data/QC.
+-   UN FAO. 2020b. FAOSTAT: Livestock Primary. http://www.fao.org/faostat/en/#data/QL.
+-   UN FAO. 2020c. RuLIS - Rural Livelihoods Information System. http://www.fao.org/in-action/rural-livelihoods-dataset-rulis/en/.
+-   World Bank. 2020. World Development Indicators. https://databank.worldbank.org/source/world-development-indicators. 
+-   World Bank. Various years. Projects & Operations. Project appraisal documents and implementation completion reports for selected projects. https://projects.worldbank.org/en/projects-operations/projects-home. 
 
 
 .. _Appendix F:
