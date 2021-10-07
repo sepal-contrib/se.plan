@@ -98,3 +98,112 @@ The output provides two outputs:
 - A map of the Restoration suitability index scaled from 1 (low suitability) to 5 (high suitability). This map, generated within the Google Earth Engine API can be displayed in the app but also exported as a GEE asset or a .tif file in your SEPAL folders. 
 
 - A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
+
+
+.. _Appendix F:
+
+Constraints data layers
+-----------------------
+
+se.plan includes various constraints that enable users to restrict restoration to sites that satisfy specific criteria. Many of the constraints can be viewed as indicators of risk, which allows users to avoid sites where the risk of failure, or the risk of undesirable impacts, might be unacceptable. Values of the constraints should be viewed as average values for a site, with some locations within a site likely having higher or lower values. The constraints are grouped into faour categories: biophysical, current land cover, forest change, and socio-economic.
+
+Biophysical constraints
+^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: Title
+    :header-rows: 1
+    
+    * - Variable
+      - Units
+      - Description
+      - Source
+    * - Elevation
+      - meters
+      - Void-filled digital elevation dataset from Shuttle Radar Topography Mission (SRTM).
+      - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
+    * - Slope
+      - degrees
+      - The elevation dataset (see above) was used to calculate slope in units of degrees from horizontal, with greater values indicating steeper inclines.
+      - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
+    * - Annual rainfall
+      - mm/yr
+      - High-resolution estimates of total annual rainfall based on blending satellite information with station data and regression-based spatial interpolation.
+      - C. Funk, P. Peterson, M. Landsfeld, et al., The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes. Sci Data 2, 150066. https://doi.org/10.1038/sdata.2015.66 
+    * - Baseline water stress
+      - scale (0 to 5)
+      - Ratio of total water withdrawals (for consumptive and nonconsumptive domestic, industrial, irrigation, and livestock uses) to available renewable supplies of surface water and groundwater, averaged across months of the year and converted to a numerical scale. Higher values of the scale indicate greater water stress.
+      - World Resources Institute, 2021, Aqueduct Global Maps 3.0 Data, https://www.wri.org/data/aqueduct-global-maps-30-data 
+
+Current land cover
+^^^^^^^^^^^^^^^^^^
+
+.. list-table:: Title
+    :header-rows: 1
+    
+    * - Variable
+      - Units
+      - Description
+      - Source
+    * - Terrestrial ecoregion
+      - ecological zone labels
+      - Classification of Earth’s land surface into 20 ecological zones, which have relatively homogeneous vegetation formations under natural conditions and similar physical features (e.g., climate)
+      - UN FAO, 2012 Global ecological zones for fao forest reporting: 2010 Update, http://www.fao.org/3/ap861e/ap861e.pdf 
+
+
+Forest change constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: Title
+    :header-rows: 1
+    
+    * - Variable
+      - Units
+      - Description
+      - Source
+    * - Deforestation rate
+      - %/yr
+      - Annual rate of tree-cover loss within a 5 km buffer around a site during 2005–2015, expressed as a positive percentage of total tree cover. Higher values indicate higher rates of loss. The value is zero in areas without deforestation (i.e., areas with expanding tree cover).
+      - Developed by **se.plan** team, using data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, `maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pd`_  
+      - Climate risk
+      - % of area
+      - Difference between potential tree cover in 2050 if climate trends continue, and potential tree cover under current climatic conditions. Positive values indicate increases in potential tree cover, while negative values indicate decreases.
+      - J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258 
+    * - Natural regeneration variability
+      - scale (0 to 1)
+      - Measure of variability of forest restoration in fostering recovery of biodiversity to typical levels in natural native forests. Higher values indicate that biodiversity recovery is more variable (i.e., less predictable).
+      - Developed by se.plan team, using model from: R. Crouzeilles, F.S. Barros, P.G. Molin, et al., 2019, A new approach to map landscape variation in forest restoration success in tropical and temperate forest biomes, J Appl Ecol. 56, pp. 2675– 2686, https://doi.org/10.1111/1365-2664.13501; and data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf 
+
+Socio-economic constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. list-table:: Title
+    :header-rows: 1
+    
+    * - Variable
+      - Units
+      - Description
+      - Source
+    * - Current land cover
+      - land-cover class labels 
+      - Land-cover classification for most recent year, generated from multi-sensor satellite observations by the European Space Agency’s Copernicus Earth observation program and classified according to ESA’s Climate Change Initiative (CCI) land-cover categories.
+      - ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf
+    * - Protected areas
+      - binary (0 or 1)
+      - Value of 1 indicates that a site is located in a protected area, while a value of 0 indicates it is not.
+      - IUCN, World Database on Protected Areas, https://www.iucn.org/theme/protected-areas/our-work/world-database-protected-areas
+    * - Population density
+      - persons per km2 
+      - Modeled distribution of human population for 2020, based on census data for the most disaggregated administrative units available.
+      - CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
+    * - Declining population
+      - binary (0 or 1)
+      - Value of 1 indicates that human population in a 5 km buffer around a site declined during 2010 – 2020, while a value of 0 indicates it rose or did not change.
+      - Developed by se.plan team, using 2.5 arc-minute data from: CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
+    * - Property rights protection
+      - index (−2.5 to +2.5)
+      - Downscaled version of the World Bank’s Rule of Law governance indicator, which is often interpreted as an indicator of property rights protection. Values range from −2.5 (very weak property rights) to +2.5 (very strong property rights). Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province).
+      - Developed by se.plan team, by downscaling national data from: World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/
+    * - Accessibility to cities
+      - minutes
+      - Travel time from a site to the nearest city in 2015.
+      - D.J. Weiss, A. Nelson, H.S. Gibson, et al., 2018, A global map of travel time to cities to assess inequalities in accessibility in 2015, Nature,  doi:10.1038/nature25181; data downloaded from: https://malariaatlas.org/research-project/accessibility-to-cities/
