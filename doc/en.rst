@@ -499,25 +499,25 @@ In its current form, **se.plan** includes numerical estimates of four categories
 -   Local livelihoods
 -   Wood production.
 
-Denote these benefits, respectively, by $$B_1$$, $$B_2$$, $$B_3$$, and $$B_4$$. The data on which the benefit estimates are based have different units. To enable the benefit estimates to be compared to each other, **se.plan** converts them to the same, relative scale, which ranges from 1 (low) to 5 (high). **se.plan** includes two indicators each for $$B_1$$ and $$B_3$$ and a single indicator for $$B_2$$ and $$B_4$$. We return to this difference in number of indicators below.
+Denote these benefits, respectively, by :math:`B_1`, :math:`B_2`, :math:`B_3`, and :math:`B_4`. The data on which the benefit estimates are based have different units. To enable the benefit estimates to be compared to each other, **se.plan** converts them to the same, relative scale, which ranges from 1 (low) to 5 (high). **se.plan** includes two indicators each for :math:`B_1` and :math:`B_3` and a single indicator for :math:`B_2` and :math:`B_4`. We return to this difference in number of indicators below.
 
 **se.plan** users rate the relative importance of each benefit on a scale of 1 (low) to 5 (high). **se.plan** treats these ratings as weights and calculates a restoration value index for each site by the weighted-average formula:
 
 .. math::
 
-    Restoration value index = (w_1B_1 + w_2B_2 + w_3B_3 + w_4B_4.) / (w_1 + w_2 + w_3 + w_4)
+    Restoration_value_index = (w_1B_1 + w_2B_2 + w_3B_3 + w_4B_4.) / (w_1 + w_2 + w_3 + w_4)
     
-Where $$w_1$$, $$w_2$$, $$w_3$$, and $$w_4$$ are the user ratings for the four corresponding benefits.
+Where :math:`w_1`, :math:`w_2`, :math:`w_3`, and :math:`w_4` are the user ratings for the four corresponding benefits.
 
 **se.plan** also includes numerical estimates of restoration cost, defined as the sum of opportunity cost and implementation cost in 2017 US dollars per hectare, for each potential restoration site. **se.plan** calculates an approximate benefit-cost ratio by dividing the restoration value index by the estimate of restoration cost:
 
 .. math::
 
-	Benefit-cost ratio = Restoration value index / Restoration cost.
+	Benefit_cost_ratio = Restoration_value_index / Restoration_cost.
     
 The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`Appendix E`. As a final step, se.plan converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the restoration suitability index on the map and dashboard.
 
-As noted above, **se.plan** includes two indicators for benefits $$B_1$$ (biodiversity conservation) and $$B_3$$ (local livelihoods). For $$B_1$$, the two indicators are the *biodiversity intactness index* and *number of endangered species*. Denote these two indicators by $$B_1a$$ and $$B_1b. **se.plan** converts each of these indicators to a 1-5 scale and then calculates the overall biodiversity benefit, $$B_1$$, as their simple average:
+As noted above, **se.plan** includes two indicators for benefits :math:`B_1` (biodiversity conservation) and :math:`B_3` (local livelihoods). For :math:`B_1`, the two indicators are the *biodiversity intactness index* and *number of endangered species*. Denote these two indicators by :math:`B_1a` and :math:`B_1b`. **se.plan** converts each of these indicators to a 1-5 scale and then calculates the overall biodiversity benefit, :math:`B_1`, as their simple average:
 
 .. math::
 
