@@ -99,6 +99,203 @@ The output provides two outputs:
 
 - A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
 
+.. Appendix B:
+
+Countries
+---------
+
+Countries and territories in se.plan, by World Bank region.
+
+East Asia & Pacific
+^^^^^^^^^^^^^^^^^^^
+
+.. csv-table::
+   :header-rows: 1
+   
+   Country,Official name,ISO3,ISO2,UNI,UNDP,FAOSTAT,GAUL
+   Cambodia,the Kingdom of Cambodia,KHM,KH,116,KHM,115,44
+   China,the People's Republic of China,CHN,CN,156,CHN,41,147295
+   Cook Islands,the Cook Islands,COK,CK,184,COK,47,60
+   Democratic People's Republic of Korea,the Democratic People's Republic of Korea,PRK,KP,408,PRK,116,67
+   Fiji,the Republic of Fiji,FJI,FJ,242,FJI,66,83
+   Indonesia,the Republic of Indonesia,IDN,ID,360,IDN,101,116
+   Kiribati,the Republic of Kiribati,KIR,KI,296,KIR,83,135
+   Lao PDR,the Lao People's Democratic Republic,LAO,LA,418,LAO,120,139
+   Malaysia,Malaysia,MYS,MY,458,MYS,131,153
+   Marshall Islands,the Republic of the Marshall Islands,MHL,MH,584,MHL,127,157
+   Micronesia,the Federated States of Micronesia,FSM,FM,583,FSM,145,163
+   Mongolia,Mongolia,MNG,MN,496,MNG,141,167
+   Myanmar,the Republic of the Union of Myanmar,MMR,MM,104,MMR,28,171
+   Nauru,the Republic of Nauru,NRU,NR,520,NRU,148,173
+   Palau,the Republic of Palau,PLW,PW,585,PLW,180,189
+   Papua New Guinea,Independent State of Papua New Guinea,PNG,PG,598,PNG,168,192
+   Philippines,the Republic of the Philippines,PHL,PH,608,PHL,171,196
+   Samoa,the Independent State of Samoa,WSM,WS,882,WSM,244,212
+   Solomon Islands,Solomon Islands,SLB,SB,90,SLB,25,225
+   Thailand,the Kingdom of Thailand,THA,TH,764,THA,216,240
+   Timor-Leste,the Democratic Republic of Timor-Leste,TLS,TL,626,TLS,176,242
+   Tokelau,Tokelau,TKL,TK,772,TKL,218,244
+   Tonga,the Kingdom of Tonga,TON,TO,776,TON,219,245
+   Tuvalu,Tuvalu,TUV,TV,798,TUV,227,252
+   Vanuatu,the Republic of Vanuatu,VUT,VU,548,VUT,155,262
+   Viet Nam,the Socialist Republic of Viet Nam,VNM,VN,704,VNM,237,264
+   
+Central Asia
+^^^^^^^^^^^^
+
+.. csv-table::
+   :header-rows: 1
+   
+   Country,Official name,ISO3,ISO2,UNI,UNDP,FAOSTAT,GAUL
+   Armenia,the Republic of Armenia,ARM,AM,51,ARM,1,13
+   Azerbaijan,the Republic of Azerbaijan,AZE,AZ,31,AZE,52,19
+   Georgia,Georgia,GEO,GE,268,GEO,73,92
+   Kazakhstan,the Republic of Kazakhstan,KAZ,KZ,398,KAZ,108,132
+   Kyrgyzstan,the Kyrgyz Republic,KGZ,KG,417,KGZ,113,138
+   Tajikistan,the Republic of Tajikistan,TJK,TJ,762,TJK,208,239
+   Turkey,the Republic of Turkey,TUR,TR,792,TUR,223,249
+   Turkmenistan,Turkmenistan,TKM,TM,795,TKM,213,250
+   Uzbekistan,the Republic of Uzbekistan,UZB,UZ,860,UZB,235,261
+   
+   
+Latin America & Caribbean
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. csv-table::
+   :header-rows: 1
+   
+   Country,Official name,ISO3,ISO2,UNI,UNDP,FAOSTAT,GAUL
+   Antigua and Barbuda,Antigua and Barbuda,ATG,AG,28,ATG,8,11
+   Argentina,the Argentine Republic,ARG,AR,32,ARG,9,12
+   Barbados,Barbados,BRB,BB,52,BRB,14,24
+   Belize,Belize,BLZ,BZ,84,BLZ,23,28
+   Bolivia,the Plurinational State of Bolivia,BOL,BO,68,BOL,19,33
+   Brazil,the Federative Republic of Brazil,BRA,BR,76,BRA,21,37
+   Chile,the Republic of Chile,CHL,CL,152,CHL,40,51
+   Colombia,the Republic of Colombia,COL,CO,170,COL,44,57
+   Costa Rica,the Republic of Costa Rica,CRI,CR,188,CRI,48,61
+   Cuba,the Republic of Cuba,CUB,CU,192,CUB,49,63
+   Dominica,the Commonwealth of Dominica,DMA,DM,212,DMA,55,71
+   Dominican Republic,the Dominican Republic,DOM,DO,214,DOM,56,72
+   Ecuador,the Republic of Ecuador,ECU,EC,218,ECU,58,73
+   El Salvador,the Republic of El Salvador,SLV,SV,222,SLV,60,75
+   French Guiana,,GUF,,,,,86
+   Grenada,Grenada,GRD,GD,308,GRD,86,99
+   Guatemala,the Republic of Guatemala,GTM,GT,320,GTM,89,103
+   Guyana,the Co-operative Republic of Guyana,GUY,GY,328,GUY,91,107
+   Haiti,the Republic of Haiti,HTI,HT,332,HTI,93,108
+   Honduras,the Republic of Honduras,HND,HN,340,HND,95,111
+   Jamaica,Jamaica,JAM,JM,388,JAM,109,123
+   Mexico,the United Mexican States,MEX,MX,484,MEX,138,162
+   Nicaragua,the Republic of Nicaragua,NIC,NI,558,NIC,157,180
+   Panama,the Republic of Panama,PAN,PA,591,PAN,166,191
+   Paraguay,the Republic of Paraguay,PRY,PY,600,PRY,169,194
+   Peru,the Republic of Peru,PER,PE,604,PER,170,195
+   Saint Kitts and Nevis,Saint Kitts and Nevis,KNA,KN,659,KNA,188,208
+   Saint Lucia,Saint Lucia,LCA,LC,662,LCA,189,209
+   Saint Vincent and the Grenadines,Saint Vincent and the Grenadines,VCT,VC,670,VCT,191,211
+   Suriname,the Republic of Suriname,SUR,SR,740,SUR,207,233
+   Trinidad and Tobago,the Republic of Trinidad and Tobago,TTO,TT,780,TTO,220,246
+   Uruguay,the Eastern Republic of Uruguay,URY,UY,858,URY,234,260
+   Venezuela,the Bolivarian Republic of Venezuela,VEN,VE,862,VEN,236,263
+   
+Middle East & North Africa
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. csv-table::
+   :header-rows: 1
+   
+   Country,Official name,ISO3,ISO2,UNI,UNDP,FAOSTAT,GAUL
+   Algeria,the People's Democratic Republic of Algeria,DZA,DZ,12,DZA,4,4
+   Djibouti,the Republic of Djibouti,DJI,DJ,262,DJI,72,70
+   Egypt,the Arab Republic of Egypt,EGY,EG,818,EGY,59,40765
+   Iran,the Islamic Republic of Iran,IRN,IR,364,IRN,102,117
+   Iraq,the Republic of Iraq,IRQ,IQ,368,IRQ,103,118
+   Jordan,the Hashemite Kingdom of Jordan,JOR,JO,400,JOR,112,130
+   Lebanon,the Lebanese Republic,LBN,LB,422,LBN,121,141
+   Libya,State of Libya,LBY,LY,434,LBY,124,145
+   Morocco,the Kingdom of Morocco,MAR,MA,504,MAR,143,169
+   Oman,the Sultanate of Oman,OMN,OM,512,OMN,221,187
+   Palestine,[Often called West Bank and Gaza],PSE,,,,,267
+   Syria,the Syrian Arab Republic,SYR,SY,760,SYR,212,238
+   Tunisia,the Republic of Tunisia,TUN,TN,788,TUN,222,248
+   Western Sahara,,ESH,,,,,268
+   Yemen,the Republic of Yemen,YEM,YE,887,YEM,249,269
+   
+South Asia
+^^^^^^^^^^
+
+.. csv-table::
+   :header-rows: 1
+   
+   Country,Official name,ISO3,ISO2,UNI,UNDP,FAOSTAT,GAUL
+   Afghanistan,the Islamic Republic of Afghanistan,AFG,AF,4,AFG,2,1
+   Bangladesh,the People's Republic of Bangladesh,BGD,BD,50,BGD,16,23
+   Bhutan,the Kingdom of Bhutan,BTN,BT,64,BTN,18,31
+   India,the Republic of India,IND,IN,356,IND,100,115
+   Maldives,the Republic of Maldives,MDV,MV,462,MDV,132,154
+   Nepal,the Federal Democratic Republic of Nepal,NPL,NP,524,NPL,149,175
+   Pakistan,the Islamic Republic of Pakistan,PAK,PK,586,PAK,165,188
+   Sri Lanka,the Democratic Socialist Republic of Sri Lanka,LKA,LK,144,LKA,38,231
+      
+Sub-Saharan Africa
+^^^^^^^^^^^^^^^^^^
+
+.. csv-table::
+   :header-rows: 1
+   
+   Country,Official name,ISO3,ISO2,UNI,UNDP,FAOSTAT,GAUL
+   Angola,the Republic of Angola,AGO,AO,24,AGO,7,8
+   Benin,the Republic of Benin,BEN,BJ,204,BEN,53,29
+   Botswana,the Republic of Botswana,BWA,BW,72,BWA,20,35
+   Burkina Faso,Burkina Faso,BFA,BF,854,BFA,233,42
+   Burundi,the Republic of Burundi,BDI,BI,108,BDI,29,43
+   Cabo Verde,Republic of Cabo Verde,CPV,CV,132,CPV,35,47
+   Cameroon,the Republic of Cameroon,CMR,CM,120,CMR,32,45
+   Central African Republic,the Central African Republic,CAF,CF,140,CAF,37,49
+   Chad,the Republic of Chad,TCD,TD,148,TCD,39,50
+   Comoros,the Union of the Comoros,COM,KM,174,COM,45,58
+   Congo,the Republic of the Congo,COG,CG,178,COG,46,59
+   Côte d'Ivoire,the Republic of Côte d'Ivoire,CIV,CI,384,CIV,107,66
+   Democratic Republic of the Congo,the Democratic Republic of the Congo,COD,CD,180,COD,250,68
+   Equatorial Guinea,the Republic of Equatorial Guinea,GNQ,GQ,226,GNQ,61,76
+   Eritrea,the State of Eritrea,ERI,ER,232,ERI,178,77
+   Eswatini,the Kingdom of Eswatini,SWZ,SZ,748,SWZ,209,235
+   Ethiopia,the Federal Democratic Republic of Ethiopia,ETH,ET,231,ETH,238,79
+   Gabon,the Gabonese Republic,GAB,GA,266,GAB,74,89
+   Gambia,the Republic of the Gambia,GMB,GM,270,GMB,75,90
+   Ghana,the Republic of Ghana,GHA,GH,288,GHA,81,94
+   Guinea,the Republic of Guinea,GIN,GN,324,GIN,90,106
+   Guinea-Bissau,the Republic of Guinea-Bissau,GNB,GW,624,GNB,175,105
+   Kenya,the Republic of Kenya,KEN,KE,404,KEN,114,133
+   Lesotho,the Kingdom of Lesotho,LSO,LS,426,LSO,122,142
+   Liberia,the Republic of Liberia,LBR,LR,430,LBR,123,144
+   Madagascar,the Republic of Madagascar,MDG,MG,450,MDG,129,150
+   Malawi,the Republic of Malawi,MWI,MW,454,MWI,130,152
+   Mali,the Republic of Mali,MLI,ML,466,MLI,133,155
+   Mauritania,the Islamic Republic of Mauritania,MRT,MR,478,MRT,136,159
+   Mauritius,the Republic of Mauritius,MUS,MU,480,MUS,137,160
+   Mozambique,the Republic of Mozambique,MOZ,MZ,508,MOZ,144,170
+   Namibia,the Republic of Namibia,NAM,NA,516,NAM,147,172
+   Niger,the Republic of the Niger,NER,NE,562,NER,158,181
+   Nigeria,the Federal Republic of Nigeria,NGA,NG,566,NGA,159,182
+   Rwanda,the Republic of Rwanda,RWA,RW,646,RWA,184,205
+   Sao Tome and Principe,the Democratic Republic of Sao Tome and Principe,STP,ST,678,STP,193,214
+   Senegal,the Republic of Senegal,SEN,SN,686,SEN,195,217
+   Seychelles,the Republic of Seychelles,SYC,SC,690,SYC,196,220
+   Sierra Leone,the Republic of Sierra Leone,SLE,SL,694,SLE,197,221
+   Somalia,the Federal Republic of Somalia,SOM,SO,706,SOM,201,226
+   South Africa,the Republic of South Africa,ZAF,ZA,710,ZAF,202,227
+   South Sudan,the Republic of South Sudan,SSD,SS,728,SSD,277,74
+   Sudan,the Republic of the Sudan,SDN,SD,736,SDN,276,6
+   Tanzania,the United Republic of Tanzania,TZA,TZ,834,TZA,215,257
+   Togo,the Togolese Republic,TGO,TG,768,TGO,217,243
+   Uganda,the Republic of Uganda,UGA,UG,800,UGA,226,253
+   Zambia,the Republic of Zambia,ZMB,ZM,894,ZMB,251,270
+   Zimbabwe,the Republic of Zimbabwe,ZWE,ZW,716,ZWE,181,271
+
+
+
 .. Appendix C:
 
 Benefits data layers
