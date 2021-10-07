@@ -110,7 +110,7 @@ se.plan includes various constraints that enable users to restrict restoration t
 Biophysical constraints
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. list-table:: Title
+.. list-table::
     :header-rows: 1
     
     * - Variable
@@ -137,7 +137,7 @@ Biophysical constraints
 Current land cover
 ^^^^^^^^^^^^^^^^^^
 
-.. list-table:: Title
+.. list-table::
     :header-rows: 1
     
     * - Variable
@@ -153,7 +153,7 @@ Current land cover
 Forest change constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. list-table:: Title
+.. list-table::
     :header-rows: 1
     
     * - Variable
@@ -176,7 +176,7 @@ Forest change constraints
 Socio-economic constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-.. list-table:: Title
+.. list-table::
     :header-rows: 1
     
     * - Variable
