@@ -99,6 +99,44 @@ The output provides two outputs:
 
 - A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
 
+.. Appendix D:
+
+benefit-cost ratio
+------------------
+
+In its current form, **se.plan** includes numerical estimates of four categories of potential restoration benefits for each potential restoration site:
+
+-   Biodiversity conservation
+-   Carbon sequestration
+-   Local livelihoods
+-   Wood production.
+
+Denote these benefits, respectively, by $$B_1$$, $$B_2$$, $$B_3$$, and $$B_4$$. The data on which the benefit estimates are based have different units. To enable the benefit estimates to be compared to each other, **se.plan** converts them to the same, relative scale, which ranges from 1 (low) to 5 (high). **se.plan** includes two indicators each for $$B_1$$ and $$B_3$$ and a single indicator for $$B_2$$ and $$B_4$$. We return to this difference in number of indicators below.
+
+**se.plan** users rate the relative importance of each benefit on a scale of 1 (low) to 5 (high). **se.plan** treats these ratings as weights and calculates a restoration value index for each site by the weighted-average formula:
+
+.. math::
+
+    Restoration value index = (w_1B_1 + w_2B_2 + w_3B_3 + w_4B_4.) / (w_1 + w_2 + w_3 + w_4)
+    
+Where $$w_1$$, $$w_2$$, $$w_3$$, and $$w_4$$ are the user ratings for the four corresponding benefits.
+
+**se.plan** also includes numerical estimates of restoration cost, defined as the sum of opportunity cost and implementation cost in 2017 US dollars per hectare, for each potential restoration site. **se.plan** calculates an approximate benefit-cost ratio by dividing the restoration value index by the estimate of restoration cost:
+
+.. math::
+
+	Benefit-cost ratio = Restoration value index / Restoration cost.
+    
+The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`Appendix E`. As a final step, se.plan converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the restoration suitability index on the map and dashboard.
+
+As noted above, **se.plan** includes two indicators for benefits $$B_1$$ (biodiversity conservation) and $$B_3$$ (local livelihoods). For $$B_1$$, the two indicators are the *biodiversity intactness index* and *number of endangered species*. Denote these two indicators by $$B_1a$$ and $$B_1b. **se.plan** converts each of these indicators to a 1-5 scale and then calculates the overall biodiversity benefit, $$B_1$$, as their simple average:
+
+.. math::
+
+	B_1 = (B_1a + B_1b) / 2
+    
+**se.plan** calculates the overall local livelihoods benefit in the same way from its two constituent indicators, *forest employment* and *woodfuel harvest*.
+
 .. Appendix E:
 
 Cost data layers
