@@ -88,7 +88,7 @@ Customization
 
 Every Constraints and benefits are based on layers provided within the tools. These layer may not be covering the AOI selected by the user or provide less accurate/updated data than the National datasets available. To allow user to improve the quality of the analysis **se.plan** provides the possiblity of replacing these datasets by any layer available with Google Earth Engine.
 
-Please see :ref:`Usage`for more details on the customization process.
+Please see :ref:`Usage` for more details on the customization process.
 
 Output
 ^^^^^^
@@ -98,6 +98,61 @@ The output provides two outputs:
 - A map of the Restoration suitability index scaled from 1 (low suitability) to 5 (high suitability). This map, generated within the Google Earth Engine API can be displayed in the app but also exported as a GEE asset or a .tif file in your SEPAL folders. 
 
 - A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
+
+.. Appendix C:
+
+Benefits data layers
+--------------------
+
+In its current form, **se.plan** provides information on four categories of potential benefits of forest restoration:
+
+- Biodiversity conservation
+- Carbon sequestration
+- Local livelihoods
+- Wood production
+
+**se.plan** does not predict the levels of benefits that will occur if forests are restored. Instead, it uses data on benefit-related site characteristics to quantify the potential of a site to provide benefits if it is restored. To clarify this distinction, consider the case of species extinctions. A predictive tool might, for example, estimate the number of extinctions avoided if restoration occurs. To do so, it would need to account for restoration scale and interdependencies across sites associated with distances and corridors between restored sites. **se.plan** instead takes a simpler approach: it includes information on the total number of critically endangered and endangered amphibians, reptiles, birds, and mammals at each site. Sites with a larger number of critically endangered and endangered species are ones where the potential number of avoided extinctions is greater. Realizing the benefit of reduced extinctions depends on factors beyond simply restoring an individual site, including the type of forest that is restored (native tree species or introduced tree species, single tree species or multiple tree species, etc.) and the pattern of restoration in the rest of the landscape. Interpreting se.plan output in the context of additional, location-specific information available to a user is therefore important.
+
+Quantitative measures of potential benefits in se.plan should be viewed as averages for a grid cell. Potential benefits could be higher at some locations within a given grid cell and lower at others.
+
+.. list-table::
+    :header-rows: 1
+    
+    * - Variable
+      - category
+      - Units
+      - Description
+      - Source
+    * - Endangered species
+      - Biodiversity conservation
+      - count
+      - Total number of critically endangered and endangered amphibians, reptiles, birds, and mammals whose ranges overlap a site. Rationale for including in se.plan: sites with a larger number of critically endangered and endangered species are ones where successful forest restoration can potentially contribute to reducing a larger number of extinctions.
+      - World Bank, which processed over 25,000 species range maps from: (i) IUCN, The IUCN Red List of Threatened Species, https://www.iucnredlist.org; and (ii) BirdLife International, Data Zone, http://datazone.birdlife.org/species/requestdis. Resolution of World Bank layer: 1 kilometer. More information may be found at https://datacatalog.worldbank.org/dataset/terrestrial-biodiversity-indicators, and data may be downloaded at http://wbg-terre-biodiv.s3.amazonaws.com/listing.html. See also: (i) Dasgupta, Susmita; Wheeler, David. 2016. Minimizing Ecological Damage from Road Improvement in Tropical Forests. Policy Research Working Paper: No. 7826. World Bank, Washington, DC. (ii) Danyo Stephen, Susmita Dasgupta and David Wheeler. 2018. Potential Forest Loss and Biodiversity Risks from Road Improvement in Lao PDR. World Bank Policy Research Working Paper 8569. World Bank, Washington, DC. (iii) Damania Richard, Jason Russ, David Wheeler and Alvaro Federico Barra. 2018. The Road to Growth: Measuring the Tradeoffs between Economic Growth and Ecological Destruction, World Development, Elsevier, vol. 101(C), pp. 351-376.
+    * - BII gap
+      - Biodiversity conservation
+      - percent
+      - The biodiversity intactness index (BII) describes the average abundance of a large and diverse set of organisms in a given geographical area, relative to the set of originally present species. se.plan subtracts the BII from 100, to measure the gap between full intactness and current intactness. Rationale for including in se.plan: sites with a larger BII gap are ones where successful forest restoration can potentially contribute to reducing a larger gap.
+      - T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936. Resolution of Newbold et al. layer: 1 km. See also: (i) Scholes, R.J. and Biggs, R., 2005. A biodiversity intactness index. Nature, 434(7029), pp.45-49. (ii) Newbold, T., Hudson, L.N., Arnell, A.P., Contu, S., De Palma, A., Ferrier, S., Hill, S.L., Hoskins, A.J., Lysenko, I., Phillips, H.R. and Burton, V.J., 2016. Has land use pushed terrestrial biodiversity beyond the planetary boundary? A global assessment. Science, 353(6296), pp.288-291.
+    * - Aboveground carbon accumulation
+      - Carbon sequestration
+      - metric tons of carbon per hectare per year
+      - Projected potential mean annual aboveground carbon accumulation rates for natural forest regeneration during 2020-2050. Accounts for variation in such factors as climate and soil. Rationale for including in se.plan: climate mitigation benefits of forest restoration are greater where forests regenerate more rapidly. Although the layer refers to natural regeneration, it might also reflect relative spatial differences in aboveground carbon sequestration in planted forests, given that climate and soil also affect growth of those forests. Can also be viewed as complementing the plantation growth rate layer (see below).
+      - S.C. Cook-Patton, S.M. Leavitt, D. Gibbs, et al., 2020, Mapping carbon accumulation potential from global natural forest regrowth, Nature 585(7826), pp. 545–550, https://doi.org/10.1038/s41586-020-2686-x. Resolution of Cook-Patton et al. layer: 1 km.
+    * - Forest employment
+      - Local livelihoods
+      - count
+      - Number of forest-related jobs per ha of forest in 2015, summed across three economic activities: forestry, logging, and related service activities; manufacture of wood and of products of wood and cork, except furniture; and manufacture of paper and paper products. Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province). Rationale for including in se.plan: a higher level of forest employment implies the existence of attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make forest restoration more feasible when income for local households is a desired benefit.
+      - Developed by se.plan team, by downscaling national data from: International Labour Organization, 2020, Employment by sex and economic activity - ISIC level 2 (thousands) | Annual, ILOSTAT database, https://ilostat.ilo.org/data
+    * - Woodfuel harvest
+      - Local livelihoods
+      - cubic meters per hectare
+      - Harvest of wood fuel per hectare of forest in 2015. Rationale for including in se.plan: a higher level of wood fuel harvest implies greater demand for wood fuel as an energy source, which tends to make forest restoration more feasible when supply of wood to meet local demands is a desired benefit.
+      - Developed by se.plan team, by downscaling national data from: UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO
+    * - Plantation growth rate
+      - Wood production
+      - dry metric tons of woody biomass per hectare per year
+      - Potential annual production of woody biomass by fast-growing trees such as eucalypts, poplars, and willows. Rationale for including in se.plan: faster growth of plantation trees tends to make forest restoration more feasible when desired benefits include income for landholders and wood supply to meet local and export demands.
+      - F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242. Resolution of Albanito et al. layer: 55 km.
 
 .. Appendix D:
 
