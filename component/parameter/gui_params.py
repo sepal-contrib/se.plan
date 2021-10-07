@@ -1,148 +1,106 @@
-# list of the available constraints types. They will be used in the criterias names 
+# value of each land cover category
+landcover_default_cat = {
+    "Bare land": 60,
+    "Shrub land": 20,
+    "Agricultural land": 40,
+    "Agriculture": 40,
+    "Rangeland": 40,
+    "Grassland": 30,
+    "Settlements": 50,
+}
+
+land_use_criterias = {
+    k: {"tooltip": 2, "layer": None, "header": "land_use", "content": "BINARY"}
+    for k in landcover_default_cat
+}
+
+# list of the available constraints types. They will be used in the criterias names
 criteria_types = {
-    'land_use': 'Land use constraints',
-    'bio': 'Biophysical constraints',
-    'socio_eco': 'Socio-economic constraints',
+    "land_use": "Land use constraints",
+    "bio": "Biophysical constraints",
+    "socio_eco": "Socio-economic constraints",
     #'treecover': 'Tree cover constraints within land cover classes',
-    'forest': 'Forest change'
+    "forest": "Forest change",
 }
 
 # list of the available constraint criteria
-# the "header" describe the category of the concstraint 
-# the "layer" describe the layer to use 
+# the "header" describe the category of the concstraint
+# the "layer" describe the layer to use
 # the "content" how it should be used
-    # None for binary inputs 
-    # dict for dropdown
-    # integer for the max of a range input
+# None for binary inputs
+# dict for dropdown
+# integer for the max of a range input
 # the number of the "tooltip" text:
-    # 0: less than 
-    # 1: more than 
-    # 2 binary
+# 0: less than
+# 1: more than
+# 2 binary
 criterias = {
-    'Bare land': {
-        'tooltip': 2,
-        'layer': None,
-        'header': 'land_use',
-        'content': 'BINARY'
+    **land_use_criterias,
+    "Annual rainfall": {
+        "tooltip": 1,
+        "layer": "annual_rainfall",
+        "header": "bio",
+        "content": "RANGE",
     },
-    'Shrub land': {
-        'tooltip': 2,
-        'layer': None,
-        'header': 'land_use',
-        'content': 'BINARY'
+    "Baseline water stress": {
+        "tooltip": 0,
+        "layer": "water_stress",
+        "header": "bio",
+        "content": "RANGE",
     },
-    'Agricultural land': {
-        'tooltip': 2,
-        'layer': None,
-        'header': 'land_use',
-        'content': 'BINARY'
+    "Elevation": {
+        "tooltip": 1,
+        "layer": "elevation",
+        "header": "bio",
+        "content": "RANGE",
     },
-    'Annual rainfall': {
-        'tooltip': 1,
-        'layer': 'annual_rainfall',
-        'header': 'bio',
-        'content': [
-            {'text': 'high precipitaion',    'value': 1000},
-            {'text': 'medium precipitaion', 'value': 500},
-            {'text': 'low precipitaion',    'value': 200}
-        ]
+    "Slope": {"tooltip": 1, "layer": "slope", "header": "bio", "content": "RANGE"},
+    "Accessibility to cities": {
+        "tooltip": 0,
+        "layer": "city_access",
+        "header": "socio_eco",
+        "content": "RANGE",
     },
-    'Baseline water stress': {
-        'tooltip': 0,
-        'layer': 'water_stress',
-        'header': 'bio',
-        'content': [
-            {'text': 'high water stress', 'value':3},
-            {'text': 'medium water stress', 'value':2},
-            {'text': 'low water stress', 'value':1},      
-        ]
+    "Population density": {
+        "tooltip": 0,
+        "layer": "population_density",
+        "header": "socio_eco",
+        "content": "RANGE",
     },
-    'Elevation': {
-        'tooltip': 1,
-        'layer': 'elevation',
-        'header': 'bio',
-        'content': [
-            {'text': 'high altitude',    'value': 3000},
-            {'text': 'medium altitude', 'value': 1000},
-            {'text': 'low altitude',    'value': 300},
-        ]
+    "Protected areas": {
+        "tooltip": 2,
+        "layer": "protected_areas",
+        "header": "socio_eco",
+        "content": "BINARY",
     },
-    'Slope': {
-        'tooltip': 1,
-        'layer': 'slope',
-        'header': 'bio',
-        'content': 'RANGE'
+    "Property rights protection": {
+        "tooltip": 1,
+        "layer": "property_rights",
+        "header": "socio_eco",
+        "content": "RANGE",
     },
-    'Accessibility to cities' : {
-        'tooltip': 0,
-        'layer': 'city_access',
-        'header': 'socio_eco',
-        'content': [
-            {'text': 'high acessibility',    'value': 360},
-            {'text': 'medium acessibility', 'value': 180},
-            {'text': 'low acessibility',    'value': 60},
-        ]
+    "Deforestation rate": {
+        "tooltip": 0,
+        "layer": "deforestation_rate",
+        "header": "forest",
+        "content": "RANGE",
     },
-    'Population density' : {
-        'tooltip': 0,
-        'layer': 'population_density',
-        'header': 'socio_eco',
-        'content': [
-            {'text': 'high populated',    'value': 100},
-            {'text': 'medium populated', 'value': 10},
-            {'text': 'low populated',    'value': 1},
-        ]
+    "Climate risk": {
+        "tooltip": 1,
+        "layer": "climate_risk",
+        "header": "forest",
+        "content": "RANGE",
     },
-    'Protected areas': {
-        'tooltip': 2,
-        'layer': 'protected_areas',
-        'header': 'socio_eco',
-        'content': 'BINARY'
+    "Natural regeneration variability": {
+        "tooltip": 0,
+        "layer": "natural_regeneration",
+        "header": "forest",
+        "content": "RANGE",
     },
-    'Property rights protection': {
-        'tooltip': 1,
-        'layer': 'property_rigths',
-        'header': 'socio_eco',
-        'content': [
-            {'text': 'high variation',    'value': -11},
-            {'text': 'medium variation', 'value': -53},
-            {'text': 'low variation',    'value': -95},
-        ]
+    "Declining population": {
+        "tooltip": 2,
+        "layer": "declining_population",
+        "header": "socio_eco",
+        "content": "BINARY",
     },
-    'Deforestation rate':{
-        'tooltip': 0,
-        'layer': 'deforestation_rate',
-        'header': 'forest',
-        'content': [
-            {'text': 'high change',    'value': 92},
-            {'text': 'medium change', 'value': 43},
-            {'text': 'low change',    'value': 21},
-        ]
-    },
-    'Climate risk': {
-        'tooltip': 1,
-        'layer': 'climate_risk',
-        'header': 'forest',
-        'content': [
-            {'text': 'high climate risk',    'value': 25},
-            {'text': 'medium climate risk', 'value': -2},
-            {'text': 'low climate risk',    'value': -24},
-        ]
-    },
-    'Natural regeneration variability': {
-        'tooltip': 0,
-        'layer': 'natural_regeneration',
-        'header': 'forest',
-        'content': [
-            {'text': 'high variation',    'value': 26},
-            {'text': 'medium variation', 'value': 16},
-            {'text': 'low variation',    'value': 10},
-        ]
-    },
-    'Declining population': {
-        'tooltip': 2,
-        'layer': 'declining_population',
-        'header': 'socio_eco',
-        'content': 'BINARY'
-    }
 }

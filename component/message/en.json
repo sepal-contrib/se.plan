@@ -121,7 +121,7 @@
         "treecover_lbl": "Tree cover in {}"
     },
     "benefits": {
-        "title": "Restoration benefits"
+        "title": "Restoration indicators"
     },
     "export": {
         "title": "Export map",
