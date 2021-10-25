@@ -428,6 +428,12 @@ Sub-Saharan Africa
 Benefits data layers
 --------------------
 
+.. note::
+
+    Every data layer presented in the following document can be displayed in Google Earth Engine as an overview of our datasets. Click on the provided link in the description, you'll be redirected to the GEE code editor panel. The selected layer will be displayed over Uganda. To modify the country change the :code:`fao_gaul` variable line 7 by your country number (listed in the Country list section). If you want to export this layer, please set the value of :code:`to_export` (line 10) and :code:`to_drive` (line 13) according to your need. 
+    Hit the :code:`run` button again to relaunch the computation.
+    Code used for this display can be found `here <https://github.com/12rambau/restoration_planning_module/blob/master/utils/code/display_layer.md>`__.
+
 In its current form, **se.plan** provides information on four categories of potential benefits of forest restoration:
 
 - Biodiversity conservation
@@ -446,10 +452,10 @@ Quantitative measures of potential benefits in se.plan should be viewed as avera
       - Description
       - Source
     * - Endangered species (Biodiversity conservation) in **count**
-      - Total number of critically endangered and endangered amphibians, reptiles, birds, and mammals whose ranges overlap a site. Rationale for including in se.plan: sites with a larger number of critically endangered and endangered species are ones where successful forest restoration can potentially contribute to reducing a larger number of extinctions.
+      - Total number of critically endangered and endangered amphibians, reptiles, birds, and mammals whose ranges overlap a site. Rationale for including in se.plan: sites with a larger number of critically endangered and endangered species are ones where successful forest restoration can potentially contribute to reducing a larger number of extinctions. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fterra-bio-div-image>`__)
       - World Bank, which processed over 25,000 species range maps from: (i) IUCN, The IUCN Red List of Threatened Species, https://www.iucnredlist.org; and (ii) BirdLife International, Data Zone, http://datazone.birdlife.org/species/requestdis. Resolution of World Bank layer: 1 kilometer. More information may be found at https://datacatalog.worldbank.org/dataset/terrestrial-biodiversity-indicators, and data may be downloaded at http://wbg-terre-biodiv.s3.amazonaws.com/listing.html. See also: (i) Dasgupta, Susmita; Wheeler, David. 2016. Minimizing Ecological Damage from Road Improvement in Tropical Forests. Policy Research Working Paper: No. 7826. World Bank, Washington, DC. (ii) Danyo Stephen, Susmita Dasgupta and David Wheeler. 2018. Potential Forest Loss and Biodiversity Risks from Road Improvement in Lao PDR. World Bank Policy Research Working Paper 8569. World Bank, Washington, DC. (iii) Damania Richard, Jason Russ, David Wheeler and Alvaro Federico Barra. 2018. The Road to Growth: Measuring the Tradeoffs between Economic Growth and Ecological Destruction, World Development, Elsevier, vol. 101(C), pp. 351-376.
     * - BII gap (Biodiversity conservation) in **percent**
-      - The biodiversity intactness index (BII) describes the average abundance of a large and diverse set of organisms in a given geographical area, relative to the set of originally present species. se.plan subtracts the BII from 100, to measure the gap between full intactness and current intactness. Rationale for including in se.plan: sites with a larger BII gap are ones where successful forest restoration can potentially contribute to reducing a larger gap.
+      - The biodiversity intactness index (BII) describes the average abundance of a large and diverse set of organisms in a given geographical area, relative to the set of originally present species. se.plan subtracts the BII from 100, to measure the gap between full intactness and current intactness. Rationale for including in se.plan: sites with a larger BII gap are ones where successful forest restoration can potentially contribute to reducing a larger gap. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fibii-4326>`__)
       - \T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936. Resolution of Newbold et al. layer: 1 km. See also: (i) Scholes, R.J. and Biggs, R., 2005. A biodiversity intactness index. Nature, 434(7029), pp.45-49. (ii) Newbold, T., Hudson, L.N., Arnell, A.P., Contu, S., De Palma, A., Ferrier, S., Hill, S.L., Hoskins, A.J., Lysenko, I., Phillips, H.R. and Burton, V.J., 2016. Has land use pushed terrestrial biodiversity beyond the planetary boundary? A global assessment. Science, 353(6296), pp.288-291.
     * - Aboveground carbon accumulation (Carbon sequestration) in **metric tons C/hectare/year**
       - Projected potential mean annual aboveground carbon accumulation rates for natural forest regeneration during 2020-2050. Accounts for variation in such factors as climate and soil. Rationale for including in se.plan: climate mitigation benefits of forest restoration are greater where forests regenerate more rapidly. Although the layer refers to natural regeneration, it might also reflect relative spatial differences in aboveground carbon sequestration in planted forests, given that climate and soil also affect growth of those forests. Can also be viewed as complementing the plantation growth rate layer (see below).
@@ -508,6 +514,12 @@ Cost data layers
 ----------------
 
 In the cases of benefits (:ref:`Appendix C`) and constraints (:ref:`Appendix F`), the **se.plan** team adopted the tool’s data layers primarily from existing sources, with little or no modification of the original layers. In contrast, it developed wholly new data layers for both the *opportunity cost* and the *implementation cost* of forest restoration. Developing these layers involved multiple steps, which are described below.
+
+.. note::
+
+    Every data layer presented in the following document can be displayed in Google Earth Engine as an overview of our datasets. Click on the provided link in the description, you'll be redirected to the GEE code editor panel. The selected layer will be displayed over Uganda. To modify the country change the :code:`fao_gaul` variable line 7 by your country number (listed in the Country list section). If you want to export this layer, please set the value of :code:`to_export` (line 10) and :code:`to_drive` (line 13) according to your need. 
+    Hit the :code:`run` button again to relaunch the computation.
+    Code used for this display can be found `here <https://github.com/12rambau/restoration_planning_module/blob/master/utils/code/display_layer.md>`__.
 
 Opportunity cost
 ^^^^^^^^^^^^^^^^
@@ -588,6 +600,12 @@ Constraints data layers
 
 se.plan includes various constraints that enable users to restrict restoration to sites that satisfy specific criteria. Many of the constraints can be viewed as indicators of risk, which allows users to avoid sites where the risk of failure, or the risk of undesirable impacts, might be unacceptable. Values of the constraints should be viewed as average values for a site, with some locations within a site likely having higher or lower values. The constraints are grouped into faour categories: biophysical, current land cover, forest change, and socio-economic.
 
+.. note::
+
+    Every data layer presented in the following document can be displayed in Google Earth Engine as an overview of our datasets. Click on the provided link in the description, you'll be redirected to the GEE code editor panel. The selected layer will be displayed over Uganda. To modify the country change the :code:`fao_gaul` variable line 7 by your country number (listed in the Country list section). If you want to export this layer, please set the value of :code:`to_export` (line 10) and :code:`to_drive` (line 13) according to your need. 
+    Hit the :code:`run` button again to relaunch the computation.
+    Code used for this display can be found `here <https://github.com/12rambau/restoration_planning_module/blob/master/utils/code/display_layer.md>`__.
+    
 Biophysical constraints
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -695,27 +713,27 @@ Aknowledgement
 
 This tool has been developed by FAO in close collaboration with Spatial Informatics Group (SIG), SilvaCarbon and researchers at Peking University and Duke University, with financial support from the Government of Japan.
 
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/duke.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/duke.png
     :target: https://duke.edu
     :alt: duke_logo
     :height: 100
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/peking.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/peking.png
     :target: http://english.pku.edu.cn
     :alt: pku_logo
     :height: 100
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/sig.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/sig.png
     :target: https://sig-gis.com
     :alt: sig-gis_logo
     :height: 100
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/SilvaCarbon.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/SilvaCarbon.png
     :target: https://www.silvacarbon.org
     :alt: silvacarbon_logo
     :height: 100
     
-.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/MAFF.png
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/light/MAFF.png
     :target: https://www.maff.go.jp/e/
     :alt: MAAF_logo
     :height: 100
