@@ -141,7 +141,7 @@ The **se.plan** team obtained data for the default spatial layers in the tool fr
 
 It determined current tree cover using data from:
 
-    M. Buchhorn, M. Lesiv, N.E. Tsendbazar, M. Herold, L. Bertels, B. Smets, 2020, Copernicus Global Land Cover Layers—Collection 2. Remote Sensing, 12 Volume 108, 1044. doi:`10.3390/rs12061044 <https://www.mdpi.com/2072-4292/12/6/1044>`_
+    \M. Buchhorn, M. Lesiv, N.E. Tsendbazar, M. Herold, L. Bertels, B. Smets, 2020, Copernicus Global Land Cover Layers—Collection 2. Remote Sensing, 12 Volume 108, 1044. doi:`10.3390/rs12061044 <https://www.mdpi.com/2072-4292/12/6/1044>`_
 
 It drew data for remaining spatial layers primarily from the following sources. For additional detail, see :ref:`Appendix C` (benefits), :ref:`Appendix E` (costs), and :ref:`Appendix F` (constraints).
 
@@ -161,7 +161,7 @@ Costs
    , "UN FAO, 2020, RuLIS - Rural Livelihoods Information System, http://www.fao.org/in-action/rural-livelihoods-dataset-rulis/en/"
    , "World Bank, 2020, World Development Indicators, https://databank.worldbank.org/source/world-development-indicators"
    , "CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW"
-   , "M. Kummu, M. Taka, & J. Guillaume, 2018, Gridded global datasets for Gross Domestic Product and Human Development Index over 1990–2015, Scientific Data 5, 180004, https://doi.org/10.1038/sdata.2018.4"
+   , "\M. Kummu, M. Taka, & J. Guillaume, 2018, Gridded global datasets for Gross Domestic Product and Human Development Index over 1990–2015, Scientific Data 5, 180004, https://doi.org/10.1038/sdata.2018.4"
    Establishment cost, "World Bank, various years, Projects & Operations  [project appraisal documents and implementation completion reports for selected projects], https://projects.worldbank.org/en/projects-operations/projects-home"
 
 
@@ -172,12 +172,12 @@ Benefits
    :header-rows: 1
     
     Spatial layer, subtheme, Data sources
-    Biodiversity intactness index, Biodiversity conservation, "T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936"
+    Biodiversity intactness index, Biodiversity conservation, "\T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936"
     Endangered species, Biodiversity conservation, "Layer obtained from World Bank, which processed species range maps from: (i) IUCN, The IUCN Red List of Threatened Species, https://www.iucnredlist.org; and (ii) BirdLife International, Data Zone, http://datazone.birdlife.org/species/requestdis"
     Aboveground carbon accumulation, Carbon sequestration, "S.C. Cook-Patton, S.M. Leavitt, D. Gibbs, et al., 2020, Mapping carbon accumulation potential from global natural forest regrowth, Nature 585, pp. 545–550, https://doi.org/10.1038/s41586-020-2686-x"
     Forest employment, Local livelihoods, "Downscaled estimates generated using national data from: International Labour Organization, 2020, Employment by sex and economic activity - ISIC level 2 (thousands) | Annual, ILOSTAT database, https://ilostat.ilo.org/data"
     Woodfuel harvest, Local livelihoods, "Downscaled estimates generated using national data from: UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO"
-    Plantation growth rate, Wood production, "F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242"
+    Plantation growth rate, Wood production, "\F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242"
 
 Constraints
 ^^^^^^^^^^^
@@ -189,7 +189,7 @@ biophysical
    :header-rows: 1
 
     Spatial layer, Data sources
-    Annual rainfall, "C. Funk, P. Peterson, M. Landsfeld, et al., The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes. Sci Data 2, 150066. https://doi.org/10.1038/sdata.2015.66"
+    Annual rainfall, "\C. Funk, P. Peterson, M. Landsfeld, et al., The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes. Sci Data 2, 150066. https://doi.org/10.1038/sdata.2015.66"
     Baseline water stress, "World Resources Institute, 2021, Aqueduct Global Maps 3.0 Data, https://www.wri.org/data/aqueduct-global-maps-30-data"
     Elevation, "T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183."
     Slope, "T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183."
@@ -204,7 +204,7 @@ forest change
     Spatial layer, Data sources
     Climate risk, "J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258"
     Deforestation rate, "ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
-    Natural regeneration variability, "Model from R. Crouzeilles, F.S. Barros, P.G. Molin, et al., 2019, A new approach to map landscape variation in forest restoration success in tropical and temperate forest biomes", J Appl Ecol. 56, pp. 2675– 2686, https://doi.org/10.1111/1365-2664.13501, applied to data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
+    Natural regeneration variability, "Model from R. Crouzeilles, F.S. Barros, P.G. Molin, et al., 2019, A new approach to map landscape variation in forest restoration success in tropical and temperate forest biomes, J Appl Ecol. 56, pp. 2675– 2686, https://doi.org/10.1111/1365-2664.13501, applied to data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
 
 socio-economic
 **************
@@ -214,7 +214,7 @@ socio-economic
     
     Spatial layer, Data sources
     Accessibility to cities, "D.J. Weiss, A. Nelson, H.S. Gibson, et al., 2018, A global map of travel time to cities to assess inequalities in accessibility in 2015, Nature,  doi:10.1038/nature25181; data downloaded from: https://malariaatlas.org/research-project/accessibility-to-cities/"
-    Country risk premium, "A. Damodaran, 2020, Damodaran Online, http://pages.stern.nyu.edu/~adamodar/"
+    Country risk premium, "\A. Damodaran, 2020, Damodaran Online, http://pages.stern.nyu.edu/~adamodar/"
     Current land cover, "ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
     Declining population, "CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW"
     Governance index, "World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/"
@@ -443,38 +443,24 @@ Quantitative measures of potential benefits in se.plan should be viewed as avera
     :header-rows: 1
     
     * - Variable
-      - category
-      - Units
       - Description
       - Source
-    * - Endangered species
-      - Biodiversity conservation
-      - count
+    * - Endangered species (Biodiversity conservation) in **count**
       - Total number of critically endangered and endangered amphibians, reptiles, birds, and mammals whose ranges overlap a site. Rationale for including in se.plan: sites with a larger number of critically endangered and endangered species are ones where successful forest restoration can potentially contribute to reducing a larger number of extinctions.
       - World Bank, which processed over 25,000 species range maps from: (i) IUCN, The IUCN Red List of Threatened Species, https://www.iucnredlist.org; and (ii) BirdLife International, Data Zone, http://datazone.birdlife.org/species/requestdis. Resolution of World Bank layer: 1 kilometer. More information may be found at https://datacatalog.worldbank.org/dataset/terrestrial-biodiversity-indicators, and data may be downloaded at http://wbg-terre-biodiv.s3.amazonaws.com/listing.html. See also: (i) Dasgupta, Susmita; Wheeler, David. 2016. Minimizing Ecological Damage from Road Improvement in Tropical Forests. Policy Research Working Paper: No. 7826. World Bank, Washington, DC. (ii) Danyo Stephen, Susmita Dasgupta and David Wheeler. 2018. Potential Forest Loss and Biodiversity Risks from Road Improvement in Lao PDR. World Bank Policy Research Working Paper 8569. World Bank, Washington, DC. (iii) Damania Richard, Jason Russ, David Wheeler and Alvaro Federico Barra. 2018. The Road to Growth: Measuring the Tradeoffs between Economic Growth and Ecological Destruction, World Development, Elsevier, vol. 101(C), pp. 351-376.
-    * - BII gap
-      - Biodiversity conservation
-      - percent
+    * - BII gap (Biodiversity conservation) in **percent**
       - The biodiversity intactness index (BII) describes the average abundance of a large and diverse set of organisms in a given geographical area, relative to the set of originally present species. se.plan subtracts the BII from 100, to measure the gap between full intactness and current intactness. Rationale for including in se.plan: sites with a larger BII gap are ones where successful forest restoration can potentially contribute to reducing a larger gap.
       - T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936. Resolution of Newbold et al. layer: 1 km. See also: (i) Scholes, R.J. and Biggs, R., 2005. A biodiversity intactness index. Nature, 434(7029), pp.45-49. (ii) Newbold, T., Hudson, L.N., Arnell, A.P., Contu, S., De Palma, A., Ferrier, S., Hill, S.L., Hoskins, A.J., Lysenko, I., Phillips, H.R. and Burton, V.J., 2016. Has land use pushed terrestrial biodiversity beyond the planetary boundary? A global assessment. Science, 353(6296), pp.288-291.
-    * - Aboveground carbon accumulation
-      - Carbon sequestration
-      - metric tons of carbon per hectare per year
+    * - Aboveground carbon accumulation (Carbon sequestration) in **metric tons C/hectare/year**
       - Projected potential mean annual aboveground carbon accumulation rates for natural forest regeneration during 2020-2050. Accounts for variation in such factors as climate and soil. Rationale for including in se.plan: climate mitigation benefits of forest restoration are greater where forests regenerate more rapidly. Although the layer refers to natural regeneration, it might also reflect relative spatial differences in aboveground carbon sequestration in planted forests, given that climate and soil also affect growth of those forests. Can also be viewed as complementing the plantation growth rate layer (see below).
       - S.C. Cook-Patton, S.M. Leavitt, D. Gibbs, et al., 2020, Mapping carbon accumulation potential from global natural forest regrowth, Nature 585(7826), pp. 545–550, https://doi.org/10.1038/s41586-020-2686-x. Resolution of Cook-Patton et al. layer: 1 km.
-    * - Forest employment
-      - Local livelihoods
-      - count
+    * - Forest employment (Local livelihoods) in **count**
       - Number of forest-related jobs per ha of forest in 2015, summed across three economic activities: forestry, logging, and related service activities; manufacture of wood and of products of wood and cork, except furniture; and manufacture of paper and paper products. Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province). Rationale for including in se.plan: a higher level of forest employment implies the existence of attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make forest restoration more feasible when income for local households is a desired benefit.
       - Developed by se.plan team, by downscaling national data from: International Labour Organization, 2020, Employment by sex and economic activity - ISIC level 2 (thousands) | Annual, ILOSTAT database, https://ilostat.ilo.org/data
-    * - Woodfuel harvest
-      - Local livelihoods
-      - cubic meters per hectare
+    * - Woodfuel harvest (Local livelihoods) in **m3/hectare**
       - Harvest of wood fuel per hectare of forest in 2015. Rationale for including in se.plan: a higher level of wood fuel harvest implies greater demand for wood fuel as an energy source, which tends to make forest restoration more feasible when supply of wood to meet local demands is a desired benefit.
       - Developed by se.plan team, by downscaling national data from: UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO
-    * - Plantation growth rate
-      - Wood production
-      - dry metric tons of woody biomass per hectare per year
+    * - Plantation growth rate (Wood production) in **dry metric tons of woody biomass/hectare/year**
       - Potential annual production of woody biomass by fast-growing trees such as eucalypts, poplars, and willows. Rationale for including in se.plan: faster growth of plantation trees tends to make forest restoration more feasible when desired benefits include income for landholders and wood supply to meet local and export demands.
       - F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242. Resolution of Albanito et al. layer: 55 km.
 
@@ -496,7 +482,7 @@ Denote these benefits, respectively, by :math:`B_1`, :math:`B_2`, :math:`B_3`, a
 
 .. math::
 
-    Restoration_value_index = (w_1B_1 + w_2B_2 + w_3B_3 + w_4B_4.) / (w_1 + w_2 + w_3 + w_4)
+    Restoration\_value\_index = (w_1B_1 + w_2B_2 + w_3B_3 + w_4B_4.) / (w_1 + w_2 + w_3 + w_4)
     
 Where :math:`w_1`, :math:`w_2`, :math:`w_3`, and :math:`w_4` are the user ratings for the four corresponding benefits.
 
@@ -504,7 +490,7 @@ Where :math:`w_1`, :math:`w_2`, :math:`w_3`, and :math:`w_4` are the user rating
 
 .. math::
 
-	Benefit_cost_ratio = Restoration_value_index / Restoration_cost.
+	Benefit\_cost\_ratio = Restoration\_value\_index / Restoration\_cost.
     
 The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`Appendix E`. As a final step, se.plan converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the restoration suitability index on the map and dashboard.
 
