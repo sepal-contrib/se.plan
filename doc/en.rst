@@ -99,6 +99,34 @@ The output provides two outputs:
 
 - A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
 
+Usage
+-----
+
+Open the app 
+^^^^^^^^^^^^
+
+Select AO
+^^^^^^^^^
+
+
+The dropdown menu enables users to select a group of countries, an individual country, or one or more first-level administrative subdivisions (e.g., states or provinces) within a country. The drawing feature enables them to draw boundaries around up to two areas of their choosing.
+
+Select constraint
+^^^^^^^^^^^^^^^^^
+
+Select Indicators
+^^^^^^^^^^^^^^^^^
+
+Recipe
+^^^^^^
+
+Compute map
+^^^^^^^^^^^
+
+Compute dashboard
+^^^^^^^^^^^^^^^^^
+
+
 .. Appendix A:
 
 Primary data sources
