@@ -15,7 +15,10 @@ The sections below highlight key features of **se.plan**. A high-level view of u
 
     Users start by (i) selecting their geographical planning area, (ii) rating the relative importance of different restoration benefits from their perspective, and (iii) imposing constraints that limit restoration to only those sites they view as suitable, in view of ecological and socioeconomic risks. **se.plan** then generates maps and related information on restoration’s benefits, costs, and risks for all suitable sites within the planning area. 
 
-In addition to reading this manual, we encourage users to watch **se.plan** YouTube videos: `video being shot`_.
+In addition to reading this manual, we encourage users to watch **se.plan** YouTube videos:
+
+.. youtube:: https://www.youtube.com/watch?v=37pCFhF4zBI
+    :align: center
 
 Geographical resolution and scope
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -739,3 +742,34 @@ Socio-economic constraints
       - minutes
       - Travel time from a site to the nearest city in 2015.
       - D.J. Weiss, A. Nelson, H.S. Gibson, et al., 2018, A global map of travel time to cities to assess inequalities in accessibility in 2015, Nature,  doi:10.1038/nature25181; data downloaded from: https://malariaatlas.org/research-project/accessibility-to-cities/
+      
+      
+Aknowledgement
+--------------
+
+This tool has been developed by FAO in close collaboration with Spatial Informatics Group (SIG), SilvaCarbon and researchers at Peking University and Duke University, with financial support from the Government of Japan.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/duke.png
+    :target: https://duke.edu
+    :alt: duke_logo
+    :height: 100
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/peking.png
+    :target: http://english.pku.edu.cn
+    :alt: pku_logo
+    :height: 100
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/sig.png
+    :target: https://sig-gis.com
+    :alt: sig-gis_logo
+    :height: 100
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/SilvaCarbon.png
+    :target: https://www.silvacarbon.org
+    :alt: silvacarbon_logo
+    :height: 100
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/MAFF.png
+    :target: https://www.maff.go.jp/e/
+    :alt: MAAF_logo
+    :height: 100
