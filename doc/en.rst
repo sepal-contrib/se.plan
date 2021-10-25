@@ -108,11 +108,31 @@ Usage
 Open the app 
 ^^^^^^^^^^^^
 
-Select AO
-^^^^^^^^^
+Select AOI
+^^^^^^^^^^
 
+The *restoration suitability index* will be calculated based on the user inputs. The first mandatory input is the area of interest. In this step you’ll have the possibility to choose from a predefined list of administrative layers or use your own datasets, the available options are:
 
-The dropdown menu enables users to select a group of countries, an individual country, or one or more first-level administrative subdivisions (e.g., states or provinces) within a country. The drawing feature enables them to draw boundaries around up to two areas of their choosing.
+**Predefined layers**
+
+-   Country/province
+-   Administrative level 1
+-   Administrative level 2
+
+**Custom layers**
+
+-   Vector file
+-   Drawn shapes on map
+-   Google Earth Engine Asset
+
+After selecting the desired area, click over the ‘Select these inputs’ button and the map show up your selection.
+
+.. note::
+
+    You can only select one area of interest. In some cases, depending on the input data you could run out of resources in GEE.
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/aoi_selection.png
+    :alt: AOI selection
 
 Select constraint
 ^^^^^^^^^^^^^^^^^
