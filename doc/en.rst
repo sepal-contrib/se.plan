@@ -96,7 +96,7 @@ Please see :ref:`Usage` for more details on the customization process.
 Output
 ^^^^^^
 
-The output provides two outputs: 
+**se.plan** provides two outputs: 
 
 - A map of the Restoration suitability index scaled from 1 (low suitability) to 5 (high suitability). This map, generated within the Google Earth Engine API can be displayed in the app but also exported as a GEE asset or a .tif file in your SEPAL folders. 
 
@@ -137,64 +137,47 @@ Primary data sources
 
 The **se.plan** team obtained data for the default spatial layers in the tool from various sources. It determined potential tree cover using data from:
 
-J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258
+    J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, doi:`10.1126/science.aax084 <https://www.science.org/doi/10.1126/science.aax0848>`_
 
 It determined current tree cover using data from:
 
-M. Buchhorn, M. Lesiv, N.E. Tsendbazar, M. Herold, L. Bertels, B. Smets, 2020, Copernicus Global Land Cover Layers—Collection 2. Remote Sensing, 12 Volume 108, 1044. doi:10.3390/rs12061044
+    M. Buchhorn, M. Lesiv, N.E. Tsendbazar, M. Herold, L. Bertels, B. Smets, 2020, Copernicus Global Land Cover Layers—Collection 2. Remote Sensing, 12 Volume 108, 1044. doi:`10.3390/rs12061044 <https://www.mdpi.com/2072-4292/12/6/1044>`_
 
 It drew data for remaining spatial layers primarily from the following sources. For additional detail, see :ref:`Appendix C` (benefits), :ref:`Appendix E` (costs), and :ref:`Appendix F` (constraints).
 
 Costs
 ^^^^^
 
-.. list-table::
-    :header-rows: 1
-
-    * - Spatial layer
-      - Data sources
-    * - Land opportunity cost
-      - * International Food Policy Research Institute, 2019, Global Spatially-Disaggregated Crop Production Statistics Data for 2010 Version 2.0, https://doi.org/10.7910/DVN/PRFF8V, Harvard Dataverse, V4
-        * UN FAO, 2020, FAOSTAT: Crops, http://www.fao.org/faostat/en/#data/QC
-        * UN FAO, 2007, Occurrence of Pasture and Browse (FGGD), https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/913e79a0-7591-11db-b9b2-000d939bc5d8
-        * ESA, 2017, Land Cover CCI Product User Guide, Version2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf
-        * UN FAO, 2018, Gridded Livestock of the World – Latest – 2010 (GLW 3), https://dataverse.harvard.edu/dataverse/glw_3, Harvard Dataverse, V3
-        * UN FAO, 2020, FAOSTAT: Livestock Primary, http://www.fao.org/faostat/en/#data/QL
-        * UN FAO, 2020, RuLIS - Rural Livelihoods Information System, http://www.fao.org/in-action/rural-livelihoods-dataset-rulis/en/
-World Bank, 2020, World Development Indicators, https://databank.worldbank.org/source/world-development-indicators
-        * CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
-M. Kummu, M. Taka, & J. Guillaume, 2018, Gridded global datasets for Gross Domestic Product and Human Development Index over 1990–2015, Scientific Data 5, 180004, https://doi.org/10.1038/sdata.2018.4
-    * - Establishment cost
-      - - World Bank, various years, Projects & Operations  [project appraisal documents and implementation completion reports for selected projects], https://projects.worldbank.org/en/projects-operations/projects-home
+.. csv-table::
+   :header-rows: 1
+   
+   Spatial layer, Data sources
+   Land opportunity cost, "International Food Policy Research Institute, 2019, Global Spatially-Disaggregated Crop Production Statistics Data for 2010 Version 2.0, https://doi.org/10.7910/DVN/PRFF8V, Harvard Dataverse, V4"
+   , "UN FAO, 2020, FAOSTAT: Crops, http://www.fao.org/faostat/en/#data/QC"
+   , "UN FAO, 2007, Occurrence of Pasture and Browse (FGGD), https://data.apps.fao.org/map/catalog/srv/eng/catalog.search#/metadata/913e79a0-7591-11db-b9b2-000d939bc5d8"
+   , "ESA, 2017, Land Cover CCI Product User Guide, Version2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
+   , "UN FAO, 2018, Gridded Livestock of the World – Latest – 2010 (GLW 3), https://dataverse.harvard.edu/dataverse/glw_3, Harvard Dataverse, V3"
+   , "UN FAO, 2020, FAOSTAT: Livestock Primary, http://www.fao.org/faostat/en/#data/QL"
+   , "UN FAO, 2020, RuLIS - Rural Livelihoods Information System, http://www.fao.org/in-action/rural-livelihoods-dataset-rulis/en/"
+   , "World Bank, 2020, World Development Indicators, https://databank.worldbank.org/source/world-development-indicators"
+   , "CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW"
+   , "M. Kummu, M. Taka, & J. Guillaume, 2018, Gridded global datasets for Gross Domestic Product and Human Development Index over 1990–2015, Scientific Data 5, 180004, https://doi.org/10.1038/sdata.2018.4"
+   Establishment cost, "World Bank, various years, Projects & Operations  [project appraisal documents and implementation completion reports for selected projects], https://projects.worldbank.org/en/projects-operations/projects-home"
 
 
 Benefits
 ^^^^^^^^
 
-.. list-table::
-    :header-rows: 1
+.. csv-table::
+   :header-rows: 1
     
-    * - Spatial layer
-      - subtheme
-      - Data sources
-    * - Biodiversity intactness index
-      - Biodiversity conservation
-      - T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936
-    * - Endangered species
-      - Biodiversity conservation
-      - Layer obtained from World Bank, which processed species range maps from: (i) IUCN, The IUCN Red List of Threatened Species, https://www.iucnredlist.org; and (ii) BirdLife International, Data Zone, http://datazone.birdlife.org/species/requestdis
-    * - Aboveground carbon accumulation
-      - Carbon sequestration
-      - S.C. Cook-Patton, S.M. Leavitt, D. Gibbs, et al., 2020, Mapping carbon accumulation potential from global natural forest regrowth, Nature 585, pp. 545–550, https://doi.org/10.1038/s41586-020-2686-x
-    * - Forest employment
-      - Local livelihoods
-      - Downscaled estimates generated using national data from: International Labour Organization, 2020, Employment by sex and economic activity - ISIC level 2 (thousands) | Annual, ILOSTAT database, https://ilostat.ilo.org/data
-    * - Woodfuel harvest
-      - Local livelihoods
-      - Downscaled estimates generated using national data from: UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO
-    * - Plantation growth rate
-      - Wood production
-      - F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242
+    Spatial layer, subtheme, Data sources
+    Biodiversity intactness index, Biodiversity conservation, "T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936"
+    Endangered species, Biodiversity conservation, "Layer obtained from World Bank, which processed species range maps from: (i) IUCN, The IUCN Red List of Threatened Species, https://www.iucnredlist.org; and (ii) BirdLife International, Data Zone, http://datazone.birdlife.org/species/requestdis"
+    Aboveground carbon accumulation, Carbon sequestration, "S.C. Cook-Patton, S.M. Leavitt, D. Gibbs, et al., 2020, Mapping carbon accumulation potential from global natural forest regrowth, Nature 585, pp. 545–550, https://doi.org/10.1038/s41586-020-2686-x"
+    Forest employment, Local livelihoods, "Downscaled estimates generated using national data from: International Labour Organization, 2020, Employment by sex and economic activity - ISIC level 2 (thousands) | Annual, ILOSTAT database, https://ilostat.ilo.org/data"
+    Woodfuel harvest, Local livelihoods, "Downscaled estimates generated using national data from: UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO"
+    Plantation growth rate, Wood production, "F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242"
 
 Constraints
 ^^^^^^^^^^^
@@ -202,69 +185,46 @@ Constraints
 biophysical
 ***********
 
-.. list-table::
-    :header-rows: 1
+.. csv-table::
+   :header-rows: 1
 
-    * - Spatial layer
-      - Data sources
-    * - Annual rainfall
-      - C. Funk, P. Peterson, M. Landsfeld, et al., The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes. Sci Data 2, 150066. https://doi.org/10.1038/sdata.2015.66
-    * - Baseline water stress
-      - World Resources Institute, 2021, Aqueduct Global Maps 3.0 Data, https://www.wri.org/data/aqueduct-global-maps-30-data
-    * - Elevation
-      - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
-    * - Slope
-      - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
-    * - Terrestrial ecoregion
-      - UN FAO, 2012 Global ecological zones for fao forest reporting: 2010 Update, http://www.fao.org/3/ap861e/ap861e.pdf 
+    Spatial layer, Data sources
+    Annual rainfall, "C. Funk, P. Peterson, M. Landsfeld, et al., The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes. Sci Data 2, 150066. https://doi.org/10.1038/sdata.2015.66"
+    Baseline water stress, "World Resources Institute, 2021, Aqueduct Global Maps 3.0 Data, https://www.wri.org/data/aqueduct-global-maps-30-data"
+    Elevation, "T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183."
+    Slope, "T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183."
+    Terrestrial ecoregion, "UN FAO, 2012 Global ecological zones for fao forest reporting: 2010 Update, http://www.fao.org/3/ap861e/ap861e.pdf" 
 
 forest change
 *************
 
-.. list-table::
-    :header-rows: 1
+.. csv-table::
+   :header-rows: 1
 
-    * - Spatial layer
-      - Data sources
-    * - Climate risk
-      - J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258
-    * - Deforestation rate
-      - ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf
-    * - Natural regeneration variability
-      - Model from R. Crouzeilles, F.S. Barros, P.G. Molin, et al., 2019, A new approach to map landscape variation in forest restoration success in tropical and temperate forest biomes", J Appl Ecol. 56, pp. 2675– 2686, https://doi.org/10.1111/1365-2664.13501, applied to data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf
+    Spatial layer, Data sources
+    Climate risk, "J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258"
+    Deforestation rate, "ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
+    Natural regeneration variability, "Model from R. Crouzeilles, F.S. Barros, P.G. Molin, et al., 2019, A new approach to map landscape variation in forest restoration success in tropical and temperate forest biomes", J Appl Ecol. 56, pp. 2675– 2686, https://doi.org/10.1111/1365-2664.13501, applied to data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
 
 socio-economic
 **************
 
-.. list-table::
-    :header-rows: 1
+.. csv-table::
+   :header-rows: 1
     
-    * - Spatial layer
-      - Data sources
-    * - Accessibility to cities
-      - D.J. Weiss, A. Nelson, H.S. Gibson, et al., 2018, A global map of travel time to cities to assess inequalities in accessibility in 2015, Nature,  doi:10.1038/nature25181; data downloaded from: https://malariaatlas.org/research-project/accessibility-to-cities/
-    * - Country risk premium
-      - A. Damodaran, 2020, Damodaran Online, http://pages.stern.nyu.edu/~adamodar/
-    * - Current land cover
-      - ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf
-    * - Declining population
-      - CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
-    * - Governance index
-      - World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/
-    * - Land designated for or owned by IP and LC
-      - Rights and Resources Initiative, 2015, Who Owns the World’s Land? A global baseline of formally recognized indigenous and community land rights, Washington, DC
-    * - Net imports of forest products
-      - UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO
-    * - Population density
-      - CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
-    * - Perceived property security
-      - Prindex, 2020, https://www.prindex.net/
-    * - Property rights protection
-      - Downscaled estimates generated using national data from: World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/
-    * - Protected area
-      - IUCN, World Database on Protected Areas, https://www.iucn.org/theme/protected-areas/our-work/world-database-protected-areas
-    * - Real interest rate
-      - World Bank, 2020, World Development Indicators, https://databank.worldbank.org/source/world-development-indicators
+    Spatial layer, Data sources
+    Accessibility to cities, "D.J. Weiss, A. Nelson, H.S. Gibson, et al., 2018, A global map of travel time to cities to assess inequalities in accessibility in 2015, Nature,  doi:10.1038/nature25181; data downloaded from: https://malariaatlas.org/research-project/accessibility-to-cities/"
+    Country risk premium, "A. Damodaran, 2020, Damodaran Online, http://pages.stern.nyu.edu/~adamodar/"
+    Current land cover, "ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf"
+    Declining population, "CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW"
+    Governance index, "World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/"
+    Land designated for or owned by IP and LC, "Rights and Resources Initiative, 2015, Who Owns the World’s Land? A global baseline of formally recognized indigenous and community land rights, Washington, DC"
+    Net imports of forest products, "UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO"
+    Population density, "CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW"
+    Perceived property security, "Prindex, 2020, https://www.prindex.net/"
+    Property rights protection, "Downscaled estimates generated using national data from: World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/"
+    Protected area, "IUCN, World Database on Protected Areas, https://www.iucn.org/theme/protected-areas/our-work/world-database-protected-areas"
+    Real interest rate, "World Bank, 2020, World Development Indicators, https://databank.worldbank.org/source/world-development-indicators"
 
 .. Appendix B:
 
