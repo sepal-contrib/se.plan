@@ -23,7 +23,7 @@ In addition to reading this manual, we encourage users to watch **se.plan** YouT
 Geographical resolution and scope
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**se.plan** divides the Earth’s surface into grid cells with 30 arc-second resolution (≈1km at the equator). It includes only grid cells that satisfy the following four criteria:
+**se.plan** divides the Earth’s surface into grid cells with 30 arc-second resolution (≈1km at the equator). It includes only grid cells that satisfy the following four criteria (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Frest_pot_gt_treecoverfrac_mask_urban>`__)):
 
 -   They are in countries or territories of Africa and the Near East, Asia and the Pacific, and Latin America and the Caribbean that the World Bank classified as *low or middle-income countries* or territories (LMICs) during most years during 2000–2020. These countries and territories number 139 and are listed in :ref:`Appendix B`.
 -   They include areas where tree cover can potentially occur under current climatic conditions, as determined by `Bastin et al. (2019) <https://doi.org/10.1126/science.aax0848>`_.
@@ -458,16 +458,16 @@ Quantitative measures of potential benefits in se.plan should be viewed as avera
       - The biodiversity intactness index (BII) describes the average abundance of a large and diverse set of organisms in a given geographical area, relative to the set of originally present species. se.plan subtracts the BII from 100, to measure the gap between full intactness and current intactness. Rationale for including in se.plan: sites with a larger BII gap are ones where successful forest restoration can potentially contribute to reducing a larger gap. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fibii-4326>`__)
       - \T. Newbold, L. Hudson, A. Arnell, et al., 2016, Dataset: Global map of the Biodiversity Intactness Index, from Newbold et al., 2016, Science, Natural History Museum Data Portal (data.nhm.ac.uk), https://doi.org/10.5519/0009936. Resolution of Newbold et al. layer: 1 km. See also: (i) Scholes, R.J. and Biggs, R., 2005. A biodiversity intactness index. Nature, 434(7029), pp.45-49. (ii) Newbold, T., Hudson, L.N., Arnell, A.P., Contu, S., De Palma, A., Ferrier, S., Hill, S.L., Hoskins, A.J., Lysenko, I., Phillips, H.R. and Burton, V.J., 2016. Has land use pushed terrestrial biodiversity beyond the planetary boundary? A global assessment. Science, 353(6296), pp.288-291.
     * - Aboveground carbon accumulation (Carbon sequestration) in **metric tons C/hectare/year**
-      - Projected potential mean annual aboveground carbon accumulation rates for natural forest regeneration during 2020-2050. Accounts for variation in such factors as climate and soil. Rationale for including in se.plan: climate mitigation benefits of forest restoration are greater where forests regenerate more rapidly. Although the layer refers to natural regeneration, it might also reflect relative spatial differences in aboveground carbon sequestration in planted forests, given that climate and soil also affect growth of those forests. Can also be viewed as complementing the plantation growth rate layer (see below).
+      - Projected potential mean annual aboveground carbon accumulation rates for natural forest regeneration during 2020-2050. Accounts for variation in such factors as climate and soil. Rationale for including in se.plan: climate mitigation benefits of forest restoration are greater where forests regenerate more rapidly. Although the layer refers to natural regeneration, it might also reflect relative spatial differences in aboveground carbon sequestration in planted forests, given that climate and soil also affect growth of those forests. Can also be viewed as complementing the plantation growth rate layer (see below). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fyoung_forest_sequestration_rate_Griscom_extent>`__)
       - S.C. Cook-Patton, S.M. Leavitt, D. Gibbs, et al., 2020, Mapping carbon accumulation potential from global natural forest regrowth, Nature 585(7826), pp. 545–550, https://doi.org/10.1038/s41586-020-2686-x. Resolution of Cook-Patton et al. layer: 1 km.
     * - Forest employment (Local livelihoods) in **count**
-      - Number of forest-related jobs per ha of forest in 2015, summed across three economic activities: forestry, logging, and related service activities; manufacture of wood and of products of wood and cork, except furniture; and manufacture of paper and paper products. Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province). Rationale for including in se.plan: a higher level of forest employment implies the existence of attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make forest restoration more feasible when income for local households is a desired benefit.
+      - Number of forest-related jobs per ha of forest in 2015, summed across three economic activities: forestry, logging, and related service activities; manufacture of wood and of products of wood and cork, except furniture; and manufacture of paper and paper products. Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province). Rationale for including in se.plan: a higher level of forest employment implies the existence of attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make forest restoration more feasible when income for local households is a desired benefit. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Femp_ha>`__)
       - Developed by se.plan team, by downscaling national data from: International Labour Organization, 2020, Employment by sex and economic activity - ISIC level 2 (thousands) | Annual, ILOSTAT database, https://ilostat.ilo.org/data
     * - Woodfuel harvest (Local livelihoods) in **m3/hectare**
-      - Harvest of wood fuel per hectare of forest in 2015. Rationale for including in se.plan: a higher level of wood fuel harvest implies greater demand for wood fuel as an energy source, which tends to make forest restoration more feasible when supply of wood to meet local demands is a desired benefit.
+      - Harvest of wood fuel per hectare of forest in 2015. Rationale for including in se.plan: a higher level of wood fuel harvest implies greater demand for wood fuel as an energy source, which tends to make forest restoration more feasible when supply of wood to meet local demands is a desired benefit. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2FWoodfuel_gadm36_1_edited_image>`__)
       - Developed by se.plan team, by downscaling national data from: UN FAO, 2020, Forestry Production and Trade, FAOSTAT, http://www.fao.org/faostat/en/#data/FO
     * - Plantation growth rate (Wood production) in **dry metric tons of woody biomass/hectare/year**
-      - Potential annual production of woody biomass by fast-growing trees such as eucalypts, poplars, and willows. Rationale for including in se.plan: faster growth of plantation trees tends to make forest restoration more feasible when desired benefits include income for landholders and wood supply to meet local and export demands.
+      - Potential annual production of woody biomass by fast-growing trees such as eucalypts, poplars, and willows. Rationale for including in se.plan: faster growth of plantation trees tends to make forest restoration more feasible when desired benefits include income for landholders and wood supply to meet local and export demands. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fyields-4326>`__)
       - \F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242. Resolution of Albanito et al. layer: 55 km.
 
 .. Appendix D:
@@ -530,6 +530,8 @@ The value of land in agricultural use is defined as the portion of agricultural 
 
 The team assumed that forest restoration is intended to be permanent, and so it estimated land rent in perpetuity: the opportunity cost of forgoing agricultural use of a restored site forever, not just for a single year. The estimates of this long-run opportunity cost in **se.plan** are expressed in US dollars per hectare for reference year 2017. 
 
+(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fopportunity_cost>`__)
+
 Cropland
 ********
 
@@ -563,6 +565,8 @@ Implementation costs
 Implementation costs refer to the expense of activities required to regenerate forests. They include both: (i) initial expenses incurred in the first year of restoration (establishment costs), which are associated with such activities as site preparation, planting, and fencing; and (ii) expenses associated with monitoring, protection, and other activities in years following establishment (operating costs), which are required to enable the regenerated stand to reach the “free to grow” stage. se.plan does not report these two components of implementation costs separately. Instead, it reports the aggregate cost of restoring a site, in 2017 US dollars per hectare, by summing the estimates of opportunity cost and implementation costs. This aggregate cost is the cost variable that it includes in the benefit-cost ratio (Appendix D). The estimates of implementation costs vary by country and, for countries with sufficient data, by first-level subdivision.
 
 As discussed above, se.plan assumes that current land use is some form of agriculture. It therefore also assumes that regeneration requires planting, as sources of propagules for natural regeneration are often not adequate on land that has been cleared for agriculture. se.plan does not ignore natural regeneration as a restoration option, however, as it includes a constraint layer that predicts the variability of natural regeneration success (see :ref:`Appendix E`).
+
+(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2FAfCost_ha>`__)
 
 The se.plan team estimated implementation costs in three steps:
 
@@ -618,19 +622,19 @@ Biophysical constraints
       - Source
     * - Elevation
       - meters
-      - Void-filled digital elevation dataset from Shuttle Radar Topography Mission (SRTM).
+      - Void-filled digital elevation dataset from Shuttle Radar Topography Mission (SRTM). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=USGS%2FSRTMGL1_003>`__)
       - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
     * - Slope
       - degrees
-      - The elevation dataset (see above) was used to calculate slope in units of degrees from horizontal, with greater values indicating steeper inclines.
+      - The elevation dataset (see above) was used to calculate slope in units of degrees from horizontal, with greater values indicating steeper inclines. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fslope>`__)
       - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
     * - Annual rainfall
       - mm/yr
-      - High-resolution estimates of total annual rainfall based on blending satellite information with station data and regression-based spatial interpolation.
+      - High-resolution estimates of total annual rainfall based on blending satellite information with station data and regression-based spatial interpolation. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fchirps_00_20_mean>`__)
       - \C. Funk, P. Peterson, M. Landsfeld, et al., The climate hazards infrared precipitation with stations—a new environmental record for monitoring extremes. Sci Data 2, 150066. https://doi.org/10.1038/sdata.2015.66 
     * - Baseline water stress
       - scale (0 to 5)
-      - Ratio of total water withdrawals (for consumptive and nonconsumptive domestic, industrial, irrigation, and livestock uses) to available renewable supplies of surface water and groundwater, averaged across months of the year and converted to a numerical scale. Higher values of the scale indicate greater water stress.
+      - Ratio of total water withdrawals (for consumptive and nonconsumptive domestic, industrial, irrigation, and livestock uses) to available renewable supplies of surface water and groundwater, averaged across months of the year and converted to a numerical scale. Higher values of the scale indicate greater water stress. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fbws_score>`__)
       - World Resources Institute, 2021, Aqueduct Global Maps 3.0 Data, https://www.wri.org/data/aqueduct-global-maps-30-data 
 
 Current land cover
@@ -645,7 +649,7 @@ Current land cover
       - Source
     * - Terrestrial ecoregion
       - ecological zone labels
-      - Classification of Earth’s land surface into 20 ecological zones, which have relatively homogeneous vegetation formations under natural conditions and similar physical features (e.g., climate)
+      - Classification of Earth’s land surface into 20 ecological zones, which have relatively homogeneous vegetation formations under natural conditions and similar physical features (e.g., climate). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=COPERNICUS%2FLandcover%2F100m%2FProba-V-C3%2FGlobal%2F2019>`__)
       - UN FAO, 2012 Global ecological zones for fao forest reporting: 2010 Update, http://www.fao.org/3/ap861e/ap861e.pdf 
 
 
@@ -661,15 +665,16 @@ Forest change constraints
       - Source
     * - Deforestation rate
       - %/yr
-      - Annual rate of tree-cover loss within a 5 km buffer around a site during 2005–2015, expressed as a positive percentage of total tree cover. Higher values indicate higher rates of loss. The value is zero in areas without deforestation (i.e., areas with expanding tree cover).
+      - Annual rate of tree-cover loss within a 5 km buffer around a site during 2005–2015, expressed as a positive percentage of total tree cover. Higher values indicate higher rates of loss. The value is zero in areas without deforestation (i.e., areas with expanding tree cover). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fdeforestation_rate>`__)
       - Developed by **se.plan** team, using data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, `maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pd`_  
       - Climate risk
       - % of area
-      - Difference between potential tree cover in 2050 if climate trends continue, and potential tree cover under current climatic conditions. Positive values indicate increases in potential tree cover, while negative values indicate decreases.
+      - Difference between potential tree cover in 2050 if climate trends continue, and potential tree cover under current climatic conditions. Positive values indicate increases in potential tree cover, while negative values indicate decreases. 
+(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Ffuture_risk>`__)
       - J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258 
     * - Natural regeneration variability
       - scale (0 to 1)
-      - Measure of variability of forest restoration in fostering recovery of biodiversity to typical levels in natural native forests. Higher values indicate that biodiversity recovery is more variable (i.e., less predictable).
+      - Measure of variability of forest restoration in fostering recovery of biodiversity to typical levels in natural native forests. Higher values indicate that biodiversity recovery is more variable (i.e., less predictable). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2FRegeneration>`__)
       - Developed by se.plan team, using model from: R. Crouzeilles, F.S. Barros, P.G. Molin, et al., 2019, A new approach to map landscape variation in forest restoration success in tropical and temperate forest biomes, J Appl Ecol. 56, pp. 2675– 2686, https://doi.org/10.1111/1365-2664.13501; and data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf 
 
 Socio-economic constraints
@@ -682,29 +687,25 @@ Socio-economic constraints
       - Units
       - Description
       - Source
-    * - Current land cover
-      - land-cover class labels 
-      - Land-cover classification for most recent year, generated from multi-sensor satellite observations by the European Space Agency’s Copernicus Earth observation program and classified according to ESA’s Climate Change Initiative (CCI) land-cover categories.
-      - ESA, 2017, Land Cover CCI Product User Guide, Version 2, maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf
     * - Protected areas
       - binary (0 or 1)
-      - Value of 1 indicates that a site is located in a protected area, while a value of 0 indicates it is not.
+      - Value of 1 indicates that a site is located in a protected area, while a value of 0 indicates it is not. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fprotected_areas>`__)
       - IUCN, World Database on Protected Areas, https://www.iucn.org/theme/protected-areas/our-work/world-database-protected-areas
     * - Population density
       - persons per km2 
-      - Modeled distribution of human population for 2020, based on census data for the most disaggregated administrative units available.
+      - Modeled distribution of human population for 2020, based on census data for the most disaggregated administrative units available. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=CIESIN%2FGPWv411%2FGPW_Population_Density%2Fgpw_v4_population_density_rev11_2015_30_sec>`__)
       - CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
     * - Declining population
       - binary (0 or 1)
-      - Value of 1 indicates that human population in a 5 km buffer around a site declined during 2010 – 2020, while a value of 0 indicates it rose or did not change.
+      - Value of 1 indicates that human population in a 5 km buffer around a site declined during 2010 – 2020, while a value of 0 indicates it rose or did not change. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fpopulation_decline>`__)
       - Developed by se.plan team, using 2.5 arc-minute data from: CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
     * - Property rights protection
       - index (−2.5 to +2.5)
-      - Downscaled version of the World Bank’s Rule of Law governance indicator, which is often interpreted as an indicator of property rights protection. Values range from −2.5 (very weak property rights) to +2.5 (very strong property rights). Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province).
+      - Downscaled version of the World Bank’s Rule of Law governance indicator, which is often interpreted as an indicator of property rights protection. Values range from −2.5 (very weak property rights) to +2.5 (very strong property rights). Varies by country and, when data are sufficient for downscaling, first-level administrative subdivision (e.g., state or province). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2FRL_gadm36_1_edited_image>`__)
       - Developed by se.plan team, by downscaling national data from: World Bank, 2020, Worldwide Governance Indicators, https://info.worldbank.org/governance/wgi/
     * - Accessibility to cities
       - minutes
-      - Travel time from a site to the nearest city in 2015.
+      - Travel time from a site to the nearest city in 2015. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=Oxford%2FMAP%2Faccessibility_to_cities_2015_v1_0>`__)
       - D.J. Weiss, A. Nelson, H.S. Gibson, et al., 2018, A global map of travel time to cities to assess inequalities in accessibility in 2015, Nature,  doi:10.1038/nature25181; data downloaded from: https://malariaatlas.org/research-project/accessibility-to-cities/
       
       
