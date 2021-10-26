@@ -1,349 +1,411 @@
 import ee
 import json
+from traitlets import Any, HasTraits
 
-from component import parameter as cp 
+from component import parameter as cp
 from component import model
 
 ee.Initialize()
 
-class gee_compute:
-    
-    def __init__(self, rp_aoi_model, rp_layers_model, rp_questionaire_model):
-        
-        self.aoi_model = rp_aoi_model
-        self.rp_layers_model = rp_layers_model
-        self.rp_questionaire_model = rp_questionaire_model
-        self.rp_default_layer = model.CustomizeLayerModel().layer_list
+####################################################
+###   default parameters of the singleton   ########
+####################################################
 
-        # results
-        self.wlcoutputs = None
+# find the criteria name of every range slider and bool
+range_constraint_names = [
+    i for i in cp.criterias if cp.criterias[i]["content"] == "RANGE"
+]
+bool_constraint_names = [
+    i for i in cp.criterias if cp.criterias[i]["content"] == "BINARY"
+]
 
-        self.landcover_default_object = {
-            'Bare land':60,
-            'Shrub land':20,
-            'Agricultural land':40, 
-            'Agriculture':40,
-            'Rangeland':40,
-            'Grassland':30, 
-            'Settlements':50
-        }
-    
-    def constraints_catagorical(self, cat_value,contratint_bool,name,layer_id):
-
-        layer = {'theme':'constraints'}
-        layer['name'] = name 
-        image = ee.Image(layer_id)
-
-        if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
-            image = image.select("discrete_classification")
-        if contratint_bool:
-            layer['eeimage'] = image.neq(cat_value)
-        else:
-            layer['eeimage'] = image.eq(cat_value)
-
-        return layer
-
-    def constraints_hight_low_bool(self,value, contratint_bool, name, layer_id):
-        
-        layer = {'theme':'constraints'}
-        layer['name'] = name 
-        
-        if contratint_bool:
-            layer['eeimage'] = ee.Image(layer_id).gt(value)
-        else:
-            layer['eeimage'] = ee.Image(layer_id).lt(value)
-
-    def constraints_tree_cover(self, cat_value, value, name, layer_id):
-        
-        layer = {'theme':'constraints'}
-        layer['name'] = name 
-        image = ee.Image(layer_id)
-
-        if layer_id == 'COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019':
-            image = image.select("discrete_classification")
-
-        treecoverpotential = ee.Image('projects/john-ee-282116/assets/fao-restoration/features/RestorePotential')
-        threshold_max = value * 0.01
-
-        layer['eeimage'] = ee.Image.constant(1).where(image.eq(cat_value).And(treecoverpotential.gt(threshold_max)), 0)
-        return layer
-
-    def get_layer_and_id(self, layername, constraints_layers):
-        
-        try:
-            if layername in  self.landcover_default_object.keys():
-                constraint_layer = next(item for item in constraints_layers if item["name"] == 'Current land cover')
-            else:
-                constraint_layer = next(item for item in constraints_layers if item["name"] == layername)
-            
-            layer_id = constraint_layer['layer']
-            
-        except:
-            raise Exception(f"Layer {layername} does not exsit.")
-            
-        return constraint_layer, layer_id
-    
-    def is_default_layer(self, name, layer_id):
-        
-        default_layer_id = next(item['layer'] for item in self.rp_default_layer if item["name"] == name)
-        
-        return layer_id == default_layer_id
+####################################################
 
 
-    def update_range_constraint(self, value, name, constraints_layers):
-        
-        constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
-        
-        # apply any preprocessing 
-        #TODO : export images with 100 multiplication factor....
-        if name == 'Slope' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id)
-            image = ee.Algorithms.Terrain(image).select('slope')
-        elif name == 'Deforestation rate' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        elif name == 'Natural regeneration probability' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        elif name == 'Property rights protection' and self.is_default_layer(name, layer_id):
-            image = ee.Image(layer_id).multiply(100)
-        else:
-            image = ee.Image(layer_id)
-        
-        if constraint_layer['operator'] == 'gt':
-            eeimage = {'eeimage': image.gt(value)}
-        elif constraint_layer['operator'] == 'lt':
-            eeimage = {'eeimage': image.gt(value)}
-        else:
-            raise RuntimeError(f"The layer {name} does not have a logical operator assigned. Please contact our maintainer.")
-        constraint_layer.update(eeimage)
+def wlc(layer_list, constraints, priorities, aoi_ee):
+    """
+    Compute the resoration suitability indicator over the specified AOI
+    the computation will take into account all the parameters specified by the user in the app
 
-    def make_constraints(self, constraints, constraints_layers):
-        landcover_constraints = []
-        default_range_constraints = [i for i in cp.criterias if type(cp.criterias[i]['content']) is list]
+    Args:
+        layer_list (dict): the list of layers items
+        constraints (str): a str json formatted list of constraints. Use the formatting specified in the QuestionModel
+        priorities (str): a str json formatted list of priorities. Use the formatting specified in the QuestionModel
 
-        for i in constraints:
-            value = constraints[i]
-            name = i
-            
-            if value == None or value == -1 : continue 
-                
-            try:
-                constraint_layer, layer_id = self.get_layer_and_id(name, constraints_layers)
-            except:
-                print(name,value)
-                continue
-                
-            # boolean masking lc
-            if name in self.landcover_default_object.keys() and type(value) is bool:
-                landcover_value = self.landcover_default_object[name] 
-                landcover_constraints.append(self.constraints_catagorical(landcover_value, value, name, layer_id))
+    Return:
+        (ee.Image): the restoration suitability index
+    """
+    # load the json strings
+    constraints = json.loads(constraints)
+    priorities = json.loads(priorities)
 
-            # restoration coverage % masking by lc
-            elif name in self.landcover_default_object.keys() and type(value) is int:
-                landcover_value = self.landcover_default_object[name] 
-                landcover_constraints.append(self.constraints_tree_cover(landcover_value, value, name, layer_id))
+    # load layers and create eeimages
+    benefit_list = [
+        i for i in layer_list if i["theme"] == "benefits" and priorities[i["id"]] != 0
+    ]
+    list(
+        map(
+            lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}), benefit_list
+        )
+    )
 
-            # high med lowe constraints (rain, elevation, slope, ect)
-            elif name in default_range_constraints:
-                self.update_range_constraint(value, name, constraints_layers)
+    risk_list = [i for i in layer_list if i["theme"] == "risks"]
+    list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"])}), risk_list))
 
-            # protected areas masking
-            # TODO : export this and remove 
-            elif name == 'Protected areas' and self.is_default_layer(name, layer_id):
-                protected_feature = ee.FeatureCollection(layer_id)
-                protected_image = protected_feature \
-                    .filter(ee.Filter.neq('WDPAID', {})) \
-                    .reduceToImage(properties = ['WDPAID'], reducer = ee.Reducer.first()) \
-                    .gt(0) \
-                    .unmask(0) \
-                    .rename('wdpa')
-                eeimage = {'eeimage':protected_image}
-                constraint_layer.update(eeimage)
+    cost_list = [i for i in layer_list if i["theme"] == "costs"]
+    list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}), cost_list))
 
-            # TODO : export and remove
-            elif name == 'Declining population' and self.is_default_layer(name,layer_id):
-                # Loctions w declining pop is 1,2 in not declining - binary 
-                eeimage = {'eeimage':ee.Image(layer_id).eq(1)}
-                constraint_layer.update(eeimage)
-            
-            else:
-                # asummes 0 is constraint, 1 is keep
-                eeimage = {'eeimage' : ee.Image(layer_id)}
-                constraint_layer.update(eeimage)
+    # constraint_list, initialize with constant value 1
+    # meaning that for all layer nothing is masked
+    constraint_list = [i for i in layer_list if i["theme"] == "constraint"]
+    list(map(lambda i: i.update({"eeimage": ee.Image.constant(1)}), constraint_list))
+    constraint_list = set_constraints(constraints, constraint_list)
 
-        default_geographic = next(item for item in constraints_layers if item["name"] == 'Current tree cover less than potential')
-        default_geographic.update({'eeimage' : ee.Image(default_geographic['layer'])})
+    # normalize the benefits on the aoi extends using the quintile method
+    benefit_list = normalize_benefits(benefit_list, aoi_ee, "quintile")
 
-        constraints_layers = constraints_layers + landcover_constraints + [default_geographic]
-        
-        return constraints_layers
+    # normalize benefit weights to 0 - 1
+    sum_weights = sum(priorities[i["id"]] for i in benefit_list)
+    list(
+        map(
+            lambda i: i.update(
+                {"norm_weight": round((priorities[i["id"]] / sum_weights), 5)}
+            ),
+            benefit_list,
+        )
+    )
 
-    def minmax_normalization(self,eeimage,region,scale = 10000): 
-        
-        mmvalues = eeimage.reduceRegion(
-            reducer = ee.Reducer.minMax(),
-            geometry = region, 
-            scale = scale, 
-            maxPixels = 1e13,
-            bestEffort = True,
-            tileScale = 4
+    # calc wlc image
+    exp, exp_dict = get_expression(benefit_list, cost_list, constraint_list)
+    wlc_image = ee.Image.constant(1).expression(exp, exp_dict)
+
+    # rescale wlc image from to
+    wlc_image = (
+        _percentile(wlc_image, aoi_ee, scale=10000, percentile=[3, 97])
+        .multiply(4)
+        .add(1)
+    )
+
+    # rather than clipping paint wlc to region
+    wlc_out = ee.Image().float()
+    wlc_out = (
+        wlc_out.paint(ee.FeatureCollection(aoi_ee), 0)
+        .where(wlc_image, wlc_image)
+        .selfMask()
+    )
+
+    return wlc_out, benefit_list, constraint_list, cost_list
+
+
+def set_constraints(constraints, constraint_list):
+    """
+    Update the constraint_layers list with filtered ee.Images according to user parameters
+
+    Args:
+        constraints (dict): a str json formatted list of constraints. Use the formatting specified in the QuestionModel
+        constraint_list (list): the list of all the constraint layer. each layer is represented by a dict : {'eeimage': dataset}
+
+    Return:
+        (list): the updated version of the constraints_layers
+    """
+
+    # loop through all the constraint in the json list
+    for name in constraints:
+
+        value = constraints[name]
+
+        # skip if the constraint is disabled
+        if value == None or value == -1:
+            continue
+
+        # get the constraint
+        constraint_layer = get_layer(name, constraint_list)
+
+        # boolean masking lc
+        # use the value associated to the name to build the mask image
+        if name in cp.landcover_default_cat and isinstance(value, bool):
+            constraint_list.append(
+                get_cat_constraint(
+                    cp.landcover_default_cat[name],
+                    value,
+                    name,
+                    constraint_layer["layer"],
+                )
+            )
+
+        # range constraints (slope, rainfall, etc...)
+        elif name in range_constraint_names:
+            constraint_layer.update(
+                eeimage=get_range_constraint(value, constraint_layer["layer"])
+            )
+
+        # the rest of the bool values (land cover have already been handle I can safely use the bool list)
+        elif name in bool_constraint_names:
+            constraint_layer.update(
+                ee_image=get_bool_constraint(value, constraint_layer["layer"])
+            )
+
+    # add the default geographic constraint
+    default_geographic = next(
+        item
+        for item in constraint_list
+        if item["name"] == "Current tree cover less than potential"
+    )
+    default_geographic.update(eeimage=ee.Image(default_geographic["layer"]))
+
+    return constraint_list
+
+
+def get_layer(layer_name, constraint_list):
+    """Return the layer dict
+
+    Args:
+        layer_name(str): the layer name (with spaces)
+        constraint_list(list of dict): the list of each layer and it's eeimage
+
+    Return:
+        (dict): the layer dict"""
+
+    # for all land cover constraints we use the same layer
+    if layer_name in cp.landcover_default_cat:
+        constraint_layer = next(
+            i for i in constraint_list if i["name"] == "Current land cover"
         )
 
-        bandname = ee.String(eeimage.bandNames().get(0))
-        keyMin = bandname.cat('_min')
-        keyMax = bandname.cat('_max')
+    # else use the one that have the same name
+    else:
+        constraint_layer = next(i for i in constraint_list if i["name"] == layer_name)
 
-        imgMin = ee.Number(mmvalues.get(keyMin) )
-        imgMax = ee.Number(mmvalues.get(keyMax) )
-
-        return eeimage.unitScale(imgMin, imgMax).toFloat()
-
-    def percentile_normalization(self, eeimage, region, scale): #, percentiles):
-        # todo: make this more dynamic with dictionary regex. using quick fix for now
-
-        eeimagetmp = eeimage.rename("img")
-        percents = eeimagetmp.reduceRegion(geometry=region, 
-            reducer=ee.Reducer.percentile(percentiles=[3,97]), 
-            scale=scale)
-        
-        img_low = ee.Number(percents.get('img_p3') )
-        img_high = ee.Number(percents.get('img_p97') ).add(0.1e-13)
-        
-        return  eeimage.unitScale(img_low,img_high).clamp(0, 1)
-
-    def quintile_normalization(self, image, featurecollection, scale=100):
-        
-        quintile_collection = image.reduceRegions(collection=featurecollection, 
-        reducer=ee.Reducer.percentile(percentiles=[20,40,60,80],outputNames=['low','lowmed','highmed','high']), 
-        tileScale=2,scale=scale)
-    
-        #only use features that have non null quintiles  
-        valid_quintiles = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']))
-        valid_quintiles_size = valid_quintiles.size()
-        vaild_quintiles_list = valid_quintiles.toList(valid_quintiles_size)
-        #catch regions where input region is null for user info
-        invalid_regions = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']).Not())
-
-        def conditions(feature):
-            
-            feature = ee.Feature(feature)
-
-            quintiles = ee.Image().byte()
-            quintiles = quintiles.paint(ee.FeatureCollection(feature), 0)
-
-            low = ee.Number(feature.get('low'))
-            lowmed = ee.Number(feature.get('lowmed'))
-            highmed = ee.Number(feature.get('highmed'))
-            high = ee.Number(feature.get('high'))
-
-            out = quintiles \
-                .where(image.lte(low),1) \
-                .where(image.gt(low).And(image.lte(lowmed)),2) \
-                .where(image.gt(lowmed).And(image.lte(highmed)),3) \
-                .where(image.gt(highmed).And(image.lte(high)),4) \
-                .where(image.gt(high),5)
-            
-            return out
-    
-        quintile_image = ee.ImageCollection(vaild_quintiles_list.map(conditions)).mosaic()
-        
-        return (quintile_image, invalid_regions)
+    return constraint_layer
 
 
-    def normalize_image(self,layer, region, method='mixmax'):
-        
-        eeimage = layer['eeimage']
-        if method == 'minmax': 
-            eeimage = self.minmax_normalization(eeimage,region)
-        elif method == 'quintile':
-            region_as_featurecollection = ee.FeatureCollection(region)
-            eeimage = self.quintile_normalization(eeimage,region_as_featurecollection)[0]
-        layer.update({'eeimage':eeimage})
+def get_cat_constraint(cat_id, value, name, layer_id):
+    """
+    Return fully defined layer dict for the constraint list
 
-    def normalize_benefits(self,benefits_layers,method='minmax'):
-        
-        list(map(lambda i : self.normalize_image(i,self.aoi_model.feature_collection, method), benefits_layers))
+    Args:
+        cat_id (int): the category number to mask in the landcover image
+        value (bool): a bool value to mask the category. True: mask it, False: keep only this one
+        name (str): the constraint name
+        layer_id (str): the gee layer id
 
-    def make_benefit_expression(self,benefits_layers):
-        
-        # build expression for benefits
-        fdict_bene = {'f' + str(index): element['norm_weight'] for index, element in enumerate(benefits_layers)}
-        idict_bene = {'b' + str(index): element['eeimage'] for index, element in enumerate(benefits_layers)}
+    Return:
+        (dict): the fully qualified layer dict
+    """
 
-        exp_bene = ['(f' + str(index) + '*b' + str(index) + ')' for index, element in enumerate(benefits_layers)]
-        # i_enum = {'b'+str(index): img.select(index) for index, element in enumerate(ranks)}
-        benefits_exp = '+'.join(exp_bene).join(['(', ')'])
+    # read the ee image and mask it according to the value
+    image = ee.Image(layer_id).select("discrete_classification")
+    image = image.neq(cat_id) if value else image.eq(cat_id)
 
-        return fdict_bene, idict_bene, benefits_exp 
-
-    def make_cost_expression(self,costs_layers):
-        
-        idict = {'c' + str(index):element['eeimage'] for index, element in enumerate(costs_layers)}
-        exp = ['(c' + str(index) + ')' for index, element in enumerate(costs_layers)]
-        exp_string = '+'.join(exp).join(['(', ')'])
-
-        return idict, exp_string
-
-    def make_constraint_expression(self,constraints_layers):
-        
-        idict = {'cn' + str(index):element['eeimage'] for index, element in enumerate(constraints_layers)}
-        exp = ['(cn' + str(index) + ')' for index, element in enumerate(constraints_layers)]
-        exp_string = '*'.join(exp).join(['(', ')'])
-
-        return idict, exp_string
-
-    def make_expression(self,benefits_layers,costs_layers,constraints_layers):
-        
-        fdict_bene, idict_bene, benefits_exp = self.make_benefit_expression(benefits_layers)
-        idict_cost, costs_exp = self.make_cost_expression(costs_layers)
-        idict_cons, constraint_exp = self.make_constraint_expression(constraints_layers)
-
-        expression_dict = {**fdict_bene, **idict_bene, **idict_cost, **idict_cons}
-        expression = f"( ( {benefits_exp} / {costs_exp} ) * {constraint_exp} )"
-
-        return expression, expression_dict
-
-    def wlc(self):
-        
-        layerlist = self.rp_layers_model.layer_list
-        constraints = json.loads(self.rp_questionaire_model.constraints)
-        priorities = json.loads(self.rp_questionaire_model.priorities)
-        
-        # load layers and create eeimages
-        benefits_layers = [i for i in layerlist if i['theme'] == 'benefits' and priorities[i['subtheme']] != 0]
-        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), benefits_layers))
-
-        risks_layers = [i for i in layerlist if i['theme'] == 'risks']
-        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer'])}), risks_layers))
-
-        costs_layers = [i for i in layerlist if i['theme'] == 'costs']
-        list(map(lambda i : i.update({'eeimage':ee.Image(i['layer']).unmask() }), costs_layers))
-
-        # constraint_layer, initialize with constant value 1 
-        constraints_layers = [i for i in layerlist if i['theme'] == 'constraint']
-        list(map(lambda i : i.update({'eeimage':ee.Image.constant(1)}), constraints_layers))
-        constraints_layers = self.make_constraints(constraints, constraints_layers)
-
-        self.normalize_benefits(benefits_layers, method='quintile')
-        
-        # normalize benefit weights to 0 - 1 
-        sum_weights =sum(priorities[i['subtheme']] for i in benefits_layers)
-        list(map(lambda i : i.update({'norm_weight': round( (priorities[i['subtheme']] / sum_weights), 5) }), benefits_layers))
-
-        exp, exp_dict = self.make_expression(benefits_layers,costs_layers,constraints_layers)
-
-        # cal wlc image
-        wlc_image = ee.Image.constant(1).expression(exp,exp_dict)
-
-        # rescale wlc image from to
-        wlc_image2 = self.percentile_normalization(wlc_image,self.aoi_model.feature_collection,10000).multiply(4).add(1)
-
-        # rather than clipping paint wlc to region
-        wlc_out = ee.Image().float()
-        wlc_out = wlc_out.paint(ee.FeatureCollection(self.aoi_model.feature_collection), 0).where(wlc_image2, wlc_image2).selfMask()
-
-        setattr(self, 'wlcoutputs',(wlc_out, benefits_layers, constraints_layers, costs_layers))
-        setattr(self, 'wlc_debug',(wlc_image,wlc_image2, wlc_out))
-        
-        return  wlc_out
+    return {"theme": "constraints", "name": name, "eeimage": image}
 
 
+def get_range_constraint(values, layer_id):
+    """
+    set a contraint in the provided layer list using the name provided by the criteria and the values provided by the user.
+    The function will find the layer in the list and update the eeimage mask
+
+    Args:
+        values (list): the min and max value of the specified range
+        layer_id (str): the gee layer id
+
+    Return:
+        (ee.Image): the masked gee image
+    """
+
+    # extract an ee.Image
+    image = ee.Image(layer_id)
+
+    # filter the image according to min and max values set by the user
+    image = image.gt(values[0]).And(image.lt(values[1]))
+
+    return image
+
+
+def get_bool_constraint(value, layer_id):
+    """
+    set a contraint in the provided layer list using the name provided by the criteria and the value provided by the user.
+    The function will find the layer in the list and update the eeimage mask
+
+    Args:
+        value (bool): a bool value to mask the category. True: mask it, False: keep only this one
+        layer_id (str): the gee layer id
+
+    Return:
+        (ee.Image): the masked gee image
+    """
+
+    # extract an ee.Image
+    image = ee.Image(layer_id)
+
+    # filter the image according to the value provided by the user
+    image = image.eq(0) if value else image.eq(1)
+
+    return image
+
+
+def normalize_benefits(benefit_list, ee_aoi, method="minmax"):
+    """
+    Normalize each benefits using the provided method
+
+    Args:
+        benefit_list (list): the list of the benefit
+        ee_aoi (ee.FeatureCollection): the aoi as an ee.FeatureCollection
+        method (str, optional): the method to use to normalize
+
+
+    Return:
+        the normalized benefit_list
+    """
+
+    # update the layer images
+    for layer in benefit_list:
+        layer.update(eeimage=normalize_image(layer, ee_aoi, method))
+
+    return benefit_list
+
+
+def _minmax(ee_image, ee_aoi, scale=10000):
+    """use the minmax normalization"""
+
+    mmvalues = ee_image.reduceRegion(
+        reducer=ee.Reducer.minMax(),
+        geometry=ee_aoi.geometry(),
+        scale=scale,
+        maxPixels=1e13,
+        bestEffort=True,
+        tileScale=4,
+    )
+
+    band_name = ee.String(ee_image.bandNames().get(0))
+    key_min = band_name.cat("_min")
+    key_max = band_name.cat("_max")
+
+    img_min = ee.Number(mmvalues.get(key_min))
+    img_max = ee.Number(mmvalues.get(key_max))
+
+    return ee_image.unitScale(img_min, img_max).float()
+
+
+def _percentile(ee_image, ee_aoi, scale=10000, percentile=[3, 97]):
+    """Use the percentile normalization"""
+
+    tmp_ee_image = ee_image.rename("img")
+
+    percents = tmp_ee_image.reduceRegion(
+        geometry=ee_aoi.geometry(),
+        reducer=ee.Reducer.percentile(percentiles=percentile),
+        scale=scale,
+    )
+
+    img_low = ee.Number(percents.get(f"img_p{percentile[0]}"))
+    img_high = ee.Number(percents.get(f"img_p{percentile[1]}")).add(0.1e-13)
+
+    return ee_image.unitScale(img_low, img_high).clamp(0, 1)
+
+
+def _quintile(ee_image, ee_aoi, scale=100):
+    """use quintile normailzation"""
+
+    quintile_collection = ee_image.reduceRegions(
+        collection=ee_aoi,
+        reducer=ee.Reducer.percentile(
+            percentiles=[20, 40, 60, 80],
+            outputNames=["low", "lowmed", "highmed", "high"],
+        ),
+        tileScale=2,
+        scale=scale,
+    )
+
+    # only use features that have non null quintiles
+    valid_quintiles = quintile_collection.filter(
+        ee.Filter.notNull(["high", "low", "lowmed", "highmed"])
+    )
+    vaild_quintiles_list = valid_quintiles.toList(valid_quintiles.size())
+
+    # catch regions where input region is null for user info (debug)
+    # invalid_regions = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']).Not())
+
+    def conditions(feature):
+
+        feature = ee.Feature(feature)
+
+        quintiles = ee.Image().byte()
+        quintiles = quintiles.paint(ee.FeatureCollection(feature), 0)
+
+        low = ee.Number(feature.get("low"))
+        lowmed = ee.Number(feature.get("lowmed"))
+        highmed = ee.Number(feature.get("highmed"))
+        high = ee.Number(feature.get("high"))
+
+        out = (
+            quintiles.where(ee_image.lte(low), 1)
+            .where(ee_image.gt(low).And(ee_image.lte(lowmed)), 2)
+            .where(ee_image.gt(lowmed).And(ee_image.lte(highmed)), 3)
+            .where(ee_image.gt(highmed).And(ee_image.lte(high)), 4)
+            .where(ee_image.gt(high), 5)
+        )
+
+        return out
+
+    quintile_image = ee.ImageCollection(vaild_quintiles_list.map(conditions)).mosaic()
+
+    return quintile_image
+
+
+def normalize_image(layer, ee_aoi, method="mixmax"):
+    """
+    Return the normalize image of a set layer using the provided method
+
+    Args:
+        layer (dict): the fully qualified layer dict
+        ee_aoi (ee.FeatureCollection): the defined aoi
+        method (str): the method to use
+    """
+
+    normalize = {"minmax": _minmax, "quintile": _quintile}
+
+    return normalize[method](ee.Image(layer["layer"]), ee_aoi)
+
+
+def get_expression(benefit_list, cost_list, constraint_list):
+
+    fdict_bene, idict_bene, benefits_exp = get_benefit_expression(benefit_list)
+    idict_cost, costs_exp = get_cost_expression(cost_list)
+    idict_cons, constraint_exp = get_constraint_expression(constraint_list)
+
+    expression_dict = {**fdict_bene, **idict_bene, **idict_cost, **idict_cons}
+    expression = f"( ( {benefits_exp} / {costs_exp} ) * {constraint_exp} )"
+
+    return expression, expression_dict
+
+
+def get_benefit_expression(benefit_list):
+
+    # build expressions for benefits
+    fdict_bene = {f"f{i}": e["norm_weight"] for i, e in enumerate(benefit_list)}
+    idict_bene = {f"b{i}": e["eeimage"] for i, e in enumerate(benefit_list)}
+
+    exp_bene = [f"(f{i}*b{i})" for i, e in enumerate(benefit_list)]
+
+    benefits_exp = f"({'+'.join(exp_bene)})"
+
+    return fdict_bene, idict_bene, benefits_exp
+
+
+def get_cost_expression(cost_list):
+
+    idict = {f"c{i}": e["eeimage"] for i, e in enumerate(cost_list)}
+    exp = [f"(c{i})" for i, e in enumerate(cost_list)]
+    exp_string = f"({'+'.join(exp)})"
+
+    return idict, exp_string
+
+
+def get_constraint_expression(constraint_list):
+
+    idict = {f"cn{i}": e["eeimage"] for i, e in enumerate(constraint_list)}
+    exp = [f"(cn{i})" for i, e in enumerate(constraint_list)]
+    exp_string = f"({'*'.join(exp)})"
+
+    return idict, exp_string
