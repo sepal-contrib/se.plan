@@ -52,7 +52,7 @@ Restoration offers many potential benefits. In its current form, **se.plan** pro
 
 **se.plan** includes two indicators each for biodiversity conservation and local livelihoods and one indicator each for carbon sequestration and wood production. Each indicator is associated with a data layer that estimates each grid cell’s relative potential to provide each benefit if the grid cell is restored;  the relative potential is measured on a scale of 1 (low) to 5 (high). Please see :ref:`Appendix C` for more detail on the interpretation and generation of the data layers for the benefit indicators.
 
-Users rate the relative importance of these benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an index that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. This restoration value index is a weighted average of the benefits, with user ratings serving as the weights. It therefore accounts for not only the potential of a grid cell to provide each benefit but also the relative importance that a user assigns to each benefit. It is scaled from 1 (low restoration value) to 5 (high restoration value). Please see Appendix D for more detail on the generation of the index.
+Users rate the relative importance of these benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an index that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. This restoration value index is a weighted average of the benefits, with user ratings serving as the weights. It therefore accounts for not only the potential of a grid cell to provide each benefit but also the relative importance that a user assigns to each benefit. It is scaled from 1 (low restoration value) to 5 (high restoration value). Please see :ref:`Appendix D` for more detail on the generation of the index.
 
 Restoration cost
 ^^^^^^^^^^^^^^^^
@@ -98,15 +98,37 @@ Output
 
 **se.plan** provides two outputs: 
 
-- A map of the Restoration suitability index scaled from 1 (low suitability) to 5 (high suitability). This map, generated within the Google Earth Engine API can be displayed in the app but also exported as a GEE asset or a .tif file in your SEPAL folders. 
+- A map of the Restoration suitability index scaled from 1 (low suitability) to 5 (high suitability). This map, generated within the Google Earth Engine API can be displayed in the app but also exported as a GEE asset or a :code:`.tif` file in your SEPAL folders. 
 
-- A dashboard that summarize informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
+- A dashboard that summarizes informations on the AOI and sub-AOIs defined by the users. The suitability index is thus presented as surfaces in Mha but **se.plan** also displays the mean values of the benefits and the sum of all the used constraints and cost over the AOIs.
 
 Usage
 -----
 
+In this section, we will exaustively describe how to use the **se.plan** application. 
+
 Open the app 
 ^^^^^^^^^^^^
+
+To access the application, please connect to your SEPAL account following this link: https://sepal.io/.
+
+Then ckicl on the purple toquewrench on the right side of your screen to access the dashboard of application (https://sepal.io/app-launch-pad). On this page you'll see all the available application of SEPAL. 
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/app_dashboard.png
+    :alt: app dashboard
+    
+In the app dashboard, type "se.plan" in the search bar. The list of application should be reduce to one sing application. 
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/app_dashboard_filter.png
+    :alt: app dashboard
+
+
+Click on it and wait until the loading is finished. You should see the about section of the application.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/landing_page.png
+    :alt: landing_page
+    
+You can then use the drawers to navigate through the application panels. The next sections will guide you through eah step of the **se.plan** process.
 
 Select AOI
 ^^^^^^^^^^
@@ -133,23 +155,263 @@ After selecting the desired area, click over the ‘Select these inputs’ butto
     
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/aoi_selection.png
     :alt: AOI selection
+    
+.. warning:: 
+
+    As described in the first section of this manual, the layers provided in this application are covering the 139 countries defined as LMIC by the *World Bank*. If the selected AOI is out of these 139 countries' boundaries, then the provided layers cannot be used to compute the index. A warning message will remind the user that every used layer will thus need to be replaced by a custom one that will conver the missing area.
+    
+    .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/out_of_lmic_selection.png
+    :alt: Out of LMIC AOI
+    
+Questionnaire
+^^^^^^^^^^^^^
+
+The questionnaire is splited in 2 steps, the constraints that will narrow the spatial extend of the computation and the indicators that will allow the user to customize the priorities of its restoration programm. 
 
 Select constraint
-^^^^^^^^^^^^^^^^^
+#################
+
+.. warning:: 
+
+    This panel cannot be used prior to select an AOI
+
+**se.plan** allows users to impose constraints that limit restoration to only those sites they view as suitable, in view of ecological and socioeconomic risks. It groups the constraints into four categories:
+
+-   Biophysical (5 constraints): elevation, slope, annual rainfall, baseline water stress, terrestrial ecoregion
+-   Current land cover (5 constraints): Shrub land, Herbaceous vegetation, Agricultural land, Urban / built up, Bare / sparse vegetation, Snow and ice, Herbaceous wetland, Moss and lichen
+-   Forest change (3 constraints): deforestation rate, climate risk, natural regeneration variability
+-   Socio-economic constraints (6 constraints): protected areas, population density, declining population, property rights protection, accessibility to cities
+
+These categories are display to the user in exandable panels. Simply click on it to open it panel and select your constraints your constraints in the dropdown menu labeled "criteria". The constraints customization will appear underneath.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/constraints.png
+    :alt: constraints
+
+**se.plan** enables the user to adjust the values that will be masked from the analysis for most of these constraints. 
+
+.. tip::
+
+    The values provided in the slider are computed on the fly over your AOI preventing the user from selecting a filter that would remove all pixels in your Area.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/sliders.png
+    :alt: binary
+
+Other constraints are binary variables, with a value of 1 if a site has the characteristic associated with the variable and 0 if it does not. For these constraints, users can choose if they want to keep zeros or ones.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/binaries.png
+    :alt: binary
+    
+Once the selection is finished, the selected constraints will be displayed as small chips in the expandable panel title, allowing the user to see all the selected constraints at a glance.
+
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/chips.png
+    :alt: constraints chips
+    
+Every selected constraints is corresponding to a layer provided by **se.plan** listed in :ref:`Appendix F`. These layers can be customized in this panel to use national data or to provide information on areas that are not covered by the tool default layers. 
+
+.. note:: 
+
+    To use a customize dataset, this layer nned to be uploaded as a :code:`ee.Image` in Google Earth Engine.
+
+
+Click on the pencil on the left side of the layer name; a popu will rise on the screen. It include multiple informations: 
+
+-   The layer name as it can be found in GEE
+-   The unit of the provided layer 
+-   A map displaying the layer over the AOI using a linear viridis color scale (the lgend is in the bootm left corner)
+
+The user can change the layer name to any other images from GEE. The map will update automatically to display this new layer and change the legend. If the provided layer uses another unit please change it. This unit will be used in the final report of the app. 
+
+.. warning:: 
+
+    The user need to have access to the provided custom layer to use it. if the asset cannot be accessed the application will fallback to the default one
+
+Once the modifications are finished click on :code:`save` to apply the changes to the layer. If the constraint is a continuaous constraint, the slider values will be updated to ythe custom dataset. 
+
+.. wanrning::
+
+    Don't forget to change the slider values after a layer customization. If your layer uses a different unit, all the pixels might be included in your filtering parameters
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/custom_constraint.gif
+    :alt: constraints customization 
+
 
 Select Indicators
-^^^^^^^^^^^^^^^^^
+#################
+
+Users rate the relative importance of benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an index that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. To rate each indicator, the user simply ticks the corresponding checkbox. 
+
+.. warning:: 
+
+    if every indicator is set to low (0), then the final output will be 0 everywhere.
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/indocators.png
+    :alt: indicators
+    
+.. tip::
+
+    Using the pencil icon next to the indicator name, the user can customize the layer used by **se.plan** to compute indicators. THe editing popup panel is the same as the one presented in the previous section.
+    
+    .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/indocator_custom.gif
+        :alt: indicators custom
+
 
 Recipe
 ^^^^^^
 
+Recipe is the base information use by **se.plan** to compute the *restoration suitability index*. It's a json serialized version of all the input the user provided in the previous steps. It can be shared and reused by other users.
+
+Validate recipe 
+###############
+
+.. warning::
+
+    The AOI and quetionnaire step need to be completed to validate the recipe
+    
+First the use should provide a name for its recipe. By default **se.plan** will use the current date but this can be specified to anything else.
+
+.. note::
+
+    If unauthorized folder characters ("\", "/", " ") are used they will be replaced automatically by "_".
+    
+Once all the required inputs are provided. the user can validate the recipe by clicking on the :code:`validate recipe` btn.
+
+A :code:`.json` file will be created in the :code:`module_result/restoration_planning_module/` directory of your SEPAL workspace and a sum-up of your inputs wil be displayed in expandable panels. 
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/valid_recipe.png
+    :alt: valid recipe
+        
+In the benefits section of the expandable panels, The user will find the list of indicators sets in the questionnaire with the selected wheight. If they are not matching its restoration priorities, they can still be modified in the questionnaire section. 
+
+.. note:: 
+
+    Don't forget to validate again the recipe every time a change is made in the prior sections (AOI selector and/or Quetionnaire).
+    
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/indicator_recipe.png
+    :alt: indicators recipe
+    
+In the Constraints section of the expandable panels, the user will find the complete list of available constraints in the tool. The activated one will be displayed in blue. The red one will be ignored in the computation of the *restoration suitability index*.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/constraints_recipe.png
+    :alt: constraints recipe
+
+
+Use existing recipe
+###################
+
+.. tips::
+
+    Loading a recipe can be done without setting any AOI or questionnaire answers.
+
+The recipe is a simple :code:`.json` file. it's meant to be shared and reused. To to so simply use the file selector of the recipe panel and select a recipe from your SEPAL workspace folder. 
+
+.. note:: 
+
+    only the :code:`.json`files will be available
+    
+.. tip::
+    
+    by default the file selector is pointing where **se.plan** is saving recipes and results. If the user wants to access the rest of its SEPAL workspace, simply click on the :code:`parent` link in the popup menu (on top of the list).
+
+Once the user will click on :code:`apply the selected recipe`, **se.plan** will reload the AOI specified in the recipe and changed all the questionnaire answers according to the loaded recipe. It's then automatically validated. 
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/load_recipe.gif
+    :alt: constraints recipe
+
+
 Compute map
 ^^^^^^^^^^^
+
+.. warning::
+
+    the recipe needs to be validated 
+    
+Once the recipe is validated, the :code:`compute the restoration map`is released and the *restoration suitability index* can be computed.
+
+The map will be centered on the selected AOI and the value of the *index* will be displayed from 1 to 5 using a color blind friendly color ramp, red  being "not suitable" and blue "very suitable". 
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/restoration_map.png
+    :alt: restoration map
+
+.. note::
+
+    The map can be downloaded as an asset to GEE or as a :code:`.tif`file. click on the :code:`cloud` btn on the top left corner and follow the exportation instructions
 
 Compute dashboard
 ^^^^^^^^^^^^^^^^^
 
+the dashboard is a report of all the restoration information gathered by **se.plan** during the computation. It is run from the map and displayed in the "dasboard" page. 
 
+Select sub AOI
+##############
+
+The Results from **se.plan** are given for the initial AOI. users can also provide sub-AOI to the tool to provide extra information on smaller areas. The sub-area are not mandatory to compute the dashboard.
+
+.. important::
+    
+    Using sub-AOI is the only way to compare results fore different zones as the normalization have been performed on the full extend of the initial AOI. 
+    
+The sub-AOI can be selected using a shapefile. The sub-AOI namee will be the one set in the selected property.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/load_shp.gif
+    :alt: load shp
+    
+They can also be directly drawn on the map. each time a new geometry is drawned a popup dialog wiil ask the user to name it. This name will be used in the final report. 
+
+.. note:: 
+
+    The user still have the possiblity to remove some geometry by clicking on the trashbin button on the map. 
+    
+.. danger::
+
+    Once the dashboard have been computed, sub-aoi will be validated (a different color for each one of them) and it will be impossible to remove them. New geometries can still be added. 
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/custom_sub_aoi.gif
+    :alt: custom sub aoi
+
+Display the results
+###################
+
+Once the :code:`compute dashboard`button is clicked, **se.plan** will generate a report shaped as a dashboard. 
+
+.. warning:: 
+
+    This action can take time as GEE need to export and reduce information on the full extend of the user initial AOI. Wait until the button stop spinning before changing page.
+
+Th dasboard has 2 sections: 
+
+#.   Summary of restoration suitability by region
+#.   Area of interest - summary by subthemes
+
+In the first one, the *restoration suitability index* is given as proportion of the AOI and the sub-AOI. click on the details panel to get the surfaces of each restoration value in Mha.
+The name use for AOI are the one selected in the map.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/dashboard_region.png
+    :alt: regional dashboard
+    
+In the second section, the summary is given by subtheme: 
+
+**Benefits**
+
+The mean value of each benefits is displayed in a bar chart. These charts use the unit corresponding to each layer and display the value for each sub-aoi. ain AOI is displayed in first in gold and the sub-aoi are displayed using the color attributed when the dashboard was computed (i.e. the same as the one used on the map).
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/dashboard_benefits.png
+    :alt: dashboard benefits
+    
+**Costs**
+
+The sum of each cost over the AOI is displayed in bar charts in the same fashion as the benefits.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/dashboard_costs.png
+    :alt: dashboard costs
+    
+**Constraints**
+
+The constraints are displayed in percentage. each value represent the percentage of surface affected by the filter applied by this constraint over the AOI. each color represent an AOI: gold for the main AOI and the automatically colors attributed to the sub-AOI when the dashboard was computed.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/documentation/doc/img/dashboard_constraints.png
+    :alt: dashboard costs
+    
 .. Appendix A:
 
 Primary data sources
