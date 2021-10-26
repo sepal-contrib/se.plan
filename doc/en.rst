@@ -232,7 +232,7 @@ The user can change the layer name to any other image from GEE. The map will upd
 
 Once the modifications are finished click on :code:`save` to apply the changes to the layer. If the constraint is non binary, the slider values will be updated to the custom dataset. 
 
-.. wanrning::
+.. warning::
 
     Don't forget to change the slider values after a layer customization. If your layer uses a different unit, all the pixels might be included in your filtering parameters.
     
@@ -961,8 +961,7 @@ Forest change constraints
       - Developed by **se.plan** team, using data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, `maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf`__
     * - Climate risk
       - % of area
-      - Difference between potential tree cover in 2050 if climate trends continue, and potential tree cover under current climatic conditions. Positive values indicate increases in potential tree cover, while negative values indicate decreases. 
-(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Ffuture_risk>`__)
+      - Difference between potential tree cover in 2050 if climate trends continue, and potential tree cover under current climatic conditions. Positive values indicate increases in potential tree cover, while negative values indicate decreases. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Ffuture_risk>`__)
       - J.F. Bastin, Y. Finegold, C. Garcia, et al., 2019, The global tree restoration potential, Science 365(6448), pp. 76–79, DOI: 10.1126/science.aax0848; data downloaded from: https://www.research-collection.ethz.ch/handle/20.500.11850/350258 
     * - Natural regeneration variability
       - scale (0 to 1)
