@@ -24,7 +24,7 @@ bool_constraint_names = [
 
 def wlc(layer_list, constraints, priorities, aoi_ee):
     """
-    Compute the resoration suitability indocator over the specified AOI
+    Compute the resoration suitability indicator over the specified AOI
     the computation will take into account all the parameters specified by the user in the app
 
     Args:
