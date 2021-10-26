@@ -174,7 +174,7 @@ Questionnaire
 The questionnaire is split in 2 steps, the constraints that will narrow the spatial extend of the computation and the indicators that will allow the user to customize the priorities of its restoration analysis. 
 
 Select constraint
-#################
+*****************
 
 .. warning:: 
 
@@ -241,7 +241,7 @@ Once the modifications are finished click on :code:`save` to apply the changes t
 
 
 Select Indicators
-#################
+*****************
 
 Users rate the relative importance of benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an *index* that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. To rate each indicator, the user simply ticks the corresponding checkbox. 
 
@@ -266,7 +266,7 @@ Recipe
 Recipe is the base information use by **se.plan** to compute the *restoration suitability index*. It's a :code:`.json` serialized version of all the inputs the user provided in the previous steps. It can be shared and reused by other users.
 
 Validate recipe 
-###############
+***************
 
 .. warning::
 
@@ -301,7 +301,7 @@ In the Constraints section of the expandable panels, the user will find the comp
 
 
 Use existing recipe
-###################
+*******************
 
 .. tip::
 
@@ -348,7 +348,7 @@ Compute dashboard
 The dashboard is a report of all the restoration informations gathered by **se.plan** during the computation. It is run from the map and displayed in the "dasboard" page. 
 
 Select sub AOI
-##############
+**************
 
 The Results from **se.plan** are given for the initial AOI. users can also provide sub-AOIs to the tool to provide extra information on smaller areas. The sub-area are not mandatory to compute the dashboard.
 
@@ -375,7 +375,7 @@ They can also be directly drawn on the map. Each time a new geometry is drawned,
     :alt: custom sub aoi
 
 Display the results
-###################
+*******************
 
 After clicking on :code:`compute dashboard` button, **se.plan** will generate a report shaped as a dashboard. 
 
@@ -959,7 +959,7 @@ Forest change constraints
       - %/yr
       - Annual rate of tree-cover loss within a 5 km buffer around a site during 2005–2015, expressed as a positive percentage of total tree cover. Higher values indicate higher rates of loss. The value is zero in areas without deforestation (i.e., areas with expanding tree cover). (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fdeforestation_rate>`__)
       - Developed by **se.plan** team, using data from: ESA, 2017, Land Cover CCI Product User Guide, Version 2, `maps.elie.ucl.ac.be/CCI/viewer/download/ESACCI-LC-Ph2-PUGv2_2.0.pdf`__
-      - Climate risk
+    * - Climate risk
       - % of area
       - Difference between potential tree cover in 2050 if climate trends continue, and potential tree cover under current climatic conditions. Positive values indicate increases in potential tree cover, while negative values indicate decreases. 
 (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Ffuture_risk>`__)
