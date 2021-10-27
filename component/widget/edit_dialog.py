@@ -227,13 +227,13 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         # get min
         min_ = ee_image.reduceRegion(
-            reducer=ee.Reducer.min(), geometry=geometry, scale=250
+            reducer=ee.Reducer.min(), geometry=geometry, scale=250, bestEffort=True
         )
         min_ = list(min_.getInfo().values())[0]
 
         # get max
         max_ = ee_image.reduceRegion(
-            reducer=ee.Reducer.max(), geometry=geometry, scale=250
+            reducer=ee.Reducer.max(), geometry=geometry, scale=250, bestEffort=True
         )
         max_ = list(max_.getInfo().values())[0]
 
