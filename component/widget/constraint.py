@@ -126,7 +126,7 @@ class Range(Constraint):
 
         # if noneType it means that my AOI is out of bounds with respect to my constraint
         # as it won't be usable I need to add a hint to the end user
-        if not min_ or not max_:
+        if min_ is None or max_ is None:
 
             self.widget.error_messages = "The aoi is out of the bounds of your constraint layer, use a custom one."
             self.widget.min = 0
