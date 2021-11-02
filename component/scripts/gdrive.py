@@ -74,7 +74,7 @@ class gdrive(object):
         items = self.get_items()
         files = []
         for item in items:
-            if file_name in item["name"]:
+            if item["name"].startswith(file_name):
                 files.append({"id": item["id"], "name": item["name"]})
 
         return files
