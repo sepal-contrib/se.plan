@@ -35,14 +35,13 @@ class Constraint(sw.SepalWidget, v.Row):
             v.Flex(align_center=True, xs11=True, children=[self.widget]),
         ]
 
-        # link widget and custom_v_model
-        dlink((self.widget, "v_model"), (self, "custom_v_model"))
-
     @observe("v_model")
     def _on_change(self, change):
 
         # update the custom v_model
-        self.custom_v_model = change["new"]
+        # if the widget is displayed on the questionnaire
+        if self.visible:
+            self.custom_v_model = change["new"]
 
         return
 
