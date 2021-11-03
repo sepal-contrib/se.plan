@@ -59,6 +59,7 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     # meaning that for all layer nothing is masked
     constraint_list = [i for i in layer_list if i["theme"] == "constraint"]
     list(map(lambda i: i.update({"eeimage": ee.Image.constant(1)}), constraint_list))
+
     constraint_list = set_constraints(constraints, constraint_list)
 
     # normalize the benefits on the aoi extends using the quintile method
@@ -115,7 +116,7 @@ def set_constraints(constraints, constraint_list):
         value = constraints[name]
 
         # skip if the constraint is disabled
-        if value == None or value == -1:
+        if value is None or value == -1:
             continue
 
         # get the constraint
@@ -322,9 +323,6 @@ def _quintile(ee_image, ee_aoi, scale=100):
         ee.Filter.notNull(["high", "low", "lowmed", "highmed"])
     )
     vaild_quintiles_list = valid_quintiles.toList(valid_quintiles.size())
-
-    # catch regions where input region is null for user info (debug)
-    # invalid_regions = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']).Not())
 
     def conditions(feature):
 

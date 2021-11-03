@@ -104,12 +104,13 @@ class ConstraintTile(sw.Tile, HasTraits):
 
         # activate every criteria via their panels selector
         for p in self.panels.children:
+            criterias = []
             for c in p.criterias:
-                criterias = []
                 for k, v in data.items():
                     if c.name == k and v != -1:
-                        c.v_model = v
+                        c.widget.v_model = v
                         criterias.append(c.name)
+
             p.select.v_model = criterias
             p.shrunk()
 

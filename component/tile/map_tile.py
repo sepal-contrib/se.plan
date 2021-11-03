@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
@@ -8,7 +9,6 @@ from shapely import geometry as sg
 import geopandas as gpd
 import geemap
 import ee
-import json
 from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON
 from matplotlib import pyplot as plt

@@ -78,7 +78,8 @@ class ValidationTile(sw.Tile):
     def _normalize_name(self, widget, event, data):
         """normalize the recipe name on blur as it will be used everywhere else"""
 
-        widget.v_model = su.normalize_str(widget.v_model)
+        if widget.v_model:
+            widget.v_model = su.normalize_str(widget.v_model)
 
         return self
 
@@ -117,8 +118,5 @@ class ValidationTile(sw.Tile):
 
         # automatically validate them
         self.btn.fire_event("click", None)
-
-        # send a message to the end user
-        self.alert.add_msg("loaded", "success")
 
         return self
