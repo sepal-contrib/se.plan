@@ -101,7 +101,9 @@ class ExportMap(v.Menu, sw.SepalWidget):
                     "visualization_0_max": 5,
                     "visualization_0_min": 0,
                     "visualization_0_name": "restauration index",
-                    "visualization_0_palette": ",".join(red_to_green),
+                    "visualization_0_palette": ",".join(
+                        cp.no_data_color + cp.gradient(5)
+                    ),
                     "visualization_0_type": "continuous",
                 }
             )
@@ -158,8 +160,8 @@ class ExportMap(v.Menu, sw.SepalWidget):
 
             # add the colormap to each tile
             colormap = {}
-            for code, item in self.dst_class.items():
-                colormap[code] = tuple(int(c * 255) for c in to_rgba(item[1]))
+            for code, color in enumerate(no_data_color + cp.gradient(5)):
+                colormap[i] = tuple(int(c * 255) for c in to_rgba(color))
 
             for tile in tile_list:
 

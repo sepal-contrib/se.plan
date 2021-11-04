@@ -32,7 +32,7 @@ class MapTile(sw.Tile):
         # create the map
         self.m = sm.SepalMap(dc=True).hide_dc()
         self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
-        self.m.add_colorbar(colors=cp.red_to_green, vmin=0, vmax=5)
+        self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
         # drawing managment
         self.draw_features = {"type": "FeatureCollection", "features": []}

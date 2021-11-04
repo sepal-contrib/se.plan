@@ -20,7 +20,6 @@ criteria_types = {
     "land_use": "Land use constraints",
     "bio": "Biophysical constraints",
     "socio_eco": "Socio-economic constraints",
-    #'treecover': 'Tree cover constraints within land cover classes',
     "forest": "Forest change",
 }
 
