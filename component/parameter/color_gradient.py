@@ -1,4 +1,4 @@
-red_to_green = ["#d73027", "#fee090", "#4575b4"]  # red  # yellow  # blue
+red_to_green = ["#edf8fb", "#66c2a4", "#006d2c"]  # lighgreen  # green  # darkgreen
 no_data_color = ["#353535"]  # the color used for values filtered by constraints
 
 
