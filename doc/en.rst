@@ -1012,7 +1012,7 @@ Socio-economic constraints
       
       
 Acknowledgement
---------------
+---------------
 
 This tool has been developed by UN FAO in close collaboration with Spatial Informatics Group (SIG), SilvaCarbon and researchers at Peking University and Duke University, with financial support from the Government of Japan.
 
