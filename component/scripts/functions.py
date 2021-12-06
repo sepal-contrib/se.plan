@@ -31,6 +31,7 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
         layer_list (dict): the list of layers items
         constraints (str): a str json formatted list of constraints. Use the formatting specified in the QuestionModel
         priorities (str): a str json formatted list of priorities. Use the formatting specified in the QuestionModel
+        aoi_ee (ee.FeatureCollection): The AOI geometry
 
     Return:
         (ee.Image): the restoration suitability index
@@ -59,6 +60,7 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     # meaning that for all layer nothing is masked
     constraint_list = [i for i in layer_list if i["theme"] == "constraint"]
     list(map(lambda i: i.update({"eeimage": ee.Image.constant(1)}), constraint_list))
+
     constraint_list = set_constraints(constraints, constraint_list)
 
     # normalize the benefits on the aoi extends using the quintile method
@@ -76,23 +78,31 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     )
 
     # calc wlc image
-    exp, exp_dict = get_expression(benefit_list, cost_list, constraint_list)
-    wlc_image = ee.Image.constant(1).expression(exp, exp_dict)
+    exp, exp_dict = get_expression(benefit_list, cost_list)
+    wlc_image = ee.Image.constant(0).expression(exp, exp_dict)
 
-    # rescale wlc image from to
+    # rescale wlc image from [0-4] to [1-5]
     wlc_image = (
         _percentile(wlc_image, aoi_ee, scale=10000, percentile=[3, 97])
         .multiply(4)
         .add(1)
     )
 
+    # set constraints as 0 values
+    idict_cons, constraint_exp = get_constraint_expression(constraint_list)
+    exp_dict = {"wlc": wlc_image, **idict_cons}
+    exp = f"( wlc * {constraint_exp} )"
+    wlc_image = wlc_image.expression(exp, exp_dict)
+
+    wlc_out = wlc_image.clip(aoi_ee)
+
     # rather than clipping paint wlc to region
-    wlc_out = ee.Image().float()
-    wlc_out = (
-        wlc_out.paint(ee.FeatureCollection(aoi_ee), 0)
-        .where(wlc_image, wlc_image)
-        .selfMask()
-    )
+    # wlc_out = ee.Image().float()
+    # wlc_out = (
+    #    wlc_out.paint(ee.FeatureCollection(aoi_ee), 0)
+    #    .where(wlc_image, wlc_image)
+    #    .selfMask()
+    # )
 
     return wlc_out, benefit_list, constraint_list, cost_list
 
@@ -115,7 +125,7 @@ def set_constraints(constraints, constraint_list):
         value = constraints[name]
 
         # skip if the constraint is disabled
-        if value == None or value == -1:
+        if value is None or value == -1:
             continue
 
         # get the constraint
@@ -142,7 +152,7 @@ def set_constraints(constraints, constraint_list):
         # the rest of the bool values (land cover have already been handle I can safely use the bool list)
         elif name in bool_constraint_names:
             constraint_layer.update(
-                ee_image=get_bool_constraint(value, constraint_layer["layer"])
+                eeimage=get_bool_constraint(value, constraint_layer["layer"])
             )
 
     # add the default geographic constraint
@@ -323,9 +333,6 @@ def _quintile(ee_image, ee_aoi, scale=100):
     )
     vaild_quintiles_list = valid_quintiles.toList(valid_quintiles.size())
 
-    # catch regions where input region is null for user info (debug)
-    # invalid_regions = quintile_collection.filter(ee.Filter.notNull(['high','low','lowmed','highmed']).Not())
-
     def conditions(feature):
 
         feature = ee.Feature(feature)
@@ -368,14 +375,13 @@ def normalize_image(layer, ee_aoi, method="mixmax"):
     return normalize[method](ee.Image(layer["layer"]), ee_aoi)
 
 
-def get_expression(benefit_list, cost_list, constraint_list):
+def get_expression(benefit_list, cost_list):
 
     fdict_bene, idict_bene, benefits_exp = get_benefit_expression(benefit_list)
     idict_cost, costs_exp = get_cost_expression(cost_list)
-    idict_cons, constraint_exp = get_constraint_expression(constraint_list)
 
-    expression_dict = {**fdict_bene, **idict_bene, **idict_cost, **idict_cons}
-    expression = f"( ( {benefits_exp} / {costs_exp} ) * {constraint_exp} )"
+    expression_dict = {**fdict_bene, **idict_bene, **idict_cost}
+    expression = f"( ( {benefits_exp} / {costs_exp} ))"
 
     return expression, expression_dict
 

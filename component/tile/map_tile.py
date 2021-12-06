@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
@@ -8,7 +9,6 @@ from shapely import geometry as sg
 import geopandas as gpd
 import geemap
 import ee
-import json
 from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON
 from matplotlib import pyplot as plt
@@ -32,7 +32,7 @@ class MapTile(sw.Tile):
         # create the map
         self.m = sm.SepalMap(dc=True).hide_dc()
         self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
-        self.m.add_colorbar(colors=cp.red_to_green, vmin=0, vmax=5)
+        self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
         # drawing managment
         self.draw_features = {"type": "FeatureCollection", "features": []}

@@ -9,7 +9,7 @@ from component.message import cm
 class AreaSumUp(v.Layout):
 
     NAMES = ["restoration potential", "surface (MHa)", "ratio over total surface (%)"]
-    COLORS = cp.gradient(5) + ["grey"]
+    COLORS = cp.gradient(5) + cp.no_data_color
     POTENTIALS = ["Very low", "Low", "Medium", "High", "Very High", "Unsuitable land"]
 
     def __init__(self, title, surfaces=[0] * 6):

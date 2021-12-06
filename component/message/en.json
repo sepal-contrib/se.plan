@@ -79,7 +79,7 @@
                 "For any of these thematic layers, if you have used your own data in the model, then please refer to the methods used to create that layer."
             ],
             "cost": [
-                "The tool includes data on two types of costs: opportunity costs, and establishment costs. The opportunity cost is based on the value of land for crop production unless data on crop production are missing, in which case the opportunity cost is based on the value of pastureland. Establishment costs refer to artificial regeneration, which typically means planting seedlings but sometimes means sowing seeds.",
+                "The tool includes data on two types of costs: opportunity costs, and implementation costs. The opportunity cost is based on the value of land for crop production unless data on crop production are missing, in which case the opportunity cost is based on the value of pastureland. Implementation costs refer to artificial regeneration, which typically means planting seedlings but sometimes means sowing seeds.",
                 "Note: Information on the variability of natural regeneration success is included in the \"Constraints\" category." 
             ],
             "constraint": ["Results indicate the percentage of the total area of the region of interest that is subject to each particular constraint (i.e., is excluded from restoration)."]
@@ -100,7 +100,7 @@
         "txt": [
             "The map below displays the suitability of different locations for restoration, based on your rating of restoration benefits and your selection of restoration constraints. Blue areas indicate a higher return on investment, while red areas indicate a lower return.",
             "Examine the restoration suitability map and identify some areas that seem promising for more detailed restoration planning. Once you have identified these areas, you can draw a boundary around them and obtain summary statistics on their estimated benefits, costs, and risks (i.e., constraints). This information can help you assess tradeoffs and set restoration priorities for regions of interest.",
-            "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and establishment costs. This indicator allows you to compare the restoration suitability of different sites and determine which ones offer higher returns on investment."
+            "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and implementation costs. This indicator allows you to compare the restoration suitability of different sites and determine which ones offer higher returns on investment."
             ],
         "dialog": {
             "title": "Sub AOI name",

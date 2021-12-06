@@ -1,4 +1,5 @@
-red_to_green = ["#fc8d59", "#ffffbf", "#91bfdb"]  # red  # yellow  # blue
+red_to_green = ["#edf8fb", "#66c2a4", "#006d2c"]  # lighgreen  # green  # darkgreen
+no_data_color = ["#353535"]  # the color used for values filtered by constraints
 
 
 def hex_to_RGB(hex):
