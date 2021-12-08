@@ -152,7 +152,7 @@ def set_constraints(constraints, constraint_list):
         # the rest of the bool values (land cover have already been handle I can safely use the bool list)
         elif name in bool_constraint_names:
             constraint_layer.update(
-                ee_image=get_bool_constraint(value, constraint_layer["layer"])
+                eeimage=get_bool_constraint(value, constraint_layer["layer"])
             )
 
     # add the default geographic constraint
