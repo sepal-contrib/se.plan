@@ -38,7 +38,7 @@ Methodology
 Selection of planning area
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`Usage section`. 
+**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`usage`. 
 
 Restoration indicators
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -801,7 +801,7 @@ Where :math:`w_1`, :math:`w_2`, :math:`w_3`, and :math:`w_4` are the user rating
 
 	Benefit\_cost\_ratio = Restoration\_value\_index / Restoration\_cost.
     
-The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`Appendix E`. As a final step, **se.plan** converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the *restoration suitability index* on the map and dashboard.
+The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`appendix_e`. As a final step, **se.plan** converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the *restoration suitability index* on the map and dashboard.
 
 As noted above, **se.plan** includes two indicators for benefits :math:`B_1` (biodiversity conservation) and :math:`B_3` (local livelihoods). For :math:`B_1`, the two indicators are the *biodiversity intactness index* and *number of endangered species*. Denote these two indicators by :math:`B_1a` and :math:`B_1b`. **se.plan** converts each of these indicators to a 1-5 scale and then calculates the overall biodiversity benefit, :math:`B_1`, as their simple average:
 
