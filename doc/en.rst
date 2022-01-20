@@ -17,7 +17,7 @@ The sections below highlight key features of **se.plan**. In brief, following th
 
 In addition to reading this manual, we encourage users to watch **se.plan** YouTube videos:
 
-.. youtube:: https://www.youtube.com/watch?v=37pCFhF4zBI
+.. youtube:: 37pCFhF4zBI
     :align: center
 
 Geographical resolution and scope
