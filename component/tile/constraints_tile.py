@@ -50,7 +50,7 @@ class ConstraintTile(sw.Tile, HasTraits):
             elif isinstance(value, list):  # dropdown values
                 crit = cw.Dropdown(key, value, header, id_=id_, hint=hint)
             elif value == "RANGE":  # range values
-                crit = cw.Range(key, header, unit, id_=id_)
+                crit = cw.Range(key, header, unit, id_=id_, hint=hint)
 
             self.criterias.append(crit)
 

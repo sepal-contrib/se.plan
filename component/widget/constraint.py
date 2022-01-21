@@ -108,6 +108,7 @@ class Range(Constraint):
             step=0.1,
             v_model=[0, 1],
             thumb_label=True,
+            persistent_hint=True,
             **kwargs,
         )
 
