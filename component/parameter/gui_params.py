@@ -1,8 +1,8 @@
 # value of each land cover category
 landcover_default_cat = {
-    "Shrub land": 20,
+    "Shrubs": 20,
     "Herbaceous vegetation": 30,
-    "Agricultural land": 40,
+    "Cultivated and managed vegetation/agriculture": 40,
     "Urban / built up": 50,
     "Bare / sparse vegetation": 60,
     "Snow and ice": 70,
