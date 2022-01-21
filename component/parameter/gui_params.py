@@ -11,7 +11,7 @@ landcover_default_cat = {
 }
 
 land_use_criterias = {
-    k: {"tooltip": 2, "layer": None, "header": "land_use", "content": "BINARY"}
+    k: {"tooltip": 2, "layer": "land_cover", "header": "land_use", "content": "BINARY"}
     for k in landcover_default_cat
 }
 

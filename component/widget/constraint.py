@@ -76,7 +76,7 @@ class Binary(Constraint):
             persistent_hint=True,
             v_model=True,
             label=name,
-            **kwargs
+            **kwargs,
         )
 
         super().__init__(widget, name=name, header=header, id_=id_)
@@ -90,7 +90,7 @@ class Dropdown(Constraint):
             persistent_hint=True,
             items=items,
             v_model=int(items[0]["value"]),
-            **kwargs
+            **kwargs,
         )
 
         super().__init__(widget, name=name, header=header)
@@ -100,10 +100,15 @@ class Range(Constraint):
 
     LABEL = ["low", "medium", "high"]
 
-    def __init__(self, name, header, id_, **kwargs):
+    def __init__(self, name, header, unit, id_, **kwargs):
 
         widget = v.RangeSlider(
-            label=name, max=1, step=0.1, v_model=[0, 1], thumb_label=True, **kwargs
+            label=f"{name} ({unit})",
+            max=1,
+            step=0.1,
+            v_model=[0, 1],
+            thumb_label=True,
+            **kwargs,
         )
 
         super().__init__(widget, name=name, header=header, id_=id_)
