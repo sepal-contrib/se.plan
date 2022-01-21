@@ -57,7 +57,7 @@ class LayerFull(sw.Layout):
                 magnitude += 1
                 num = round(num / 1000.0, round_to)
             return "{:.{}f}{}".format(
-                round(num, round_to), round_to, ["", "K", "M", "G", "T", "P"][magnitude]
+                round(num, round_to), round_to, ["", "k", "M", "G", "T", "P"][magnitude]
             )
 
         # create a matplotlib stack horizontal bar chart

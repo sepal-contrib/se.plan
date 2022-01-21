@@ -410,7 +410,7 @@ In the second section, the summary is given by subtheme:
 
 **Benefits**
 
-The mean value of each benefits is displayed in a bar chart. These charts use the unit corresponding to each layer and display the value for each sub-AOI. The main AOI is first displayed in gold and the sub-AOIs are displayed using the color attributed when the dashboard was computed (i.e. the same as the one used on the map).
+The mean value of each benefits is displayed in a bar chart. These charts use the unit corresponding to each layer and display the value for each sub-AOI. Value will be using the SI prefixes if the value is not readable in the original unit. The main AOI is first displayed in gold and the sub-AOIs are displayed using the color attributed when the dashboard was computed (i.e. the same as the one used on the map).
 
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/dashboard_benefits.png
     :alt: dashboard benefits

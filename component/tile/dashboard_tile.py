@@ -51,13 +51,13 @@ class DashThemeTile(sw.Tile):
                     continue
 
         benefits = v.Html(tag="h2", children=["Benefits"])
-        benefits_txt = sw.Markdown("  /n".join(cm.dashboard.theme.benefit))
+        benefits_txt = sw.Markdown("  \n".join(cm.dashboard.theme.benefit))
 
         costs = v.Html(tag="h2", children=["Costs"])
-        costs_txt = sw.Markdown("  /n".join(cm.dashboard.theme.cost))
+        costs_txt = sw.Markdown("  \n".join(cm.dashboard.theme.cost))
 
         constraints = v.Html(tag="h2", children=["Constraints"])
-        constraints_txt = sw.Markdown("  /n".join(cm.dashboard.theme.constraint))
+        constraints_txt = sw.Markdown("  \n".join(cm.dashboard.theme.constraint))
 
         # create an expansion panel to store everything
         ep = v.ExpansionPanels(

@@ -74,11 +74,12 @@
             "title": "Area of interest - summary by subthemes",
             "txt": "To help disentangle the potential impacts of restoration at each candidate site, we report the individual benefits, costs, and risks (i.e., constraints) in finer detail below.",
             "benefit": [
-                "Assessed benefits include improvements to wood production, local livelihoods, and non-timber resources, including biodiversity conservation and carbon sequestration. Each benefit is quantified in its original units (for example, C tons/ha). We also present the information in quintiles across the country.",
-                "For any of these thematic layers, if you have used your own data in the model, then please refer to the methods used to create that layer."
+                "For each assessed benefit, the mean value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
+                "For any of these thematic layers, if you have used your own data in the model, make sure that you provided the correct information."
             ],
             "cost": [
-                "The tool includes data on two types of costs: opportunity costs, and implementation costs. The opportunity cost is based on the value of land for crop production unless data on crop production are missing, in which case the opportunity cost is based on the value of pastureland. Implementation costs refer to artificial regeneration, which typically means planting seedlings but sometimes means sowing seeds.",
+                "The tool includes data on two types of costs: opportunity costs, and implementation costs. Please refer to our manual for more information.",
+                "For each cost, the sum value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
                 "Note: Information on the variability of natural regeneration success is included in the \"Constraints\" category." 
             ],
             "constraint": ["Results indicate the percentage of the total area of the region of interest that is subject to each particular constraint (i.e., is excluded from restoration)."]
