@@ -82,20 +82,6 @@ class Binary(Constraint):
         super().__init__(widget, name=name, header=header, id_=id_)
 
 
-class Dropdown(Constraint):
-    def __init__(self, name, items, header, **kwargs):
-
-        widget = v.Select(
-            label=name,
-            persistent_hint=True,
-            items=items,
-            v_model=int(items[0]["value"]),
-            **kwargs,
-        )
-
-        super().__init__(widget, name=name, header=header)
-
-
 class Range(Constraint):
 
     LABEL = ["low", "medium", "high"]
@@ -107,7 +93,7 @@ class Range(Constraint):
             max=1,
             step=0.1,
             v_model=[0, 1],
-            thumb_label=True,
+            thumb_label="always",
             persistent_hint=True,
             **kwargs,
         )
@@ -139,7 +125,7 @@ class Range(Constraint):
             self.widget.min = 0
             self.widget.max = 1
             self.widget.step = 0.1
-            self.widget.tick_labels = []
+            # self.widget.tick_labels = []
             self.widget.v_model = [0, 1]
 
         else:
@@ -152,12 +138,12 @@ class Range(Constraint):
             self.widget.max = round(max_, 2)
 
             # set the number of steps by stting the step parameter (100)
-            self.widget.step = round((self.widget.max - self.widget.min) / 100, 2)
+            self.widget.step = max(0.01, (self.widget.max - self.widget.min) / 100)
 
             # display ticks label with low medium and high values
-            self.widget.tick_labels = [
-                self.LABEL[i // 25 - 1] if i in [25, 50, 75] else "" for i in range(101)
-            ]
+            # self.widget.tick_labels = [
+            #    self.LABEL[i // 25 - 1] if i in [25, 50, 75] else "" for i in range(101)
+            # ]
 
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
