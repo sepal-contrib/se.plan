@@ -1,6 +1,8 @@
 from pathlib import Path
 import json
+from copy import deepcopy
 
+from sepal_ui import color as sc
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
 from sepal_ui.scripts import utils as su
@@ -13,6 +15,7 @@ from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
+from ipywidgets import HTML
 
 from component.message import cm
 from component import parameter as cp
@@ -21,6 +24,9 @@ from component import widget as cw
 
 
 class MapTile(sw.Tile):
+
+    EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
+
     def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile):
 
         # add the explanation
@@ -34,8 +40,14 @@ class MapTile(sw.Tile):
         self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
         self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
+        # create a window to display AOI information
+        self.html = HTML()
+        self.html.layout.margin = "0em 2em 0em 20em"
+        control = WidgetControl(widget=self.html, position="bottomright")
+        self.m.add_control(control)
+
         # drawing managment
-        self.draw_features = {"type": "FeatureCollection", "features": []}
+        self.draw_features = deepcopy(self.EMPTY_FEATURES)
         self.colors = []
         self.name_dialog = cw.CustomAoiDialog()
 
@@ -104,6 +116,18 @@ class MapTile(sw.Tile):
             }
             self._add_geom(feat, row[column])
 
+        # display a tmp geometry before validation
+        data = json.loads(gdf.to_json())
+        style = {
+            **cp.aoi_style,
+            "color": sc.info,
+            "fillColor": sc.info,
+            "opacity": 0.5,
+            "weight": 2,
+        }
+        layer = GeoJSON(data=data, style=style, name="tmp")
+        self.m.add_layer(layer)
+
         return
 
     def _add_geom(self, geo_json, name):
@@ -115,6 +139,30 @@ class MapTile(sw.Tile):
 
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map"""
+
+        # remove the previous sub aoi from the map
+        [
+            self.m.remove_layer(l)
+            for l in self.m.layers
+            if l.name not in ["CartoDB.DarkMatter"]
+        ]
+        self.m.dc.clear()
+        self.draw_features = deepcopy(self.EMPTY_FEATURES)
+
+        # add the AOI geometry
+        # using the color code of the dashboard
+        style = {
+            **cp.aoi_style,
+            "fillOpacity": 0,
+            "color": sc.primary,
+            "fillColor": sc.primary,
+        }
+        aoi_layer = self.aoi_model.get_ipygeojson()
+        aoi_layer.name = f"{self.aoi_model.name}"
+        aoi_layer.style = style
+        aoi_layer.hover_style = {**style, "weight": 2}
+        aoi_layer.on_hover(self._display_name)
+        self.m.add_layer(aoi_layer)
 
         # create a layer and a dashboard
         self.wlc_outputs = cs.wlc(
@@ -146,17 +194,26 @@ class MapTile(sw.Tile):
         """save the features as layers on the map"""
 
         # remove any sub aoi layer
-        [self.m.remove_layer(l) for l in self.m.layers if "sub aoi" in l.name]
+        layers_2_keep = ["CartoDB.DarkMatter", "restoration layer", self.aoi_model.name]
+        [self.m.remove_layer(l) for l in self.m.layers if l.name not in layers_2_keep]
 
         # save the drawn features
         draw_features = self.draw_features
 
         # remove the shapes from the dc
-        # as a side effect the draw_feature member will be emptied
+        # as a side effect the draw_features member will be emptied
         self.m.dc.clear()
 
         # reset the draw_features
+        # I'm sure the the AOI folder exists because the recipe was already saved there
         self.draw_features = draw_features
+        features_file = (
+            cp.result_dir
+            / self.aoi_model.name
+            / f"features_{self.question_model.recipe_name}.geojson"
+        )
+        with features_file.open("w") as f:
+            json.dump(draw_features, f)
 
         # set up the colors using the tab10 matplotlib colormap
         self.colors = [
@@ -167,7 +224,9 @@ class MapTile(sw.Tile):
         for feat, color in zip(self.draw_features["features"], self.colors):
             name = feat["properties"]["name"]
             style = {**cp.aoi_style, "color": color, "fillColor": color}
-            layer = GeoJSON(data=feat, style=style, name=f"sub aoi {name}")
+            hover_style = {**style, "fillOpacity": 0.4, "weight": 2}
+            layer = GeoJSON(data=feat, style=style, hover_style=hover_style, name=name)
+            layer.on_hover(self._display_name)
             self.m.add_layer(layer)
 
         return self
@@ -226,6 +285,20 @@ class MapTile(sw.Tile):
             return self
 
         self._add_geom(self.name_dialog.feature, self.name_dialog.w_name.v_model)
+
+        return self
+
+    def _display_name(self, feature, **kwargs):
+        """update the AOI in the html viewver widget"""
+
+        # if the feature is a aoi it has no name so I display only the sub AOI name
+        # it will be solved with: https://github.com/12rambau/sepal_ui/issues/390
+        name = (
+            feature["properties"]["name"]
+            if "name" in feature["properties"]
+            else "Main AOI"
+        )
+        self.html.value = f"<h3><b>{name}</b></h3>"
 
         return self
 

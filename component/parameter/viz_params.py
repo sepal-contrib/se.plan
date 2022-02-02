@@ -29,9 +29,9 @@ plt_viz = {
 aoi_style = {  # default styling of the layer
     "stroke": True,
     "color": "black",
-    "weight": 2,
+    "weight": 1,
     "opacity": 1,
     "fill": True,
     "fillColor": "black",
-    "fillOpacity": 0.4,
+    "fillOpacity": 0.05,
 }
