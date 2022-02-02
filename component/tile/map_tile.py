@@ -116,6 +116,18 @@ class MapTile(sw.Tile):
             }
             self._add_geom(feat, row[column])
 
+        # display a tmp geometry before validation
+        data = json.loads(gdf.to_json())
+        style = {
+            **cp.aoi_style,
+            "color": sc.info,
+            "fillColor": sc.info,
+            "opacity": 0.5,
+            "weight": 2,
+        }
+        layer = GeoJSON(data=data, style=style, name="tmp")
+        self.m.add_layer(layer)
+
         return
 
     def _add_geom(self, geo_json, name):
