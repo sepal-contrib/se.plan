@@ -917,7 +917,7 @@ Potential constraint
 
 .. warning::
 
-    This contraint is hard coded in the tool. The user cannot customize it. It covers the entire world meaning that it will not mask all your analysis if **se.plan** is run outside of the LMIC. 
+    This contraint is hard coded in the tool, the user cannot customize it. It covers the entire world meaning that it will not mask all your analysis if **se.plan** is run outside of the LMIC. 
     
 .. list-table::
     :header-rows: 1
