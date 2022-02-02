@@ -117,9 +117,11 @@ class MapTile(sw.Tile):
         """compute the restoration plan and display the map"""
 
         # remove the previous sub aoi from the map
-        for l in self.m.layers:
-            if l.name not in ["CartoDB.DarkMatter"]:
-                self.m.remove_layer(l)
+        [
+            self.m.remove_layer(l)
+            for l in self.m.layers
+            if l.name not in ["CartoDB.DarkMatter"]
+        ]
 
         # create a layer and a dashboard
         self.wlc_outputs = cs.wlc(
@@ -151,17 +153,26 @@ class MapTile(sw.Tile):
         """save the features as layers on the map"""
 
         # remove any sub aoi layer
-        [self.m.remove_layer(l) for l in self.m.layers if "sub aoi" in l.name]
+        layers_2_keep = ["CartoDB.DarkMatter", "restoration layer"]
+        [self.m.remove_layer(l) for l in self.m.layers if l.name not in layers_2_keep]
 
         # save the drawn features
         draw_features = self.draw_features
 
         # remove the shapes from the dc
-        # as a side effect the draw_feature member will be emptied
+        # as a side effect the draw_features member will be emptied
         self.m.dc.clear()
 
         # reset the draw_features
+        # I'm sure the the AOI folder exists because the recipe was already saved there
         self.draw_features = draw_features
+        features_file = (
+            cp.result_dir
+            / self.aoi_model.name
+            / f"features_{self.question_model.recipe_name}.geojson"
+        )
+        with features_file.open("w") as f:
+            json.dump(draw_features, f)
 
         # set up the colors using the tab10 matplotlib colormap
         self.colors = [
