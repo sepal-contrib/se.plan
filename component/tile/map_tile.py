@@ -1,5 +1,6 @@
 from pathlib import Path
 import json
+from copy import deepcopy
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
@@ -21,6 +22,9 @@ from component import widget as cw
 
 
 class MapTile(sw.Tile):
+
+    EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
+
     def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile):
 
         # add the explanation
@@ -35,7 +39,7 @@ class MapTile(sw.Tile):
         self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
         # drawing managment
-        self.draw_features = {"type": "FeatureCollection", "features": []}
+        self.draw_features = deepcopy(self.EMPTY_FEATURES)
         self.colors = []
         self.name_dialog = cw.CustomAoiDialog()
 
@@ -122,6 +126,8 @@ class MapTile(sw.Tile):
             for l in self.m.layers
             if l.name not in ["CartoDB.DarkMatter"]
         ]
+        self.m.dc.clear()
+        self.draw_features = deepcopy(self.EMPTY_FEATURES)
 
         # create a layer and a dashboard
         self.wlc_outputs = cs.wlc(
