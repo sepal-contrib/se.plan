@@ -193,7 +193,7 @@ Select constraints
 **se.plan** allows users to set constraints limiting restoration to only those sites they view as suitable, in view of ecological and socioeconomic risks. It groups the constraints into four categories:
 
 -   Biophysical (5 constraints): elevation, slope, annual rainfall, baseline water stress, terrestrial ecoregion
--   Current land cover (5 constraints): Shrub land, Herbaceous vegetation, Agricultural land, Urban / built up, Bare / sparse vegetation, Snow and ice, Herbaceous wetland, Moss and lichen
+-   Current land cover (8 constraints): Shrubs, Herbaceous vegetation, Cultivated and managed vegetation/agriculture, Urban / built up, Bare / sparse vegetation, Snow and ice, Herbaceous wetland, Moss and lichen
 -   Forest change (3 constraints): deforestation rate, climate risk, natural regeneration variability
 -   Socio-economic constraints (6 constraints): protected areas, population density, declining population, property rights protection, accessibility to cities
 
@@ -911,6 +911,26 @@ Constraints data layers
     Every data layer presented in the following document can be displayed in Google Earth Engine as an overview of our datasets. Click on the provided link in the description, you'll be redirected to the GEE code editor panel. The selected layer will be displayed over Uganda. To modify the country change the :code:`fao_gaul` variable line 7 by your country number (listed in the Country list section). If you want to export this layer, please set the value of :code:`to_export` (line 10) and :code:`to_drive` (line 13) according to your need. 
     Hit the :code:`run` button again to relaunch the computation.
     Code used for this display can be found `here <https://github.com/12rambau/restoration_planning_module/blob/master/utils/code/display_layer.md>`__.
+    
+Potential constraint
+^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+
+    This contraint is hard coded in the tool. The user cannot customize it. It covers the entire world meaning that it will not mask all your analysis if **se.plan** is run outside of the LMIC. 
+    
+.. list-table::
+    :header-rows: 1
+    
+    * - Variable
+      - Units/measure
+      - Description
+      - Source
+    * - Potential for restoration
+      - Binary
+      - Sites that have the potential for restoration. Their tree-cover fraction is less its potential and they are not in urban areas. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Frest_pot_gt_treecoverfrac_mask_urban>`__)
+      - Bastin, Jean-François & Finegold, Yelena & Garcia, Claude & Mollicone, Danilo & Rezende, Marcelo & Routh, Devin & Zohner, Constantin & Crowther, Thomas. (2019). The global tree restoration potential. Science. 365. 76-79. https://doi.org/10.1126/science.aax0848. 
+        Buchhorn M, Lesiv M, Tsendbazar N-E, Herold M, Bertels L, Smets B. Copernicus Global Land Cover Layers—Collection 2. Remote Sensing. 2020; 12(6):1044. https://doi.org/10.3390/rs12061044
     
 Biophysical constraints
 ^^^^^^^^^^^^^^^^^^^^^^^
