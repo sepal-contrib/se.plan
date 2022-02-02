@@ -116,6 +116,11 @@ class MapTile(sw.Tile):
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map"""
 
+        # remove the previous sub aoi from the map
+        for l in self.m.layers:
+            if l.name not in ["CartoDB.DarkMatter"]:
+                self.m.remove_layer(l)
+
         # create a layer and a dashboard
         self.wlc_outputs = cs.wlc(
             self.layer_model.layer_list,
