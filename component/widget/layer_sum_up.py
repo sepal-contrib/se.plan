@@ -1,4 +1,5 @@
-import ipyvuetify as v
+from sepal_ui import color as scolor
+from sepal_ui import sepalwidgets as sw
 import pandas as pd
 from ipywidgets import Output
 from matplotlib import pyplot as plt
@@ -6,7 +7,7 @@ from matplotlib import pyplot as plt
 from component import parameter as cp
 
 
-class LayerFull(v.Layout):
+class LayerFull(sw.Layout):
 
     COLORS = cp.gradient(5) + ["grey"]
 
@@ -22,18 +23,18 @@ class LayerFull(v.Layout):
             )
 
         # build the internal details
-        details = v.ExpansionPanels(
+        details = sw.ExpansionPanels(
             xs12=True,
             class_="mt-3",
             children=[
-                v.ExpansionPanel(
+                sw.ExpansionPanel(
                     children=[
-                        v.ExpansionPanelHeader(
+                        sw.ExpansionPanelHeader(
                             children=["Details"],
                             expand_icon="mdi-help-circle-outline",
                             disable_icon_rotate=True,
                         ),
-                        v.ExpansionPanelContent(
+                        sw.ExpansionPanelContent(
                             children=[layer_row.layer_info.values[0]]
                         ),
                     ]
@@ -42,7 +43,7 @@ class LayerFull(v.Layout):
         )
 
         # create a title with the layer name
-        title = v.Html(
+        title = sw.Html(
             class_="mt-2 mb-2",
             xs12=True,
             tag="h3",
@@ -56,7 +57,7 @@ class LayerFull(v.Layout):
                 magnitude += 1
                 num = round(num / 1000.0, round_to)
             return "{:.{}f}{}".format(
-                round(num, round_to), round_to, ["", "K", "M", "G", "T", "P"][magnitude]
+                round(num, round_to), round_to, ["", "k", "M", "G", "T", "P"][magnitude]
             )
 
         # create a matplotlib stack horizontal bar chart
@@ -76,8 +77,7 @@ class LayerFull(v.Layout):
             norm_values = [v / max_value * 100 for v in reversed(values)]
             human_values = [f"{human_format(val)}" for val in reversed(values)]
             colors = [
-                colors[i - 1] if i else v.theme.themes.dark.primary
-                for i in range(len(values))
+                colors[i - 1] if i else scolor.primary for i in range(len(values))
             ][::-1]
 
             # add the axes
@@ -101,14 +101,14 @@ class LayerFull(v.Layout):
             class_="ma-5",
             row=True,
             children=[
-                v.Flex(xs12=True, children=[title]),
-                v.Flex(xs12=True, children=[chart]),
-                v.Flex(xs12=True, children=[details]),
+                sw.Flex(xs12=True, children=[title]),
+                sw.Flex(xs12=True, children=[chart]),
+                sw.Flex(xs12=True, children=[details]),
             ],
         )
 
 
-class LayerPercentage(v.Layout):
+class LayerPercentage(sw.Layout):
     def __init__(self, layer_name, pcts, colors):
 
         # read the layer list and find the layer information based on the layer name
@@ -133,20 +133,20 @@ class LayerPercentage(v.Layout):
             )
 
         # add the title
-        title = v.Html(tag="h4", children=[layer_name])
+        title = sw.Html(tag="h4", children=[layer_name])
         # build the internal details
-        details = v.ExpansionPanels(
+        details = sw.ExpansionPanels(
             xs12=True,
             class_="mt-3",
             children=[
-                v.ExpansionPanel(
+                sw.ExpansionPanel(
                     children=[
-                        v.ExpansionPanelHeader(
+                        sw.ExpansionPanelHeader(
                             children=["Details"],
                             expand_icon="mdi-help-circle-outline",
                             disable_icon_rotate=True,
                         ),
-                        v.ExpansionPanelContent(
+                        sw.ExpansionPanelContent(
                             children=[layer_row.layer_info.values[0]]
                         ),
                     ]
@@ -159,10 +159,10 @@ class LayerPercentage(v.Layout):
         for i, val in enumerate(pcts):
             # if val != 0: #TODO: do we need this still?
             spans.append(
-                v.Html(
+                sw.Html(
                     tag="span",
                     class_="ml-1 mr-1",
-                    style_=f"color: {colors[i-1] if i else v.theme.themes.dark.primary}",
+                    style_=f"color: {colors[i-1] if i else scolor.primary}",
                     children=[f"{round(val,2)}%"],
                 )
             )
@@ -171,7 +171,10 @@ class LayerPercentage(v.Layout):
             class_="ma-5",
             row=True,
             children=[
-                v.Flex(xs12=True, children=[title] + spans),
-                v.Flex(xs12=True, children=[details]),
+                sw.Flex(xs12=True, children=[title] + spans),
+                sw.Flex(xs12=True, children=[details]),
             ],
         )
+
+        # hide the constraints if all values are 0
+        self.viz = any([v != 0 for v in pcts])

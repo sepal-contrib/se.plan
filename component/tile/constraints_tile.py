@@ -31,10 +31,15 @@ class ConstraintTile(sw.Tile, HasTraits):
         # write a quick explaination
         tile_txt = sw.Markdown(cm.constraints.desc)
 
+        # read the layer list and find the layer information based on the layer name
+        layer_list = pd.read_csv(cp.layer_list).fillna("")
+
         # create the criteria list
         self.criterias = []
         for key, c in cp.criterias.items():
 
+            layer_row = layer_list[layer_list.layer_id == c["layer"]]
+            unit = layer_row.unit.values[0]
             header = c["header"]
             value = c["content"]
             id_ = c["layer"]
@@ -45,7 +50,7 @@ class ConstraintTile(sw.Tile, HasTraits):
             elif isinstance(value, list):  # dropdown values
                 crit = cw.Dropdown(key, value, header, id_=id_, hint=hint)
             elif value == "RANGE":  # range values
-                crit = cw.Range(key, header, id_=id_)
+                crit = cw.Range(key, header, unit, id_=id_, hint=hint)
 
             self.criterias.append(crit)
 

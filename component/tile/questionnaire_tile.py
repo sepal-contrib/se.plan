@@ -5,6 +5,7 @@ from component.message import cm
 from component import widget as cw
 from .constraints_tile import ConstraintTile
 from .priority_tile import PriorityTile
+from .cost_tile import CostTile
 
 
 class QuestionnaireTile(sw.Tile):
@@ -17,8 +18,9 @@ class QuestionnaireTile(sw.Tile):
         # build the tiles
         self.constraint_tile = ConstraintTile(aoi_view, layer_model)
         self.priority_tile = PriorityTile()
+        self.cost_tile = CostTile()
 
-        self.tiles = [self.constraint_tile, self.priority_tile]
+        self.tiles = [self.constraint_tile, self.priority_tile, self.cost_tile]
 
         # build the content and the stepper header
         tab_content = []
@@ -46,14 +48,12 @@ class QuestionnaireTile(sw.Tile):
         self.question_model.priorities = self.priority_tile.v_model
 
         # js behaviours
-        [
+        for btn in self.priority_tile.table.btn_list:
             btn.on_event("click", self._open_dialog)
-            for btn in self.priority_tile.table.btn_list
-        ]
-        [
+        for c in self.constraint_tile.criterias:
             c.btn.on_event("click", self._open_dialog)
-            for c in self.constraint_tile.criterias
-        ]
+        for btn in self.cost_tile.btn_list:
+            btn.on_event("click", self._open_dialog)
         self.constraint_tile.observe(self.__on_constraint, "custom_v_model")
         self.priority_tile.table.observe(self.__on_priority_tile, "v_model")
         self.dialog.observe(self.constraint_tile._update_constraints, "updated")
@@ -62,7 +62,6 @@ class QuestionnaireTile(sw.Tile):
         """populate and update the dialog"""
 
         # get the layer informations and
-
         self.dialog.set_dialog(widget._metadata["layer"])
 
         return

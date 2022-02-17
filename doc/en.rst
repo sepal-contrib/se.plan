@@ -7,7 +7,7 @@ Introduction
 Overview
 ^^^^^^^^
 
-**se.plan** is a spatially explicit online tool designed to support forest restoration planning decisions by restoration stakeholders. It is part of `SEPAL <https://sepal.io/>`_ (System for Earth Observation Data Access, Processing and Analysis for Land Monitoring), a component of UN FAO’s free, open-source software suite, `Open Foris <http://www.openforis.org>`_. It aims to identify locations where the benefits of forest restoration are high relative to restoration costs, subject to biophysical and socioeconomic constraints that users impose to define the areas where restoration is allowable. The computation is performed using cloud-based supercomputing and geospatial datasets from Google Earth Engine available through SEPAL. As a decision-support tool, it is intended to be used in combination with other information users may have that provides greater detail on planning areas and features of those areas that **se.plan** might not adequately include. It offers users the option to replace its built-in data layers, which are based on publicly available global datasets, with users’ own customized layers. Please see :ref:`Appendix A` for a list of **se.plan**’s built-in data layers and their sources.
+**se.plan** is a spatially explicit online tool designed to support forest restoration planning decisions by restoration stakeholders. It is part of `SEPAL <https://sepal.io/>`_ (System for Earth Observation Data Access, Processing and Analysis for Land Monitoring), a component of UN FAO’s free, open-source software suite, `Open Foris <http://www.openforis.org>`_. It aims to identify locations where the benefits of forest restoration are high relative to restoration costs, subject to biophysical and socioeconomic constraints that users impose to define the areas where restoration is allowable. The computation is performed using cloud-based supercomputing and geospatial datasets from Google Earth Engine available through SEPAL. As a decision-support tool, it is intended to be used in combination with other information users may have that provides greater detail on planning areas and features of those areas that **se.plan** might not adequately include. It offers users the option to replace its built-in data layers, which are based on publicly available global datasets, with users’ own customized layers. Please see :ref:`appendix_a` for a list of **se.plan**’s built-in data layers and their sources.
 
 The sections below highlight key features of **se.plan**. In brief, following the three steps below, se.plan can be used to generate information on forest restoration potential.   
 
@@ -17,15 +17,14 @@ The sections below highlight key features of **se.plan**. In brief, following th
 
 In addition to reading this manual, we encourage users to watch **se.plan** YouTube videos:
 
-.. youtube:: https://www.youtube.com/watch?v=37pCFhF4zBI
-    :align: center
+.. youtube:: 37pCFhF4zBI
 
 Geographical resolution and scope
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **se.plan** divides the Earth’s surface into grid cells with 30 arc-second resolution (≈1km at the equator). It includes only grid cells that satisfy the following four criteria (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Frest_pot_gt_treecoverfrac_mask_urban>`__)):
 
--   They are in countries or territories of Africa and the Near East, Asia and the Pacific, and Latin America and the Caribbean that the World Bank classified as *low or middle-income countries* or territories (LMICs) during most years during 2000–2020. These countries and territories number 139 and are listed in :ref:`Appendix B`.
+-   They are in countries or territories of Africa and the Near East, Asia and the Pacific, and Latin America and the Caribbean that the World Bank classified as *low or middle-income countries* or territories (LMICs) during most years during 2000–2020. These countries and territories number 139 and are listed in :ref:`appendix_b`.
 -   They include areas where tree cover can potentially occur under current climatic conditions, as determined by `Bastin et al. (2019) <https://doi.org/10.1126/science.aax0848>`_.
 -   Their current tree cover, as measured by the European Space Agency’s Copernicus Programme (`Buchhorn et al. 2020 <https://doi.org/10.3390/rs12061044>`_), is less than their potential tree cover.
 -   They are not in urban use.
@@ -38,7 +37,7 @@ Methodology
 Selection of planning area
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`Usage section`. 
+**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`usage`. 
 
 Restoration indicators
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -50,9 +49,9 @@ Restoration offers many potential benefits. In its current form, **se.plan** pro
 -   Local livelihoods
 -   Wood production
 
-**se.plan** includes two indicators each for biodiversity conservation and local livelihoods and one indicator each for carbon sequestration and wood production. Each indicator is associated with a data layer that estimates each grid cell’s relative potential to provide each benefit if the grid cell is restored;  the relative potential is measured on a scale of 1 (low) to 5 (high). Please see :ref:`Appendix C` for more detail on the interpretation and generation of the data layers for the benefit indicators.
+**se.plan** includes two indicators each for biodiversity conservation and local livelihoods and one indicator each for carbon sequestration and wood production. Each indicator is associated with a data layer that estimates each grid cell’s relative potential to provide each benefit if the grid cell is restored;  the relative potential is measured on a scale of 1 (low) to 5 (high). Please see :ref:`appendix_c` for more detail on the interpretation and generation of the data layers for the benefit indicators.
 
-Users rate the relative importance of these benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an index that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. This restoration value index is a weighted average of the benefits, with user ratings serving as the weights. It therefore accounts for not only the potential of a grid cell to provide each benefit but also the relative importance that a user assigns to each benefit. It is scaled from 1 (low restoration value) to 5 (high restoration value). Please see :ref:`Appendix D` for more detail on the generation of the index.
+Users rate the relative importance of these benefits from their standpoint (or the standpoint of stakeholders they represent), and **se.plan** then calculates an index that indicates each grid cell’s relative restoration value aggregated across all four benefit categories. This restoration value index is a weighted average of the benefits, with user ratings serving as the weights. It therefore accounts for not only the potential of a grid cell to provide each benefit but also the relative importance that a user assigns to each benefit. It is scaled from 1 (low restoration value) to 5 (high restoration value). Please see :ref:`appendix_d` for more detail on the generation of the index.
 
 Restoration cost
 ^^^^^^^^^^^^^^^^
@@ -65,12 +64,12 @@ Forest restoration incurs two broad categories of costs, **opportunity cost** an
 
 **se.plan** assumes that implementation costs include planting expenses on all sites. This assumption might not be valid on sites where natural regeneration is feasible. To account for this possibility, **se.plan** includes a data layer that predicts the variability of natural regeneration success. 
 
-**se.plan** calculates the overall restoration cost of each site by summing the corresponding estimates of the opportunity cost and implementation costs. Please see :ref:`Appendix E` for more detail on the interpretation and generation of the data layers for opportunity and implementation costs.
+**se.plan** calculates the overall restoration cost of each site by summing the corresponding estimates of the opportunity cost and implementation costs. Please see :ref:`appendix_e` for more detail on the interpretation and generation of the data layers for opportunity and implementation costs.
 
 Benefit-cost ratio
 ^^^^^^^^^^^^^^^^^^
 
-**se.plan** calculates an approximate benefit-cost ratio for each site by dividing the restoration value index by the restoration cost and converting the resulting number to a scale from 1 (small ratio) to 5 (large ratio). Sites with a higher ratio are the ones that **se.plan** predicts are more suitable for restoration, subject to additional investigation that draws on other information users have on the sites. Please see :ref:`Appendix D` for more detail on the generation and interpretation of this ratio. A key limitation is that the ratio does not account interdependencies across sites related to either benefits, such as the impact of habitat scale on species extinction risk, or costs, such as scale economies in planting trees. This limitation stems from **se.plan**’s treatment of each potential restoration site as an independent restoration planning unit.
+**se.plan** calculates an approximate benefit-cost ratio for each site by dividing the restoration value index by the restoration cost and converting the resulting number to a scale from 1 (small ratio) to 5 (large ratio). Sites with a higher ratio are the ones that **se.plan** predicts are more suitable for restoration, subject to additional investigation that draws on other information users have on the sites. Please see :ref:`appendix_d` for more detail on the generation and interpretation of this ratio. A key limitation is that the ratio does not account interdependencies across sites related to either benefits, such as the impact of habitat scale on species extinction risk, or costs, such as scale economies in planting trees. This limitation stems from **se.plan**’s treatment of each potential restoration site as an independent restoration planning unit.
 
 Constraint
 ^^^^^^^^^^
@@ -84,14 +83,14 @@ Constraint
 
 **se.plan** enables the user to adjust the values that will be masked from the analysis for most of these constraints. Some of the constraints are binary variables, with a value of 1 if a site has the characteristic associated with the variable and 0 if it does not. For these constraints, users can choose if they want to keep zeros or ones.
 
-Please see :ref:`Appendix F` for more detail on the interpretation and generation of the data layers for the constraints.
+Please see :ref:`appendix_f` for more detail on the interpretation and generation of the data layers for the constraints.
 
 Customization
 ^^^^^^^^^^^^^
 
 Every Constraints, Costs and Indicators are based on layers provided within the tools. These layer may not be covering the AOI selected by the user or provide less accurate/updated data than the National datasets available. To allow user to improve the quality of the analysis **se.plan** provides the possiblity of replacing these datasets by any layer available with Google Earth Engine.
 
-Please see :ref:`Usage` section for more details on the customization process.
+Please see :ref:`usage` section for more details on the customization process.
 
 Output
 ^^^^^^
@@ -110,7 +109,7 @@ Output
     	:title: The dashboard produced by Seplan showing which areas are best suited for restoration according to the select costs, benefits and constraints
 	:group: se.plan
 
-.. Usage:
+.. usage:
 
 Usage
 -----
@@ -194,7 +193,7 @@ Select constraints
 **se.plan** allows users to set constraints limiting restoration to only those sites they view as suitable, in view of ecological and socioeconomic risks. It groups the constraints into four categories:
 
 -   Biophysical (5 constraints): elevation, slope, annual rainfall, baseline water stress, terrestrial ecoregion
--   Current land cover (5 constraints): Shrub land, Herbaceous vegetation, Agricultural land, Urban / built up, Bare / sparse vegetation, Snow and ice, Herbaceous wetland, Moss and lichen
+-   Current land cover (8 constraints): Shrubs, Herbaceous vegetation, Cultivated and managed vegetation/agriculture, Urban / built up, Bare / sparse vegetation, Snow and ice, Herbaceous wetland, Moss and lichen
 -   Forest change (3 constraints): deforestation rate, climate risk, natural regeneration variability
 -   Socio-economic constraints (6 constraints): protected areas, population density, declining population, property rights protection, accessibility to cities
 
@@ -223,7 +222,7 @@ Once the selection is finished, the selected constraints will be displayed as sm
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/chips.png
     :alt: constraints chips
     
-Every selected constraints is corresponding to a layer provided by **se.plan** listed in :ref:`Appendix F`. These layers can be customized in this panel to use national data or to provide information on areas that are not covered by the tool default layers. You do not need to add constraints if there isn’t any. In this case, default values will be used and you can simply proceed to the next steps. 
+Every selected constraints is corresponding to a layer provided by **se.plan** listed in :ref:`appendix_f`. These layers can be customized in this panel to use national data or to provide information on areas that are not covered by the tool default layers. You do not need to add constraints if there isn’t any. In this case, default values will be used and you can simply proceed to the next steps. 
 
 .. note:: 
 
@@ -269,7 +268,14 @@ Users rate the relative importance of benefits from their standpoint (or the sta
     
     .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/indicator_custom.gif
         :alt: indicators custom
+        
+Select costs 
+************
 
+User can customize the layers that will be used as **costs** in the weighted sum approach. To change it the user will go to the third tab of the questionnaire panel ("COSTS") and click on the :icon:`fas fa-pencil-alt` to open the modification dialog interface. The editing popup panel is the same as the one presented in the previous section.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/costs.png
+    :alt: indicators
 
 Recipe
 ^^^^^^
@@ -410,7 +416,7 @@ In the second section, the summary is given by subtheme:
 
 **Benefits**
 
-The mean value of each benefits is displayed in a bar chart. These charts use the unit corresponding to each layer and display the value for each sub-AOI. The main AOI is first displayed in gold and the sub-AOIs are displayed using the color attributed when the dashboard was computed (i.e. the same as the one used on the map).
+The mean value of each benefits is displayed in a bar chart. These charts use the unit corresponding to each layer and display the value for each sub-AOI. Value will be using the SI prefixes if the value is not readable in the original unit. The main AOI is first displayed in gold and the sub-AOIs are displayed using the color attributed when the dashboard was computed (i.e. the same as the one used on the map).
 
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/dashboard_benefits.png
     :alt: dashboard benefits
@@ -433,7 +439,7 @@ The constraints are displayed in percentages. Each value represents the percenta
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/dashboard_constraints.png
     :alt: dashboard costs
     
-.. Appendix A:
+.. appendix_a:
 
 Primary data sources
 --------------------
@@ -446,7 +452,7 @@ It determined current tree cover using data from:
 
     \M. Buchhorn, M. Lesiv, N.E. Tsendbazar, M. Herold, L. Bertels, B. Smets, 2020, Copernicus Global Land Cover Layers—Collection 2. Remote Sensing, 12 Volume 108, 1044. doi:`10.3390/rs12061044 <https://www.mdpi.com/2072-4292/12/6/1044>`_
 
-It drew data for remaining spatial layers primarily from the following sources. For additional detail, see :ref:`Appendix C` (benefits), :ref:`Appendix E` (costs), and :ref:`Appendix F` (constraints).
+It drew data for remaining spatial layers primarily from the following sources. For additional detail, see :ref:`appendix_c` (benefits), :ref:`appendix_e` (costs), and :ref:`appendix_f` (constraints).
 
 Costs
 ^^^^^
@@ -529,7 +535,7 @@ socio-economic
     Protected area, "IUCN, World Database on Protected Areas, https://www.iucn.org/theme/protected-areas/our-work/world-database-protected-areas"
     Real interest rate, "World Bank, 2020, World Development Indicators, https://databank.worldbank.org/source/world-development-indicators"
 
-.. Appendix B:
+.. appendix_b:
 
 Countries
 ---------
@@ -726,7 +732,7 @@ Sub-Saharan Africa
 
 
 
-.. Appendix C:
+.. appendix_c:
 
 Benefits data layers
 --------------------
@@ -773,7 +779,7 @@ Quantitative measures of potential benefits in **se.plan** should be viewed as a
       - Potential annual production of woody biomass by fast-growing trees such as eucalypts, poplars, and willows. Rationale for including in se.plan: faster growth of plantation trees tends to make forest restoration more feasible when desired benefits include income for landholders and wood supply to meet local and export demands. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fyields-4326>`__)
       - \F. Albanito, T. Beringer, R. Corstanje, et al., 2016, Carbon implications of converting cropland to bioenergy crops or forest for climate mitigation: a global assessment, GCB Bioenergy 8, pp. 81–95, https://doi.org/10.1111/gcbb.12242. Resolution of Albanito et al. layer: 55 km.
 
-.. Appendix D:
+.. appendix_d:
 
 Benefit-cost ratio
 ------------------
@@ -801,7 +807,7 @@ Where :math:`w_1`, :math:`w_2`, :math:`w_3`, and :math:`w_4` are the user rating
 
 	Benefit\_cost\_ratio = Restoration\_value\_index / Restoration\_cost.
     
-The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`Appendix E`. As a final step, **se.plan** converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the *restoration suitability index* on the map and dashboard.
+The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`appendix_e`. As a final step, **se.plan** converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the *restoration suitability index* on the map and dashboard.
 
 As noted above, **se.plan** includes two indicators for benefits :math:`B_1` (biodiversity conservation) and :math:`B_3` (local livelihoods). For :math:`B_1`, the two indicators are the *biodiversity intactness index* and *number of endangered species*. Denote these two indicators by :math:`B_1a` and :math:`B_1b`. **se.plan** converts each of these indicators to a 1-5 scale and then calculates the overall biodiversity benefit, :math:`B_1`, as their simple average:
 
@@ -811,12 +817,12 @@ As noted above, **se.plan** includes two indicators for benefits :math:`B_1` (bi
     
 **se.plan** calculates the overall local livelihoods benefit in the same way from its two constituent indicators, *forest employment* and *woodfuel harvest*.
 
-.. Appendix E:
+.. appendix_e:
 
 Cost data layers
 ----------------
 
-In the cases of benefits (:ref:`Appendix C`) and constraints (:ref:`Appendix F`), the **se.plan** team adopted the tool’s data layers primarily from existing sources, with little or no modification of the original layers. In contrast, it developed wholly new data layers for both the *opportunity cost* and the *implementation cost* of forest restoration. Developing these layers involved multiple steps, which are described below.
+In the cases of benefits (:ref:`appendix_c`) and constraints (:ref:`appendix_f`), the **se.plan** team adopted the tool’s data layers primarily from existing sources, with little or no modification of the original layers. In contrast, it developed wholly new data layers for both the *opportunity cost* and the *implementation cost* of forest restoration. Developing these layers involved multiple steps, which are described below.
 
 .. note::
 
@@ -867,7 +873,7 @@ Implementation costs
 
 Implementation costs refer to the expense of activities required to regenerate forests. They include both: (i) initial expenses incurred in the first year of restoration (establishment costs), which are associated with such activities as site preparation, planting, and fencing; and (ii) expenses associated with monitoring, protection, and other activities in years following establishment (operating costs), which are required to enable the regenerated stand to reach the “free to grow” stage. **se.plan** does not report these two components of implementation costs separately. Instead, it reports the aggregate cost of restoring a site, in 2017 US dollars per hectare, by summing the estimates of opportunity cost and implementation costs. This aggregate cost is the cost variable that it includes in the benefit-cost ratio (Appendix D). The estimates of implementation costs vary by country and, for countries with sufficient data, by first-level subdivision.
 
-As discussed above, **se.plan** assumes that current land use is some form of agriculture. It therefore also assumes that regeneration requires planting, as sources of propagules for natural regeneration are often not adequate on land that has been cleared for agriculture. **se.plan** does not ignore natural regeneration as a restoration option, however, as it includes a constraint layer that predicts the variability of natural regeneration success (see :ref:`Appendix E`).
+As discussed above, **se.plan** assumes that current land use is some form of agriculture. It therefore also assumes that regeneration requires planting, as sources of propagules for natural regeneration are often not adequate on land that has been cleared for agriculture. **se.plan** does not ignore natural regeneration as a restoration option, however, as it includes a constraint layer that predicts the variability of natural regeneration success (see :ref:`appendix_e`).
 
 (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2FAfCost_ha>`__)
 
@@ -900,7 +906,7 @@ References
 -   World Bank. Various years. Projects & Operations. Project appraisal documents and implementation completion reports for selected projects. https://projects.worldbank.org/en/projects-operations/projects-home. 
 
 
-.. _Appendix F:
+.. appendix_f:
 
 Constraints data layers
 -----------------------
@@ -912,6 +918,26 @@ Constraints data layers
     Every data layer presented in the following document can be displayed in Google Earth Engine as an overview of our datasets. Click on the provided link in the description, you'll be redirected to the GEE code editor panel. The selected layer will be displayed over Uganda. To modify the country change the :code:`fao_gaul` variable line 7 by your country number (listed in the Country list section). If you want to export this layer, please set the value of :code:`to_export` (line 10) and :code:`to_drive` (line 13) according to your need. 
     Hit the :code:`run` button again to relaunch the computation.
     Code used for this display can be found `here <https://github.com/12rambau/restoration_planning_module/blob/master/utils/code/display_layer.md>`__.
+    
+Potential constraint
+^^^^^^^^^^^^^^^^^^^^
+
+.. warning::
+
+    This contraint is hard coded in the tool, the user cannot customize it. It covers the entire world meaning that it will not mask all your analysis if **se.plan** is run outside of the LMIC. 
+    
+.. list-table::
+    :header-rows: 1
+    
+    * - Variable
+      - Units/measure
+      - Description
+      - Source
+    * - Potential for restoration
+      - Binary
+      - Sites that have the potential for restoration. Their tree-cover fraction is less its potential and they are not in urban areas. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Frest_pot_gt_treecoverfrac_mask_urban>`__)
+      - Bastin, Jean-François & Finegold, Yelena & Garcia, Claude & Mollicone, Danilo & Rezende, Marcelo & Routh, Devin & Zohner, Constantin & Crowther, Thomas. (2019). The global tree restoration potential. Science. 365. 76-79. https://doi.org/10.1126/science.aax0848. 
+        Buchhorn M, Lesiv M, Tsendbazar N-E, Herold M, Bertels L, Smets B. Copernicus Global Land Cover Layers—Collection 2. Remote Sensing. 2020; 12(6):1044. https://doi.org/10.3390/rs12061044
     
 Biophysical constraints
 ^^^^^^^^^^^^^^^^^^^^^^^

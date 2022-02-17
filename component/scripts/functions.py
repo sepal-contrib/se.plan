@@ -227,7 +227,7 @@ def get_range_constraint(values, layer_id):
     image = ee.Image(layer_id)
 
     # filter the image according to min and max values set by the user
-    image = image.gt(values[0]).And(image.lt(values[1]))
+    image = image.gte(values[0]).And(image.lte(values[1]))
 
     return image
 

@@ -1,8 +1,8 @@
 # value of each land cover category
 landcover_default_cat = {
-    "Shrub land": 20,
+    "Shrubs": 20,
     "Herbaceous vegetation": 30,
-    "Agricultural land": 40,
+    "Cultivated and managed vegetation/agriculture": 40,
     "Urban / built up": 50,
     "Bare / sparse vegetation": 60,
     "Snow and ice": 70,
@@ -11,7 +11,7 @@ landcover_default_cat = {
 }
 
 land_use_criterias = {
-    k: {"tooltip": 2, "layer": None, "header": "land_use", "content": "BINARY"}
+    k: {"tooltip": 0, "layer": "land_cover", "header": "land_use", "content": "BINARY"}
     for k in landcover_default_cat
 }
 
@@ -28,7 +28,6 @@ criteria_types = {
 # the "layer" describe the layer to use
 # the "content" how it should be used
 # None for binary inputs
-# dict for dropdown
 # integer for the max of a range input
 # the number of the "tooltip" text:
 # 0: less than
@@ -43,7 +42,7 @@ criterias = {
         "content": "RANGE",
     },
     "Baseline water stress": {
-        "tooltip": 0,
+        "tooltip": 1,
         "layer": "water_stress",
         "header": "bio",
         "content": "RANGE",
@@ -56,19 +55,19 @@ criterias = {
     },
     "Slope": {"tooltip": 1, "layer": "slope", "header": "bio", "content": "RANGE"},
     "Accessibility to cities": {
-        "tooltip": 0,
+        "tooltip": 1,
         "layer": "city_access",
         "header": "socio_eco",
         "content": "RANGE",
     },
     "Population density": {
-        "tooltip": 0,
+        "tooltip": 1,
         "layer": "population_density",
         "header": "socio_eco",
         "content": "RANGE",
     },
     "Protected areas": {
-        "tooltip": 2,
+        "tooltip": 0,
         "layer": "protected_areas",
         "header": "socio_eco",
         "content": "BINARY",
@@ -80,7 +79,7 @@ criterias = {
         "content": "RANGE",
     },
     "Deforestation rate": {
-        "tooltip": 0,
+        "tooltip": 1,
         "layer": "deforestation_rate",
         "header": "forest",
         "content": "RANGE",
@@ -92,13 +91,13 @@ criterias = {
         "content": "RANGE",
     },
     "Natural regeneration variability": {
-        "tooltip": 0,
+        "tooltip": 1,
         "layer": "natural_regeneration",
         "header": "forest",
         "content": "RANGE",
     },
     "Declining population": {
-        "tooltip": 2,
+        "tooltip": 1,
         "layer": "declining_population",
         "header": "socio_eco",
         "content": "BINARY",

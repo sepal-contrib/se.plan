@@ -19,7 +19,7 @@ class PriorityTable(v.SimpleTable):
 
     _colors = cp.gradient(5)
 
-    _BENEFITS = pd.read_csv(cp.layer_list).fillna("")
+    _BENEFITS = pd.read_csv(cp.layer_list).fillna("").sort_values(by=["subtheme"])
     _BENEFITS = _BENEFITS[_BENEFITS.theme == "benefits"]
 
     _DEFAULT_V_MODEL = {layer_id: 0 for layer_id in _BENEFITS.layer_id}
@@ -41,43 +41,35 @@ class PriorityTable(v.SimpleTable):
             self.checkbox_list[layer_id] = line
 
         # construct the rows of the table
-        rows = []
-        self.btn_list = []
-        for i, layer_row in self._BENEFITS.iterrows():
-            edit_btn = v.Icon(
-                children=["mdi-pencil"], _metadata={"layer": layer_row.layer_id}
-            )
+        rows, self.btn_list = [], []
+        for i, lr in self._BENEFITS.iterrows():
+            edit_btn = v.Icon(children=["mdi-pencil"], _metadata={"layer": lr.layer_id})
             self.btn_list.append(edit_btn)
-            row = [v.Html(tag="td", children=[edit_btn])]
-            row.append(v.Html(tag="td", children=[layer_row.layer_name]))
+            row = [
+                v.Html(tag="td", children=[edit_btn]),
+                v.Html(tag="td", children=[lr.subtheme]),
+                v.Html(tag="td", children=[lr.layer_name]),
+            ]
             for j in range(len(self._colors)):
-                row.append(
-                    v.Html(
-                        tag="td", children=[self.checkbox_list[layer_row.layer_id][j]]
-                    )
-                )
+                row += [v.Html(tag="td", children=[self.checkbox_list[lr.layer_id][j]])]
+
             rows.append(v.Html(tag="tr", children=row))
+
+        headers = v.Html(
+            tag="tr",
+            children=[
+                v.Html(tag="th", children=["action"]),
+                v.Html(tag="th", children=["theme"]),
+                v.Html(tag="th", children=["indicator"]),
+                *[v.Html(tag="th", children=[lbl]) for lbl in self._labels],
+            ],
+        )
 
         # create the table
         super().__init__(
             v_model=json.dumps(self._DEFAULT_V_MODEL),
             children=[
-                v.Html(
-                    tag="thead",
-                    children=[
-                        v.Html(
-                            tag="tr",
-                            children=(
-                                [v.Html(tag="th", children=["action"])]
-                                + [v.Html(tag="th", children=["indicator"])]
-                                + [
-                                    v.Html(tag="th", children=[label])
-                                    for label in self._labels
-                                ]
-                            ),
-                        )
-                    ],
-                ),
+                v.Html(tag="thead", children=[headers]),
                 v.Html(tag="tbody", children=rows),
             ],
         )

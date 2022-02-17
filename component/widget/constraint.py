@@ -76,34 +76,26 @@ class Binary(Constraint):
             persistent_hint=True,
             v_model=True,
             label=name,
-            **kwargs
+            **kwargs,
         )
 
         super().__init__(widget, name=name, header=header, id_=id_)
-
-
-class Dropdown(Constraint):
-    def __init__(self, name, items, header, **kwargs):
-
-        widget = v.Select(
-            label=name,
-            persistent_hint=True,
-            items=items,
-            v_model=int(items[0]["value"]),
-            **kwargs
-        )
-
-        super().__init__(widget, name=name, header=header)
 
 
 class Range(Constraint):
 
     LABEL = ["low", "medium", "high"]
 
-    def __init__(self, name, header, id_, **kwargs):
+    def __init__(self, name, header, unit, id_, **kwargs):
 
         widget = v.RangeSlider(
-            label=name, max=1, step=0.1, v_model=[0, 1], thumb_label=True, **kwargs
+            label=f"{name} ({unit})",
+            max=1,
+            step=0.1,
+            v_model=[0, 1],
+            thumb_label="always",
+            persistent_hint=True,
+            **kwargs,
         )
 
         super().__init__(widget, name=name, header=header, id_=id_)
@@ -133,7 +125,7 @@ class Range(Constraint):
             self.widget.min = 0
             self.widget.max = 1
             self.widget.step = 0.1
-            self.widget.tick_labels = []
+            # self.widget.tick_labels = []
             self.widget.v_model = [0, 1]
 
         else:
@@ -146,12 +138,12 @@ class Range(Constraint):
             self.widget.max = round(max_, 2)
 
             # set the number of steps by stting the step parameter (100)
-            self.widget.step = round((self.widget.max - self.widget.min) / 100, 2)
+            self.widget.step = max(0.01, (self.widget.max - self.widget.min) / 100)
 
             # display ticks label with low medium and high values
-            self.widget.tick_labels = [
-                self.LABEL[i // 25 - 1] if i in [25, 50, 75] else "" for i in range(101)
-            ]
+            # self.widget.tick_labels = [
+            #    self.LABEL[i // 25 - 1] if i in [25, 50, 75] else "" for i in range(101)
+            # ]
 
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
@@ -174,7 +166,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
             disabled=True,  # disabled until the aoi is selected
             class_="mt-5",
             small_chips=True,
-            v_model=None,
+            v_model=[],
             items=[c.name for c in self.criterias],
             label=cm.constraints.criteria_lbl,
             multiple=True,
@@ -194,6 +186,15 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
 
         # link the js behaviour
         self.select.observe(self._show_crit, "v_model")
+        self.select.observe(self._on_change, "v_model")
+
+    def _on_change(self, change):
+        """remove the menu-props if at least 1 items is added"""
+
+        if len(change["old"]) == 0:
+            self.select.menu_props = {}
+
+        return self
 
     def _show_crit(self, change):
 
@@ -210,10 +211,17 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
 
         self.header.children = [cp.criteria_types[self.title]]
 
+        # automatically open the criterias if none are selected
+        if len(self.select.v_model) == 0 and self.select.disabled == False:
+            self.select.menu_props = {"value": True}
+
         return self
 
     def shrunk(self):
         """when shrunked I want to display the chips int the header along the title"""
+
+        # automatically close the criterias if none are selected
+        self.select.menu_props = {}
 
         # get the title
         title = cp.criteria_types[self.title]
