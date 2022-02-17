@@ -268,7 +268,14 @@ Users rate the relative importance of benefits from their standpoint (or the sta
     
     .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/indicator_custom.gif
         :alt: indicators custom
+        
+Select costs 
+************
 
+User can customize the layers that will be used as **costs** in the weighted sum approach. To change it the user will go to the third tab of the questionnaire panel ("COSTS") and click on the :icon:`fas fa-pencil-alt` to open the modification dialog interface. The editing popup panel is the same as the one presented in the previous section.
+
+.. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/costs.png
+    :alt: indicators
 
 Recipe
 ^^^^^^

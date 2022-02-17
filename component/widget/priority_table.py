@@ -41,8 +41,7 @@ class PriorityTable(v.SimpleTable):
             self.checkbox_list[layer_id] = line
 
         # construct the rows of the table
-        rows = []
-        self.btn_list = []
+        rows, self.btn_list = [], []
         for i, layer_row in self._BENEFITS.iterrows():
             edit_btn = v.Icon(
                 children=["mdi-pencil"], _metadata={"layer": layer_row.layer_id}
