@@ -5,6 +5,7 @@ from component.message import cm
 from component import widget as cw
 from .constraints_tile import ConstraintTile
 from .priority_tile import PriorityTile
+from .cost_tile import CostTile
 
 
 class QuestionnaireTile(sw.Tile):
@@ -17,8 +18,9 @@ class QuestionnaireTile(sw.Tile):
         # build the tiles
         self.constraint_tile = ConstraintTile(aoi_view, layer_model)
         self.priority_tile = PriorityTile()
+        self.cost_tile = CostTile(aoi_view, layer_model)
 
-        self.tiles = [self.constraint_tile, self.priority_tile]
+        self.tiles = [self.constraint_tile, self.priority_tile, self.cost_tile]
 
         # build the content and the stepper header
         tab_content = []
@@ -62,7 +64,6 @@ class QuestionnaireTile(sw.Tile):
         """populate and update the dialog"""
 
         # get the layer informations and
-
         self.dialog.set_dialog(widget._metadata["layer"])
 
         return

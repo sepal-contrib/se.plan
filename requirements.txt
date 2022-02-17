@@ -15,7 +15,7 @@ git+git://github.com/openforis/earthengine-api.git@v0.1.270#egg=earthengine-api&
 
 # the base lib to run any sepal_ui based app 
 # don't forget to fix it to a specific version when you're app is ready
-sepal_ui==2.4.0
+sepal_ui==2.6.0
 
 
 # custom libs
