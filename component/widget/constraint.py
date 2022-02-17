@@ -166,7 +166,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
             disabled=True,  # disabled until the aoi is selected
             class_="mt-5",
             small_chips=True,
-            v_model=None,
+            v_model=[],
             items=[c.name for c in self.criterias],
             label=cm.constraints.criteria_lbl,
             multiple=True,
@@ -186,6 +186,15 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
 
         # link the js behaviour
         self.select.observe(self._show_crit, "v_model")
+        self.select.observe(self._on_change, "v_model")
+
+    def _on_change(self, change):
+        """remove the menu-props if at least 1 items is added"""
+
+        if len(change["old"]) == 0:
+            self.select.menu_props = {}
+
+        return self
 
     def _show_crit(self, change):
 
@@ -202,10 +211,17 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
 
         self.header.children = [cp.criteria_types[self.title]]
 
+        # automatically open the criterias if none are selected
+        if len(self.select.v_model) == 0 and self.select.disabled == False:
+            self.select.menu_props = {"value": True}
+
         return self
 
     def shrunk(self):
         """when shrunked I want to display the chips int the header along the title"""
+
+        # automatically close the criterias if none are selected
+        self.select.menu_props = {}
 
         # get the title
         title = cp.criteria_types[self.title]
