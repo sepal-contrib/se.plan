@@ -204,7 +204,7 @@ def get_cat_constraint(cat_id, value, name, layer_id):
     """
 
     # read the ee image and mask it according to the value
-    image = ee.Image(layer_id).select("discrete_classification")
+    image = ee.Image(layer_id).select("discrete_classification").unmask()
     image = image.neq(cat_id) if value else image.eq(cat_id)
 
     return {"theme": "constraints", "name": name, "eeimage": image}

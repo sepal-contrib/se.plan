@@ -101,6 +101,22 @@ class ConstraintTile(sw.Tile, HasTraits):
 
         return self
 
+    def _reset_constraint(self, change):
+        """update the specified constraint if using slider based on the geometry and the layer it uses"""
+
+        if change["new"] == "":
+            return self
+
+        for c in self.criterias:
+            if c.id == change["new"] and isinstance(c, cw.Range):
+                layer = next(
+                    l["layer"] for l in self.layer_model.layer_list if l["id"] == c.id
+                )
+                geometry = self.aoi_model.feature_collection.geometry()
+                c.set_values(geometry, layer)
+
+        return self
+
     def load_data(self, data):
         """load the data from a json string"""
 

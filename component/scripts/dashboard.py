@@ -38,6 +38,16 @@ def get_areas(image, geometry, scale=100):
 
     total = areas_list.reduce(ee.Reducer.sum())
 
+    sum_img = image.reduceRegion(
+        reducer=ee.Reducer.sum(),
+        geometry=geometry,
+        scale=100,
+        maxPixels=1e13,
+    )
+    print(sum_img.getInfo())
+
+    # print(total.getInfo())
+
     return areas, total
 
 
@@ -46,7 +56,7 @@ def get_image_stats(image, name, mask, geom, scale=100):
 
     Args:
         image (eeimage): restoration suitability values 1 to 5
-        name (string): name of the area of interst
+        name (string): name of the area of interest
         mask (eeimage): mask of unsuitable land
         geom (eegeomerty): an earth engine geometry
         scale (int, optional): scale to reduce area by. Defaults to 100.
@@ -60,7 +70,7 @@ def get_image_stats(image, name, mask, geom, scale=100):
     list_values, total = get_areas(image, geom)
 
     out_dict = ee.Dictionary(
-        {"suitibility": {name: {"values": list_values, "total": total}}}
+        {"suitability": {name: {"values": list_values, "total": total}}}
     )
 
     return out_dict
@@ -253,8 +263,8 @@ def get_area_dashboard(stats):
 
     tmp = {}
     for i in stats:
-        suitibility_i = json.loads(i)
-        tmp.update(suitibility_i["suitibility"])
+        suitability_i = json.loads(i)
+        tmp.update(suitability_i["suitability"])
 
     return tmp
 
@@ -293,7 +303,7 @@ def get_theme_dashboard(stats):
                         layer_total, tmp_dict[k][layer_name]["total"]
                     )
     tmp_dict["names"] = names
-    tmp_dict.pop("suitibility", None)
+    tmp_dict.pop("suitability", None)
 
     return tmp_dict
 
@@ -311,6 +321,8 @@ def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
         get_summary_statistics(wlc_outputs, names[i], geom, layer_model.layer_list)
         for i, geom in enumerate(ee_aoi_list)
     ]
+
+    # print(stats)
 
     area_dashboard = get_area_dashboard(stats)
     theme_dashboard = get_theme_dashboard(stats)
