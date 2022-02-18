@@ -1,7 +1,6 @@
 from traitlets import Unicode
 import json
 from pathlib import Path
-from traitlets import Int
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
@@ -19,7 +18,7 @@ ee.Initialize()
 
 class EditDialog(sw.SepalWidget, v.Dialog):
 
-    updated = Int(0).tag(sync=True)  # the update traitlets
+    updated = Unicode("").tag(sync=True)  # the update traitlets
 
     def __init__(self, aoi_vew, model):
 
@@ -104,6 +103,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         # close without doing anything
         self.value = False
+        self.updated = ""
 
         return
 
@@ -118,7 +118,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
 
         # modify update to tell the rest of the app that value have been changed
-        self.updated += 1
+        self.updated = self.id
 
         # close
         self.value = False
@@ -148,6 +148,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         for l in self.m.layers:
             if not (l.name in ["aoi", "CartoDB.DarkMatter"]):
                 self.m.remove_layer(l)
+
+        # disable the updated value
+        # to trigger the change on exit
+        self.updated = ""
 
         # if data are empty
         if not layer_id:

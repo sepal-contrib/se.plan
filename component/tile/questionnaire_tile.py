@@ -56,7 +56,7 @@ class QuestionnaireTile(sw.Tile):
             btn.on_event("click", self._open_dialog)
         self.constraint_tile.observe(self.__on_constraint, "custom_v_model")
         self.priority_tile.table.observe(self.__on_priority_tile, "v_model")
-        self.dialog.observe(self.constraint_tile._update_constraints, "updated")
+        self.dialog.observe(self.constraint_tile._reset_constraint, "updated")
 
     def _open_dialog(self, widget, event, data):
         """populate and update the dialog"""
