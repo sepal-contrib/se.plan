@@ -2,141 +2,141 @@
     "app": {
         "title": "se.plan",
         "drawer": {
-            "aoi": "Area of interest selection",
+            "aoi": "Sélection de la zone d'intérêt",
             "question": "Questionnaire",
-            "custom": "Manual selection",
-            "compute": "Compute",
-            "dashboard": "Restoration dashboard",
-            "map": "Results map",
-            "about": "About",
-            "recipe": "Recipe",
-            "feedback": "feedback"
+            "custom": "Sélection manuelle",
+            "compute": "Calculer",
+            "dashboard": "Tableau de bord",
+            "map": "Carte finale",
+            "about": "À propos",
+            "recipe": "Formule",
+            "feedback": "commentaires"
         }
     },
     "questionnaire": {
-        "title": "Questionnaire identifying restoration priorities & constraints",
-        "max_treecover": "Maximum allowable percent tree cover in {}:",
-        "default_layer": "Use default layers",
-        "custom_layer": "Use customized layers",
-        "questionnaire_btn": "Apply questionnaire answers",
-        "slider_hint": "Maximum % tree cover in the class"
+        "title": "Questionnaire identifiant les priorités et contraintes de restauration",
+        "max_treecover": "Couverture arborée maximale autorisée dans {} :",
+        "default_layer": "Utiliser les couches par défaut",
+        "custom_layer": "Utiliser des couches personnalisées",
+        "questionnaire_btn": "Appliquer les réponses au questionnaire",
+        "slider_hint": "% maximal de couverture arborée dans la classe"
     },
     "valid": {
-        "title": "Model recipe (input benefits, costs, and constraints)",
-        "display": "Save your recipe",
-        "save": "Save your recipe",
+        "title": "Formule de modèle (en entrée: bénéfices, coûts et contraintes)",
+        "display": "Enregistrez votre formule",
+        "save": "Enregistrez votre formule",
         "txt": {
-            "0": "The tool uses a weighted sum approach to generate a map indicating how the net benefits of restoration compare across different locations in the landscape. This approach is a simple multi-attribute decision analysis method whereby digital maps (often called “spatial layers”) of restoration’s prospective benefits, such as enhanced wood harvest, carbon sequestration, or biodiversity conservation, are weighted according to the relative importance (i.e., rating) a user attaches to them. The tool creates a single weighted benefit layer by multiplying each benefit layer by its user-assigned weight and then summing across all the benefit layers. Next, it calculates a benefit-cost ratio by dividing the weighted benefit layer by the estimated costs of restoration, which like the benefits may vary across locations. Finally, it masks from the results any locations that the user has indicated are unsuitable for restoration due to ecological or socioeconomic risks. Users thus provide two important types of input before running the tool: the relative weights on different restoration benefits, and constraints that exclude specified locations from restoration.",
-            "1": "We recommend that users explore different weighting combinations to examine how areas recommended for restoration might change depending on the weights. In order to assist in comparing alternative benefit ratings and constraints, we have included a snapshot of your model settings above. You also have the option to save this as a recipe in SEPAL so you can revisit it at a later point in time."
+            "0": "L'outil utilise une approche de somme pondérée pour générer une carte indiquant comment les avantages nets de la restauration se comparent entre les différents localitées du paysage. Cette approche est une simple méthode d'analyse de décisions multi-attributs par laquelle les cartes numériques (souvent appelées « couches spatiales ») des avantages potentiels de la restauration, comme la récolte de bois améliorée, la séquestration du carbone, ou la conservation de la biodiversité, sont pondérées en fonction de l'importance relative (i. ., évaluation) qu'un utilisateur y attache. L'outil crée une seule couche d'avantages pondérés en multipliant chaque couche d'avantages par son poids assigné par l'utilisateur et en sommant ensuite à travers toutes les couches. Ensuite, il calcule un rapport bénéfice-coût en divisant la couche de bénéfice pondérée par les coûts estimés de restauration, qui, comme les avantages, peuvent varier selon les lieus. Enfin, il masque à partir des résultats les lieux que l'utilisateur a indiqué comme pas appropriés pour la restauration en raison de risques écologiques ou socioéconomiques. Les utilisateurs fournissent donc deux types importants d'entrées avant d'exécuter l'outil : les poids relatifs sur différents avantages de restauration, et les contraintes qui excluent les emplacements spécifiés de la restauration.",
+            "1": "Nous recommandons aux utilisateurs d'explorer différentes combinaisons de pondération pour examiner comment les zones recommandées pour la restauration peuvent changer en fonction des poids. Afin de vous aider à comparer les bénéfices et les contraintes des sénarii alternatifs, nous avons inclus un aperçu des paramètres de votre modèle ci-dessus. Vous avez également la possibilité de sauvegarder cette formule dans SEPAL afin de pouvoir la revisiter ultérieurement."
         }
     },
     "compute": {
-        "title": "Launch computation",
-        "btn": "Compute the restoration map",
-        "desc": "**The launch button will be available after you validate your inputs**"
+        "title": "Lancer le calcul",
+        "btn": "Calcul de la carte de restauration",
+        "desc": "**Le bouton de lancement sera disponible une fois que vous aurez validé vos entrées**"
     },
     "constraints": {
-        "title": "Constraints",
-        "desc": "Select your constraints for the analysis. Constraints are grouped by theme. Click on the arrow to expand the menu and select the constraint you want to activate. By selecting a constraint in the dropdown menu, you will activate it. Constraints can then be further customized, if eligible.",
-        "criteria_lbl": "Criteria",
+        "title": "Contraintes",
+        "desc": "Sélectionnez vos contraintes pour l'analyse. Les contraintes sont regroupées par thème. Cliquez sur la flèche pour agrandir le menu et sélectionnez la contrainte que vous voulez activer. En sélectionnant une contrainte dans le menu déroulant, vous l'activez. Les contraintes peuvent ensuite être personnalisées.",
+        "criteria_lbl": "Critères",
         "info": {
-            "0": "Using \"{}\" constraint, setting the switch \"on\" will exclude all sites whose characteristics match the variable named by the constraint, setting the switch \"off\" To exclude no sites at all, do not select the constraint.",
-            "1": "Using \"{}\" constraint, all sites with characteristics that are out of the colored bar will be excluded from the computation."
+            "0": "En utilisant la contrainte \"{}\", mettre le boutton sur \"on\" exclura tous les sites dont les caractéristiques correspondent à la variable nommée par la contrainte, en réglant le bouton \"off\" Pour exclure aucun site du tout, ne sélectionnez pas la contrainte.",
+            "1": "En utilisant la contrainte \"{}\", tous les sites dont les caractéristiques sont hors de la barre de couleur seront exclus du calcul."
         }
     },
     "cost": {
-        "title": "Costs"
+        "title": "Coûts"
     },
     "custom": {
-        "title": "Customize layers input",
-        "desc": "When you click on the 'Apply questionnaire answers' button, the layers will be weighted according to your responses. However, you can still change the value of any weight. In the second panel, you will find all of the layers that can be replaced with custom versions. Exercise caution when changing weights and using custom layers, as this can lead to inaccurate recommendations.",
-        "question_btn": "Apply questionnaire answers",
-        "default_btn": "Apply default parameters",
+        "title": "Personnaliser les couches",
+        "desc": "Lorsque vous cliquez sur le bouton « Appliquer les réponses au questionnaire », les couches seront pondérées en fonction de vos réponses. Cependant, vous pouvez toujours modifier la valeur de n'importe quel poids. Dans le second panneau, vous trouverez toutes les couches qui peuvent être remplacés par des versions personnalisées. Faites preuve de prudence lorsque vous changez de poids et utilisez des couches personnalisées, car cela peut entraîner des recommandations inexactes.",
+        "question_btn": "Appliquer les réponses au questionnaire",
+        "default_btn": "Appliquer les paramètres par défaut",
         "recipe": {
-            "title": "Load an existing recipe",
-            "apply": "Apply the selected recipe",
-            "file": "Select recipe file",
-            "name": "Recipe name"
+            "title": "Charger une formule existante",
+            "apply": "Appliquer la formule sélectionnée",
+            "file": "Sélectionner une formule",
+            "name": "Nom de la formule"
         }
     },
     "dial": {
-        "layer": "Use custom layer",
-        "change": "Change layer used for the computation",
-        "cancel": "Cancel",
-        "save": "Save",
-        "weight": "Weight",
-        "no_layer": "No layer",
-        "disc": "You need to select a layer before making modifications"
+        "layer": "Utiliser des couches personnalisées",
+        "change": "Changer la couche utilisée pour le calcul",
+        "cancel": "Annuler",
+        "save": "Sauver",
+        "weight": "Poids",
+        "no_layer": "Aucune couche",
+        "disc": "Vous devez sélectionner une couche avant de faire des modifications"
     },
     "dashboard": {
         "region": {
-            "title": "Summary of restoration suitability by region",
-            "detail": "Details"
+            "title": "Résumé de la capacité de restauration par région",
+            "detail": "Détails"
         },
         "theme": {
-            "title": "Area of interest - summary by subthemes",
-            "txt": "To help disentangle the potential impacts of restoration at each candidate site, we report the individual benefits, costs, and risks (i.e., constraints) in finer detail below.",
+            "title": "Domaine d'intérêt - résumé par sous-thèmes",
+            "txt": "Pour aider à démêler les impacts potentiels de la restauration sur chaque site candidat, nous signalons les avantages, les coûts et les risques individuels (i. ., contraintes) dans des détails plus fins ci-dessous.",
             "benefit": {
-                "0": "For each assessed benefit, the mean value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
-                "1": "For any of these thematic layers, if you have used your own data in the model, make sure that you provided the correct information."
+                "0": "Pour chaque avantage estimé, la valeur moyenne par rapport à l'AOI est affichée dans ses unités d'origine (par exemple, tons/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
+                "1": "Pour une de ces couches thématiques, si vous avez utilisé vos propres données dans le modèle, assurez-vous que vous avez fourni des informations correctes."
             },
             "cost": {
-                "0": "The tool includes data on two types of costs: opportunity costs, and implementation costs. Please refer to our manual for more information.",
-                "1": "For each cost, the sum value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
-                "2": "Note: Information on the variability of natural regeneration success is included in the \"Constraints\" category."
+                "0": "L'outil comprend des données sur deux types de coûts : les coûts d'opportunité et les coûts d'implémentation. Veuillez consulter notre manuel pour plus d'informations.",
+                "1": "Pour chaque coût, la valeur de la somme sur l'AOI considérée est affichée dans ses unités d'origine (par exemple, les tonnes C/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
+                "2": "Remarque : Les informations sur la variabilité du succès de la régénération naturelle sont incluses dans la catégorie « Contraintes »."
             },
             "constraint": {
-                "0": "Results indicate the percentage of the total area of the region of interest that is subject to each particular constraint (i.e., is excluded from restoration)."
+                "0": "Les résultats indiquent le pourcentage de la superficie totale de la région d'intérêt qui est assujettie à chaque contrainte particulière (c.-à-d. est exclue de la restauration)."
             }
         }
     },
     "goal": {
-        "title": "Restoration goals",
-        "goal_lbl": "restoration goals"
+        "title": "Objectifs de restauration",
+        "goal_lbl": "objectifs de restauration"
     },
     "map": {
-        "title": "Results map",
-        "to_asset": "Download to GEE assets",
-        "to_sepal": "Download to SEPAL",
-        "draw_custom_area": "Draw sub AOI",
-        "compute_dashboard": "Compute dashboard",
-        "low": "Low",
-        "high": "High",
+        "title": "Carte finale",
+        "to_asset": "Télécharger comme asset GEE",
+        "to_sepal": "Télécharger vers SEPAL",
+        "draw_custom_area": "Dessiner une sous-AOI",
+        "compute_dashboard": "Calculer le tableau de bord",
+        "low": "Faible",
+        "high": "Élevée",
         "txt": {
-            "0": "The map below displays the suitability of different locations for restoration, based on your rating of restoration benefits and your selection of restoration constraints. Blue areas indicate a higher return on investment, while red areas indicate a lower return.",
-            "1": "Examine the restoration suitability map and identify some areas that seem promising for more detailed restoration planning. Once you have identified these areas, you can draw a boundary around them and obtain summary statistics on their estimated benefits, costs, and risks (i.e., constraints). This information can help you assess tradeoffs and set restoration priorities for regions of interest.",
-            "2": "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and implementation costs. This indicator allows you to compare the restoration suitability of different sites and determine which ones offer higher returns on investment."
+            "0": "La carte ci-dessous montre la pertinence de différents emplacements pour la restauration, en fonction de votre évaluation des avantages de la restauration et de votre choix de contraintes de restauration. Les zones bleues indiquent un rendement plus élevé sur les investissements, tandis que les zones rouges indiquent un rendement inférieur.",
+            "1": "Examinez la carte de capacité à la restauration et identifiez certaines zones qui semblent prometteuses pour une planification de restauration plus détaillée. Une fois que vous avez identifié ces zones, vous pouvez tracer une frontière autour d'elles et obtenir des statistiques sommaires sur leurs bébéfices, leurs coûts et leurs risques (i.e constraintes) Ces informations peuvent vous aider à évaluer les compromis et à fixer les priorités de restauration pour les régions d'intérêt.",
+            "2": "La capacité de restauration dépend des bénéfices et des coûts. Il s'agit du rapport de la somme pondérée des prestations, de 1 à 5, divisée par les coûts. Les coûts comprennent à la fois les coûts d'opportunité et ceux de mise en œuvre. Cet indicateur vous permet de comparer la qualité de restauration de différents sites et de déterminer ceux qui offrent un rendement plus élevé sur l'investissement."
         },
         "dialog": {
-            "title": "Sub AOI name",
-            "label": "Set name",
-            "btn": "Validate"
+            "title": "Nom de la sous-AOI",
+            "label": "Définir le nom",
+            "btn": "Valider"
         },
         "shapes": {
-            "btn": "Load shapes",
-            "file": "Select file",
-            "feature": "Select the Id Feature",
-            "title": "Load existing shapes"
+            "btn": "Charger les vecteurs",
+            "file": "Sélectionner un fichier",
+            "feature": "Sélectionner l'Id de la forme",
+            "title": "Charger des formes existantes"
         }
     },
     "potential": {
-        "title": "Restoration potential and land use",
-        "desc": "Maximum % tree cover in land use classes",
-        "land_use_lbl": "Which land uses allow restoration?",
-        "treecover_lbl": "Tree cover in {}"
+        "title": "Potentiel de restauration et utilisation des terres",
+        "desc": "% maximal de couverture arborée dans la classe",
+        "land_use_lbl": "Quelles sont les couvertures des terres qui permettent la restauration?",
+        "treecover_lbl": "Couverture arborée en {}"
     },
     "benefits": {
-        "title": "Restoration indicators"
+        "title": "Indicateurs de restauration"
     },
     "export": {
-        "title": "Export map",
-        "scale": "Scale",
+        "title": "Exporter la carte",
+        "scale": "Échelle",
         "radio": {
-            "label": "Select export method",
-            "gee": "As a GEE asset",
-            "sepal": "As a sepal file"
+            "label": "Sélectionnez la méthode d'exportation",
+            "gee": "En tant qu'asset GEE",
+            "sepal": "En tant que fichier SEPAL"
         },
-        "cancel": "Cancel",
-        "apply": "Apply"
+        "cancel": "Annuler",
+        "apply": "Appliquer"
     }
 }
