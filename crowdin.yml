@@ -1,0 +1,3 @@
+files:
+  - source: component/message/en/*.json
+    translation: /component/message/%locale%/%original_file_name%
