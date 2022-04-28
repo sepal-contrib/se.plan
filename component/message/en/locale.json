@@ -11,8 +11,9 @@
             "about": "About",
             "recipe": "Recipe",
             "feedback": "feedback"
-        }
-        
+        },
+        "about": "utils/ABOUT_en.md",
+        "disclaimer": "The se.plan application is still under development. We encourage the users to continue explore the tool functionalities and report any issues using the \"bug report\" link in the left panel."
     },
     "questionnaire": {
         "title": "Questionnaire identifying restoration priorities & constraints",

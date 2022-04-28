@@ -11,7 +11,9 @@
             "about": "关于",
             "recipe": "配方",
             "feedback": "反馈"
-        }
+        },
+        "about": "utils/ABOUT_zh-CN.md",
+        "disclaimer": "se.plan应用程序仍在开发中。我们鼓励用户继续探索工具的功能，并使用左侧面板的 \"错误报告 \"链接报告任何问题。"
     },
     "questionnaire": {
         "title": "确定恢复的优先事项和制约因素的问卷。",
