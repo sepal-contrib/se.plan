@@ -6,6 +6,7 @@ import pandas as pd
 import numpy as np
 
 from component import parameter as cp
+from component.message import cm
 
 
 class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
@@ -58,6 +59,13 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                     "layer"
                 ].values[0]
 
+                # get the asset name as displayed in the hints
+                asset_name = (
+                    row["layer"]
+                    if row["layer"] != original_asset
+                    else cm.compute.default_label
+                )
+
                 # cannot make the slots work with icons so I need to move to intermediate layout
                 if row["theme"] == "benefits":
 
@@ -71,9 +79,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                             children=[
                                 v.TextField(
                                     small=True,
-                                    hint=row["layer"]
-                                    if row["layer"] != original_asset
-                                    else "default",
+                                    hint=asset_name,
                                     persistent_hint=True,
                                     color=cp.gradient(5)[weight],
                                     readonly=True,
@@ -96,9 +102,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                             children=[
                                 v.TextField(
                                     small=True,
-                                    hint=row["layer"]
-                                    if row["layer"] != original_asset
-                                    else "default",
+                                    hint=asset_name,
                                     persistent_hint=True,
                                     color=cp.gradient(2)[active],
                                     readonly=True,
@@ -128,9 +132,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                             children=[
                                 v.TextField(
                                     small=True,
-                                    hint=row["layer"]
-                                    if row["layer"] != original_asset
-                                    else "default",
+                                    hint=asset_name,
                                     persistent_hint=True,
                                     color=cp.gradient(2)[active],
                                     readonly=True,

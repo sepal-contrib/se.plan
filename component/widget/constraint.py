@@ -121,7 +121,7 @@ class Range(Constraint):
         # as it won't be usable I need to add a hint to the end user
         if min_ is None or max_ is None:
 
-            self.widget.error_messages = "The aoi is out of the bounds of your constraint layer, use a custom one."
+            self.widget.error_messages = cm.constraints.error.out_of_aoi
             self.widget.min = 0
             self.widget.max = 1
             self.widget.step = 0.1
@@ -172,7 +172,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
             multiple=True,
             deletable_chips=True,
             persistent_hint=True,
-            hint="select an AOI first",
+            hint=cm.constraints.error.no_aoi,
         )
 
         # create the content, nothing is selected by default so Select should be empty and criterias hidden

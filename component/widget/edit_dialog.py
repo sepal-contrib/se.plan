@@ -33,13 +33,21 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.index = None
 
         # add all the standard placeholder, they will be replaced when a layer will be selected
-        self.title = v.CardTitle(children=["Layer name"])
+        self.title = v.CardTitle(children=[cm.dial.default_title])
         self.text = v.CardText(children=[""])
         self.layer = v.TextField(
-            class_="ma-5", v_model=None, color="warning", outlined=True, label="Layer"
+            class_="ma-5",
+            v_model=None,
+            color="warning",
+            outlined=True,
+            label=cm.dial.layer,
         )
         self.unit = v.TextField(
-            class_="ma-5", v_model=None, color="warning", outlined=True, label="Unit"
+            class_="ma-5",
+            v_model=None,
+            color="warning",
+            outlined=True,
+            label=cm.dial.unit,
         )
 
         # add a map to display the layers
@@ -168,10 +176,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.text.children = [cm.dial.disc]
 
             # mute all the widgets
-            self.layer.v_model = "no Layer"
+            self.layer.v_model = cm.dial.no_layer
             self.layer.disabled = True
 
-            self.unit.v_model = "no unit"
+            self.unit.v_model = cm.dial.no_unit
             self.unit.disabled = True
 
             # disable save

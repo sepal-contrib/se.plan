@@ -5,17 +5,10 @@ import pandas as pd
 import numpy as np
 
 from component import parameter as cp
+from component.message import cm
 
 
 class PriorityTable(v.SimpleTable):
-
-    _labels = [
-        "no importance",
-        "low importance",
-        "neutral",
-        "important",
-        "very important",
-    ]
 
     _colors = cp.gradient(5)
 
@@ -58,10 +51,10 @@ class PriorityTable(v.SimpleTable):
         headers = v.Html(
             tag="tr",
             children=[
-                v.Html(tag="th", children=["action"]),
-                v.Html(tag="th", children=["theme"]),
-                v.Html(tag="th", children=["indicator"]),
-                *[v.Html(tag="th", children=[lbl]) for lbl in self._labels],
+                v.Html(tag="th", children=[cm.benefits.table.action]),
+                v.Html(tag="th", children=[cm.benefits.table.theme]),
+                v.Html(tag="th", children=[cm.benefits.table.indicator]),
+                *[v.Html(tag="th", children=[lbl]) for lbl in cm.benefits.table.labels],
             ],
         )
 
@@ -80,8 +73,8 @@ class PriorityTable(v.SimpleTable):
                 check.observe(self._on_check_change, "v_model")
 
         # action on clicks
-        for icon in self.btn_list:
-            icon.on_event("click", lambda *args: print("toto"))
+        # for icon in self.btn_list:
+        #    icon.on_event("click", lambda *args: print("toto"))
 
     def _on_check_change(self, change):
 

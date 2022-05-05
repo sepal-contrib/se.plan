@@ -37,9 +37,9 @@ class CostTile(sw.Tile):
         header = sw.Html(
             tag="thead",
             children=[
-                sw.Html(tag="th", children=["action"]),
-                sw.Html(tag="th", children=["cost"]),
-                sw.Html(tag="th", children=["description"]),
+                sw.Html(tag="th", children=[cm.cost.table.action]),
+                sw.Html(tag="th", children=[cm.cost.table.cost]),
+                sw.Html(tag="th", children=[cm.cost.table.description]),
             ],
         )
 

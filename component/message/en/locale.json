@@ -35,7 +35,8 @@
     "compute": {
         "title": "Launch computation",
         "btn": "Compute the restoration map",
-        "desc": "**The launch button will be available after you validate your inputs**"
+        "desc": "**The launch button will be available after you validate your inputs**",
+        "default_label": "default"
     },
     "constraints": {
         "title": "Constraints",
@@ -44,10 +45,19 @@
         "info": {
             "0": "Using \"{}\" constraint, setting the switch \"on\" will exclude all sites whose characteristics match the variable named by the constraint, setting the switch \"off\" To exclude no sites at all, do not select the constraint.",
             "1": "Using \"{}\" constraint, all sites with characteristics that are out of the colored bar will be excluded from the computation." 
+        },
+        "error": {
+            "out_of_aoi":  "The aoi is out of the bounds of your constraint layer, use a custom one.",
+            "no_aoi": "Select an aoi first"
         }
     },
     "cost": {
-        "title": "Costs"
+        "title": "Costs",
+        "table": {
+            "action": "action",
+            "cost": "cost",
+            "description": "description"
+        }
     },
     "custom": {
         "title": "Customize layers input",
@@ -68,7 +78,12 @@
         "save": "Save",
         "weight": "Weight",
         "no_layer": "No layer",
-        "disc": "You need to select a layer before making modifications"
+        "disc": "You need to select a layer before making modifications",
+        "layer": "Layer",
+        "unit": "Unit",
+        "default_title": "Layer Name",
+        "no_layer": "no_layer",
+        "no_unit": "no_unit"
     },
     "dashboard": {
         "region": {
@@ -128,7 +143,19 @@
         "treecover_lbl": "Tree cover in {}"
     },
     "benefits": {
-        "title": "Restoration indicators"
+        "title": "Restoration indicators",
+        "table": {
+            "action": "action",
+            "theme": "theme",
+            "indicator": "indicator",
+            "labels": {
+                "0": "no importance",
+                "1": "low importance",
+                "2": "neutral",
+                "3": "important",
+                "4": "very important"
+            }
+        }
     },
     "export": {
         "title": "Export map",
