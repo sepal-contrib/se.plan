@@ -62,14 +62,14 @@ def gradient(n, colors=red_to_green):
     # The number of colors per individual linear gradient
     n_out = int(float(n) / (len(colors) - 1))
 
-    # returns dictionary defined by color_dict()
-    gradient_dict = linear_gradient(
-        colors[0], colors[1], (n_out + 1) if n % 2 else n_out
-    )
+    # create an initial dictionary for a single pair
+    nb_colors = (n_out + 1) if n % 2 else n_out
+    gradient_dict = linear_gradient(colors[0], colors[1], nb_colors)
 
+    # add the other color pairs if needed
     if len(colors) > 1:
-        for col in range(1, len(colors) - 1):
-            next_ = linear_gradient(colors[col], colors[col + 1], n_out + 1)
+        for i in range(1, len(colors) - 1):
+            next_ = linear_gradient(colors[i], colors[i + 1], n_out + 1)
             gradient_dict += next_[1:]
 
     return gradient_dict
