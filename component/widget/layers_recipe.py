@@ -39,6 +39,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
         layer_list = pd.DataFrame(layer_list) if layer_list else self.LAYER_LIST
 
         # get all the themes
+        # themes = [t for t in cm.theme.keys()]
         themes = np.unique(layer_list.theme)
 
         ep_content = []
@@ -55,19 +56,16 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
             for i, row in tmp_layers.iterrows():
 
                 # get the original layer asset
-                original_asset = self.LAYER_LIST[self.LAYER_LIST.layer_id == row["id"]][
-                    "layer"
-                ].values[0]
+                original_row = self.LAYER_LIST[self.LAYER_LIST.layer_id == row.id]
+                original_asset = original_row["layer"].values[0]
 
                 # get the asset name as displayed in the hints
-                asset_name = (
-                    row["layer"]
-                    if row["layer"] != original_asset
-                    else cm.compute.default_label
-                )
+                current_layer = row["layer"]
+                is_same = current_layer == original_asset
+                asset_name = cm.compute.default_label if is_same else current_layer
 
                 # cannot make the slots work with icons so I need to move to intermediate layout
-                if row["theme"] == "benefits":
+                if theme == "benefit":
 
                     # get the weight from questionnaire
                     weight = json.loads(question_io.priorities)[row["id"]]
@@ -83,7 +81,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                                     persistent_hint=True,
                                     color=cp.gradient(5)[weight],
                                     readonly=True,
-                                    v_model=row["name"],
+                                    v_model=getattr(cm.layers, row["id"]).name,
                                 ),
                                 v.Icon(
                                     class_="ml-2",
@@ -94,7 +92,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                         )
                     )
 
-                elif row["theme"] == "costs":
+                elif theme == "cost":
                     active = True
                     theme_layer_widgets.append(
                         v.Row(
@@ -106,7 +104,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                                     persistent_hint=True,
                                     color=cp.gradient(2)[active],
                                     readonly=True,
-                                    v_model=row["name"],
+                                    v_model=getattr(cm.layers, row["id"]).name,
                                 ),
                                 v.Icon(
                                     class_="ml-2",
@@ -117,14 +115,14 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                         )
                     )
 
-                elif row["id"] not in [
+                elif row.id not in [
                     "ecozones",
                     "land_cover",
                     "treecover_with_potential",
                 ]:
 
                     # get the activation from questionnaire_io if constraint
-                    active = json.loads(question_io.constraints)[row["name"]] != -1
+                    active = json.loads(question_io.constraints)[row["id"]] != -1
 
                     theme_layer_widgets.append(
                         v.Row(
@@ -136,7 +134,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
                                     persistent_hint=True,
                                     color=cp.gradient(2)[active],
                                     readonly=True,
-                                    v_model=row["name"],
+                                    v_model=getattr(cm.layers, row["id"]).name,
                                 ),
                                 v.Icon(
                                     class_="ml-2",

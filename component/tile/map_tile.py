@@ -250,9 +250,6 @@ class MapTile(sw.Tile):
             names,
         )
 
-        # print(self.area_dashboard)
-        # print(self.theme_dashboard)
-
         self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
 
         self.area_tile.set_summary(self.area_dashboard)

@@ -196,14 +196,14 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.id = layer_id
 
             # change title
-            self.title.children = [self.model.layer_list[self.index]["name"]]
+            self.title.children = [getattr(cm.layers, layer_id).name]
 
             # get the layer list pd dataframe
             layer_list = pd.read_csv(cp.layer_list).fillna("")
 
             # change text
             layer_df_line = layer_list[layer_list.layer_id == layer_id].iloc[0]
-            self.text.children = [layer_df_line.layer_info]
+            self.text.children = [getattr(cm.layers, layer_id).detail]
 
             # enable textFields
             self.layer.disabled = False

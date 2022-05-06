@@ -14,10 +14,13 @@ class Constraint(sw.SepalWidget, v.Row):
 
     custom_v_model = Any(-1).tag(sync=True)
 
-    def __init__(self, widget, name="name", header="header", id_="id", **kwargs):
+    def __init__(
+        self, widget, name="name", header="header", layer="layer", id_="id", **kwargs
+    ):
 
         # default
         self.id = id_
+        self.layer = layer
         self.header = header
         self.name = name
         self.class_ = "ma-5"
@@ -69,27 +72,32 @@ class Constraint(sw.SepalWidget, v.Row):
 
 
 class Binary(Constraint):
-    def __init__(self, name, header, id_, **kwargs):
+    def __init__(self, name, header, layer, **kwargs):
+
+        # get the translated name from cm
+        t_name = getattr(cm.layers, name).name
 
         widget = v.Switch(
-            # readonly = True,
             persistent_hint=True,
             v_model=True,
-            label=name,
+            label=t_name,
             **kwargs,
         )
 
-        super().__init__(widget, name=name, header=header, id_=id_)
+        super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
 
 class Range(Constraint):
 
     LABEL = ["low", "medium", "high"]
 
-    def __init__(self, name, header, unit, id_, **kwargs):
+    def __init__(self, name, header, unit, layer, **kwargs):
+
+        # get the translated name from cm
+        t_name = getattr(cm.layers, name).name
 
         widget = v.RangeSlider(
-            label=f"{name} ({unit})",
+            label=f"{t_name} ({unit})",
             max=1,
             step=0.1,
             v_model=[0, 1],
@@ -98,7 +106,7 @@ class Range(Constraint):
             **kwargs,
         )
 
-        super().__init__(widget, name=name, header=header, id_=id_)
+        super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
     def set_values(self, geometry, layer):
 
@@ -125,7 +133,6 @@ class Range(Constraint):
             self.widget.min = 0
             self.widget.max = 1
             self.widget.step = 0.1
-            # self.widget.tick_labels = []
             self.widget.v_model = [0, 1]
 
         else:
@@ -140,11 +147,6 @@ class Range(Constraint):
             # set the number of steps by stting the step parameter (100)
             self.widget.step = max(0.01, (self.widget.max - self.widget.min) / 100)
 
-            # display ticks label with low medium and high values
-            # self.widget.tick_labels = [
-            #    self.LABEL[i // 25 - 1] if i in [25, 50, 75] else "" for i in range(101)
-            # ]
-
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
 
@@ -155,10 +157,10 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
     def __init__(self, category, criterias):
 
         # save title name
-        self.title = category
+        self.title = getattr(cm.constraint.category, category)
 
-        # create a header, as nothing is selected by defaul it should only display the title
-        self.header = v.ExpansionPanelHeader(children=[cp.criteria_types[category]])
+        # create a header, as nothing is selected by default it should only display the title
+        self.header = v.ExpansionPanelHeader(children=[self.title])
 
         # link the criterias to the select
         self.criterias = [c.disable() for c in criterias if c.header == category]
@@ -209,7 +211,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
     def expand(self):
         """when the custom panel expand I want to display only the title"""
 
-        self.header.children = [cp.criteria_types[self.title]]
+        self.header.children = [self.title]
 
         # automatically open the criterias if none are selected
         if len(self.select.v_model) == 0 and self.select.disabled == False:
@@ -223,9 +225,6 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         # automatically close the criterias if none are selected
         self.select.menu_props = {}
 
-        # get the title
-        title = cp.criteria_types[self.title]
-
         # get the chips
         chips = v.Flex(
             children=[
@@ -236,6 +235,6 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         )
 
         # write the new header content
-        self.header.children = [title, chips]
+        self.header.children = [self.title, chips]
 
         return self

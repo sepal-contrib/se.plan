@@ -13,7 +13,7 @@ class PriorityTable(v.SimpleTable):
     _colors = cp.gradient(5)
 
     _BENEFITS = pd.read_csv(cp.layer_list).fillna("").sort_values(by=["subtheme"])
-    _BENEFITS = _BENEFITS[_BENEFITS.theme == "benefits"]
+    _BENEFITS = _BENEFITS[_BENEFITS.theme == "benefit"]
 
     _DEFAULT_V_MODEL = {layer_id: 0 for layer_id in _BENEFITS.layer_id}
 
@@ -71,10 +71,6 @@ class PriorityTable(v.SimpleTable):
         for name in self._BENEFITS.layer_id.tolist():
             for check in self.checkbox_list[name]:
                 check.observe(self._on_check_change, "v_model")
-
-        # action on clicks
-        # for icon in self.btn_list:
-        #    icon.on_event("click", lambda *args: print("toto"))
 
     def _on_check_change(self, change):
 

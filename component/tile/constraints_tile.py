@@ -42,15 +42,15 @@ class ConstraintTile(sw.Tile, HasTraits):
             unit = layer_row.unit.values[0]
             header = c["header"]
             value = c["content"]
-            id_ = c["layer"]
+            layer = c["layer"]
             hint = cm.constraints.info[c["tooltip"]].format(key)
 
             if value == "BINARY":  # binary criteria
-                crit = cw.Binary(key, header, id_=id_, hint=hint)
+                crit = cw.Binary(key, header, layer=layer, hint=hint)
             elif isinstance(value, list):  # dropdown values
-                crit = cw.Dropdown(key, value, header, id_=id_, hint=hint)
+                crit = cw.Dropdown(key, value, header, layer=layer, hint=hint)
             elif value == "RANGE":  # range values
-                crit = cw.Range(key, header, unit, id_=id_, hint=hint)
+                crit = cw.Range(key, header, unit, layer=layer, hint=hint)
 
             self.criterias.append(crit)
 
@@ -60,13 +60,11 @@ class ConstraintTile(sw.Tile, HasTraits):
             v_model=None,
             hover=True,
             accordion=True,
-            children=[
-                cw.CustomPanel(k, self.criterias) for k in cp.criteria_types.keys()
-            ],
+            children=[cw.CustomPanel(k, self.criterias) for k in cp.criteria_types],
         )
 
         # default custom_v_model
-        default_v_model = {c.name: c.custom_v_model for c in self.criterias}
+        default_v_model = {c.id: c.custom_v_model for c in self.criterias}
         self.custom_v_model = json.dumps(default_v_model)
 
         # cration of the tile
@@ -141,7 +139,7 @@ class ConstraintTile(sw.Tile, HasTraits):
 
         # insert the new values in custom_v_model
         tmp = json.loads(self.custom_v_model)
-        tmp[change["owner"].name] = change["new"]
+        tmp[change["owner"].id] = change["new"]
         self.custom_v_model = json.dumps(tmp)
 
         return
@@ -152,9 +150,6 @@ class ConstraintTile(sw.Tile, HasTraits):
         # loop in the custom panels
         for i, p in enumerate(self.panels.children):
 
-            if i == change["new"]:
-                p.expand()
-            else:
-                p.shrunk()
+            p.expand() if i == change["new"] else p.shrunk()
 
         return self

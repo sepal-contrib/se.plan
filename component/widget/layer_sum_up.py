@@ -5,6 +5,7 @@ from ipywidgets import Output
 from matplotlib import pyplot as plt
 
 from component import parameter as cp
+from component.message import cm
 
 
 class LayerFull(sw.Layout):
@@ -13,14 +14,12 @@ class LayerFull(sw.Layout):
 
     def __init__(self, layer_name, values, aoi_names, colors):
 
+        # get the layer labels from the translator object
+        t_layer = getattr(cm.layers, layer_name)
+
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_row = layer_list[layer_list.layer_name == layer_name]
-
-        if len(layer_row) != 1:
-            raise IndexError(
-                f"The layer {layer_name} is not part of the existing layers of the application. Please contact our maintainer."
-            )
+        layer_row = layer_list[layer_list.layer_id == layer_name]
 
         # build the internal details
         details = sw.ExpansionPanels(
@@ -30,13 +29,11 @@ class LayerFull(sw.Layout):
                 sw.ExpansionPanel(
                     children=[
                         sw.ExpansionPanelHeader(
-                            children=["Details"],
+                            children=[cm.dashboard.theme.benefit.details],
                             expand_icon="mdi-help-circle-outline",
                             disable_icon_rotate=True,
                         ),
-                        sw.ExpansionPanelContent(
-                            children=[layer_row.layer_info.values[0]]
-                        ),
+                        sw.ExpansionPanelContent(children=[t_layer.detail]),
                     ]
                 )
             ],
@@ -47,7 +44,7 @@ class LayerFull(sw.Layout):
             class_="mt-2 mb-2",
             xs12=True,
             tag="h3",
-            children=[f"{layer_name} ({layer_row.unit.values[0]})"],
+            children=[f"{t_layer.name} ({layer_row.unit.values[0]})"],
         )
 
         # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
@@ -111,14 +108,19 @@ class LayerFull(sw.Layout):
 class LayerPercentage(sw.Layout):
     def __init__(self, layer_name, pcts, colors):
 
+        # get the layer labels from the translator object
+        t_layer = getattr(cm.layers, layer_name)
+
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_row = layer_list[layer_list.layer_name == layer_name]
+        layer_row = layer_list[layer_list.layer_id == layer_name]
 
         if len(layer_row) != 1 and layer_name not in cp.criterias:
             raise IndexError(
-                f"The layer {layer_name} is not part of the existing layers of the application. Please contact our maintainer."
+                f"The layer {t_layer.name} is not part of the existing layers of the application. Please contact our maintainer."
             )
+
+        # deal with land_use special case
         if len(layer_row) != 1 and layer_name in cp.criterias:
             layer_row = pd.DataFrame(
                 [["", "", layer_name, "", layer_name, "HA"]],
@@ -133,7 +135,7 @@ class LayerPercentage(sw.Layout):
             )
 
         # add the title
-        title = sw.Html(tag="h4", children=[layer_name])
+        title = sw.Html(tag="h4", children=[t_layer.name])
         # build the internal details
         details = sw.ExpansionPanels(
             xs12=True,
@@ -142,13 +144,11 @@ class LayerPercentage(sw.Layout):
                 sw.ExpansionPanel(
                     children=[
                         sw.ExpansionPanelHeader(
-                            children=["Details"],
+                            children=[cm.dashboard.theme.benefit.details],
                             expand_icon="mdi-help-circle-outline",
                             disable_icon_rotate=True,
                         ),
-                        sw.ExpansionPanelContent(
-                            children=[layer_row.layer_info.values[0]]
-                        ),
+                        sw.ExpansionPanelContent(children=[t_layer.detail]),
                     ]
                 )
             ],

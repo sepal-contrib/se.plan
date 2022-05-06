@@ -1,27 +1,23 @@
-# value of each land cover category
-landcover_default_cat = {
-    "Shrubs": 20,
-    "Herbaceous vegetation": 30,
-    "Cultivated and managed vegetation/agriculture": 40,
-    "Urban / built up": 50,
-    "Bare / sparse vegetation": 60,
-    "Snow and ice": 70,
-    "Herbaceous wetland": 90,
-    "Moss and lichen": 100,
-}
-
-land_use_criterias = {
-    k: {"tooltip": 0, "layer": "land_cover", "header": "land_use", "content": "BINARY"}
-    for k in landcover_default_cat
-}
-
 # list of the available constraints types. They will be used in the criterias names
-criteria_types = {
-    "land_use": "Land use constraints",
-    "bio": "Biophysical constraints",
-    "socio_eco": "Socio-economic constraints",
-    "forest": "Forest change",
+criteria_types = ["land_use", "bio", "socio_eco", "forest"]
+
+lc_crit = {
+    "tooltip": 0,
+    "layer": "land_cover",
+    "header": "land_use",
+    "content": "BINARY",
 }
+land_use_criterias = {
+    "shrub": {**lc_crit, "value": 20},  # shrubs
+    "herbaceous": {**lc_crit, "value": 30},  # hebaceous vegetation
+    "agriculture": {**lc_crit, "value": 40},  # agriculture
+    "urban": {**lc_crit, "value": 50},  # urban
+    "bare": {**lc_crit, "value": 60},  # bare/sparse vegetation
+    "snow": {**lc_crit, "value": 70},  # snow and ice
+    "wetland": {**lc_crit, "value": 90},  # herbaceous wetland
+    "moss": {**lc_crit, "value": 100},  # moss and lichen
+}
+
 
 # list of the available constraint criteria
 # the "header" describe the category of the concstraint
@@ -33,70 +29,72 @@ criteria_types = {
 # 0: less than
 # 1: more than
 # 2 binary
+
+# note: the duplication of layers and name is a trick to include correctly the lc
 criterias = {
     **land_use_criterias,
-    "Annual rainfall": {
+    "annual_rainfall": {
         "tooltip": 1,
         "layer": "annual_rainfall",
         "header": "bio",
         "content": "RANGE",
     },
-    "Baseline water stress": {
+    "water_stress": {
         "tooltip": 1,
         "layer": "water_stress",
         "header": "bio",
         "content": "RANGE",
     },
-    "Elevation": {
+    "elevation": {
         "tooltip": 1,
         "layer": "elevation",
         "header": "bio",
         "content": "RANGE",
     },
-    "Slope": {"tooltip": 1, "layer": "slope", "header": "bio", "content": "RANGE"},
-    "Accessibility to cities": {
+    "slope": {"tooltip": 1, "layer": "slope", "header": "bio", "content": "RANGE"},
+    "city_access": {
         "tooltip": 1,
         "layer": "city_access",
         "header": "socio_eco",
         "content": "RANGE",
     },
-    "Population density": {
+    "population_density": {
         "tooltip": 1,
         "layer": "population_density",
         "header": "socio_eco",
         "content": "RANGE",
     },
-    "Protected areas": {
+    "protected_areas": {
         "tooltip": 0,
         "layer": "protected_areas",
         "header": "socio_eco",
         "content": "BINARY",
     },
-    "Property rights protection": {
+    "property_rights": {
         "tooltip": 1,
         "layer": "property_rights",
         "header": "socio_eco",
         "content": "RANGE",
     },
-    "Deforestation rate": {
+    "deforestation_rate": {
         "tooltip": 1,
         "layer": "deforestation_rate",
         "header": "forest",
         "content": "RANGE",
     },
-    "Climate risk": {
+    "climate_risk": {
         "tooltip": 1,
         "layer": "climate_risk",
         "header": "forest",
         "content": "RANGE",
     },
-    "Natural regeneration variability": {
+    "natural_regeneration": {
         "tooltip": 1,
         "layer": "natural_regeneration",
         "header": "forest",
         "content": "RANGE",
     },
-    "Declining population": {
+    "declining_population": {
         "tooltip": 1,
         "layer": "declining_population",
         "header": "socio_eco",
