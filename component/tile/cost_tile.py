@@ -18,30 +18,22 @@ class CostTile(sw.Tile):
 
         # build the cost table
         rows, self.btn_list = [], []
-        for _, lr in self._COSTS.iterrows():
-            edit_btn = sw.Icon(
-                children=["mdi-pencil"], _metadata={"layer": lr.layer_id}
-            )
+        for id_ in self._COSTS.layer_id:
+            edit_btn = sw.Icon(children=["mdi-pencil"], _metadata={"layer": id_})
             self.btn_list.append(edit_btn)
-            rows.append(
-                sw.Html(
-                    tag="tr",
-                    children=[
-                        sw.Html(tag="td", children=[edit_btn]),
-                        sw.Html(tag="td", children=[lr.layer_name]),
-                        sw.Html(tag="td", children=[lr.layer_info]),
-                    ],
-                )
-            )
+            td = [
+                sw.Html(tag="td", children=[edit_btn]),
+                sw.Html(tag="td", children=[getattr(cm.layers, id_).name]),
+                sw.Html(tag="td", children=[getattr(cm.layers, id_).detail]),
+            ]
+            rows.append(sw.Html(tag="tr", children=td))
 
-        header = sw.Html(
-            tag="thead",
-            children=[
-                sw.Html(tag="th", children=[cm.cost.table.action]),
-                sw.Html(tag="th", children=[cm.cost.table.cost]),
-                sw.Html(tag="th", children=[cm.cost.table.description]),
-            ],
-        )
+        th = [
+            sw.Html(tag="th", children=[cm.cost.table.action]),
+            sw.Html(tag="th", children=[cm.cost.table.cost]),
+            sw.Html(tag="th", children=[cm.cost.table.description]),
+        ]
+        header = sw.Html(tag="thead", children=th)
 
         body = sw.Html(tag="tbody", children=rows)
 
