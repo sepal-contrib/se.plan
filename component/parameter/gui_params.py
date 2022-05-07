@@ -1,6 +1,9 @@
 # list of the available constraints types. They will be used in the criterias names
 criteria_types = ["land_use", "bio", "socio_eco", "forest"]
 
+# list of the layer themes
+themes = ["benefit", "constraint", "cost"]
+
 
 def _crit(*args):
     """

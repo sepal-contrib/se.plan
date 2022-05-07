@@ -5,6 +5,7 @@ from pathlib import Path
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
 from sepal_ui import color
+from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 import pandas as pd
 import ee
@@ -60,16 +61,9 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.save = sw.Btn(cm.dial.save, color="primary")
 
         # create the init card
-        self.card = v.Card(
-            children=[
-                self.title,
-                self.text,
-                self.layer,
-                self.unit,
-                self.m,
-                v.CardActions(class_="ma-5", children=[self.cancel, self.save]),
-            ]
-        )
+        action = v.CardActions(class_="ma-5", children=[self.cancel, self.save])
+        children = [self.title, self.text, self.layer, self.unit, self.m, action]
+        self.card = v.Card(children=children)
 
         # init the dialog
         super().__init__(
@@ -115,10 +109,8 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         return
 
+    @su.switch("loading", on_widgets=["save", "cancel"])
     def _save_click(self, widget, data, event):
-
-        # load the btn
-        widget.toggle_loading()
 
         # change the model according to the selected informations
         self.model.layer_list[self.index].update(
@@ -130,9 +122,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         # close
         self.value = False
-
-        # free the btn once the widget is closed
-        widget.toggle_loading()
 
         return
 

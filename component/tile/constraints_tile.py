@@ -89,11 +89,9 @@ class ConstraintTile(sw.Tile, HasTraits):
 
         # reevaluate every layer over the AOI with the default layer
         for c in self.criterias:
-
             if isinstance(c, cw.Range):
-                layer = next(
-                    l["layer"] for l in self.layer_model.layer_list if l["id"] == c.id
-                )
+                layer_list = self.layer_model.layer_list
+                layer = next(l["layer"] for l in layer_list if l["id"] == c.id)
                 geometry = self.aoi_model.feature_collection.geometry()
                 c.set_values(geometry, layer)
 
@@ -107,9 +105,8 @@ class ConstraintTile(sw.Tile, HasTraits):
 
         for c in self.criterias:
             if c.id == change["new"] and isinstance(c, cw.Range):
-                layer = next(
-                    l["layer"] for l in self.layer_model.layer_list if l["id"] == c.id
-                )
+                layer_list = self.layer_model.layer_list
+                layer = next(l["layer"] for l in layer_list if l["id"] == c.id)
                 geometry = self.aoi_model.feature_collection.geometry()
                 c.set_values(geometry, layer)
 
@@ -124,11 +121,10 @@ class ConstraintTile(sw.Tile, HasTraits):
         # activate every criteria via their panels selector
         for p in self.panels.children:
             criterias = []
-            for c in p.criterias:
-                for k, v in data.items():
-                    if c.name == k and v != -1:
-                        c.widget.v_model = v
-                        criterias.append(c.name)
+            for c, (k, v) in zip(p.criterias, data.items()):
+                if c.name == k and v != -1:
+                    c.widget.v_model = v
+                    criterias.append(c.name)
 
             p.select.v_model = criterias
             p.shrunk()
@@ -149,7 +145,6 @@ class ConstraintTile(sw.Tile, HasTraits):
 
         # loop in the custom panels
         for i, p in enumerate(self.panels.children):
-
             p.expand() if i == change["new"] else p.shrunk()
 
         return self

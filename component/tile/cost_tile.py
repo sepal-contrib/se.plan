@@ -43,8 +43,8 @@ class CostTile(sw.Tile):
             ],
         )
 
-        self.table = sw.SimpleTable(
-            children=[header, sw.Html(tag="tbody", children=rows)]
-        )
+        body = sw.Html(tag="tbody", children=rows)
+
+        self.table = sw.SimpleTable(children=[header, body])
 
         super().__init__(id_, title, inputs=[self.table])

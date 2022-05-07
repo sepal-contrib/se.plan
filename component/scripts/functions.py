@@ -44,11 +44,8 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     benefit_list = [
         i for i in layer_list if i["theme"] == "benefit" and priorities[i["id"]] != 0
     ]
-    list(
-        map(
-            lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}), benefit_list
-        )
-    )
+    fn_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+    list(map(fn_benefit, benefit_list))
 
     risk_list = [i for i in layer_list if i["theme"] == "risks"]
     list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"])}), risk_list))
@@ -67,15 +64,11 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     benefit_list = normalize_benefits(benefit_list, aoi_ee, "quintile")
 
     # normalize benefit weights to 0 - 1
-    sum_weights = sum(priorities[i["id"]] for i in benefit_list)
-    list(
-        map(
-            lambda i: i.update(
-                {"norm_weight": round((priorities[i["id"]] / sum_weights), 5)}
-            ),
-            benefit_list,
-        )
+    sum_ = sum(priorities[i["id"]] for i in benefit_list)
+    fn_weight = lambda i: i.update(
+        {"norm_weight": round((priorities[i["id"]] / sum_), 5)}
     )
+    list(map(fn_weight, benefit_list))
 
     # calc wlc image
     exp, exp_dict = get_expression(benefit_list, cost_list)

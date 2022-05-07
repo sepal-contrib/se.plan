@@ -63,11 +63,10 @@ def load_recipe(aoi_tile, questionnaire_tile, path):
         questionnaire_tile.question_model.import_data(data["question_model"])
 
         # reload the widgets
-        questionnaire_tile.constraint_tile.load_data(
-            questionnaire_tile.question_model.constraints
-        )
-        questionnaire_tile.priority_tile.table.load_data(
-            questionnaire_tile.question_model.priorities
-        )
+        constraints = questionnaire_tile.question_model.constraints
+        questionnaire_tile.constraint_tile.load_data(constraints)
+
+        priorities = questionnaire_tile.question_model.priorities
+        questionnaire_tile.priority_tile.table.load_data(priorities)
 
     return
