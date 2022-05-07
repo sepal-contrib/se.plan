@@ -15,7 +15,7 @@ from component.parameter.color_gradient import red_to_green
 ee.Initialize()
 
 
-class ExportMap(sw.Menu, sw.SepalWidget):
+class ExportMap(sw.Menu):
     def __init__(self):
 
         # init the downloadable informations

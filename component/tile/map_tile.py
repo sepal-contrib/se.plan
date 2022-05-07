@@ -144,7 +144,7 @@ class MapTile(sw.Tile):
         [
             self.m.remove_layer(l)
             for l in self.m.layers
-            if l.name not in ["CartoDB.DarkMatter"]
+            if l.name not in ["CartoDB.DarkMatter", "CartoDB.Positron"]
         ]
         self.m.dc.clear()
         self.draw_features = deepcopy(self.EMPTY_FEATURES)
@@ -194,7 +194,12 @@ class MapTile(sw.Tile):
         """save the features as layers on the map"""
 
         # remove any sub aoi layer
-        layers_2_keep = ["CartoDB.DarkMatter", "restoration layer", self.aoi_model.name]
+        layers_2_keep = [
+            "CartoDB.DarkMatter",
+            "CartoDB.Positron",
+            "restoration layer",
+            self.aoi_model.name,
+        ]
         [self.m.remove_layer(l) for l in self.m.layers if l.name not in layers_2_keep]
 
         # save the drawn features
