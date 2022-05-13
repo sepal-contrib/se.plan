@@ -127,6 +127,9 @@ class ConstraintTile(sw.Tile, HasTraits):
         # load the data
         data = json.loads(data)
 
+        # update al the constraints component with the new units and ranges
+        self._update_constraints(None)
+
         # activate every criteria via their panels selector
         for p in self.panels.children:
             criterias = []
