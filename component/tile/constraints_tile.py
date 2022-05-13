@@ -91,9 +91,11 @@ class ConstraintTile(sw.Tile, HasTraits):
         for c in self.criterias:
             if isinstance(c, cw.Range):
                 layer_list = self.layer_model.layer_list
-                layer = next(l["layer"] for l in layer_list if l["id"] == c.id)
+                layer = next(l for l in layer_list if l["id"] == c.id)
+                asset = layer["layer"]
+                unit = layer["unit"]
                 geometry = self.aoi_model.feature_collection.geometry()
-                c.set_values(geometry, layer)
+                c.set_values(geometry, asset, unit)
 
         return self
 
@@ -106,9 +108,11 @@ class ConstraintTile(sw.Tile, HasTraits):
         for c in self.criterias:
             if c.id == change["new"] and isinstance(c, cw.Range):
                 layer_list = self.layer_model.layer_list
-                layer = next(l["layer"] for l in layer_list if l["id"] == c.id)
+                layer = next(l for l in layer_list if l["id"] == c.id)
+                asset = layer["layer"]
+                unit = layer["unit"]
                 geometry = self.aoi_model.feature_collection.geometry()
-                c.set_values(geometry, layer)
+                c.set_values(geometry, asset, unit)
 
         return self
 

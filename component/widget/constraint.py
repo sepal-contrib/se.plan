@@ -1,5 +1,6 @@
-from traitlets import HasTraits, Any, observe, dlink
+import re
 
+from traitlets import HasTraits, Any, observe, dlink
 from sepal_ui import sepalwidgets as sw
 import ee
 
@@ -143,7 +144,7 @@ class Range(Constraint):
 
         super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
-    def set_values(self, geometry, layer):
+    def set_values(self, geometry, layer, unit):
         """
         Compute the extreme value of the layer on the AOI and use them as min and max values of the slider.
         Use 1000 step to navigate from these values
@@ -151,6 +152,7 @@ class Range(Constraint):
         Args:
             geometry (ee.Geometry): the AOI to compute min and max
             layer (str): the Asset id of the layer
+            unit (str): the unit of the customized layer
         """
 
         # compute the min and the max for the specific geometry and layer
@@ -186,6 +188,11 @@ class Range(Constraint):
 
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
+
+        # update the label of the layer by replacing the unit
+        # units are the only thing between parenthesis
+        reg = r"\([\s\S]*\)"
+        self.widget.label = re.sub(reg, f"({unit})", self.widget.label)
 
         return self
 
