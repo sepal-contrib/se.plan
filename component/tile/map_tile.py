@@ -38,6 +38,7 @@ class MapTile(sw.Tile):
         # create the map
         self.m = sm.SepalMap(dc=True).hide_dc()
         self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
+        self.m.add_control(sm.FullScreenControl(position="topright"))
         self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
         # create a window to display AOI information
