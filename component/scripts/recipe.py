@@ -56,10 +56,10 @@ def load_recipe(aoi_tile, questionnaire_tile, path):
         # reload the aoi tile values
         aoi_tile.view.btn.fire_event("click", None)
 
-        # load the layer_io
+        # load the layer_model
         questionnaire_tile.layer_model.import_data(data["layer_model"])
 
-        # load the questionnaire
+        # load the questionnaire_model
         questionnaire_tile.question_model.import_data(data["question_model"])
 
         # reload the widgets

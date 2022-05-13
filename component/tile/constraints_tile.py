@@ -1,6 +1,6 @@
 from traitlets import HasTraits, Unicode
 import json
-
+from itertools import product
 from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
 import pandas as pd
@@ -113,7 +113,12 @@ class ConstraintTile(sw.Tile, HasTraits):
         return self
 
     def load_data(self, data):
-        """load the data from a json string"""
+        """
+        load the data from a json string
+
+        Args:
+            data (dict): data to load in the panel using the same format as the queltion_model
+        """
 
         # load the data
         data = json.loads(data)
@@ -121,8 +126,8 @@ class ConstraintTile(sw.Tile, HasTraits):
         # activate every criteria via their panels selector
         for p in self.panels.children:
             criterias = []
-            for c, (k, v) in zip(p.criterias, data.items()):
-                if c.name == k and v != -1:
+            for c, (k, v) in product(p.criterias, data.items()):
+                if c.id == k and v != -1:
                     c.widget.v_model = v
                     criterias.append(c.name)
 
