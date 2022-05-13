@@ -9,14 +9,21 @@ from component import widget as cw
 from component import parameter as cp
 
 
+ID = "dashboard_widget"
+"the dashboard tiles share id"
+
+
 class DashThemeTile(sw.Tile):
     def __init__(self):
 
         txt = sw.Markdown(cm.dashboard.theme.txt)
 
+        # TODO for no reason this alert is shared between DashThemeTile and
+        # DashRegionTile. that's a wanted behaviour but I would like to have more control over it
+        alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
+
         # create the tile
-        id_ = "dashboard_widget"
-        super().__init__(id_=id_, title=cm.dashboard.theme.title)
+        super().__init__(id_=ID, title=cm.dashboard.theme.title, alert=alert)
 
     def dev_set_summary(self, json_themes_values, aoi_names, colors):
 
@@ -66,13 +73,16 @@ class DashThemeTile(sw.Tile):
 
         self.set_content([ep])
 
+        # hide the alert
+        self.alert.reset()
+
         return self
 
 
 class DashRegionTile(sw.Tile):
     def __init__(self):
 
-        super().__init__(id_="dashboard_widget", title=cm.dashboard.region.title)
+        super().__init__(id_=ID, title=cm.dashboard.region.title)
 
     def set_summary(self, json_feature_values):
 

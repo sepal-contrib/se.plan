@@ -106,6 +106,7 @@
         "theme": {
             "title": "Area of interest - summary by subthemes",
             "txt": "To help disentangle the potential impacts of restoration at each candidate site, we report the individual benefits, costs, and risks (i.e., constraints) in finer detail below.",
+            "disclaimer": "The dashboard needs to be computed first.",
             "benefit": {
                 "description": {
                     "0": "For each assessed benefit, the mean value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
