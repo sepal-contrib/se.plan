@@ -62,6 +62,7 @@ class DashThemeTile(sw.Tile):
 
         # create an expansion panel to store everything
         ep = v.ExpansionPanels(children=[ben_panel, cost_panel, const_panel])
+        ep.value = 1
 
         self.set_content([ep])
 
