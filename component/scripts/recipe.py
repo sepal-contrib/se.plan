@@ -50,6 +50,9 @@ def load_recipe(aoi_tile, questionnaire_tile, path):
 
         data = json.loads(f.read())
 
+        # empty the AoiView
+        aoi_tile.view.reset()
+
         # load the aoi_model
         aoi_tile.view.model.import_data(data["aoi_model"])
 

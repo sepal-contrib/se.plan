@@ -210,12 +210,9 @@ class EditDialog(sw.Dialog):
 
             # add the custom layer if existing
             geometry = self.view.model.feature_collection
-            if self.layer.v_model != self.init_layer:
-                custom_img = Path(self.layer.v_model)
-                self.display_on_map(custom_img, geometry)
-            else:
-                default_img = Path(self.init_layer)
-                self.display_on_map(default_img, geometry)
+            is_default = self.layer.v_model == self.init_layer
+            image = self.init_layer if is_default else self.layer.v_model
+            self.display_on_map(image, geometry)
 
             # enable save
             self.save.disabled = False
@@ -223,9 +220,17 @@ class EditDialog(sw.Dialog):
         return
 
     def display_on_map(self, image, geometry):
+        """
+        Display the image on the map
+
+        Args:
+            image (str): the asset name of the image
+            geometry (ee.Geometry): the geometry of the AOI
+        """
 
         # clip image
-        ee_image = ee.Image(str(image)).clip(geometry)
+        ee_image = ee.Image(image).clip(geometry)
+        print(image)
 
         # get minmax
         min_max = ee_image.reduceRegion(
@@ -233,8 +238,8 @@ class EditDialog(sw.Dialog):
         )
         max_, min_ = min_max.getInfo().values()
 
-        min_ = min_ if min_ is None else 0
-        max_ = max_ if max_ is None else 1
+        min_ = 0 if min_ is None else min_
+        max_ = 1 if max_ is None else max_
 
         # update viz_params acordingly
         viz_params = cp.plt_viz["viridis"]
@@ -250,6 +255,6 @@ class EditDialog(sw.Dialog):
         )
 
         # dispaly on map
-        self.m.addLayer(ee_image, viz_params, image.stem)
+        self.m.addLayer(ee_image, viz_params, Path(image).stem)
 
         return self

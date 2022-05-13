@@ -58,6 +58,6 @@ class CustomAoiTile(aoi.AoiTile):
                 bit_test.getNumber("constant"), 2
             ).getInfo()
 
-        included or self.view.alert.add_msg(cm.aoi.no_lmic, "warning")
+        included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
 
         return self
