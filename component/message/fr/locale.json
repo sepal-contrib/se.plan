@@ -11,7 +11,9 @@
             "about": "À propos",
             "recipe": "Formule",
             "feedback": "commentaires"
-        }
+        },
+        "about": "utils/ABOUT_fr.md",
+        "disclaimer": "L'application se.plan est encore en cours de développement. Nous encourageons les utilisateurs à continuer à explorer les fonctionnalités de l'outil et à signaler tout problème en utilisant le lien « rapport de bug » dans le panneau de gauche."
     },
     "questionnaire": {
         "title": "Questionnaire identifiant les priorités et contraintes de restauration",
@@ -33,7 +35,8 @@
     "compute": {
         "title": "Lancer le calcul",
         "btn": "Calcul de la carte de restauration",
-        "desc": "**Le bouton de lancement sera disponible une fois que vous aurez validé vos entrées**"
+        "desc": "**Le bouton de lancement sera disponible une fois que vous aurez validé vos entrées**",
+        "default_label": "défaut"
     },
     "constraints": {
         "title": "Contraintes",
@@ -42,10 +45,19 @@
         "info": {
             "0": "En utilisant la contrainte \"{}\", mettre le boutton sur \"on\" exclura tous les sites dont les caractéristiques correspondent à la variable nommée par la contrainte, en réglant le bouton \"off\" Pour exclure aucun site du tout, ne sélectionnez pas la contrainte.",
             "1": "En utilisant la contrainte \"{}\", tous les sites dont les caractéristiques sont hors de la barre de couleur seront exclus du calcul."
+        },
+        "error": {
+            "out_of_aoi": "L'AOI est hors des limites de votre couche de contrainte, utilisez un calque personnalisé.",
+            "no_aoi": "Sélectionnez d'abord une AOI"
         }
     },
     "cost": {
-        "title": "Coûts"
+        "title": "Coûts",
+        "table": {
+            "action": "action",
+            "cost": "coût",
+            "description": "description"
+        }
     },
     "custom": {
         "title": "Personnaliser les couches",
@@ -60,33 +72,56 @@
         }
     },
     "dial": {
-        "layer": "Utiliser des couches personnalisées",
+        "layer": "Couche",
         "change": "Changer la couche utilisée pour le calcul",
         "cancel": "Annuler",
         "save": "Sauver",
         "weight": "Poids",
-        "no_layer": "Aucune couche",
-        "disc": "Vous devez sélectionner une couche avant de faire des modifications"
+        "no_layer": "aucune_couche",
+        "disc": "Vous devez sélectionner une couche avant de faire des modifications",
+        "unit": "Unité",
+        "default_title": "Nom de la couche",
+        "no_unit": "aucune_unité"
     },
     "dashboard": {
         "region": {
             "title": "Résumé de la capacité de restauration par région",
-            "detail": "Détails"
+            "detail": "Détails",
+            "potentials": {
+                "0": "Très faible",
+                "1": "Faible",
+                "2": "Moyenne",
+                "3": "Élevée",
+                "4": "Très élevée",
+                "5": "Terres inappropriées"
+            },
+            "names": {
+                "0": "potentiel de restauration",
+                "1": "surface (MHa)",
+                "2": "ratio sur la surface totale (%)"
+            }
         },
         "theme": {
             "title": "Domaine d'intérêt - résumé par sous-thèmes",
             "txt": "Pour aider à démêler les impacts potentiels de la restauration sur chaque site candidat, nous signalons les avantages, les coûts et les risques individuels (i. ., contraintes) dans des détails plus fins ci-dessous.",
             "benefit": {
-                "0": "Pour chaque avantage estimé, la valeur moyenne par rapport à l'AOI est affichée dans ses unités d'origine (par exemple, tons/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
-                "1": "Pour une de ces couches thématiques, si vous avez utilisé vos propres données dans le modèle, assurez-vous que vous avez fourni des informations correctes."
+                "description": {
+                    "0": "Pour chaque priorité estimée, la valeur moyenne par rapport à l'AOI est affichée dans son unité d'origine (par exemple, $/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
+                    "1": "Pour chacune de ces couches thématiques, si vous avez utilisé vos propres données dans le modèle, assurez-vous que vous avez fourni des informations correctes."
+                },
+                "details": "détails"
             },
             "cost": {
-                "0": "L'outil comprend des données sur deux types de coûts : les coûts d'opportunité et les coûts d'implémentation. Veuillez consulter notre manuel pour plus d'informations.",
-                "1": "Pour chaque coût, la valeur de la somme sur l'AOI considérée est affichée dans ses unités d'origine (par exemple, les tonnes C/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
-                "2": "Remarque : Les informations sur la variabilité du succès de la régénération naturelle sont incluses dans la catégorie « Contraintes »."
+                "description": {
+                    "0": "L'outil comprend des données sur deux types de coûts : les coûts d'opportunité et les coûts d'implémentation. Veuillez consulter notre manuel pour plus d'informations.",
+                    "1": "Pour chaque coût, la valeur de la somme sur l'AOI considérée est affichée dans son unité d'origine (par exemple, les tonnes C/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
+                    "2": "Remarque : Les informations sur la variabilité du succès de la régénération naturelle sont incluses dans la catégorie « Contraintes »."
+                }
             },
             "constraint": {
-                "0": "Les résultats indiquent le pourcentage de la superficie totale de la région d'intérêt qui est assujettie à chaque contrainte particulière (c.-à-d. est exclue de la restauration)."
+                "description": {
+                    "0": "Les résultats indiquent le pourcentage de la superficie totale de l'AOI qui est assujettie à chaque contrainte particulière (c.-à-d. est exclue de la restauration)."
+                }
             }
         }
     },
@@ -126,7 +161,19 @@
         "treecover_lbl": "Couverture arborée en {}"
     },
     "benefits": {
-        "title": "Indicateurs de restauration"
+        "title": "Indicateurs de restauration",
+        "table": {
+            "action": "action",
+            "theme": "thème",
+            "indicator": "indicateur",
+            "labels": {
+                "0": "sans importance",
+                "1": "faible importance",
+                "2": "neutre",
+                "3": "important",
+                "4": "très important"
+            }
+        }
     },
     "export": {
         "title": "Exporter la carte",

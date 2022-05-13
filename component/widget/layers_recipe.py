@@ -3,9 +3,10 @@ import json
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 import pandas as pd
-import numpy as np
 
 from component import parameter as cp
+from component.message import cm
+from component import widget as cw
 
 
 class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
@@ -22,7 +23,7 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
         # display the default values (all with default layer and 0 valued weight)
         self.digest_layers()
 
-    def digest_layers(self, layer_io=None, question_io=None):
+    def digest_layers(self, layer_model=None, question_model=None):
         """
         Digest the layers as a json list. This list should be composed of at least 6 information : id, name, layer, theme and subtheme
         When digestion, the layout will represent each layer sorted by categories
@@ -30,18 +31,16 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
         for each one of them the value of the weight will also be set
         """
 
-        if layer_io == None or question_io == None:
+        # exit if models are not set
+        if any([layer_model is None, question_model is None]):
             return self
 
         # read the json str into a panda dataframe
-        layer_list = layer_io.layer_list
+        layer_list = layer_model.layer_list
         layer_list = pd.DataFrame(layer_list) if layer_list else self.LAYER_LIST
 
-        # get all the themes
-        themes = np.unique(layer_list.theme)
-
         ep_content = []
-        for theme in themes:
+        for theme in cp.themes:
 
             # filter the layers
             tmp_layers = layer_list[layer_list.theme == theme]
@@ -51,99 +50,43 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
 
             # loop in these layers and create the widgets
             theme_layer_widgets = []
-            for i, row in tmp_layers.iterrows():
+            for id_, asset in zip(tmp_layers.id, tmp_layers.layer):
 
-                # get the original layer asset
-                original_asset = self.LAYER_LIST[self.LAYER_LIST.layer_id == row["id"]][
-                    "layer"
-                ].values[0]
+                # get the asset name as displayed in the hints
+                original_row = self.LAYER_LIST[self.LAYER_LIST.layer_id == id_]
+                original_asset = original_row["layer"].squeeze()
+                is_same = asset == original_asset
+                asset_name = cm.compute.default_label if is_same else asset
+
+                # get the name of the layer
+                name = getattr(cm.layers, id_).name
 
                 # cannot make the slots work with icons so I need to move to intermediate layout
-                if row["theme"] == "benefits":
+                if theme == "benefit":
 
-                    # get the weight from questionnaire
-                    weight = json.loads(question_io.priorities)[row["id"]]
+                    # get the informations to display from questionnaire
+                    weight = json.loads(question_model.priorities)[id_]
+                    color = cp.gradient(5)[weight]
+                    icon = f"mdi-numeric-{weight}-circle"
 
-                    # create the widget
-                    theme_layer_widgets.append(
-                        v.Row(
-                            class_="ml-2 mr-2",
-                            children=[
-                                v.TextField(
-                                    small=True,
-                                    hint=row["layer"]
-                                    if row["layer"] != original_asset
-                                    else "default",
-                                    persistent_hint=True,
-                                    color=cp.gradient(5)[weight],
-                                    readonly=True,
-                                    v_model=row["name"],
-                                ),
-                                v.Icon(
-                                    class_="ml-2",
-                                    color=cp.gradient(5)[weight],
-                                    children=[f"mdi-numeric-{weight}-circle"],
-                                ),
-                            ],
-                        )
-                    )
+                elif theme == "cost":
 
-                elif row["theme"] == "costs":
-                    active = True
-                    theme_layer_widgets.append(
-                        v.Row(
-                            class_="ml-2 mr-2",
-                            children=[
-                                v.TextField(
-                                    small=True,
-                                    hint=row["layer"]
-                                    if row["layer"] != original_asset
-                                    else "default",
-                                    persistent_hint=True,
-                                    color=cp.gradient(2)[active],
-                                    readonly=True,
-                                    v_model=row["name"],
-                                ),
-                                v.Icon(
-                                    class_="ml-2",
-                                    color=cp.gradient(2)[active],
-                                    children=["mdi-circle-slice-8"],
-                                ),
-                            ],
-                        )
-                    )
+                    # get the informations to display from questionnaire
+                    color = cp.gradient(2)[1]  # always true
+                    icon = "mdi-circle-slice-8"
 
-                elif row["id"] not in [
-                    "ecozones",
-                    "land_cover",
-                    "treecover_with_potential",
-                ]:
+                elif id_ not in ["ecozones", "land_cover", "treecover_with_potential"]:
 
-                    # get the activation from questionnaire_io if constraint
-                    active = json.loads(question_io.constraints)[row["name"]] != -1
+                    # get the informations to display from questionnaire
+                    active = json.loads(question_model.constraints)[id_] != -1
+                    color = cp.gradient(2)[active]
+                    icon = "mdi-circle-slice-8"
 
-                    theme_layer_widgets.append(
-                        v.Row(
-                            class_="ml-2 mr-2",
-                            children=[
-                                v.TextField(
-                                    small=True,
-                                    hint=row["layer"]
-                                    if row["layer"] != original_asset
-                                    else "default",
-                                    persistent_hint=True,
-                                    color=cp.gradient(2)[active],
-                                    readonly=True,
-                                    v_model=row["name"],
-                                ),
-                                v.Icon(
-                                    class_="ml-2",
-                                    color=cp.gradient(2)[active],
-                                    children=["mdi-circle-slice-8"],
-                                ),
-                            ],
-                        )
-                    )
+                # create the widget
+                w_text = cw.RecipeTextField(color, name, asset_name)
+                w_icon = cw.RecipeIcon(color, icon)
+                w_row = sw.Row(class_="ml-2 mr_2", children=[w_text, w_icon])
+                theme_layer_widgets.append(w_row)
 
             # add the lines to the layout
             content = v.ExpansionPanelContent(children=theme_layer_widgets)

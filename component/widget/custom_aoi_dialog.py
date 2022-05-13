@@ -4,23 +4,20 @@ import ipyvuetify as v
 from component.message import cm
 
 
-class CustomAoiDialog(v.Dialog):
+class CustomAoiDialog(sw.Dialog):
+
+    feature = None
+    "the geo_json feature selected by th user"
+
     def __init__(self):
 
-        self.feature = None
-
-        self.w_name = v.TextField(label=cm.map.dialog.label, v_model=None)
-
+        # create the widgets
+        self.w_name = sw.TextField(label=cm.map.dialog.label, v_model=None)
         self.btn = sw.Btn(cm.map.dialog.btn, "mdi-check")
-
-        card = v.Card(
-            class_="ma-5",
-            children=[
-                v.CardTitle(children=[cm.map.dialog.title]),
-                v.CardText(children=[self.w_name]),
-                v.CardActions(children=[self.btn]),
-            ],
-        )
+        title = sw.CardTitle(children=[cm.map.dialog.title])
+        text = sw.CardText(children=[self.w_name])
+        action = sw.CardActions(children=[self.btn])
+        card = sw.Card(class_="ma-5", children=[title, text, action])
 
         # init the dialog
         super().__init__(

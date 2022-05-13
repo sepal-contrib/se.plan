@@ -1,11 +1,11 @@
 from datetime import datetime as dt
 from pathlib import Path
 
-import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import gee
 from sepal_ui.scripts import utils as su
 import ee
+import ipyvuetify as v
 
 from component.message import cm
 from component import scripts as cs
@@ -15,7 +15,7 @@ from component.parameter.color_gradient import red_to_green
 ee.Initialize()
 
 
-class ExportMap(v.Menu, sw.SepalWidget):
+class ExportMap(sw.Menu):
     def __init__(self):
 
         # init the downloadable informations
@@ -25,60 +25,46 @@ class ExportMap(v.Menu, sw.SepalWidget):
         self.aoi_name = None
 
         # create the useful widgets
-        self.w_scale = v.Slider(
-            v_model=30,  # align on the landsat images
-            min=10,
-            max=300,
-            thumb_label=True,
-            step=10,
-        )
+        # align on the landsat images
+        w_scale_lbl = sw.Html(tag="h4", children=[cm.export.scale])
+        self.w_scale = sw.Slider(v_model=30, min=10, max=300, thumb_label=True, step=10)
 
-        self.w_method = v.RadioGroup(
-            v_model="gee",
-            row=True,
-            children=[
-                v.Radio(label=cm.export.radio.sepal, value="sepal"),
-                v.Radio(label=cm.export.radio.gee, value="gee"),
-            ],
-        )
+        w_method_lbl = sw.Html(tag="h4", children=[cm.export.radio.label])
+        sepal = sw.Radio(label=cm.export.radio.sepal, value="sepal")
+        gee = sw.Radio(label=cm.export.radio.gee, value="gee")
+        self.w_method = sw.RadioGroup(v_model="gee", row=True, children=[sepal, gee])
 
+        # add alert and btn component for the loading_button
         self.alert = sw.Alert()
-
         self.btn = sw.Btn(cm.export.apply, small=True)
 
-        export_data = v.Card(
+        title = sw.CardTitle(children=[sw.Html(tag="h4", children=[cm.export.title])])
+        text = sw.CardText(
             children=[
-                v.CardTitle(children=[v.Html(tag="h4", children=[cm.export.title])]),
-                v.CardText(
-                    children=[
-                        v.Html(tag="h4", children=[cm.export.scale]),
-                        self.w_scale,
-                        v.Html(tag="h4", children=[cm.export.radio.label]),
-                        self.w_method,
-                        self.alert,
-                    ]
-                ),
-                v.CardActions(children=[self.btn]),
+                w_scale_lbl,
+                self.w_scale,
+                w_method_lbl,
+                self.w_method,
+                self.alert,
             ]
         )
+        action = sw.CardActions(children=[self.btn])
+        export_data = sw.Card(children=[title, text, action])
 
         # the clickable icon
+        icon = sw.Icon(children=["mdi-cloud-download"])
         self.download_btn = v.Btn(
-            v_on="menu.on",
-            color="primary",
-            icon=True,
-            children=[v.Icon(children=["mdi-cloud-download"])],
+            v_on="menu.on", color="primary", icon=True, children=[icon]
         )
 
+        slot = {"name": "activator", "variable": "menu", "children": self.download_btn}
         super().__init__(
             value=False,
             close_on_content_click=False,
             nudge_width=200,
             offset_x=True,
             children=[export_data],
-            v_slots=[
-                {"name": "activator", "variable": "menu", "children": self.download_btn}
-            ],
+            v_slots=[slot],
         )
 
         # add js behaviour
@@ -94,6 +80,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
 
         # add vizualization properties to the image
         # cast to image as set is a ee.Element method
+        palette = ",".join(cp.no_data_color + cp.gradient(5))
         self.dataset = ee.Image(
             dataset.set(
                 {
@@ -101,9 +88,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
                     "visualization_0_max": 5,
                     "visualization_0_min": 0,
                     "visualization_0_name": "restauration index",
-                    "visualization_0_palette": ",".join(
-                        cp.no_data_color + cp.gradient(5)
-                    ),
+                    "visualization_0_palette": palette,
                     "visualization_0_type": "continuous",
                 }
             )
@@ -118,7 +103,7 @@ class ExportMap(v.Menu, sw.SepalWidget):
         folder = Path(ee.data.getAssetRoots()[0]["id"])
 
         # check if a dataset is existing
-        if self.dataset == None or self.geometry == None:
+        if any([self.dataset == None, self.geometry == None]):
             return self
 
         # set the parameters
@@ -136,14 +121,11 @@ class ExportMap(v.Menu, sw.SepalWidget):
             export_params.update(assetId=str(folder / name))
             task = ee.batch.Export.image.toAsset(**export_params)
             task.start()
-            self.alert.add_msg(
-                "the task have been launched in your GEE acount", "success"
-            )
+            msg = "the task have been launched in your GEE acount"
+            self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "sepal":
-
             gdrive = cs.gdrive()
-
             files = gdrive.get_files(name)
             if files == []:
                 task = ee.batch.Export.image.toDrive(**export_params)

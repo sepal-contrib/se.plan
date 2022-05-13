@@ -3,6 +3,7 @@ import pandas as pd
 import ee
 
 from component import parameter as cp
+from component.message import cm
 
 ee.Initialize()
 
@@ -39,6 +40,7 @@ class CustomAoiTile(aoi.AoiTile):
             lmic_raster = ee.Image(
                 "projects/john-ee-282116/assets/fao-restoration/misc/lmic_global_1k"
             )
+
             aoi_ee_geom = self.view.model.feature_collection.geometry()
 
             empt = ee.Image().byte()
@@ -56,10 +58,6 @@ class CustomAoiTile(aoi.AoiTile):
                 bit_test.getNumber("constant"), 2
             ).getInfo()
 
-        if not included:
-            self.view.alert.add_msg(
-                "The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information",
-                "warning",
-            )
+        included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
 
         return self

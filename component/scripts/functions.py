@@ -42,18 +42,12 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
 
     # load layers and create eeimages
     benefit_list = [
-        i for i in layer_list if i["theme"] == "benefits" and priorities[i["id"]] != 0
+        i for i in layer_list if i["theme"] == "benefit" and priorities[i["id"]] != 0
     ]
-    list(
-        map(
-            lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}), benefit_list
-        )
-    )
+    fn_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+    list(map(fn_benefit, benefit_list))
 
-    risk_list = [i for i in layer_list if i["theme"] == "risks"]
-    list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"])}), risk_list))
-
-    cost_list = [i for i in layer_list if i["theme"] == "costs"]
+    cost_list = [i for i in layer_list if i["theme"] == "cost"]
     list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}), cost_list))
 
     # constraint_list, initialize with constant value 1
@@ -67,15 +61,11 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     benefit_list = normalize_benefits(benefit_list, aoi_ee, "quintile")
 
     # normalize benefit weights to 0 - 1
-    sum_weights = sum(priorities[i["id"]] for i in benefit_list)
-    list(
-        map(
-            lambda i: i.update(
-                {"norm_weight": round((priorities[i["id"]] / sum_weights), 5)}
-            ),
-            benefit_list,
-        )
+    sum_ = sum(priorities[i["id"]] for i in benefit_list)
+    fn_weight = lambda i: i.update(
+        {"norm_weight": round((priorities[i["id"]] / sum_), 5)}
     )
+    list(map(fn_weight, benefit_list))
 
     # calc wlc image
     exp, exp_dict = get_expression(benefit_list, cost_list)
@@ -96,14 +86,6 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
 
     wlc_out = wlc_image.clip(aoi_ee)
 
-    # rather than clipping paint wlc to region
-    # wlc_out = ee.Image().float()
-    # wlc_out = (
-    #    wlc_out.paint(ee.FeatureCollection(aoi_ee), 0)
-    #    .where(wlc_image, wlc_image)
-    #    .selfMask()
-    # )
-
     return wlc_out, benefit_list, constraint_list, cost_list
 
 
@@ -120,9 +102,7 @@ def set_constraints(constraints, constraint_list):
     """
 
     # loop through all the constraint in the json list
-    for name in constraints:
-
-        value = constraints[name]
+    for name, value in constraints.items():
 
         # skip if the constraint is disabled
         if value is None or value == -1:
@@ -133,10 +113,10 @@ def set_constraints(constraints, constraint_list):
 
         # boolean masking lc
         # use the value associated to the name to build the mask image
-        if name in cp.landcover_default_cat and isinstance(value, bool):
+        if name in cp.land_use_criterias and isinstance(value, bool):
             constraint_list.append(
                 get_cat_constraint(
-                    cp.landcover_default_cat[name],
+                    cp.land_use_criterias[name]["value"],
                     value,
                     name,
                     constraint_layer["layer"],
@@ -177,14 +157,12 @@ def get_layer(layer_name, constraint_list):
         (dict): the layer dict"""
 
     # for all land cover constraints we use the same layer
-    if layer_name in cp.landcover_default_cat:
-        constraint_layer = next(
-            i for i in constraint_list if i["name"] == "Current land cover"
-        )
+    if layer_name in cp.land_use_criterias:
+        constraint_layer = next(i for i in constraint_list if i["id"] == "land_cover")
 
     # else use the one that have the same name
     else:
-        constraint_layer = next(i for i in constraint_list if i["name"] == layer_name)
+        constraint_layer = next(i for i in constraint_list if i["id"] == layer_name)
 
     return constraint_layer
 

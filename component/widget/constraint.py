@@ -1,7 +1,7 @@
-from traitlets import HasTraits, Any, observe, dlink
+import re
 
+from traitlets import HasTraits, Any, observe, dlink
 from sepal_ui import sepalwidgets as sw
-import ipyvuetify as v
 import ee
 
 from component.message import cm
@@ -10,14 +10,27 @@ from component import parameter as cp
 ee.Initialize()
 
 
-class Constraint(sw.SepalWidget, v.Row):
+class Constraint(sw.Row):
+    """
+    Custom Constraint using a slider to define the used values. Anything between
+    min and max will be included in the computation of the restoration index
+
+    Args:
+        widget (v.Widget): any widget used to define the value of the constraint filter
+        name (str): the name of the constraint (in translated language)
+        header (str): the category of the constraint
+        layer (str): the id of the layer (name and layer will only be different for the land_use layers)
+        id_ (str): the id of the layer (name and layer will only be different for the land_use layers)
+    """
 
     custom_v_model = Any(-1).tag(sync=True)
+    "the custom dict v_model to transfer information to the other widgets of the application"
 
-    def __init__(self, widget, name="name", header="header", id_="id", **kwargs):
+    def __init__(self, widget, name, header, layer, id_, **kwargs):
 
         # default
         self.id = id_
+        self.layer = layer
         self.header = header
         self.name = name
         self.class_ = "ma-5"
@@ -25,20 +38,21 @@ class Constraint(sw.SepalWidget, v.Row):
         self.align_center = True
 
         # creat a pencil btn
-        self.btn = v.Icon(children=["mdi-pencil"], _metadata={"layer": id_})
+        self.btn = sw.Icon(children=["mdi-pencil"], _metadata={"layer": id_})
 
         # create the row
         super().__init__(**kwargs)
 
         self.children = [
-            v.Flex(align_center=True, xs1=True, children=[self.btn]),
-            v.Flex(align_center=True, xs11=True, children=[self.widget]),
+            sw.Flex(align_center=True, xs1=True, children=[self.btn]),
+            sw.Flex(align_center=True, xs11=True, children=[self.widget]),
         ]
 
         # js behaviour
         self.widget.observe(self._on_change, "v_model")
 
     def _on_change(self, change):
+        """update v_model when the widget is changed"""
 
         # update the custom v_model
         # if the widget is displayed on the questionnaire
@@ -48,6 +62,7 @@ class Constraint(sw.SepalWidget, v.Row):
         return
 
     def disable(self):
+        """overwrite disable method to set the custom_v_model to -1"""
 
         # update the custom v_model
         self.custom_v_model = -1
@@ -58,6 +73,10 @@ class Constraint(sw.SepalWidget, v.Row):
         return self
 
     def unable(self):
+        """
+        Overwrite unable method to set the custom_v_model to the widget current value
+        (kept when successively hide and show the same constraint)
+        """
 
         # update the custom v_model
         self.custom_v_model = self.widget.v_model
@@ -69,100 +88,127 @@ class Constraint(sw.SepalWidget, v.Row):
 
 
 class Binary(Constraint):
-    def __init__(self, name, header, id_, **kwargs):
+    """
+    Custom Constraint using a Switch to define the used values. if value is 1 then we use all the ones, if not we use the 0s.
 
-        widget = v.Switch(
-            # readonly = True,
+    Args:
+        name (str): the id of the layer in the parameter dict
+        header (str): the category of the constraints
+        layer (str): the id of the layer (name and layer will only be different for the land_use layers)
+    """
+
+    def __init__(self, name, header, layer, **kwargs):
+
+        # get the translated name from cm
+        t_name = getattr(cm.layers, name).name
+
+        widget = sw.Switch(
             persistent_hint=True,
             v_model=True,
-            label=name,
+            label=t_name,
             **kwargs,
         )
 
-        super().__init__(widget, name=name, header=header, id_=id_)
+        super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
 
 class Range(Constraint):
+    """
+    Custom Constraint using a slider to define the used values. Anything between
+    min and max will be included in the computation of the restoration index
 
-    LABEL = ["low", "medium", "high"]
+    Args:
+        name (str): the id of the layer in the parameter dict
+        header (str): the category of the constraint
+        unit (str): the unit of the layer
+        layer (str): the id of the layer (name and layer will only be different for the land_use layers)
+    """
 
-    def __init__(self, name, header, unit, id_, **kwargs):
+    NB_STEPS = 1000
+    "(int): the number of steps used in the sliders"
 
-        widget = v.RangeSlider(
-            label=f"{name} ({unit})",
+    def __init__(self, name, header, unit, layer, **kwargs):
+
+        # get the translated name from cm
+        t_name = getattr(cm.layers, name).name
+
+        widget = sw.RangeSlider(
+            label=f"{t_name} ({unit})",
             max=1,
-            step=0.1,
+            step=0.01,
             v_model=[0, 1],
             thumb_label="always",
             persistent_hint=True,
             **kwargs,
         )
 
-        super().__init__(widget, name=name, header=header, id_=id_)
+        super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
-    def set_values(self, geometry, layer):
+    def set_values(self, geometry, layer, unit):
+        """
+        Compute the extreme value of the layer on the AOI and use them as min and max values of the slider.
+        Use 1000 step to navigate from these values
+
+        Args:
+            geometry (ee.Geometry): the AOI to compute min and max
+            layer (str): the Asset id of the layer
+            unit (str): the unit of the customized layer
+        """
 
         # compute the min and the max for the specific geometry and layer
         ee_image = ee.Image(layer).select(0)
 
-        # get min
-        min_ = ee_image.reduceRegion(
-            reducer=ee.Reducer.min(), geometry=geometry, scale=250, bestEffort=True
+        # get min and max values
+        min_max = ee_image.reduceRegion(
+            reducer=ee.Reducer.minMax(), geometry=geometry, scale=250, bestEffort=True
         )
-        min_ = list(min_.getInfo().values())[0]
-
-        # get max
-        max_ = ee_image.reduceRegion(
-            reducer=ee.Reducer.max(), geometry=geometry, scale=250, bestEffort=True
-        )
-        max_ = list(max_.getInfo().values())[0]
+        max_, min_ = list(min_max.getInfo().values())
 
         # if noneType it means that my AOI is out of bounds with respect to my constraint
         # as it won't be usable I need to add a hint to the end user
-        if min_ is None or max_ is None:
+        if any([min_ is None, max_ is None]):
 
-            self.widget.error_messages = "The aoi is out of the bounds of your constraint layer, use a custom one."
+            self.widget.error_messages = cm.constraints.error.out_of_aoi
             self.widget.min = 0
             self.widget.max = 1
-            self.widget.step = 0.1
-            # self.widget.tick_labels = []
             self.widget.v_model = [0, 1]
+            self.widget.step = 0.01
 
         else:
 
             # remove the error state
             self.widget.error_messages = []
 
-            # set the min max
-            self.widget.min = round(min_, 2)
-            self.widget.max = round(max_, 2)
-
-            # set the number of steps by stting the step parameter (100)
-            self.widget.step = max(0.01, (self.widget.max - self.widget.min) / 100)
-
-            # display ticks label with low medium and high values
-            # self.widget.tick_labels = [
-            #    self.LABEL[i // 25 - 1] if i in [25, 50, 75] else "" for i in range(101)
-            # ]
+            # set the min max and steps based on the nmber of decimals
+            # 1 id it's bigger than 100 else 2
+            decimals = 1 if max_ > 100 else 2
+            self.widget.min = round(min_, decimals)
+            self.widget.max = round(max_, decimals)
+            self.widget.step = 10 ** -decimals
 
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
 
+        # update the label of the layer by replacing the unit
+        # units are the only thing between parenthesis
+        reg = r"\([\s\S]*\)"
+        self.widget.label = re.sub(reg, f"({unit})", self.widget.label)
+
         return self
 
 
-class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
+class CustomPanel(sw.ExpansionPanel):
     def __init__(self, category, criterias):
 
         # save title name
-        self.title = category
+        self.title = getattr(cm.constraint.category, category)
 
-        # create a header, as nothing is selected by defaul it should only display the title
-        self.header = v.ExpansionPanelHeader(children=[cp.criteria_types[category]])
+        # create a header, as nothing is selected by default it should only display the title
+        self.header = sw.ExpansionPanelHeader(children=[self.title])
 
         # link the criterias to the select
         self.criterias = [c.disable() for c in criterias if c.header == category]
-        self.select = v.Select(
+        self.select = sw.Select(
             disabled=True,  # disabled until the aoi is selected
             class_="mt-5",
             small_chips=True,
@@ -172,13 +218,13 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
             multiple=True,
             deletable_chips=True,
             persistent_hint=True,
-            hint="select an AOI first",
+            hint=cm.constraints.error.no_aoi,
         )
 
         # create the content, nothing is selected by default so Select should be empty and criterias hidden
-        criteria_flex = [v.Flex(xs12=True, children=[c]) for c in self.criterias]
-        self.content = v.ExpansionPanelContent(
-            children=[v.Layout(row=True, children=[self.select] + criteria_flex)]
+        criteria_flex = [sw.Flex(xs12=True, children=[c]) for c in self.criterias]
+        self.content = sw.ExpansionPanelContent(
+            children=[sw.Layout(row=True, children=[self.select] + criteria_flex)]
         )
 
         # create the actual panel
@@ -199,20 +245,17 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
     def _show_crit(self, change):
 
         for c in self.criterias:
-            if c.name in change["new"]:
-                c.unable()
-            else:
-                c.disable()
+            c.unable() if c.name in change["new"] else c.disable()
 
         return self
 
     def expand(self):
         """when the custom panel expand I want to display only the title"""
 
-        self.header.children = [cp.criteria_types[self.title]]
+        self.header.children = [self.title]
 
         # automatically open the criterias if none are selected
-        if len(self.select.v_model) == 0 and self.select.disabled == False:
+        if len(self.select.v_model) == 0 and self.select.disabled is False:
             self.select.menu_props = {"value": True}
 
         return self
@@ -223,19 +266,11 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         # automatically close the criterias if none are selected
         self.select.menu_props = {}
 
-        # get the title
-        title = cp.criteria_types[self.title]
-
         # get the chips
-        chips = v.Flex(
-            children=[
-                v.Chip(class_="ml-1 mr-1", small=True, children=[c.name])
-                for c in self.criterias
-                if c.viz
-            ]
-        )
+        chip = lambda label: sw.Chip(class_="ml-1 mr-1", small=True, children=[label])
+        chips = sw.Flex(children=[chip(c.name) for c in self.criterias if c.viz])
 
         # write the new header content
-        self.header.children = [title, chips]
+        self.header.children = [self.title, chips]
 
         return self

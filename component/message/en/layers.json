@@ -1,0 +1,133 @@
+{
+    "layers":{
+        "land_cover": {
+            "name": "Current land cover",
+            "detail": "Indicator of current land cover (cropland, urban, etc.). Some restoration stakeholders might prefer to avoid forest restoration on sites with particular land cover (e.g., cropland, to reduce competition with food production)."
+        },
+        "shrub": {
+            "name": "Shrubs"
+        },
+        "herbaceous": {
+            "name": "Herbaceous vegetation"
+        },
+        "agriculture": {
+            "name": "Cultivated and managed vegetation/agriculture"
+        },
+        "urban": {
+            "name": "Urban / built up"
+        },
+        "bare": {
+            "name": "Bare / sparse vegetation"
+        },
+        "snow": {
+            "name": "Snow and ice"
+        },
+        "wetland": {
+            "name": "Herbaceous wetland"
+        },
+        "moss": {
+            "name": "Moss and lichen"
+        },
+        "woodfuel_harvest": {
+            "name": "Woodfuel harvest",
+            "detail": "Annual harvest of wood fuel for the most recent available year, expressed in cubic meters per hectare of forest. A higher level of harvest implies greater demand for wood fuel as an energy source, which tends to make restoration more feasible when supply of wood to meet local demands is a desired restoration benefit."
+        },
+        "plantation_growth_rates": {
+            "name": "Plantation growth rate",
+            "detail": "Annual production of woody biomass by plantation-grown tree species, expressed in dry tons per hectare per year. A higher growth rate tends to make restoration more feasible when income for landholders and wood supply to meet local demands are desired restoration benefits."
+        },
+        "city_access": {
+            "name": "Accessibility to cities",
+            "detail": "Estimated travel time to the nearest city for the most recent available year, expressed in hours. Greater accessibility can make restoration more feasible by increasing the return earned by forest products sold in urban markets, but it can also make restoration less feasible by increasing the return earned by products from nonforest land uses."
+        },
+        "forest_job": {
+            "name": "Forest employment",
+            "detail": "Number of forest-related jobs per hectare of forestland for the most recent available year. A higher level of forest employment implies attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make restoration more feasible when income for local households is a desired restoration benefit."
+        },
+        "ground_carbon": {
+            "name": "Aboveground carbon accumulation",
+            "detail": "Annual rate at which naturally generated forests sequester carbon in aboveground biomass, expressed in tons of carbon per hectare per year. A higher rate tends to make restoration more feasible when mitigation of climate change is a desired restoration benefit."
+        },
+        "biodiversity_intactness": {
+            "name": "Biodiversity Intactness Index",
+            "detail": "The average abundance of a large and diverse set of species, expressed as a percentage of the set of originally present species. A higher percentage tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit."
+        },
+        "endangered_species": {
+            "name": "Endangered species",
+            "detail": "Total number of critically endangered and endangered mammal, bird, reptile, and amphibian species, expressed per square kilometer. A higher number tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit."
+        },
+        "ecozones": {
+            "name": "Terrestrial ecoregion",
+            "detail": "Indicator of zone with distinctive species and natural characteristics, which indicates the ecosystem that would occur under natural conditions. Some restoration stakeholders might prefer to avoid forest restoration in particular ecoregions (e.g., grasslands)."
+        },
+        "protected_areas": {
+            "name": "Protected areas",
+            "detail": "Indicator of site located in a national park or other area protected by government in recognition of its natural, ecological, or cultural features."
+        },
+        "slope": {
+            "name": "Slope",
+            "detail": "Deviation from horizontal, expressed in percent. A higher slope can make restoration more feasible by increasing benefits associated reduced soil erosion, but it can also make restoration less feasible by increasing forest implementation cost (especially when active restoration is used)."
+        },
+        "elevation": {
+            "name": "Elevation",
+            "detail": "Height above sea level, expressed in meters. Impact on restoration feasibility depends on tree species and intended benefits of restoration."
+        },
+        "natural_regeneration": {
+            "name": "Natural regeneration variability",
+            "detail": "Natural regeneration is more likely to succeed when restoration sites are closer to remaining natural forests, which are an essential seed source. The SEPAL FR planning tool uses 2015 data on forest cover within a 5 km buffer of a restoration pixel to predict the probability of natural regeneration success on a scale of 0 (no chance of success) to 1 (certain success). Uncertainty in success of natural regeneration, expressed as an index ranging from 0 (no uncertainty) to 1 (complete uncertainty). Lower uncertainty tends to make restoration via natural regeneration more viable."
+        },
+        "declining_population": {
+            "name": "Declining population",
+            "detail": "Indicator that population in a 5 km buffer around the site declined during the most recent 10-year period. Declining population tends to make restoration more feasible by reducing the opportunity cost of land and the risk that restored forests will be converted to non-forest land uses."
+        },
+        "property_rights": {
+            "name": "Property rights protection",
+            "detail": "Strength of property rights, expressed as an index ranging from -2.5 (very weak property rights) to +2.5 (very strong property rights). Stronger property rights tend to make restoration more feasible by increasing landholders' confidence that they will receive the returns from their restoration investments."
+        },
+        "deforestation_rate": {
+            "name": "Deforestation rate",
+            "detail": "Annual rate of loss of forest cover during most recent 10-year period within a 5km buffer around a site, expressed as a percentage and set equal to zero if forest area is increasing (i.e., deforestation is not occurring). A lower rate tends to make restoration more feasible by reducing the risk that restored forests will be converted to non-forest land uses."
+        },
+        "climate_risk": {
+            "name": "Climate risk",
+            "detail": "Change in potential tree cover due to climate change, expressed as the difference, in percentage points, between potential tree cover in 2050 and potential tree cover today. Positive values indicate increases in potential tree cover, which tend to make restoration more feasible, while negative values indicate decreases, which tend to make restoration less feasible."
+        },
+        "population_density": {
+            "name": "Population density",
+            "detail": "Total number of people per square kilometer in the most recent available year. Lower population density tends to make restoration more feasible by reducing the opportunity cost of land and the risk that restored forests will be converted to non-forest land uses."
+        },
+        "annual_rainfall": {
+            "name": "Annual rainfall",
+            "detail": "Total annual rainfall in an average year. Impact on restoration feasibility depends on tree species and intended density of the restored forest."
+        },
+        "treecover_with_potential": {
+            "name": "Current tree cover less than potential",
+            "detail": "Sites that have the potential for restoration. Their tree-cover fraction is less its potential and they are not in urban areas."
+        },
+        "opportunity_cost": {
+            "name": "Land opportunity cost",
+            "detail": "Value of land if it is not used for forest restoration, expressed in US dollars per hectare for the most recent available year. Represents the value at which land would sell under competitive market conditions (i.e., the land's \"fair market value\"). A lower opportunity cost tends to make restoration more feasible."
+        },
+        "water_stress": {
+            "name": "Baseline water stress",
+            "detail": "Ratio of total water withdrawals to available renewable water supplies from surface and groundwater sources, expressed as an index ranging from 0 (no competition among water users) to 5 (intense competition among users). Lower values tend to make restoration more feasible by reducing the risk that increased evapotranspiration due to increased woody vegetaton will worsen water scarcity."
+        },
+        "implementation_cost": {
+            "name": "Implementation cost",
+            "detail": "Implementation cost in the SEPAL FR planning tool refers to expenses associated with active forest restoration on former agricultural land: preparing a site for tree regeneration, and then artificially regenerating the site by sowing seeds or planting seedlings. A higher implementation cost tends to make FR less feasible, although FR can be feasible on land with a high implementation cost if land opportunity cost is low and FR generates large benefits.\nImplementation cost is expressed in US dollars per hectare. It varies by country and, for countries with sufficient data, by first-level administrative subdivision (e.g., state or province). The cost reported by the tool is the average for the country or subdivision. The actual cost at different locations within the country or subdivision could be higher or lower than the reported average estimate. In addition, compared to the estimates reported by the tool, the SEPAL FR planning tool team estimates that implementation cost is, on average, 45% higher if the restoration site is a forest that has been heavily damaged (for example, by fire, windthrow, or pest outbreak) and 66% lower if passive restoration, which relies on natural tree regeneration, is feasible. The tool contains a variable that predicts the likely success of natural regeneration."
+        }
+    },
+    "constraint": {
+        "category": {
+            "land_use": "Land use constraints",
+            "bio": "Biophysical constraints",
+            "socio_eco": "Socio-economic constraints",
+            "forest": "Forest change"
+        }
+    },
+    "theme": {
+        "cost": "cost",
+        "benefit": "priorities",
+        "constraint": "constraint"
+    }
+}

@@ -6,5 +6,5 @@ from pathlib import Path
 module_dir = Path("~", "module_results").expanduser()
 module_dir.mkdir(exist_ok=True)
 
-result_dir = module_dir / "restoration_suitability_tool"
+result_dir = module_dir / "se.plan"
 result_dir.mkdir(exist_ok=True)

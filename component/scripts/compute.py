@@ -12,6 +12,7 @@ ee.Initialize()
 
 
 def add_area(feature):
+
     return feature.set({"rp_area": feature.geometry().area()})
 
 

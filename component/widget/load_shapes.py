@@ -35,33 +35,34 @@ class LoadShapes(v.ExpansionPanels):
         # and the vector selector
         self.w_vector = CustomVector(label=cm.map.shapes.file)
 
+        # create an alert for the su.loading_button
         self.alert = sw.Alert()
 
+        # generate the panels
         header = v.ExpansionPanelHeader(
             disable_icon_rotate=True, children=[cm.map.shapes.title]
         )
-
         content = v.ExpansionPanelContent(
             children=[self.w_vector, self.btn, self.alert]
         )
+        panel = v.ExpansionPanel(children=[header, content])
 
         # create the widget
-        super().__init__(
-            class_="mb-5 mt-2", children=[v.ExpansionPanel(children=[header, content])]
-        )
+        super().__init__(class_="mb-5 mt-2", children=[panel])
 
     @su.loading_button(debug=False)
     def read_data(self):
 
-        if self.w_vector.v_model["column"] in ["ALL", None]:
+        # extract information for compacity
+        value = self.w_vector.v_model["value"]
+        column = self.w_vector.v_model["column"]
+        pathname = self.w_vector.v_model["pathname"]
+
+        if column in ["ALL", None]:
             raise Exception("Please select data")
 
-        gdf = gpd.read_file(self.w_vector.v_model["pathname"])
+        # create the gdf and filter if necessary
+        gdf = gpd.read_file(pathname)
+        gdf = gdf if value is None else gdf[gdf[column] == value]
 
-        # filter if necessary
-        if self.w_vector.v_model["value"]:
-            gdf = gdf[
-                gdf[self.w_vector.v_model["column"]] == self.w_vector.v_model["value"]
-            ]
-
-        return gdf, self.w_vector.v_model["column"]
+        return gdf, column

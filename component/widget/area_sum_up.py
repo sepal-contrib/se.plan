@@ -8,9 +8,9 @@ from component.message import cm
 
 class AreaSumUp(v.Layout):
 
-    NAMES = ["restoration potential", "surface (MHa)", "ratio over total surface (%)"]
+    NAMES = cm.dashboard.region.names
     COLORS = cp.gradient(5) + cp.no_data_color
-    POTENTIALS = ["Very low", "Low", "Medium", "High", "Very High", "Unsuitable land"]
+    POTENTIALS = cm.dashboard.region.potentials
 
     def __init__(self, title, surfaces=[0] * 6):
 
@@ -40,54 +40,31 @@ class AreaSumUp(v.Layout):
             plt.show()
 
         # init the table
-        head = [
-            v.Html(
-                tag="thead",
-                children=[
-                    v.Html(
-                        tag="tr",
-                        children=[
-                            v.Html(tag="th", children=[name]) for name in self.NAMES
-                        ],
-                    )
-                ],
-            )
-        ]
+        heads = [v.Html(tag="th", children=[name]) for name in self.NAMES]
+        row = v.Html(tag="tr", children=heads)
+        w_header = [v.Html(tag="thead", children=[row])]
 
         self.rows = []
-        for clr, ptl, val, norm in zip(
-            self.COLORS, self.POTENTIALS, surfaces, norm_surfaces
-        ):
+        params = zip(self.COLORS, self.POTENTIALS, surfaces, norm_surfaces)
+        for clr, ptl, val, norm in params:
 
-            row = v.Html(
-                tag="tr",
-                children=[
-                    v.Html(
-                        tag="td",
-                        children=[ptl],
-                        style_=f"color: {clr}",
-                    ),
-                    v.Html(tag="td", children=[f"{float(val):.1f}"]),
-                    v.Html(tag="td", children=[f"{float(norm):.1f}"]),
-                ],
-            )
+            tds = [
+                v.Html(tag="td", children=[ptl], style_=f"color: {clr}"),
+                v.Html(tag="td", children=[f"{float(val):.1f}"]),
+                v.Html(tag="td", children=[f"{float(norm):.1f}"]),
+            ]
+            row = v.Html(tag="tr", children=tds)
 
             self.rows.append(row)
 
-        body = [v.Html(tag="tbody", children=self.rows)]
-        table = v.SimpleTable(small=True, xs12=True, children=head + body)
+        w_body = [v.Html(tag="tbody", children=self.rows)]
+        table = v.SimpleTable(small=True, xs12=True, children=w_header + w_body)
 
         # the table should not be displayed by default but as a detail expansion panel
-        ep = v.ExpansionPanels(
-            children=[
-                v.ExpansionPanel(
-                    children=[
-                        v.ExpansionPanelHeader(children=[cm.dashboard.region.detail]),
-                        v.ExpansionPanelContent(children=[table]),
-                    ]
-                )
-            ]
-        )
+        header = v.ExpansionPanelHeader(children=[cm.dashboard.region.detail])
+        content = v.ExpansionPanelContent(children=[table])
+        panel = v.ExpansionPanel(children=[header, content])
+        ep = v.ExpansionPanels(children=[panel])
 
         # init the title
         title = v.Html(xs12=True, class_="mb-2", tag="h2", children=[title])

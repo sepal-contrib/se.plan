@@ -8,7 +8,7 @@ from component import parameter as cp
 class CostTile(sw.Tile):
 
     _COSTS = pd.read_csv(cp.layer_list).fillna("")
-    _COSTS = _COSTS[_COSTS.theme == "costs"]
+    _COSTS = _COSTS[_COSTS.theme == "cost"]
 
     def __init__(self):
 
@@ -18,33 +18,25 @@ class CostTile(sw.Tile):
 
         # build the cost table
         rows, self.btn_list = [], []
-        for _, lr in self._COSTS.iterrows():
-            edit_btn = sw.Icon(
-                children=["mdi-pencil"], _metadata={"layer": lr.layer_id}
-            )
+        for id_ in self._COSTS.layer_id:
+            edit_btn = sw.Icon(children=["mdi-pencil"], _metadata={"layer": id_})
             self.btn_list.append(edit_btn)
-            rows.append(
-                sw.Html(
-                    tag="tr",
-                    children=[
-                        sw.Html(tag="td", children=[edit_btn]),
-                        sw.Html(tag="td", children=[lr.layer_name]),
-                        sw.Html(tag="td", children=[lr.layer_info]),
-                    ],
-                )
-            )
+            td = [
+                sw.Html(tag="td", children=[edit_btn]),
+                sw.Html(tag="td", children=[getattr(cm.layers, id_).name]),
+                sw.Html(tag="td", children=[getattr(cm.layers, id_).detail]),
+            ]
+            rows.append(sw.Html(tag="tr", children=td))
 
-        header = sw.Html(
-            tag="thead",
-            children=[
-                sw.Html(tag="th", children=["action"]),
-                sw.Html(tag="th", children=["cost"]),
-                sw.Html(tag="th", children=["description"]),
-            ],
-        )
+        th = [
+            sw.Html(tag="th", children=[cm.cost.table.action]),
+            sw.Html(tag="th", children=[cm.cost.table.cost]),
+            sw.Html(tag="th", children=[cm.cost.table.description]),
+        ]
+        header = sw.Html(tag="thead", children=th)
 
-        self.table = sw.SimpleTable(
-            children=[header, sw.Html(tag="tbody", children=rows)]
-        )
+        body = sw.Html(tag="tbody", children=rows)
+
+        self.table = sw.SimpleTable(children=[header, body])
 
         super().__init__(id_, title, inputs=[self.table])

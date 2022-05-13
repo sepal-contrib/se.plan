@@ -5,7 +5,7 @@ from pathlib import Path
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import mapping as sm
 from sepal_ui import color
-import ipyvuetify as v
+from sepal_ui.scripts import utils as su
 import pandas as pd
 import ee
 from ipyleaflet import WidgetControl
@@ -16,7 +16,7 @@ from component.message import cm
 ee.Initialize()
 
 
-class EditDialog(sw.SepalWidget, v.Dialog):
+class EditDialog(sw.Dialog):
 
     updated = Unicode("").tag(sync=True)  # the update traitlets
 
@@ -33,13 +33,21 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.index = None
 
         # add all the standard placeholder, they will be replaced when a layer will be selected
-        self.title = v.CardTitle(children=["Layer name"])
-        self.text = v.CardText(children=[""])
-        self.layer = v.TextField(
-            class_="ma-5", v_model=None, color="warning", outlined=True, label="Layer"
+        self.title = sw.CardTitle(children=[cm.dial.default_title])
+        self.text = sw.CardText(children=[""])
+        self.layer = sw.TextField(
+            class_="ma-5",
+            v_model=None,
+            color="warning",
+            outlined=True,
+            label=cm.dial.layer,
         )
-        self.unit = v.TextField(
-            class_="ma-5", v_model=None, color="warning", outlined=True, label="Unit"
+        self.unit = sw.TextField(
+            class_="ma-5",
+            v_model=None,
+            color="warning",
+            outlined=True,
+            label=cm.dial.unit,
         )
 
         # add a map to display the layers
@@ -52,16 +60,9 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.save = sw.Btn(cm.dial.save, color="primary")
 
         # create the init card
-        self.card = v.Card(
-            children=[
-                self.title,
-                self.text,
-                self.layer,
-                self.unit,
-                self.m,
-                v.CardActions(class_="ma-5", children=[self.cancel, self.save]),
-            ]
-        )
+        action = sw.CardActions(class_="ma-5", children=[self.cancel, self.save])
+        children = [self.title, self.text, self.layer, self.unit, self.m, action]
+        self.card = sw.Card(children=children)
 
         # init the dialog
         super().__init__(
@@ -74,6 +75,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         self.save.on_event("click", self._save_click)
         self.view.observe(self._update_aoi, "updated")
 
+    @su.switch("loading", on_widgets=["card", "layer"])
     def _on_layer_change(self, widget, event, data):
 
         # do nothing if it's no_layer
@@ -107,10 +109,8 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         return
 
+    @su.switch("loading", on_widgets=["save", "cancel"])
     def _save_click(self, widget, data, event):
-
-        # load the btn
-        widget.toggle_loading()
 
         # change the model according to the selected informations
         self.model.layer_list[self.index].update(
@@ -122,9 +122,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         # close
         self.value = False
-
-        # free the btn once the widget is closed
-        widget.toggle_loading()
 
         return
 
@@ -142,11 +139,15 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         return
 
+    @su.switch("loading", on_widgets=["card"])
     def set_dialog(self, layer_id=None):
+
+        # show the dialog
+        self.value = True
 
         # remove the images
         for l in self.m.layers:
-            if not (l.name in ["aoi", "CartoDB.DarkMatter"]):
+            if not (l.name in ["aoi", "CartoDB.DarkMatter", "CartoDB.Positron"]):
                 self.m.remove_layer(l)
 
         # disable the updated value
@@ -168,10 +169,10 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.text.children = [cm.dial.disc]
 
             # mute all the widgets
-            self.layer.v_model = "no Layer"
+            self.layer.v_model = cm.dial.no_layer
             self.layer.disabled = True
 
-            self.unit.v_model = "no unit"
+            self.unit.v_model = cm.dial.no_unit
             self.unit.disabled = True
 
             # disable save
@@ -188,14 +189,14 @@ class EditDialog(sw.SepalWidget, v.Dialog):
             self.id = layer_id
 
             # change title
-            self.title.children = [self.model.layer_list[self.index]["name"]]
+            self.title.children = [getattr(cm.layers, layer_id).name]
 
             # get the layer list pd dataframe
             layer_list = pd.read_csv(cp.layer_list).fillna("")
 
             # change text
             layer_df_line = layer_list[layer_list.layer_id == layer_id].iloc[0]
-            self.text.children = [layer_df_line.layer_info]
+            self.text.children = [getattr(cm.layers, layer_id).detail]
 
             # enable textFields
             self.layer.disabled = False
@@ -209,40 +210,36 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
             # add the custom layer if existing
             geometry = self.view.model.feature_collection
-            if self.layer.v_model != self.init_layer:
-                custom_img = Path(self.layer.v_model)
-                self.display_on_map(custom_img, geometry)
-            else:
-                default_img = Path(self.init_layer)
-                self.display_on_map(default_img, geometry)
+            is_default = self.layer.v_model == self.init_layer
+            image = self.init_layer if is_default else self.layer.v_model
+            self.display_on_map(image, geometry)
 
             # enable save
             self.save.disabled = False
 
-        # show the dialog
-        self.value = True
-
         return
 
     def display_on_map(self, image, geometry):
+        """
+        Display the image on the map
+
+        Args:
+            image (str): the asset name of the image
+            geometry (ee.Geometry): the geometry of the AOI
+        """
 
         # clip image
-        ee_image = ee.Image(str(image)).clip(geometry)
+        ee_image = ee.Image(image).clip(geometry)
+        print(image)
 
-        # get min
-        min_ = ee_image.reduceRegion(
-            reducer=ee.Reducer.min(), geometry=geometry, scale=250, bestEffort=True
+        # get minmax
+        min_max = ee_image.reduceRegion(
+            reducer=ee.Reducer.minMax(), geometry=geometry, scale=250, bestEffort=True
         )
-        min_ = list(min_.getInfo().values())[0]
+        max_, min_ = min_max.getInfo().values()
 
-        # get max
-        max_ = ee_image.reduceRegion(
-            reducer=ee.Reducer.max(), geometry=geometry, scale=250, bestEffort=True
-        )
-        max_ = list(max_.getInfo().values())[0]
-
-        min_ = min_ if min_ else 0
-        max_ = max_ if max_ else 1
+        min_ = 0 if min_ is None else min_
+        max_ = 1 if max_ is None else max_
 
         # update viz_params acordingly
         viz_params = cp.plt_viz["viridis"]
@@ -250,8 +247,7 @@ class EditDialog(sw.SepalWidget, v.Dialog):
 
         # create a colorbar
         for c in self.m.controls:
-            if type(c) == WidgetControl:
-                self.m.remove_control(c)
+            type(c) != WidgetControl or self.m.remove_control(c)
         self.m.add_colorbar(
             colors=cp.plt_viz["viridis"]["palette"],
             vmin=round(min_, 2),
@@ -259,6 +255,6 @@ class EditDialog(sw.SepalWidget, v.Dialog):
         )
 
         # dispaly on map
-        self.m.addLayer(ee_image, viz_params, image.stem)
+        self.m.addLayer(ee_image, viz_params, Path(image).stem)
 
         return self

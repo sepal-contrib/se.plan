@@ -4,7 +4,6 @@ from traitlets import link
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
-import ipyvuetify as v
 
 from component import scripts as cs
 from component.message import cm
@@ -25,7 +24,7 @@ class ValidationTile(sw.Tile):
         self.questionnaire_tile = questionnaire_tile
 
         # add the naming textField
-        self.w_name = v.TextField(label=cm.custom.recipe.name, v_model=None)
+        self.w_name = sw.TextField(label=cm.custom.recipe.name, v_model=None)
 
         # link the widget to the model
         self.question_model.bind(self.w_name, "recipe_name")
@@ -39,21 +38,14 @@ class ValidationTile(sw.Tile):
             text=cm.custom.recipe.apply, icon="mdi-download", class_="ml-2"
         )
         self.file_select = sw.FileInput([".json"], cp.result_dir, cm.custom.recipe.file)
-        ep = v.ExpansionPanels(
-            class_="mt-5",
-            children=[
-                v.ExpansionPanel(
-                    children=[
-                        v.ExpansionPanelHeader(
-                            disable_icon_rotate=True, children=[cm.custom.recipe.title]
-                        ),
-                        v.ExpansionPanelContent(
-                            children=[self.file_select, self.reset_to_recipe]
-                        ),
-                    ]
-                )
-            ],
+        content = sw.ExpansionPanelContent(
+            children=[self.file_select, self.reset_to_recipe]
         )
+        header = sw.ExpansionPanelHeader(
+            disable_icon_rotate=True, children=[cm.custom.recipe.title]
+        )
+        panel = sw.ExpansionPanel(children=[header, content])
+        ep = sw.ExpansionPanels(class_="mt-5", children=[panel])
 
         # create the tile
         super().__init__(
@@ -78,8 +70,7 @@ class ValidationTile(sw.Tile):
     def _normalize_name(self, widget, event, data):
         """normalize the recipe name on blur as it will be used everywhere else"""
 
-        if widget.v_model:
-            widget.v_model = su.normalize_str(widget.v_model)
+        widget.v_model is None or su.normalize_str(widget.v_model)
 
         return self
 

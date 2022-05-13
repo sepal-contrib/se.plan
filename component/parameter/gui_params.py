@@ -1,27 +1,36 @@
-# value of each land cover category
-landcover_default_cat = {
-    "Shrubs": 20,
-    "Herbaceous vegetation": 30,
-    "Cultivated and managed vegetation/agriculture": 40,
-    "Urban / built up": 50,
-    "Bare / sparse vegetation": 60,
-    "Snow and ice": 70,
-    "Herbaceous wetland": 90,
-    "Moss and lichen": 100,
-}
-
-land_use_criterias = {
-    k: {"tooltip": 0, "layer": "land_cover", "header": "land_use", "content": "BINARY"}
-    for k in landcover_default_cat
-}
-
 # list of the available constraints types. They will be used in the criterias names
-criteria_types = {
-    "land_use": "Land use constraints",
-    "bio": "Biophysical constraints",
-    "socio_eco": "Socio-economic constraints",
-    "forest": "Forest change",
+criteria_types = ["land_use", "bio", "socio_eco", "forest"]
+
+# list of all the available benefits types, they will be used for benefits names
+benefit_types = ["local_live", "wood_prod", "carbon", "bio"]
+
+# list of the layer themes
+themes = ["benefit", "constraint", "cost"]
+
+
+def _crit(*args):
+    """
+    return a dict of the criteria caracteristic. args need to be given in the keys order
+    used to reduce duplicate code
+    """
+    keys = ["tooltip", "layer", "header", "content"]
+    return dict(zip(keys, args))
+
+
+# default crits set for land use criteria
+# add an extra value to it
+_lc_crit = _crit(0, "land_cover", "land_use", "BINARY")
+land_use_criterias = {
+    "shrub": {**_lc_crit, "value": 20},  # shrubs
+    "herbaceous": {**_lc_crit, "value": 30},  # hebaceous vegetation
+    "agriculture": {**_lc_crit, "value": 40},  # agriculture
+    "urban": {**_lc_crit, "value": 50},  # urban
+    "bare": {**_lc_crit, "value": 60},  # bare/sparse vegetation
+    "snow": {**_lc_crit, "value": 70},  # snow and ice
+    "wetland": {**_lc_crit, "value": 90},  # herbaceous wetland
+    "moss": {**_lc_crit, "value": 100},  # moss and lichen
 }
+
 
 # list of the available constraint criteria
 # the "header" describe the category of the concstraint
@@ -33,73 +42,20 @@ criteria_types = {
 # 0: less than
 # 1: more than
 # 2 binary
+
+# note: the duplication of layers and name is a trick to include correctly the lc
 criterias = {
     **land_use_criterias,
-    "Annual rainfall": {
-        "tooltip": 1,
-        "layer": "annual_rainfall",
-        "header": "bio",
-        "content": "RANGE",
-    },
-    "Baseline water stress": {
-        "tooltip": 1,
-        "layer": "water_stress",
-        "header": "bio",
-        "content": "RANGE",
-    },
-    "Elevation": {
-        "tooltip": 1,
-        "layer": "elevation",
-        "header": "bio",
-        "content": "RANGE",
-    },
-    "Slope": {"tooltip": 1, "layer": "slope", "header": "bio", "content": "RANGE"},
-    "Accessibility to cities": {
-        "tooltip": 1,
-        "layer": "city_access",
-        "header": "socio_eco",
-        "content": "RANGE",
-    },
-    "Population density": {
-        "tooltip": 1,
-        "layer": "population_density",
-        "header": "socio_eco",
-        "content": "RANGE",
-    },
-    "Protected areas": {
-        "tooltip": 0,
-        "layer": "protected_areas",
-        "header": "socio_eco",
-        "content": "BINARY",
-    },
-    "Property rights protection": {
-        "tooltip": 1,
-        "layer": "property_rights",
-        "header": "socio_eco",
-        "content": "RANGE",
-    },
-    "Deforestation rate": {
-        "tooltip": 1,
-        "layer": "deforestation_rate",
-        "header": "forest",
-        "content": "RANGE",
-    },
-    "Climate risk": {
-        "tooltip": 1,
-        "layer": "climate_risk",
-        "header": "forest",
-        "content": "RANGE",
-    },
-    "Natural regeneration variability": {
-        "tooltip": 1,
-        "layer": "natural_regeneration",
-        "header": "forest",
-        "content": "RANGE",
-    },
-    "Declining population": {
-        "tooltip": 1,
-        "layer": "declining_population",
-        "header": "socio_eco",
-        "content": "BINARY",
-    },
+    "annual_rainfall": _crit(1, "annual_rainfall", "bio", "RANGE"),
+    "water_stress": _crit(1, "water_stress", "bio", "RANGE"),
+    "elevation": _crit(1, "elevation", "bio", "RANGE"),
+    "slope": _crit(1, "slope", "bio", "RANGE"),
+    "city_access": _crit(1, "city_access", "socio_eco", "RANGE"),
+    "population_density": _crit(1, "population_density", "socio_eco", "RANGE"),
+    "protected_areas": _crit(0, "protected_areas", "socio_eco", "BINARY"),
+    "property_rights": _crit(1, "property_rights", "socio_eco", "RANGE"),
+    "deforestation_rate": _crit(1, "deforestation_rate", "forest", "RANGE"),
+    "climate_risk": _crit(1, "climate_risk", "forest", "RANGE"),
+    "natural_regeneration": _crit(1, "natural_regeneration", "forest", "RANGE"),
+    "declining_population": _crit(1, "declining_population", "socio_eco", "BINARY"),
 }

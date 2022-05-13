@@ -38,6 +38,7 @@ class MapTile(sw.Tile):
         # create the map
         self.m = sm.SepalMap(dc=True).hide_dc()
         self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
+        self.m.add_control(sm.FullScreenControl(position="topright"))
         self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
         # create a window to display AOI information
@@ -144,7 +145,7 @@ class MapTile(sw.Tile):
         [
             self.m.remove_layer(l)
             for l in self.m.layers
-            if l.name not in ["CartoDB.DarkMatter"]
+            if l.name not in ["CartoDB.DarkMatter", "CartoDB.Positron"]
         ]
         self.m.dc.clear()
         self.draw_features = deepcopy(self.EMPTY_FEATURES)
@@ -194,7 +195,12 @@ class MapTile(sw.Tile):
         """save the features as layers on the map"""
 
         # remove any sub aoi layer
-        layers_2_keep = ["CartoDB.DarkMatter", "restoration layer", self.aoi_model.name]
+        layers_2_keep = [
+            "CartoDB.DarkMatter",
+            "CartoDB.Positron",
+            "restoration layer",
+            self.aoi_model.name,
+        ]
         [self.m.remove_layer(l) for l in self.m.layers if l.name not in layers_2_keep]
 
         # save the drawn features
@@ -249,9 +255,6 @@ class MapTile(sw.Tile):
             self.draw_features,
             names,
         )
-
-        # print(self.area_dashboard)
-        # print(self.theme_dashboard)
 
         self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
 

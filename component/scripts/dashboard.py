@@ -44,9 +44,6 @@ def get_areas(image, geometry, scale=100):
         scale=100,
         maxPixels=1e13,
     )
-    print(sum_img.getInfo())
-
-    # print(total.getInfo())
 
     return areas, total
 
@@ -209,46 +206,25 @@ def get_summary_statistics(wlc_outputs, name, geom, layer_list):
 
     # benefits
     # remake benefits from layerlist as original output are in quintiles
-    all_benefits_layers = [i for i in layer_list if i["theme"] == "benefits"]
-    list(
-        map(
-            lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}),
-            all_benefits_layers,
-        )
-    )
+    all_benefits_layers = [i for i in layer_list if i["theme"] == "benefit"]
+    fn_all_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+    list(map(fn_all_benefit, all_benefits_layers))
 
+    fn_benefits = lambda i: get_image_mean(i["eeimage"], geom, i["id"], mask)
     benefits_out = ee.Dictionary(
-        {
-            "benefits": list(
-                map(
-                    lambda i: get_image_mean(i["eeimage"], geom, i["name"], mask),
-                    all_benefits_layers,
-                )
-            )
-        }
+        {"benefit": list(map(fn_benefits, all_benefits_layers))}
     )
 
     # costs
-    costs_out = ee.Dictionary(
-        {
-            "costs": list(
-                map(lambda i: get_image_sum(i["eeimage"], geom, i["name"], mask), costs)
-            )
-        }
-    )
+    fn_costs = lambda i: get_image_sum(i["eeimage"], geom, i["id"], mask)
+    costs_out = ee.Dictionary({"cost": list(map(fn_costs, costs))})
 
     # constraints
+    fn_constraint = lambda i: get_image_percent_cover_pixelarea(
+        i["eeimage"], geom, i["id"]
+    )
     constraints_out = ee.Dictionary(
-        {
-            "constraints": list(
-                map(
-                    lambda i: get_image_percent_cover_pixelarea(
-                        i["eeimage"], geom, i["name"]
-                    ),
-                    constraints,
-                )
-            )
-        }
+        {"constraint": list(map(fn_constraint, constraints))}
     )
 
     # combine the result
@@ -282,10 +258,10 @@ def get_theme_dashboard(stats):
 
     for feature in stats:
         feature = json.loads(feature)
-        for k, val in feature.items():
+        for k, layers in feature.items():
             if k not in tmp_dict:
                 tmp_dict[k] = {}
-            for layer in feature[k]:
+            for layer in layers:
                 if isinstance(layer, str):
                     names.append(layer)
                     continue
@@ -321,8 +297,6 @@ def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
         get_summary_statistics(wlc_outputs, names[i], geom, layer_model.layer_list)
         for i, geom in enumerate(ee_aoi_list)
     ]
-
-    # print(stats)
 
     area_dashboard = get_area_dashboard(stats)
     theme_dashboard = get_theme_dashboard(stats)
