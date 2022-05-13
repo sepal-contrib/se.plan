@@ -10,8 +10,20 @@ ee.Initialize()
 
 
 class Constraint(sw.Row):
+    """
+    Custom Constraint using a slider to define the used values. Anything between
+    min and max will be included in the computation of the restoration index
+
+    Args:
+        widget (v.Widget): any widget used to define the value of the constraint filter
+        name (str): the name of the constraint (in translated language)
+        header (str): the category of the constraint
+        layer (str): the id of the layer (name and layer will only be different for the land_use layers)
+        id_ (str): the id of the layer (name and layer will only be different for the land_use layers)
+    """
 
     custom_v_model = Any(-1).tag(sync=True)
+    "the custom dict v_model to transfer information to the other widgets of the application"
 
     def __init__(self, widget, name, header, layer, id_, **kwargs):
 
@@ -39,6 +51,7 @@ class Constraint(sw.Row):
         self.widget.observe(self._on_change, "v_model")
 
     def _on_change(self, change):
+        """update v_model when the widget is changed"""
 
         # update the custom v_model
         # if the widget is displayed on the questionnaire
@@ -48,6 +61,7 @@ class Constraint(sw.Row):
         return
 
     def disable(self):
+        """overwrite disable method to set the custom_v_model to -1"""
 
         # update the custom v_model
         self.custom_v_model = -1
@@ -58,6 +72,10 @@ class Constraint(sw.Row):
         return self
 
     def unable(self):
+        """
+        Overwrite unable method to set the custom_v_model to the widget current value
+        (kept when successively hide and show the same constraint)
+        """
 
         # update the custom v_model
         self.custom_v_model = self.widget.v_model
@@ -69,6 +87,15 @@ class Constraint(sw.Row):
 
 
 class Binary(Constraint):
+    """
+    Custom Constraint using a Switch to define the used values. if value is 1 then we use all the ones, if not we use the 0s.
+
+    Args:
+        name (str): the id of the layer in the parameter dict
+        header (str): the category of the constraints
+        layer (str): the id of the layer (name and layer will only be different for the land_use layers)
+    """
+
     def __init__(self, name, header, layer, **kwargs):
 
         # get the translated name from cm
@@ -85,8 +112,19 @@ class Binary(Constraint):
 
 
 class Range(Constraint):
+    """
+    Custom Constraint using a slider to define the used values. Anything between
+    min and max will be included in the computation of the restoration index
 
-    LABEL = ["low", "medium", "high"]
+    Args:
+        name (str): the id of the layer in the parameter dict
+        header (str): the category of the constraint
+        unit (str): the unit of the layer
+        layer (str): the id of the layer (name and layer will only be different for the land_use layers)
+    """
+
+    NB_STEPS = 1000
+    "(int): the number of steps used in the sliders"
 
     def __init__(self, name, header, unit, layer, **kwargs):
 
@@ -96,7 +134,7 @@ class Range(Constraint):
         widget = sw.RangeSlider(
             label=f"{t_name} ({unit})",
             max=1,
-            step=0.1,
+            step=0.01,
             v_model=[0, 1],
             thumb_label="always",
             persistent_hint=True,
@@ -106,6 +144,14 @@ class Range(Constraint):
         super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
     def set_values(self, geometry, layer):
+        """
+        Compute the extreme value of the layer on the AOI and use them as min and max values of the slider.
+        Use 1000 step to navigate from these values
+
+        Args:
+            geometry (ee.Geometry): the AOI to compute min and max
+            layer (str): the Asset id of the layer
+        """
 
         # compute the min and the max for the specific geometry and layer
         ee_image = ee.Image(layer).select(0)
@@ -123,20 +169,20 @@ class Range(Constraint):
             self.widget.error_messages = cm.constraints.error.out_of_aoi
             self.widget.min = 0
             self.widget.max = 1
-            self.widget.step = 0.1
             self.widget.v_model = [0, 1]
+            self.widget.step = 0.01
 
         else:
 
             # remove the error state
             self.widget.error_messages = []
 
-            # set the min max
-            self.widget.min = round(min_, 2)
-            self.widget.max = round(max_, 2)
-
-            # set the number of steps by stting the step parameter (100)
-            self.widget.step = max(0.01, (self.widget.max - self.widget.min) / 100)
+            # set the min max and steps based on the nmber of decimals
+            # 1 id it's bigger than 100 else 2
+            decimals = 1 if max_ > 100 else 2
+            self.widget.min = round(min_, decimals)
+            self.widget.max = round(max_, decimals)
+            self.widget.step = 10 ** -decimals
 
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
