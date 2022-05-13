@@ -47,9 +47,6 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     fn_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
     list(map(fn_benefit, benefit_list))
 
-    risk_list = [i for i in layer_list if i["theme"] == "risks"]
-    list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"])}), risk_list))
-
     cost_list = [i for i in layer_list if i["theme"] == "cost"]
     list(map(lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()}), cost_list))
 
