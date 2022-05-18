@@ -201,7 +201,7 @@ def get_summary_statistics(wlc_outputs, name, geom, layer_list):
         list(map(lambda i: ee.Image(i["eeimage"]).rename("c").byte(), constraints))
     ).min()
 
-    # restoration pot. stats
+    # restoration potential stats
     wlc_summary = get_image_stats(wlc, name, mask, geom)
 
     # benefits
@@ -251,35 +251,41 @@ def get_theme_dashboard(stats):
         json_dashboard (list): List of string dicts. Each feature with summary values for benefits, costs, risks and constraints.
 
     returns:
-        json_thmemes_values (dict):Theme formatted dictionay of {THEME: {LAYER: 'total':float, 'values':[float]}}
+        json_themes_values (dict):Theme formatted dictionay of {THEME: {LAYER: 'total':float, 'values':[float]}}
     """
     tmp_dict = {}
     names = []
 
-    for feature in stats:
-        feature = json.loads(feature)
-        for k, layers in feature.items():
-            if k not in tmp_dict:
-                tmp_dict[k] = {}
-            for layer in layers:
-                if isinstance(layer, str):
-                    names.append(layer)
-                    continue
-                layer_name = next(iter(layer))
-                layer_value = layer[layer_name]["values"][0]
-                layer_total = layer[layer_name]["total"][0]
+    for aoi in stats:
+        # read information as they are stored as a string
+        features = json.loads(aoi)
 
-                if layer_name not in tmp_dict[k]:
-                    tmp_dict[k][layer_name] = {"values": [], "total": 0}
-                    tmp_dict[k][layer_name]["values"].append(layer_value)
-                    tmp_dict[k][layer_name]["total"] = layer_total
-                else:
-                    tmp_dict[k][layer_name]["values"].append(layer_value)
-                    tmp_dict[k][layer_name]["total"] = max(
-                        layer_total, tmp_dict[k][layer_name]["total"]
-                    )
-    tmp_dict["names"] = names
-    tmp_dict.pop("suitability", None)
+        # remove suitability from the start
+        features = {k: v for k, v in features.items() if k != "suitability"}
+
+        for theme, layers in features.items():
+            # add the theme to the keys if necessary (during the first loop)
+            theme in tmp_dict or tmp_dict.update({theme: {}})
+
+            # first loop to sum all the values related to the same layer (e.g. land_cover)
+            # each layer is tored in a dict: {lid: {"value": xx, "total": cc}}
+            d = {}
+            for layer in layers:
+                lid = next(iter(layer))
+                stat = layer[lid]
+                lid in d or d.update({lid: {"values": 0, "total": 0}})
+                d[lid]["values"] += stat["values"][0]
+                d[lid]["layer_total"] = stat["total"][0]
+
+            # second loop to write down everything in the tmp_dict
+            for lid, stat in d.items():
+                lid in tmp_dict[theme] or tmp_dict[theme].update(
+                    {lid: {"values": [], "total": 0}}
+                )
+                tmp_dict[theme][lid]["values"].append(stat["values"])
+                tmp_dict[theme][lid]["total"] = max(
+                    stat["total"], tmp_dict[theme][lid]["total"]
+                )
 
     return tmp_dict
 

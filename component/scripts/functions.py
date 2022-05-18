@@ -185,7 +185,13 @@ def get_cat_constraint(cat_id, value, name, layer_id):
     image = ee.Image(layer_id).select("discrete_classification").unmask()
     image = image.neq(cat_id) if value else image.eq(cat_id)
 
-    return {"theme": "constraints", "name": name, "eeimage": image}
+    return {
+        "id": "land_cover",
+        "theme": "constraints",
+        "subtheme": "Socio-economic",
+        "name": name,
+        "eeimage": image,
+    }
 
 
 def get_range_constraint(values, layer_id):
