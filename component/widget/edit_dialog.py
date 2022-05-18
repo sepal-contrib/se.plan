@@ -62,7 +62,7 @@ class EditDialog(sw.Dialog):
         # create the init card
         action = sw.CardActions(class_="ma-5", children=[self.cancel, self.save])
         children = [self.title, self.text, self.layer, self.unit, self.m, action]
-        self.card = sw.Card(children=children)
+        self.card = sw.Card(children=children, class_="ma-0")
 
         # init the dialog
         super().__init__(
