@@ -52,9 +52,13 @@ class ExportMap(sw.Menu):
         export_data = sw.Card(children=[title, text, action])
 
         # the clickable icon
-        icon = sw.Icon(children=["mdi-cloud-download"])
+        icon = sw.Icon(small=True, children=["mdi-cloud-download"])
         self.download_btn = v.Btn(
-            v_on="menu.on", color="primary", icon=True, children=[icon]
+            v_on="menu.on",
+            color="primary",
+            outlined=True,
+            style_="padding: 0px; min-width: 0px; width: 30px; height: 30px;",
+            children=[icon],
         )
 
         slot = {"name": "activator", "variable": "menu", "children": self.download_btn}
