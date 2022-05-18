@@ -17,7 +17,7 @@ class CustomAoiDialog(sw.Dialog):
         title = sw.CardTitle(children=[cm.map.dialog.title])
         text = sw.CardText(children=[self.w_name])
         action = sw.CardActions(children=[self.btn])
-        card = sw.Card(class_="ma-5", children=[title, text, action])
+        card = sw.Card(class_="ma-0", children=[title, text, action])
 
         # init the dialog
         super().__init__(

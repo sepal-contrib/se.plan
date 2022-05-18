@@ -24,7 +24,7 @@ class LayerFull(sw.Layout):
     def __init__(self, layer_id, values, aoi_names, colors):
 
         # add one extra color for the AOI
-        colors = [scolor.primary] + colors
+        colors = [c for c in reversed([scolor.primary] + colors)]
 
         # get the layer labels from the translator object
         t_layer = getattr(cm.layers, layer_id)
