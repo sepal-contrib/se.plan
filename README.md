@@ -2,6 +2,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Black badge](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black) 
+[![Crowdin](https://badges.crowdin.net/seplan/localized.svg)](https://crowdin.com/project/seplan)
 
 Restoration of forests and other ecosystems can be a major nature-based strategy for achieving a wide range of global development goals and national priorities, including Sustainable Development Goals, but the suitability of different locations for restoration varies and financial resources are limited. Country governments, international organizations, and other restoration stakeholders need to identify and prioritize locations suitable for restoration. A suitability analysis for forest restoration requires information on not only ecological conditions for tree growth but also restoration’s socioeconomic impacts, including its benefits, costs, and risks. Locations where benefits are high relative to costs and risks are where restoration is more likely to achieve sustainable success. These locations are also where restoration initiatives are more likely to attract the private investment needed to augment government funding and official development assistance.
   
