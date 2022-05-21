@@ -230,7 +230,6 @@ class EditDialog(sw.Dialog):
 
         # clip image
         ee_image = ee.Image(image).clip(geometry)
-        print(image)
 
         # get minmax
         min_max = ee_image.reduceRegion(

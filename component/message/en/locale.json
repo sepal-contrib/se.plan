@@ -36,7 +36,10 @@
         "title": "Launch computation",
         "btn": "Compute the restoration map",
         "desc": "**The launch button will be available after you validate your inputs**",
-        "default_label": "default"
+        "default_label": "default",
+        "error": {
+            "missing_priority": "The layer {} is completely masked on your AOI. If you cannot provide a custom one, please set it to 0 in your priority questionnaire."
+        }
     },
     "constraints": {
         "title": "Constraints",
