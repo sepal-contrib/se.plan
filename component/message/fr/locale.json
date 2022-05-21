@@ -104,6 +104,7 @@
         "theme": {
             "title": "Domaine d'intérêt - résumé par sous-thèmes",
             "txt": "Pour aider à démêler les impacts potentiels de la restauration sur chaque site candidat, nous signalons les avantages, les coûts et les risques individuels (i. ., contraintes) dans des détails plus fins ci-dessous.",
+            "disclaimer": "Le tableau de bord doit d'abord être calculé.",
             "benefit": {
                 "description": {
                     "0": "Pour chaque priorité estimée, la valeur moyenne par rapport à l'AOI est affichée dans son unité d'origine (par exemple, $/ha). La valeur utilisera les préfixes SI si la valeur n'est pas lisible dans l'unité d'origine.",
@@ -185,5 +186,8 @@
         },
         "cancel": "Annuler",
         "apply": "Appliquer"
+    },
+    "aoi": {
+        "not_lmic": "Le pays que vous êtes sur le point d'utiliser est hors de la portée des couches fournies. Veuillez noter que vous devrez personnaliser toutes les couches avant de calculer l'indice de restauration. Consultez la documentation pour plus d'informations"
     }
 }
