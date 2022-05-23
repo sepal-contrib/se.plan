@@ -274,7 +274,8 @@ def get_theme_dashboard(stats):
                 lid = next(iter(layer))
                 stat = layer[lid]
                 lid in d or d.update({lid: {"values": 0, "total": 0}})
-                d[lid]["values"] += stat["values"][0]
+                v = stat["values"][0] if stat["values"][0] is not None else 0
+                d[lid]["values"] += v
                 d[lid]["layer_total"] = stat["total"][0]
 
             # second loop to write down everything in the tmp_dict

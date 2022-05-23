@@ -60,7 +60,7 @@ class LayerFull(sw.Layout):
             fig, ax = plt.subplots(figsize=[50, width], facecolor=transparent)
 
             # set the datas
-            max_value = max(values)
+            max_value = max(values) if max(values) != 0 else 1
             norm_values = [v / max_value * 100 for v in reversed(values)]
             human_values = [f"{human_format(val)}" for val in reversed(values)]
 

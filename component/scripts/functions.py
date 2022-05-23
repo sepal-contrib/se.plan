@@ -4,6 +4,7 @@ from traitlets import Any, HasTraits
 
 from component import parameter as cp
 from component import model
+from component.message import cm
 
 ee.Initialize()
 
@@ -259,7 +260,7 @@ def normalize_benefits(benefit_list, ee_aoi, method="minmax"):
     return benefit_list
 
 
-def _minmax(ee_image, ee_aoi, scale=10000):
+def _minmax(ee_image, ee_aoi, scale=10000, name="layer_id"):
     """use the minmax normalization"""
 
     mmvalues = ee_image.reduceRegion(
@@ -281,7 +282,7 @@ def _minmax(ee_image, ee_aoi, scale=10000):
     return ee_image.unitScale(img_min, img_max).float()
 
 
-def _percentile(ee_image, ee_aoi, scale=10000, percentile=[3, 97]):
+def _percentile(ee_image, ee_aoi, scale=10000, percentile=[3, 97], name="layer_id"):
     """Use the percentile normalization"""
 
     tmp_ee_image = ee_image.rename("img")
@@ -298,7 +299,7 @@ def _percentile(ee_image, ee_aoi, scale=10000, percentile=[3, 97]):
     return ee_image.unitScale(img_low, img_high).clamp(0, 1)
 
 
-def _quintile(ee_image, ee_aoi, scale=100):
+def _quintile(ee_image, ee_aoi, scale=100, name="layer_id"):
     """use quintile normailzation"""
 
     quintile_collection = ee_image.reduceRegions(
@@ -315,6 +316,13 @@ def _quintile(ee_image, ee_aoi, scale=100):
     valid_quintiles = quintile_collection.filter(
         ee.Filter.notNull(["high", "low", "lowmed", "highmed"])
     )
+
+    # test if the quintile list is valid
+    # if the all area benefits is masked then this list will be empty and the image should be replaced by 1 everywhere
+    # it can happen as the carbon sequestration layer has holes in south america and africa
+    if valid_quintiles.size().getInfo() == 0:
+        raise ValueError(cm.compute.error.missing_priority.format(name))
+
     vaild_quintiles_list = valid_quintiles.toList(valid_quintiles.size())
 
     def conditions(feature):
@@ -339,9 +347,7 @@ def _quintile(ee_image, ee_aoi, scale=100):
 
         return out
 
-    quintile_image = ee.ImageCollection(vaild_quintiles_list.map(conditions)).mosaic()
-
-    return quintile_image
+    return ee.ImageCollection(vaild_quintiles_list.map(conditions)).mosaic()
 
 
 def normalize_image(layer, ee_aoi, method="mixmax"):
@@ -355,8 +361,7 @@ def normalize_image(layer, ee_aoi, method="mixmax"):
     """
 
     normalize = {"minmax": _minmax, "quintile": _quintile}
-
-    return normalize[method](ee.Image(layer["layer"]), ee_aoi)
+    return normalize[method](ee.Image(layer["layer"]), ee_aoi, name=layer["name"])
 
 
 def get_expression(benefit_list, cost_list):
