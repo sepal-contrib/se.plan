@@ -15,7 +15,7 @@ def human_format(num, round_to=2):
         magnitude += 1
         num = round(num / 1000.0, round_to)
 
-    prefix = ["", "k", "M", "G", "T", "P"][magnitude]
+    prefix = ["", "k", "M", "B", "T"][magnitude]
 
     return "{:.{}f}{}".format(num, round_to, prefix)
 
