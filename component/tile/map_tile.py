@@ -33,11 +33,11 @@ class MapTile(sw.Tile):
         mkd = sw.Markdown("  \n".join(cm.map.txt))
 
         # create a save widget
-        self.save = cw.ExportMap()
+        self.save = cw.ExportMap(position="topleft")
 
         # create the map
         self.m = sm.SepalMap(dc=True).hide_dc()
-        self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
+        self.m.add_control(self.save)
         self.m.add_control(sm.FullScreenControl(self.m, position="topright"))
         self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
 
