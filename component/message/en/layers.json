@@ -129,5 +129,16 @@
         "cost": "cost",
         "benefit": "priorities",
         "constraint": "constraint"
+    },
+    "subtheme": {
+        "land_use": "Land Use",
+        "local": "Local Livelihoods",
+        "wood": "Wood Production",
+        "socio_eco": "Socio-economic",
+        "carbon_seq": "Carbon sequestration",
+        "bii": "Biodiversity conservation",
+        "bio": "Biophysical",
+        "forest": "Forest change",
+        "money": "Monetary"
     }
 }

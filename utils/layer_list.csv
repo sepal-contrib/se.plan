@@ -1,24 +1,24 @@
 layer_id,theme,subtheme,gee_asset,unit
-woodfuel_harvest,benefit,Local livelihoods,projects/john-ee-282116/assets/fao-restoration/features/Woodfuel_gadm36_1_edited_image,m3/ha
-plantation_growth_rates,benefit,Wood production,projects/john-ee-282116/assets/fao-restoration/features/yields-4326,dry tons/ha/yr
-city_access,constraint,Socio-economic,Oxford/MAP/accessibility_to_cities_2015_v1_0,hours
-forest_job,benefit,Local livelihoods,projects/john-ee-282116/assets/fao-restoration/features/emp_ha,jobs/ha
-ground_carbon,benefit,Carbon sequestration,projects/john-ee-282116/assets/fao-restoration/features/young_forest_sequestration_rate_Griscom_extent,tons/ha/yr
-biodiversity_intactness,benefit,Biodiversity conservation,projects/john-ee-282116/assets/fao-restoration/features/ibii-4326,percent
-endangered_species,benefit,Biodiversity conservation,projects/john-ee-282116/assets/fao-restoration/features/terra-bio-div-image,number/km2
-ecozones,constraint,Biophysical,projects/john-ee-282116/assets/fao-restoration/features/gez_2010_wgs84_split,binary
-land_cover,constraint,Socio-economic,COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019,binary
-protected_areas,constraint,Socio-economic,projects/john-ee-282116/assets/fao-restoration/features/protected_areas,binary
-slope,constraint,Biophysical ,projects/john-ee-282116/assets/fao-restoration/features/slope,percent
-elevation,constraint,Biophysical ,USGS/SRTMGL1_003,m
-natural_regeneration,constraint,Forest change,projects/john-ee-282116/assets/fao-restoration/features/Regeneration,index (0 to 1)
-declining_population,constraint,Socio-economic,projects/john-ee-282116/assets/fao-restoration/features/population_decline,binary
-property_rights,constraint,Socio-economic,projects/john-ee-282116/assets/fao-restoration/features/RL_gadm36_1_edited_image,index (-2.5 to 2.5)
-deforestation_rate,constraint,Forest change,projects/john-ee-282116/assets/fao-restoration/features/deforestation_rate,percent/yr
-climate_risk,constraint,Forest change,projects/john-ee-282116/assets/fao-restoration/features/future_risk,percent
-population_density,constraint,Socio-economic,CIESIN/GPWv411/GPW_Population_Density/gpw_v4_population_density_rev11_2015_30_sec,people/km2
-annual_rainfall,constraint,Biophysical,projects/john-ee-282116/assets/fao-restoration/features/chirps_00_20_mean,mm/yr
+woodfuel_harvest,benefit,local,projects/john-ee-282116/assets/fao-restoration/features/Woodfuel_gadm36_1_edited_image,m3/ha
+plantation_growth_rates,benefit,wood,projects/john-ee-282116/assets/fao-restoration/features/yields-4326,dry tons/ha/yr
+city_access,constraint,socio_eco,Oxford/MAP/accessibility_to_cities_2015_v1_0,hours
+forest_job,benefit,local,projects/john-ee-282116/assets/fao-restoration/features/emp_ha,jobs/ha
+ground_carbon,benefit,carbon_seq,projects/john-ee-282116/assets/fao-restoration/features/young_forest_sequestration_rate_Griscom_extent,tons/ha/yr
+biodiversity_intactness,benefit,bii,projects/john-ee-282116/assets/fao-restoration/features/ibii-4326,percent
+endangered_species,benefit,bii,projects/john-ee-282116/assets/fao-restoration/features/terra-bio-div-image,number/km2
+ecozones,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/gez_2010_wgs84_split,binary
+land_cover,constraint,socio_eco,COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019,binary
+protected_areas,constraint,socio_eco,projects/john-ee-282116/assets/fao-restoration/features/protected_areas,binary
+slope,constraint,bio ,projects/john-ee-282116/assets/fao-restoration/features/slope,percent
+elevation,constraint,bio ,USGS/SRTMGL1_003,m
+natural_regeneration,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/Regeneration,index (0 to 1)
+declining_population,constraint,socio_eco,projects/john-ee-282116/assets/fao-restoration/features/population_decline,binary
+property_rights,constraint,socio_eco,projects/john-ee-282116/assets/fao-restoration/features/RL_gadm36_1_edited_image,index (-2.5 to 2.5)
+deforestation_rate,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/deforestation_rate,percent/yr
+climate_risk,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/future_risk,percent
+population_density,constraint,socio_eco,CIESIN/GPWv411/GPW_Population_Density/gpw_v4_population_density_rev11_2015_30_sec,people/km2
+annual_rainfall,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/chirps_00_20_mean,mm/yr
 treecover_with_potential,constraint,,projects/john-ee-282116/assets/fao-restoration/features/rest_pot_gt_treecoverfrac_mask_urban,binary
-opportunity_cost,cost,,projects/john-ee-282116/assets/fao-restoration/features/opportunity_cost,$/ha
-water_stress,constraint,Biophysical,projects/john-ee-282116/assets/fao-restoration/features/bws_score,index (0 to 5)
+opportunity_cost,cost,monetary,projects/john-ee-282116/assets/fao-restoration/features/opportunity_cost,$/ha
+water_stress,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/bws_score,index (0 to 5)
 implementation_cost,cost,monetary,projects/john-ee-282116/assets/fao-restoration/features/AfCost_ha,$/ha

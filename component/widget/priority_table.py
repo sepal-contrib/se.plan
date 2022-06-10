@@ -38,7 +38,7 @@ class PriorityTable(v.SimpleTable):
             # start with the layer informations
             row = [
                 v.Html(tag="td", children=[edit_btn]),
-                v.Html(tag="td", children=[lr.subtheme]),
+                v.Html(tag="td", children=[getattr(cm.subtheme, lr.subtheme)]),
                 v.Html(tag="td", children=[getattr(cm.layers, lr.layer_id).name]),
             ]
 
