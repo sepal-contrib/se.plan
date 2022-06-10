@@ -138,9 +138,7 @@ def set_constraints(constraints, constraint_list):
 
     # add the default geographic constraint
     default_geographic = next(
-        item
-        for item in constraint_list
-        if item["name"] == "Current tree cover less than potential"
+        item for item in constraint_list if item["id"] == "treecover_with_potential"
     )
     default_geographic.update(eeimage=ee.Image(default_geographic["layer"]))
 
@@ -361,7 +359,9 @@ def normalize_image(layer, ee_aoi, method="mixmax"):
     """
 
     normalize = {"minmax": _minmax, "quintile": _quintile}
-    return normalize[method](ee.Image(layer["layer"]), ee_aoi, name=layer["name"])
+    return normalize[method](
+        ee.Image(layer["layer"]), ee_aoi, name=getattr(cm.layers, layer["id"]).name
+    )
 
 
 def get_expression(benefit_list, cost_list):

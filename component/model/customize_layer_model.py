@@ -15,13 +15,11 @@ class CustomizeLayerModel(model.Model):
         [
             {
                 "id": row.layer_id,
-                "name": row.layer_name,
                 "layer": row.gee_asset,
                 "unit": row.unit,
                 "weight": 0,
                 "theme": row.theme,
                 "subtheme": row.subtheme,
-                "operator": row.operator,
             }
             for i, row in layer_list.iterrows()
         ]
