@@ -388,8 +388,10 @@ def dashboard_data_to_fc(dashboard_data:ee.Dictionary)->ee.FeatureCollection:
     constraintFeatures = dictionaryToFeatures(constraints,'constraint','area')
     costFeatures = dictionaryToFeatures(costs,'cost','sum')
     
-    fin = ee.FeatureCollection([suitibilityToFeatures(suitability),
-        dictionaryToFeatures(benefits,'benefit','mean'),
-        dictionaryToFeatures(constraints,'constraint','area'),
-        dictionaryToFeatures(costs,'cost','sum')]).flatten()
+    fin = ee.FeatureCollection([
+        suitibilityFeatures,
+        benefitFeatures,
+        constraintFeatures,
+        costFeatures]).flatten()
+    
     return fin
