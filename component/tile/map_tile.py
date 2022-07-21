@@ -9,7 +9,6 @@ from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 from shapely import geometry as sg
 import geopandas as gpd
-import geemap
 import ee
 from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON
