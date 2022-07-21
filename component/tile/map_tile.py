@@ -9,7 +9,6 @@ from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 from shapely import geometry as sg
 import geopandas as gpd
-import geemap
 import ee
 from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON
@@ -39,7 +38,9 @@ class MapTile(sw.Tile):
         self.m = sm.SepalMap(dc=True).hide_dc()
         self.m.add_control(self.save)
         self.m.add_control(sm.FullScreenControl(self.m, position="topright"))
-        self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
+        self.m.add_colorbar(
+            colors=cp.red_to_green, vmin=1, vmax=5, layer_name=cm.map.legend.title
+        )
 
         # create a window to display AOI information
         self.html = HTML()

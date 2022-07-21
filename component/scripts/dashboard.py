@@ -3,7 +3,7 @@ import json
 from datetime import datetime as dt
 import os
 
-import geemap
+from sepal_ui.scripts import utils as su
 
 
 def _quintile(image, geometry, scale=100):
@@ -190,34 +190,42 @@ def get_image_sum(image, aoi, name, mask):
     value = ee.Dictionary({"values": sum_img.values(), "total": total_img.values()})
 
     return ee.Dictionary({name: value})
-def get_benefits(layer_list:list, geom:ee.Geometry, constraint_mask:ee.Image)->ee.Dictionary:
-    
+
+
+def get_benefits(
+    layer_list: list, geom: ee.Geometry, constraint_mask: ee.Image
+) -> ee.Dictionary:
+
     all_benefits_layers = [i for i in layer_list if i["theme"] == "benefit"]
     fn_all_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
     list(map(fn_all_benefit, all_benefits_layers))
 
     fn_benefits = lambda i: get_image_mean(i["eeimage"], geom, i["id"], constraint_mask)
 
-    return ee.Dictionary(
-        {"benefit": list(map(fn_benefits, all_benefits_layers))}
-    )
+    return ee.Dictionary({"benefit": list(map(fn_benefits, all_benefits_layers))})
 
-def get_costs(costs:list, geom:ee.Geometry, constraint_mask:ee.Image)->ee.Dictionary:
+
+def get_costs(
+    costs: list, geom: ee.Geometry, constraint_mask: ee.Image
+) -> ee.Dictionary:
     fn_costs = lambda i: get_image_sum(i["eeimage"], geom, i["id"], constraint_mask)
     return ee.Dictionary({"cost": list(map(fn_costs, costs))})
 
-def get_constraints(constraints:list, geom:ee.Geometry, constraint_mask:ee.Image)->ee.Dictionary:
+
+def get_constraints(
+    constraints: list, geom: ee.Geometry, constraint_mask: ee.Image
+) -> ee.Dictionary:
     fn_constraint = lambda i: get_image_percent_cover_pixelarea(
         i["eeimage"], geom, i["id"]
     )
-    return ee.Dictionary(
-        {"constraint": list(map(fn_constraint, constraints))}
-    )
+    return ee.Dictionary({"constraint": list(map(fn_constraint, constraints))})
 
-def make_mask_constraints(constraints:list)->ee.Image:
-    return  ee.ImageCollection(
+
+def make_mask_constraints(constraints: list) -> ee.Image:
+    return ee.ImageCollection(
         list(map(lambda i: ee.Image(i["eeimage"]).rename("c").byte(), constraints))
     ).min()
+
 
 def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
     """returns summarys for the dashboard."""
@@ -225,7 +233,7 @@ def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
     # unpack restoration suitability results
     wlc, benefits, constraints, costs = wlc_outputs
 
-    #maske constraints mask to restrict summary to proper areas     
+    # maske constraints mask to restrict summary to proper areas
     constraint_mask = make_mask_constraints(constraints)
 
     # restoration potential stats
@@ -233,21 +241,21 @@ def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
 
     # benefits
     benefits_out = get_benefits(layer_list, geom, constraint_mask)
-    
-    # costs 
+
+    # costs
     costs_out = get_costs(costs, geom, constraint_mask)
 
     # constraints
-    constraints_out =  get_constraints(constraints, geom, constraint_mask)
+    constraints_out = get_constraints(constraints, geom, constraint_mask)
 
     # combine the result
     result = (
         wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
     )
-    
+
     if client_side:
         result = ee.String.encodeJSON(result).getInfo()
-    
+
     return result
 
 
@@ -313,11 +321,13 @@ def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
     # the first one is the aoi and the rest are sub areas
     ee_aoi_list = [aoi_model.feature_collection]
     for feat in features["features"]:
-        ee_aoi_list.append(geemap.geojson_to_ee(feat))
+        ee_aoi_list.append(su.geojson_to_ee(feat))
 
     # create the stats dictionnary
     stats = [
-        get_summary_statistics(wlc_outputs, names[i], geom, layer_model.layer_list, True)
+        get_summary_statistics(
+            wlc_outputs, names[i], geom, layer_model.layer_list, True
+        )
         for i, geom in enumerate(ee_aoi_list)
     ]
 
@@ -327,71 +337,72 @@ def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
     return area_dashboard, theme_dashboard
 
 
-def dictionaryToFeatures(results:ee.List,category:str,type_feat:str)->ee.FeatureCollection:
+def dictionaryToFeatures(
+    results: ee.List, category: str, type_feat: str
+) -> ee.FeatureCollection:
     results = ee.List(results)
+
     def parseResults(result):
         result = ee.Dictionary(result)
         result_key = result.keys().get(0)
         main_dict = ee.Dictionary(result.get(result_key))
         tmp_dict = {
-          'category':category,
-          'type': type_feat,
-          'name': result_key,
-          'total': ee.List(main_dict.get('total')).get(0),
-          'value': ee.List(main_dict.get('values')).get(0),
-
+            "category": category,
+            "type": type_feat,
+            "name": result_key,
+            "total": ee.List(main_dict.get("total")).get(0),
+            "value": ee.List(main_dict.get("values")).get(0),
         }
-        return ee.Feature(ee.Geometry.Point([0,0])).setMulti(tmp_dict);
-      
-    features = results.map(parseResults);
-  
-    return ee.FeatureCollection(features);
+        return ee.Feature(ee.Geometry.Point([0, 0])).setMulti(tmp_dict)
+
+    features = results.map(parseResults)
+
+    return ee.FeatureCollection(features)
 
 
-
-def suitibilityToFeatures(suitability:ee.Dictionary)->ee.FeatureCollection:
+def suitibilityToFeatures(suitability: ee.Dictionary) -> ee.FeatureCollection:
     suitability = ee.Dictionary(suitability)
     suit_key = suitability.keys().get(0)
     main_dict = ee.Dictionary(suitability.get(suit_key))
     tmp_dict = {
-        'category':'suitability',
-        'type':'area',
-        'name': suit_key,
-        'total': main_dict.get('total'),
-        'value': main_dict.get('total'),
+        "category": "suitability",
+        "type": "area",
+        "name": suit_key,
+        "total": main_dict.get("total"),
+        "value": main_dict.get("total"),
     }
-    
-    area_total = ee.Feature(ee.Geometry.Point([0,0])).setMulti(tmp_dict)
 
-    map_values = main_dict.get('values')
+    area_total = ee.Feature(ee.Geometry.Point([0, 0])).setMulti(tmp_dict)
+
+    map_values = main_dict.get("values")
+
     def parse_results(result):
         result = ee.Dictionary(result)
         sub_dict = {
-          'category':'suitability',
-          'type':'area',
-          'name': result.get('image'),
-          'value':result.get('sum'),
-          }
-        return ee.Feature(ee.Geometry.Point([0,0])).setMulti(sub_dict)
+            "category": "suitability",
+            "type": "area",
+            "name": result.get("image"),
+            "value": result.get("sum"),
+        }
+        return ee.Feature(ee.Geometry.Point([0, 0])).setMulti(sub_dict)
 
     map_feats = ee.List(map_values).map(parse_results)
     return ee.FeatureCollection(map_feats.add(area_total))
 
-def dashboard_data_to_fc(dashboard_data:ee.Dictionary)->ee.FeatureCollection:
-    benefits = dashboard_data.get('benefit')
-    constraints = dashboard_data.get('constraint')
-    costs = dashboard_data.get('cost')
-    suitability = dashboard_data.get('suitability')
-    
+
+def dashboard_data_to_fc(dashboard_data: ee.Dictionary) -> ee.FeatureCollection:
+    benefits = dashboard_data.get("benefit")
+    constraints = dashboard_data.get("constraint")
+    costs = dashboard_data.get("cost")
+    suitability = dashboard_data.get("suitability")
+
     suitibilityFeatures = suitibilityToFeatures(suitability)
-    benefitFeatures = dictionaryToFeatures(benefits,'benefit','mean')
-    constraintFeatures = dictionaryToFeatures(constraints,'constraint','area')
-    costFeatures = dictionaryToFeatures(costs,'cost','sum')
-    
-    fin = ee.FeatureCollection([
-        suitibilityFeatures,
-        benefitFeatures,
-        constraintFeatures,
-        costFeatures]).flatten()
-    
+    benefitFeatures = dictionaryToFeatures(benefits, "benefit", "mean")
+    constraintFeatures = dictionaryToFeatures(constraints, "constraint", "area")
+    costFeatures = dictionaryToFeatures(costs, "cost", "sum")
+
+    fin = ee.FeatureCollection(
+        [suitibilityFeatures, benefitFeatures, constraintFeatures, costFeatures]
+    ).flatten()
+
     return fin
