@@ -439,6 +439,10 @@ The constraints are displayed in percentages. Each value represents the percenta
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/dashboard_constraints.png
     :alt: dashboard costs
     
+.. note:: 
+
+    THe dashboard is also exported in .csv format to be easily interpreted in any spreadsheet software. It is stored at the same place as the recipe in :code:`module_results/se.plan/`.
+    
 .. appendix_a:
 
 Primary data sources
