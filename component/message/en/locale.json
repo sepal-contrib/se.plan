@@ -13,7 +13,7 @@
             "feedback": "feedback"
         },
         "about": "utils/ABOUT_en.md",
-        "disclaimer": "The se.plan application is still under development. We encourage the users to continue explore the tool functionalities and report any issues using the \"bug report\" link in the left panel."
+        "banner": "The se.plan application is now exporting the dashboard in .csv format. You will find it in the same folder as the recipe."
     },
     "questionnaire": {
         "title": "Questionnaire identifying restoration priorities & constraints",

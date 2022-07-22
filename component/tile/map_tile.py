@@ -257,8 +257,16 @@ class MapTile(sw.Tile):
             names,
         )
 
-        self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
+        # save the dashboard as a csv
+        cs.export_as_csv(
+            self.area_dashboard,
+            self.theme_dashboard,
+            self.aoi_model.name,
+            self.question_model.recipe_name,
+        )
 
+        # set the content of the panels
+        self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
         self.area_tile.set_summary(self.area_dashboard)
 
         return self
