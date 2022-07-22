@@ -1,0 +1,20 @@
+{
+    "csv": {
+        "index": {
+            "labels": {
+                "1": "very low",
+                "2": "low",
+                "3": "medium",
+                "4": "high",
+                "5": "very high",
+                "6": "unsuitable",
+                "7": "total"
+            }
+        },
+        "theme": {
+            "benefit": "Priorities",
+            "cost": "Costs",
+            "constraint": "Constraints"
+        }
+    }
+}

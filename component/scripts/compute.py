@@ -7,6 +7,7 @@ from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
 from component import scripts as cs
+from component.message import cm
 
 
 ee.Initialize()
@@ -35,22 +36,23 @@ def export_as_csv(area, theme, dst):
 
         # write the suitability index results per each AOI
         dst.write("suitability\n")
-        dst.write("AOI,very low,low,medium,high,very high, unsuitable, total\n")
+        dst.write(f"AOI,{','.join(cm.csv.index.labels)}\n")
         for aoi, v in area.items():
-            VERY_LOW = next(i["sum"] for i in v["values"] if isclose(i["image"], 1))
-            LOW = next(i["sum"] for i in v["values"] if isclose(i["image"], 2))
-            MEDIUM = next(i["sum"] for i in v["values"] if isclose(i["image"], 3))
-            HIGH = next(i["sum"] for i in v["values"] if isclose(i["image"], 4))
-            VERY_HIGH = next(i["sum"] for i in v["values"] if isclose(i["image"], 5))
-            UNSUITABLE = next(i["sum"] for i in v["values"] if isclose(i["image"], 6))
-            TOTAL = v["total"]
-            dst.write(f"{aoi},{VERY_LOW},{LOW},{MEDIUM},{HIGH},{VERY_HIGH},{TOTAL}\n")
+            content = [aoi]
+            for j in range(1, 7):
+                content.append(
+                    f"{next((i['sum'] for i in v['values'] if isclose(i['image'], j)), 0):.2f}"
+                )
+            content.append(f"{v['total']:.2f}")
+            dst.write(f"{','.join(content)}\n")
 
         # get results by theme
         for t in ["benefit", "cost", "constraint"]:
-            dst.write(f"{t}\n")
+            dst.write(f"{cm.csv.theme[t]}\n")
             dst.write(f"layer,{','.join(aoi_names)}\n")
             for layer, v in theme[t].items():
+                if all([isclose(i, 0) for i in v["values"]]):
+                    continue
                 value_list = []
                 for i in range(len(aoi_names)):
                     value_list.append(str(v["values"][i]))
