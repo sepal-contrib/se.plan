@@ -46,31 +46,14 @@ def export_as_csv(area, theme, dst):
             TOTAL = v["total"]
             dst.write(f"{aoi},{VERY_LOW},{LOW},{MEDIUM},{HIGH},{VERY_HIGH},{TOTAL}\n")
 
-        # write the priorities
-        dst.write("priorities\n")
-        dst.write(f"layer,{','.join(aoi_names)}\n")
-        for layer, v in theme["benefit"].items():
-            value_list = []
-            for i in range(len(aoi_names)):
-                value_list.append(str(v["values"][i]))
-            dst.write(f"{layer},{','.join(value_list)}\n")
-
-        # write the costs
-        dst.write("costs\n")
-        dst.write(f"layer,{','.join(aoi_names)}\n")
-        for layer, v in theme["cost"].items():
-            value_list = []
-            for i in range(len(aoi_names)):
-                value_list.append(str(v["values"][i]))
-            dst.write(f"{layer},{','.join(value_list)}\n")
-
-        # write the constraints
-        dst.write("constraints\n")
-        dst.write(f"layer,{','.join(aoi_names)}\n")
-        for layer, v in theme["constraint"].items():
-            value_list = []
-            for i in range(len(aoi_names)):
-                value_list.append(str(v["values"][i]))
-            dst.write(f"{layer},{','.join(value_list)}\n")
+        # get results by theme
+        for t in ["benefit", "cost", "constraint"]:
+            dst.write(f"{t}\n")
+            dst.write(f"layer,{','.join(aoi_names)}\n")
+            for layer, v in theme[t].items():
+                value_list = []
+                for i in range(len(aoi_names)):
+                    value_list.append(str(v["values"][i]))
+                dst.write(f"{layer},{','.join(value_list)}\n")
 
     return
