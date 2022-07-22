@@ -27,7 +27,11 @@ def display_layer(layer, aoi_model, m):
     return
 
 
-def export_as_csv(area, theme, dst):
+def export_as_csv(area, theme, aoi_name, recipe_name):
+
+    # path to the dst file
+    # the folder already exist as the recipe is exported
+    dst = cp.result_dir / aoi_name / f"dashboard_{recipe_name}.csv"
 
     with dst.open("w") as dst:
 
