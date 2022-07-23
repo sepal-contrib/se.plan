@@ -35,7 +35,7 @@ class MapTile(sw.Tile):
         self.save = cw.ExportMap(position="topleft")
 
         # create the map
-        self.m = sm.SepalMap(dc=True).hide_dc()
+        self.m = sm.SepalMap(dc=True, vinspector=True).hide_dc()
         self.m.add_control(self.save)
         self.m.add_control(sm.FullScreenControl(self.m, position="topright"))
         self.m.add_colorbar(
