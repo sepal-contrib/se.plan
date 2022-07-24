@@ -74,7 +74,7 @@
         },
         "natural_regeneration": {
             "name": "Natural regeneration variability",
-            "detail": "Natural regeneration is more likely to succeed when restoration sites are closer to remaining natural forests, which are an essential seed source. The SEPAL FR planning tool uses 2015 data on forest cover within a 5 km buffer of a restoration pixel to predict the probability of natural regeneration success on a scale of 0 (no chance of success) to 1 (certain success). Uncertainty in success of natural regeneration, expressed as an index ranging from 0 (no uncertainty) to 1 (complete uncertainty). Lower uncertainty tends to make restoration via natural regeneration more viable."
+            "detail": "Natural regeneration is more likely to succeed when restoration sites are closer to remaining natural forests, which are an essential seed source. The se.plan tool uses 2015 data on forest cover within a 5 km buffer of a restoration pixel to predict the probability of natural regeneration success on a scale of 0 (no chance of success) to 1 (certain success). Uncertainty in success of natural regeneration, expressed as an index ranging from 0 (no uncertainty) to 1 (complete uncertainty). Lower uncertainty tends to make restoration via natural regeneration more viable."
         },
         "declining_population": {
             "name": "Declining population",
@@ -114,7 +114,7 @@
         },
         "implementation_cost": {
             "name": "Implementation cost",
-            "detail": "Implementation cost in the SEPAL FR planning tool refers to expenses associated with active forest restoration on former agricultural land: preparing a site for tree regeneration, and then artificially regenerating the site by sowing seeds or planting seedlings. A higher implementation cost tends to make FR less feasible, although FR can be feasible on land with a high implementation cost if land opportunity cost is low and FR generates large benefits.\nImplementation cost is expressed in US dollars per hectare. It varies by country and, for countries with sufficient data, by first-level administrative subdivision (e.g., state or province). The cost reported by the tool is the average for the country or subdivision. The actual cost at different locations within the country or subdivision could be higher or lower than the reported average estimate. In addition, compared to the estimates reported by the tool, the SEPAL FR planning tool team estimates that implementation cost is, on average, 45% higher if the restoration site is a forest that has been heavily damaged (for example, by fire, windthrow, or pest outbreak) and 66% lower if passive restoration, which relies on natural tree regeneration, is feasible. The tool contains a variable that predicts the likely success of natural regeneration."
+            "detail": "Implementation cost in se.plan refers to expenses associated with active forest restoration on former agricultural land: preparing a site for tree regeneration, and then artificially regenerating the site by sowing seeds or planting seedlings. A higher implementation cost tends to make FR less feasible, although FR can be feasible on land with a high implementation cost if land opportunity cost is low and FR generates large benefits.\nImplementation cost is expressed in US dollars per hectare. It varies by country and, for countries with sufficient data, by first-level administrative subdivision (e.g., state or province). The cost reported by the tool is the average for the country or subdivision. The actual cost at different locations within the country or subdivision could be higher or lower than the reported average estimate. In addition, compared to the estimates reported by the tool, se.plan team estimates that implementation cost is, on average, 45% higher if the restoration site is a forest that has been heavily damaged (for example, by fire, windthrow, or pest outbreak) and 66% lower if passive restoration, which relies on natural tree regeneration, is feasible. The tool contains a variable that predicts the likely success of natural regeneration."
         }
     },
     "constraint": {
@@ -129,5 +129,16 @@
         "cost": "cost",
         "benefit": "priorities",
         "constraint": "constraint"
+    },
+    "subtheme": {
+        "land_use": "Land Use",
+        "local": "Local Livelihoods",
+        "wood": "Wood Production",
+        "socio_eco": "Socio-economic",
+        "carbon_seq": "Carbon sequestration",
+        "bii": "Biodiversity conservation",
+        "bio": "Biophysical",
+        "forest": "Forest change",
+        "money": "Monetary"
     }
 }

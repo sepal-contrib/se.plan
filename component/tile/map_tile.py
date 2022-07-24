@@ -9,7 +9,6 @@ from sepal_ui.scripts import utils as su
 import ipyvuetify as v
 from shapely import geometry as sg
 import geopandas as gpd
-import geemap
 import ee
 from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON
@@ -33,13 +32,15 @@ class MapTile(sw.Tile):
         mkd = sw.Markdown("  \n".join(cm.map.txt))
 
         # create a save widget
-        self.save = cw.ExportMap()
+        self.save = cw.ExportMap(position="topleft")
 
         # create the map
-        self.m = sm.SepalMap(dc=True).hide_dc()
-        self.m.add_control(WidgetControl(widget=self.save, position="topleft"))
-        self.m.add_control(sm.FullScreenControl(position="topright"))
-        self.m.add_colorbar(colors=cp.red_to_green, vmin=1, vmax=5)
+        self.m = sm.SepalMap(dc=True, vinspector=True).hide_dc()
+        self.m.add_control(self.save)
+        self.m.add_control(sm.FullScreenControl(self.m, position="topright"))
+        self.m.add_colorbar(
+            colors=cp.red_to_green, vmin=1, vmax=5, layer_name=cm.map.legend.title
+        )
 
         # create a window to display AOI information
         self.html = HTML()
@@ -256,8 +257,16 @@ class MapTile(sw.Tile):
             names,
         )
 
-        self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
+        # save the dashboard as a csv
+        cs.export_as_csv(
+            self.area_dashboard,
+            self.theme_dashboard,
+            self.aoi_model.name,
+            self.question_model.recipe_name,
+        )
 
+        # set the content of the panels
+        self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
         self.area_tile.set_summary(self.area_dashboard)
 
         return self

@@ -13,7 +13,7 @@
             "feedback": "feedback"
         },
         "about": "utils/ABOUT_en.md",
-        "disclaimer": "The se.plan application is still under development. We encourage the users to continue explore the tool functionalities and report any issues using the \"bug report\" link in the left panel."
+        "banner": "The se.plan application is now exporting the dashboard in .csv format. You will find it in the same folder as the recipe."
     },
     "questionnaire": {
         "title": "Questionnaire identifying restoration priorities & constraints",
@@ -134,31 +134,6 @@
     "goal": {
         "title": "Restoration goals",
         "goal_lbl": "restoration goals"
-    },
-    "map": {
-        "title": "Results map",
-        "to_asset": "Download to GEE assets",
-        "to_sepal": "Download to SEPAL",
-        "draw_custom_area": "Draw sub AOI",
-        "compute_dashboard": "Compute dashboard",
-        "low": "Low",
-        "high": "High",
-        "txt": {
-            "0": "The map below displays the suitability of different locations for restoration, based on your rating of restoration benefits and your selection of restoration constraints. Blue areas indicate a higher return on investment, while red areas indicate a lower return.",
-            "1": "Examine the restoration suitability map and identify some areas that seem promising for more detailed restoration planning. Once you have identified these areas, you can draw a boundary around them and obtain summary statistics on their estimated benefits, costs, and risks (i.e., constraints). This information can help you assess tradeoffs and set restoration priorities for regions of interest.",
-            "2": "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and implementation costs. This indicator allows you to compare the restoration suitability of different sites and determine which ones offer higher returns on investment."
-        },
-        "dialog": {
-            "title": "Sub AOI name",
-            "label": "Set name",
-            "btn": "Validate"
-        },
-        "shapes": {
-            "btn": "Load shapes",
-            "file": "Select file",
-            "feature": "Select the Id Feature",
-            "title": "Load existing shapes"
-        }
     },
     "potential": {
         "title": "Restoration potential and land use",

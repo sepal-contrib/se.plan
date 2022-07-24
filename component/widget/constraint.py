@@ -201,7 +201,7 @@ class CustomPanel(sw.ExpansionPanel):
     def __init__(self, category, criterias):
 
         # save title name
-        self.title = getattr(cm.constraint.category, category)
+        self.title = getattr(cm.subtheme, category)
 
         # create a header, as nothing is selected by default it should only display the title
         self.header = sw.ExpansionPanelHeader(children=[self.title])
