@@ -7,7 +7,7 @@ pre-commit
 
 # if you require GDAL and or pyproj in your module please uncomment these lines
 # there are set up to be inlined with SEPAL implementation of GDAL and PROJ version
-pygdal==3.4.0.10
+gdal==3.4.0
 pyproj==3.0.0
 
 # uncomment if you want to run your module with GEE in SEPAL
