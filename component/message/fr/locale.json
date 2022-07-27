@@ -13,7 +13,7 @@
             "feedback": "commentaires"
         },
         "about": "utils/ABOUT_fr.md",
-        "disclaimer": "L'application se.plan est encore en cours de développement. Nous encourageons les utilisateurs à continuer à explorer les fonctionnalités de l'outil et à signaler tout problème en utilisant le lien « rapport de bug » dans le panneau de gauche."
+        "banner": "L'application se.plan exporte maintenant le tableau de bord au format .csv. Vous le trouverez dans le même dossier que la formule."
     },
     "questionnaire": {
         "title": "Questionnaire identifiant les priorités et contraintes de restauration",
@@ -36,7 +36,10 @@
         "title": "Lancer le calcul",
         "btn": "Calcul de la carte de restauration",
         "desc": "**Le bouton de lancement sera disponible une fois que vous aurez validé vos entrées**",
-        "default_label": "défaut"
+        "default_label": "défaut",
+        "error": {
+            "missing_priority": "La couche {} est entièrement masquée sur votre AOI. Si vous ne pouvez pas fournir une couche personnalisée, veuillez la définir à 0 dans votre questionnaire de priorité."
+        }
     },
     "constraints": {
         "title": "Contraintes",
@@ -129,31 +132,6 @@
     "goal": {
         "title": "Objectifs de restauration",
         "goal_lbl": "objectifs de restauration"
-    },
-    "map": {
-        "title": "Carte finale",
-        "to_asset": "Télécharger comme asset GEE",
-        "to_sepal": "Télécharger vers SEPAL",
-        "draw_custom_area": "Dessiner une sous-AOI",
-        "compute_dashboard": "Calculer le tableau de bord",
-        "low": "Faible",
-        "high": "Élevée",
-        "txt": {
-            "0": "La carte ci-dessous montre la pertinence de différents emplacements pour la restauration, en fonction de votre évaluation des avantages de la restauration et de votre choix de contraintes de restauration. Les zones bleues indiquent un rendement plus élevé sur les investissements, tandis que les zones rouges indiquent un rendement inférieur.",
-            "1": "Examinez la carte de capacité à la restauration et identifiez certaines zones qui semblent prometteuses pour une planification de restauration plus détaillée. Une fois que vous avez identifié ces zones, vous pouvez tracer une frontière autour d'elles et obtenir des statistiques sommaires sur leurs bébéfices, leurs coûts et leurs risques (i.e constraintes) Ces informations peuvent vous aider à évaluer les compromis et à fixer les priorités de restauration pour les régions d'intérêt.",
-            "2": "La capacité de restauration dépend des bénéfices et des coûts. Il s'agit du rapport de la somme pondérée des prestations, de 1 à 5, divisée par les coûts. Les coûts comprennent à la fois les coûts d'opportunité et ceux de mise en œuvre. Cet indicateur vous permet de comparer la qualité de restauration de différents sites et de déterminer ceux qui offrent un rendement plus élevé sur l'investissement."
-        },
-        "dialog": {
-            "title": "Nom de la sous-AOI",
-            "label": "Définir le nom",
-            "btn": "Valider"
-        },
-        "shapes": {
-            "btn": "Charger les vecteurs",
-            "file": "Sélectionner un fichier",
-            "feature": "Sélectionner l'Id de la forme",
-            "title": "Charger des formes existantes"
-        }
     },
     "potential": {
         "title": "Potentiel de restauration et utilisation des terres",
