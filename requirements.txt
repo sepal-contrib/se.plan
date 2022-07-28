@@ -15,7 +15,7 @@ git+https://github.com/openforis/earthengine-api.git@v0.1.270#egg=earthengine-ap
 
 # the base lib to run any sepal_ui based app 
 # don't forget to fix it to a specific version when you're app is ready
-sepal-ui==2.10.1
+sepal-ui==2.10.2
 
 
 # custom libs
@@ -23,5 +23,4 @@ pandas==1.1.5
 Shapely==1.7.1
 matplotlib==3.3.4
 google-api-python-client<2,>=1.12.1
-numpy==1.19.5
 geopandas==0.9.0
