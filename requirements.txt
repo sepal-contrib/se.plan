@@ -7,7 +7,7 @@ pre-commit
 
 # if you require GDAL and or pyproj in your module please uncomment these lines
 # there are set up to be inlined with SEPAL implementation of GDAL and PROJ version
-gdal==3.4.0
+gdal==3.4.3
 pyproj==3.0.0
 
 # uncomment if you want to run your module with GEE in SEPAL
@@ -24,3 +24,4 @@ Shapely==1.7.1
 matplotlib==3.3.4
 google-api-python-client<2,>=1.12.1
 geopandas==0.9.0
+numpy==1.22.4
