@@ -4,3 +4,4 @@ from .dashboard import *
 from .recipe import *
 from .gdrive import *
 from .gee import *
+from .carbon import *

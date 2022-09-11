@@ -26,7 +26,7 @@ class MapTile(sw.Tile):
 
     EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
 
-    def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile):
+    def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile, carbon_tile):
 
         # add the explanation
         mkd = sw.Markdown("  \n".join(cm.map.txt))
@@ -70,6 +70,7 @@ class MapTile(sw.Tile):
         # get the dashboard tile
         self.area_tile = area_tile
         self.theme_tile = theme_tile
+        self.carbon_tile = carbon_tile 
 
         # init the final layers
         self.wlc_outputs = None
@@ -268,7 +269,8 @@ class MapTile(sw.Tile):
         # set the content of the panels
         self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
         self.area_tile.set_summary(self.area_dashboard)
-
+        self.carbon_tile.set_summary(self.area_dashboard)
+        
         return self
 
     def _handle_draw(self, target, action, geo_json):

@@ -7,8 +7,9 @@ import ipyvuetify as v
 from component.message import cm
 from component import widget as cw
 from component import parameter as cp
+from component import scripts as cs
 
-
+import logging
 ID = "dashboard_widget"
 "the dashboard tiles share id"
 
@@ -95,6 +96,60 @@ class DashRegionTile(sw.Tile):
 
         return self
 
+    def format_values(self, raw):
+        out_values = []
+        for class_ in range(1, 7):
+            index_i = next((i["sum"] for i in raw if i["image"] == class_), 0)
+            out_values.append(index_i)
+
+        return out_values
+
+    
+class DashCarbonTile(sw.Tile):
+    def __init__(self):
+        super().__init__(id_=ID, title='Summary of forest carbon regrowth potential' )#todo: update entry at:cm.dashboard.{carbon}.title
+        self.carbon = cp.chapman_richards_growth_params
+        self.criterias = [self.carbon[k]['name'] for k, v in self.carbon.items()]
+
+
+
+    def set_summary(self, json_feature_values):
+        self.json_feature_values = json_feature_values
+        self.select = sw.Select(
+            disabled=False,  # disabled until the aoi is selected
+            class_="mt-5",
+            small_chips=True,
+            v_model=[],
+            items=self.criterias,
+            label='Forest growth climate',
+            multiple=False,
+            deletable_chips=False,
+            persistent_hint=True,
+            # hint=cm.constraints.error.no_aoi,
+        )
+        self.set_content([self.select])
+        
+        self.select.observe(self._on_change, "v_model")
+
+            
+        return self
+        
+    def _on_change(self, change):
+        """remove the menu-props if at least 1 items is added"""
+# {'SLV': {'total': 2048660.1375282384, 'values': [{'image': 1.0, 'sum': 311744.6777816738}, {'image': 2.0, 'sum': 618409.5477976433}, {'image': 3.0, 'sum': 476404.1678195145}, {'image': 4.0, 'sum': 170626.89727065992}, {'image': 5.0, 'sum': 73769.73928468348}, {'image': 6.0, 'sum': 397705.10757406347}]}}
+        #todo this needs to be changed to something better
+        carbon_id = "_".join(self.select.v_model.lower().split(" "))
+        carbon_key = self.carbon[carbon_id]
+        # carbon_params = cs.get_growth_params(self.carbon, carbon_key)
+        feats = []
+        for feat in self.json_feature_values:
+            raw = self.json_feature_values[feat]["values"]
+            feats.append(cw.CarbonSumUp(feat, carbon_key, self.format_values(raw)))
+            
+        self.set_content(feats)
+        
+        return self
+    
     def format_values(self, raw):
         out_values = []
         for class_ in range(1, 7):
