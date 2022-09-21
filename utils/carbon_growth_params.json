@@ -1,0 +1,84 @@
+{
+    "natural_asia_dry": {
+        "name": "Natural Asia Dry",
+        "parameters": [
+            6.952180603672807,
+            0.07708632118229979,
+            2.155374937783795
+        ],
+        "code":33
+    },
+    "natural_asia_humid": {
+        "name": "Natural Asia Humid",
+        "parameters": [
+            22.20201288628687,
+            0.08282659433268577,
+            1.6575632681092896
+        ],
+        "code":26
+    },
+    "natural_euro_humid_dry": {
+        "name": "Natural Euro Humid Dry",
+        "parameters": [
+            6.673966194081617,
+            0.06740175651808789,
+            2.25457077327527
+        ],
+        "code": 18
+    },
+    "natural_euro_humid_dry_2": {
+        "name": "Natural Euro Humid Dry",
+        "parameters": [
+            6.673966194081617,
+            0.06740175651808789,
+            2.25457077327527
+        ],
+        "code": 13,
+        "note":"repeat since Europe curve is for both humid and dry."
+    },
+    "natural_afica_humid": {
+        "name": "Natural Afica Humid",
+        "parameters": [
+            9.00912152868533,
+            0.06691874765644773,
+            2.2140421801368606
+        ],
+        "code": 19
+    },
+    "central_america_dry": {
+        "name": "Central America Dry",
+        "parameters": [
+            8.66429742100409,
+            0.2096291437364193,
+            1.7082408651411614
+        ],
+        "code": 7
+    },
+    "central_america_humid": {
+        "name": "Central America Humid",
+        "parameters": [
+            8.461890294323121,
+            0.056914894706377964,
+            2.17789147266434
+        ],
+        "code": 4
+    },
+    "south_america_dry": {
+        "name": "South America Dry",
+        "parameters": [
+            7.387321640157009,
+            0.09216975743131285,
+            2.1575324061267205
+        ],
+        "code": 12
+    },
+    "south_america_humid": {
+        "name": "South America Humid",
+        "parameters": [
+            2.479989225520437,
+            0.12579472538348987,
+            5.180809811711873
+        ],
+        "code": 8
+    }
+}

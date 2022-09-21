@@ -250,7 +250,7 @@ class MapTile(sw.Tile):
         ]
 
         # retreive the area and theme json result
-        self.area_dashboard, self.theme_dashboard = cs.get_stats(
+        self.area_dashboard, self.theme_dashboard, self.carbon_dashboard = cs.get_stats(
             self.wlc_outputs,
             self.layer_model,
             self.aoi_model,
@@ -262,6 +262,7 @@ class MapTile(sw.Tile):
         cs.export_as_csv(
             self.area_dashboard,
             self.theme_dashboard,
+            self.carbon_dashboard,
             self.aoi_model.name,
             self.question_model.recipe_name,
         )
@@ -269,7 +270,7 @@ class MapTile(sw.Tile):
         # set the content of the panels
         self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
         self.area_tile.set_summary(self.area_dashboard)
-        self.carbon_tile.set_summary(self.area_dashboard)
+        self.carbon_tile.set_summary(self.carbon_dashboard)
         
         return self
 

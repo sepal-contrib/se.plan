@@ -1,6 +1,8 @@
 import ee
 import json
 from datetime import datetime as dt
+from component import parameter as cp
+from component import scripts as cs
 import os
 
 from sepal_ui.scripts import utils as su
@@ -248,9 +250,12 @@ def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
     # constraints
     constraints_out = get_constraints(constraints, geom, constraint_mask)
 
+    #carbon sequestration
+    carbon_out = get_carbon_stats(wlc, name, constraint_mask, geom)
     # combine the result
     result = (
-        wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
+        wlc_summary.combine(benefits_out).combine(costs_out)
+        .combine(constraints_out).combine(carbon_out)
     )
 
     if client_side:
@@ -285,7 +290,7 @@ def get_theme_dashboard(stats):
         features = json.loads(aoi)
 
         # remove suitability from the start
-        features = {k: v for k, v in features.items() if k != "suitability"}
+        features = {k: v for k, v in features.items() if k != "suitability" and k != 'carbon'}
 
         for theme, layers in features.items():
             # add the theme to the keys if necessary (during the first loop)
@@ -333,8 +338,9 @@ def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
 
     area_dashboard = get_area_dashboard(stats)
     theme_dashboard = get_theme_dashboard(stats)
-
-    return area_dashboard, theme_dashboard
+    carbon_dashboard = get_carbon_dashboard(stats)
+    
+    return area_dashboard, theme_dashboard, carbon_dashboard
 
 
 def dictionaryToFeatures(
@@ -406,3 +412,40 @@ def dashboard_data_to_fc(dashboard_data: ee.Dictionary) -> ee.FeatureCollection:
     ).flatten()
 
     return fin
+
+def get_carbon_stats(wlc:ee.Image, name:str, mask:ee.Image, geom:ee.Geometry):
+    def get_areas(imageGroupBy, imageValues, geometry, scale=100):
+        imageGroupBy = imageGroupBy.rename("image").round()
+        reducer = ee.Reducer.sum().group(1, "image")
+
+        areas = (
+            imageValues.addBands(imageGroupBy)
+            .reduceRegion(reducer=reducer, geometry=geometry, scale=100, maxPixels=1e12)
+            .get("groups")
+        )
+
+        areas_list = ee.List(areas).map(lambda i: ee.Dictionary(i).get("sum"))
+
+        total = areas_list.reduce(ee.Reducer.sum())
+
+        return areas, total
+    
+    image = wlc.where(mask.eq(0), 6)
+    paired = cs.get_paired_img()
+    carbon_raw = cs.get_spatial_carbon(paired, 40, cp.carbon_json)
+    list_values, total = get_areas(image, carbon_raw, geom)
+
+    out_dict = ee.Dictionary(
+        {"carbon": {name: {"values": list_values, "total": total}}}
+    )
+
+    return out_dict
+
+def get_carbon_dashboard(stats):
+
+    tmp = {}
+    for i in stats:
+        carbon_i = json.loads(i)
+        tmp.update(carbon_i["carbon"])
+
+    return tmp

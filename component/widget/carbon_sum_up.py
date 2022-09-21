@@ -8,16 +8,11 @@ from component import scripts as cs
 
 class CarbonSumUp(v.Layout):
 
-    NAMES = ["restoration potential", "Carbon sequestered after 40 years(C/MHa)", "ratio over total carbon sequestered (%)"]#todo: move to something like- cm.dashboard.region.names
+    NAMES = ["restoration potential", "Carbon sequestered after 40 years(tonnes C)", "ratio over total carbon sequestered (%)"]#todo: move to something like- cm.dashboard.region.names
     COLORS = cp.gradient(5) + cp.no_data_color
     POTENTIALS = cm.dashboard.region.potentials
 
-    def __init__(self, title, carbon_params, surfaces=[0] * 6):
-
-        surfaces =list(
-            map(lambda s: cs.get_growth_hectares(carbon_params, s, 40), surfaces)
-        )
-        print(surfaces)
+    def __init__(self, title, surfaces=[0] * 6):
         # get the total surface for ratio
         total_surface = sum(surfaces)
 

@@ -27,7 +27,7 @@ def display_layer(layer, aoi_model, m):
     return
 
 
-def export_as_csv(area, theme, aoi_name, recipe_name):
+def export_as_csv(area, theme, carbon, aoi_name, recipe_name):
 
     # path to the dst file
     # the folder already exist as the recipe is exported
@@ -61,5 +61,13 @@ def export_as_csv(area, theme, aoi_name, recipe_name):
                 for i in range(len(aoi_names)):
                     value_list.append(str(v["values"][i]))
                 dst.write(f"{layer},{','.join(value_list)}\n")
-
+        dst.write("carbon\n")
+        for aoi, v in area.items():
+            content = [aoi]
+            for j in range(1, 7):
+                content.append(
+                    f"{next((i['sum'] for i in v['values'] if isclose(i['image'], j)), 0):.2f}"
+                )
+            content.append(f"{v['total']:.2f}")
+            dst.write(f"{','.join(content)}\n")
     return
