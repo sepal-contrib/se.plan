@@ -44,13 +44,13 @@
             "name": "Forest employment",
             "detail": "Number of forest-related jobs per hectare of forestland for the most recent available year. A higher level of forest employment implies attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make restoration more feasible when income for local households is a desired restoration benefit."
         },
-        "ground_carbon": {
-            "name": "Aboveground carbon accumulation",
+        "unrealized_carbon": {
+            "name": "Potential biomass",
             "detail": "Annual rate at which naturally generated forests sequester carbon in aboveground biomass, expressed in tons of carbon per hectare per year. A higher rate tends to make restoration more feasible when mitigation of climate change is a desired restoration benefit."
         },
         "biodiversity_intactness": {
             "name": "Biodiversity Intactness Index",
-            "detail": "The average abundance of a large and diverse set of species, expressed as a percentage of the set of originally present species. A higher percentage tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit."
+            "detail": "Potential aboveground biomass, belowground biomass, and soil organic carbon combined density (megagrams carbon per hectare) under baseline climate"
         },
         "endangered_species": {
             "name": "Endangered species",
