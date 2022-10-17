@@ -1,5 +1,5 @@
 layer_id,theme,subtheme,gee_asset,unit
-unrealized_carbon,benefit,carbon_seq,projects/ee-amcmahon/assets/seplan/seplan_layers/Base_Pot_AGB_BGB_SOC_MgCha_500m,mT/ha
+ground_carbon,benefit,carbon_seq,projects/ee-amcmahon/assets/seplan/seplan_layers/Base_Pot_AGB_BGB_SOC_MgCha_500m,mT/ha
 woodfuel_harvest,benefit,local,projects/john-ee-282116/assets/fao-restoration/features/Woodfuel_gadm36_1_edited_image,m3/ha
 plantation_growth_rates,benefit,wood,projects/john-ee-282116/assets/fao-restoration/features/yields-4326,dry tons/ha/yr
 city_access,constraint,socio_eco,Oxford/MAP/accessibility_to_cities_2015_v1_0,hours
