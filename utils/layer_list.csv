@@ -1,9 +1,9 @@
 layer_id,theme,subtheme,gee_asset,unit
+unrealized_carbon,benefit,carbon_seq,projects/ee-amcmahon/assets/seplan/seplan_layers/Base_Pot_AGB_BGB_SOC_MgCha_500m,mT/ha
 woodfuel_harvest,benefit,local,projects/john-ee-282116/assets/fao-restoration/features/Woodfuel_gadm36_1_edited_image,m3/ha
 plantation_growth_rates,benefit,wood,projects/john-ee-282116/assets/fao-restoration/features/yields-4326,dry tons/ha/yr
 city_access,constraint,socio_eco,Oxford/MAP/accessibility_to_cities_2015_v1_0,hours
 forest_job,benefit,local,projects/john-ee-282116/assets/fao-restoration/features/emp_ha,jobs/ha
-ground_carbon,benefit,carbon_seq,projects/john-ee-282116/assets/fao-restoration/features/young_forest_sequestration_rate_Griscom_extent,tons/ha/yr
 biodiversity_intactness,benefit,bii,projects/john-ee-282116/assets/fao-restoration/features/ibii-4326,percent
 endangered_species,benefit,bii,projects/john-ee-282116/assets/fao-restoration/features/terra-bio-div-image,number/km2
 ecozones,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/gez_2010_wgs84_split,binary
@@ -19,6 +19,5 @@ climate_risk,constraint,forest,projects/john-ee-282116/assets/fao-restoration/fe
 population_density,constraint,socio_eco,CIESIN/GPWv411/GPW_Population_Density/gpw_v4_population_density_rev11_2015_30_sec,people/km2
 annual_rainfall,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/era5_land_1993_2022,mm/yr
 treecover_with_potential,constraint,,projects/john-ee-282116/assets/fao-restoration/features/rest_pot_gt_treecoverfrac_mask_urban,binary
-opportunity_cost,cost,monetary,projects/john-ee-282116/assets/fao-restoration/features/opportunity_cost,$/ha
-water_stress,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/bws_score,index (0 to 5)
+opportunity_cost,cost,monetary,projects/john-ee-282116/assets/fao-restoration/features/opportunity_cost_fall_2022,$/hawater_stress,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/bws_score,index (0 to 5)
 implementation_cost,cost,monetary,projects/john-ee-282116/assets/fao-restoration/features/AfCost_ha,$/ha
