@@ -45,8 +45,8 @@
             "detail": "Number of forest-related jobs per hectare of forestland for the most recent available year. A higher level of forest employment implies attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make restoration more feasible when income for local households is a desired restoration benefit."
         },
         "ground_carbon": {
-            "name": "Potential biomass",
-            "detail": "Potential aboveground biomass, belowground biomass, and soil organic carbon combined density (megagrams carbon per hectare) under baseline climate."
+            "name": "Unrealized biomass potential",
+            "detail": "Unrealized potential aboveground biomass, belowground biomass, and soil organic carbon combined density (megagrams carbon per hectare) under baseline climate."
         },
         "biodiversity_intactness": {
             "name": "Biodiversity Intactness Index",
