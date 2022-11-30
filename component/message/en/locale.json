@@ -158,7 +158,7 @@
     },
     "export": {
         "title": "Export map",
-        "scale": "Scale",
+        "scale": "Resolution (m)",
         "radio": {
             "label": "Select export method",
             "gee": "As a GEE asset",

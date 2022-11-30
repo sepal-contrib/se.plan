@@ -29,7 +29,7 @@ class ExportMap(WidgetControl):
         # create the useful widgets
         # align on the landsat images
         w_scale_lbl = sw.Html(tag="h4", children=[cm.export.scale])
-        self.w_scale = sw.Slider(v_model=30, min=10, max=300, thumb_label=True, step=10)
+        self.w_scale = sw.Slider(v_model=1000, min=10, max=2000, thumb_label="always", step=10)
 
         w_method_lbl = sw.Html(tag="h4", children=[cm.export.radio.label])
         sepal = sw.Radio(label=cm.export.radio.sepal, value="sepal")
