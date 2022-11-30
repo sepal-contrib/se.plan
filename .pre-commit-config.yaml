@@ -3,7 +3,7 @@ default_language_version:
 
 repos:
 -   repo: https://github.com/psf/black
-    rev: 8a59528c2d8ae1ef5f366039c728614aaf1a470b
+    rev: 22.10.0
     hooks:
     -   id: black
     -   id: black-jupyter

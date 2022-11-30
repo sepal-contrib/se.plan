@@ -8,6 +8,7 @@ from sepal_ui.scripts import utils as su
 import ee
 import ipyvuetify as v
 from ipyleaflet import WidgetControl
+from matplotlib.colors import to_rgba
 
 from component.message import cm
 from component import scripts as cs
@@ -29,7 +30,9 @@ class ExportMap(WidgetControl):
         # create the useful widgets
         # align on the landsat images
         w_scale_lbl = sw.Html(tag="h4", children=[cm.export.scale])
-        self.w_scale = sw.Slider(v_model=30, min=10, max=300, thumb_label=True, step=10)
+        self.w_scale = sw.Slider(
+            v_model=1000, min=10, max=2000, thumb_label="always", step=10
+        )
 
         w_method_lbl = sw.Html(tag="h4", children=[cm.export.radio.label])
         sepal = sw.Radio(label=cm.export.radio.sepal, value="sepal")
@@ -125,13 +128,14 @@ class ExportMap(WidgetControl):
 
         # launch the task
         if self.w_method.v_model == "gee":
-            export_params.update(assetId=str(folder / name))
+            export_params.update(assetId=str(folder / name), description=f"{name}_gee")
             task = ee.batch.Export.image.toAsset(**export_params)
             task.start()
             msg = "the task have been launched in your GEE acount"
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "sepal":
+            export_params.update(description=f"{name}_sepal")
             gdrive = cs.gdrive()
             files = gdrive.get_files(name)
             if files == []:
@@ -142,15 +146,15 @@ class ExportMap(WidgetControl):
 
             # save everything in the same folder as the json file
             # no need to create it it's created when the recipe is saved
-            result_dir = cp.result_dir / aoi_name
+            result_dir = cp.result_dir / self.aoi_name
 
             tile_list = gdrive.download_files(files, result_dir)
             gdrive.delete_files(files)
 
             # add the colormap to each tile
             colormap = {}
-            for code, color in enumerate(no_data_color + cp.gradient(5)):
-                colormap[i] = tuple(int(c * 255) for c in to_rgba(color))
+            for code, color in enumerate(cp.no_data_color + cp.gradient(5)):
+                colormap[code] = tuple(int(c * 255) for c in to_rgba(color))
 
             for tile in tile_list:
 

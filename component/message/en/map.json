@@ -1,12 +1,7 @@
 {
     "map": {
         "title": "Results map",
-        "to_asset": "Download to GEE assets",
-        "to_sepal": "Download to SEPAL",
-        "draw_custom_area": "Draw sub AOI",
         "compute_dashboard": "Compute dashboard",
-        "low": "Low",
-        "high": "High",
         "txt": {
             "0": "The map below displays the suitability of different locations for restoration, based on your rating of restoration benefits and your selection of restoration constraints. Blue areas indicate a higher return on investment, while red areas indicate a lower return.",
             "1": "Examine the restoration suitability map and identify some areas that seem promising for more detailed restoration planning. Once you have identified these areas, you can draw a boundary around them and obtain summary statistics on their estimated benefits, costs, and risks (i.e., constraints). This information can help you assess tradeoffs and set restoration priorities for regions of interest.",
@@ -20,7 +15,6 @@
         "shapes": {
             "btn": "Load shapes",
             "file": "Select file",
-            "feature": "Select the Id Feature",
             "title": "Load existing shapes"
         },
         "legend": {
