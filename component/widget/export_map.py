@@ -136,14 +136,15 @@ class ExportMap(WidgetControl):
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "sepal":
-            export_params.update(description=f"{name}_sepal")
+            description = f"{name}_sepal"
+            export_params.update(description=description)
             gdrive = cs.gdrive()
-            files = gdrive.get_files(name)
+            files = gdrive.get_files(description)
             if files == []:
                 task = ee.batch.Export.image.toDrive(**export_params)
                 task.start()
-                gee.wait_for_completion(name, self.alert)
-                files = gdrive.get_files(name)
+                gee.wait_for_completion(description, self.alert)
+                files = gdrive.get_files(description)
 
             # save everything in the same folder as the json file
             # no need to create it it's created when the recipe is saved
@@ -158,10 +159,11 @@ class ExportMap(WidgetControl):
                 colormap[code] = tuple(int(c * 255) for c in to_rgba(color))
 
             for tile in tile_list:
-
                 with rio.open(tile) as f:
+                    profile = f.profile
 
-                    dst_f.write_colormap(self.band, colormap)
+                with rio.open(tile, "r+", **profile) as dst_f:
+                    dst_f.write_colormap(1, colormap)
 
             self.alert.add_msg("map exported", "success")
 
