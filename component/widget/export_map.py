@@ -9,6 +9,7 @@ import ee
 import ipyvuetify as v
 from ipyleaflet import WidgetControl
 from matplotlib.colors import to_rgba
+import rasterio as rio
 
 from component.message import cm
 from component import scripts as cs
