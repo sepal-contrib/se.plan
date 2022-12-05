@@ -843,7 +843,7 @@ The value of land in agricultural use is defined as the portion of agricultural 
 
 The **se.plan** team assumed that forest restoration is intended to be permanent, and so it estimated land rent in perpetuity: the opportunity cost of forgoing agricultural use of a restored site forever, not just for a single year. The estimates of this long-run opportunity cost in **se.plan** are expressed in US dollars per hectare for reference year 2017. 
 
-(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id= https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fee-amcmahon%2Fassets%2Fseplan%2Fseplan_layers%2Ffeatures%2Fopportunity_cost_20221110>`__)
+(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fee-amcmahon%2Fassets%2Fseplan%2Fseplan_layers%2Ffeatures%2Fopportunity_cost_20221110>`__)
 
 Cropland
 ********
