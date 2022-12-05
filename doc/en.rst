@@ -39,10 +39,10 @@ Selection of planning area
 
 **se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`usage`. 
 
-Restoration indicators
-^^^^^^^^^^^^^^^^^^^^^^
+Restoration benefits
+^^^^^^^^^^^^^^^^^^^^
 
-Restoration offers many potential benefits. In its current form, **se.plan** provides information on four benefit categories:
+Restoration offers many potential benefits. In its current form, **se.plan** provides information on four benefits:
 
 -   Biodiversity conservation
 -   Carbon sequestration
@@ -181,7 +181,7 @@ After selecting the desired area, click over the :code:`Select these inputs` but
 Questionnaire
 ^^^^^^^^^^^^^
 
-The questionnaire is split in 2 steps, the constraints that will narrow the spatial extend of the computation and the indicators that will allow the user to customize the priorities of its restoration analysis. 
+The questionnaire is split in 2 steps, the constraints that will narrow the spatial extend of the computation and the benefits that will allow the user to customize the priorities of its restoration analysis. 
 
 Select constraints
 ******************
@@ -843,7 +843,7 @@ The value of land in agricultural use is defined as the portion of agricultural 
 
 The **se.plan** team assumed that forest restoration is intended to be permanent, and so it estimated land rent in perpetuity: the opportunity cost of forgoing agricultural use of a restored site forever, not just for a single year. The estimates of this long-run opportunity cost in **se.plan** are expressed in US dollars per hectare for reference year 2017. 
 
-(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fopportunity_cost>`__)
+(`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fee-amcmahon%2Fassets%2Fseplan%2Fseplan_layers%2Ffeatures%2Fopportunity_cost_20221110>`__)
 
 Cropland
 ********

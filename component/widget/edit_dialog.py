@@ -12,6 +12,7 @@ from ipyleaflet import WidgetControl
 
 from component import parameter as cp
 from component.message import cm
+from component.widget.custom_map import CustomMap
 
 ee.Initialize()
 
@@ -51,7 +52,7 @@ class EditDialog(sw.Dialog):
         )
 
         # add a map to display the layers
-        self.m = sm.SepalMap()
+        self.m = CustomMap()
         self.m.layout.height = "40vh"
         self.m.layout.margin = "2em"
 
