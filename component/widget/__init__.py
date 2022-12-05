@@ -8,3 +8,4 @@ from .load_shapes import *
 from .custom_aoi_dialog import *
 from .recipe_field import *
 from .edit_dialog import *
+from .custom_map import *
