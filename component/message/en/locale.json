@@ -113,10 +113,10 @@
 		}
 	},
 	"benefits": {
-		"title": "Restoration indicators",
+		"title": "Restoration benefits",
 		"table": {
 			"action": "action",
-			"theme": "theme",
+			"theme": "benefit",
 			"indicator": "indicator",
 			"labels": {
 				"0": "no importance",

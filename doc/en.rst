@@ -39,10 +39,10 @@ Selection of planning area
 
 **se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`usage`. 
 
-Restoration indicators
-^^^^^^^^^^^^^^^^^^^^^^
+Restoration benefits
+^^^^^^^^^^^^^^^^^^^^
 
-Restoration offers many potential benefits. In its current form, **se.plan** provides information on four benefit categories:
+Restoration offers many potential benefits. In its current form, **se.plan** provides information on four benefits:
 
 -   Biodiversity conservation
 -   Carbon sequestration
@@ -181,7 +181,7 @@ After selecting the desired area, click over the :code:`Select these inputs` but
 Questionnaire
 ^^^^^^^^^^^^^
 
-The questionnaire is split in 2 steps, the constraints that will narrow the spatial extend of the computation and the indicators that will allow the user to customize the priorities of its restoration analysis. 
+The questionnaire is split in 2 steps, the constraints that will narrow the spatial extend of the computation and the benefits that will allow the user to customize the priorities of its restoration analysis. 
 
 Select constraints
 ******************
