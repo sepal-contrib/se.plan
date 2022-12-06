@@ -11,7 +11,7 @@ from shapely import geometry as sg
 import geopandas as gpd
 import ee
 from ipyleaflet import WidgetControl
-from ipyleaflet import GeoJSON
+from ipyleaflet import GeoJSON, basemap_to_tiles, basemaps
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from ipywidgets import HTML
@@ -35,7 +35,7 @@ class MapTile(sw.Tile):
         self.save = cw.ExportMap(position="topleft")
 
         # create the map
-        self.m = cw.CustomMap(dc=True, vinspector=True).hide_dc()
+        self.m = cw.CustomMap(["SATELLITE"], dc=True, vinspector=True).hide_dc()
         self.m.add_control(self.save)
         self.m.add_control(sm.FullScreenControl(self.m, position="topright"))
         self.m.add_colorbar(
@@ -52,6 +52,13 @@ class MapTile(sw.Tile):
         self.draw_features = deepcopy(self.EMPTY_FEATURES)
         self.colors = []
         self.name_dialog = cw.CustomAoiDialog()
+
+        # add cartoDB layer after everything to make sure it stays on top
+        # workaround of https://github.com/jupyter-widgets/ipyleaflet/issues/452
+        default = "Positron" if v.theme.dark is False else "DarkMatter"
+        carto = basemap_to_tiles(basemaps.CartoDB[default])
+        carto.base = True
+        self.m.add_layer(carto)
 
         # create a layout with 2 btn
         self.map_btn = sw.Btn(cm.compute.btn, class_="ma-2")
@@ -143,11 +150,7 @@ class MapTile(sw.Tile):
         """compute the restoration plan and display the map"""
 
         # remove the previous sub aoi from the map
-        [
-            self.m.remove_layer(l)
-            for l in self.m.layers
-            if l.name not in ["CartoDB.DarkMatter", "CartoDB.Positron"]
-        ]
+        self.m.remove_all()
         self.m.dc.clear()
         self.draw_features = deepcopy(self.EMPTY_FEATURES)
 
@@ -196,13 +199,12 @@ class MapTile(sw.Tile):
         """save the features as layers on the map"""
 
         # remove any sub aoi layer
-        layers_2_keep = [
-            "CartoDB.DarkMatter",
-            "CartoDB.Positron",
-            "restoration layer",
-            self.aoi_model.name,
+        l_2_keep = ["restoration layer", self.aoi_model.name]
+        [
+            self.m.remove_layer(l, none_ok=True)
+            for l in self.m.layers
+            if l.name not in l_2_keep
         ]
-        [self.m.remove_layer(l) for l in self.m.layers if l.name not in layers_2_keep]
 
         # save the drawn features
         draw_features = self.draw_features

@@ -40,7 +40,11 @@ class AreaSumUp(v.Layout):
             plt.show()
 
         # init the table
-        heads = [v.Html(tag="th", children=[name]) for name in self.NAMES]
+        heads = [
+            v.Html(tag="th", children=[self.NAMES[0]]),
+            v.Html(tag="th", class_="text-right", children=[self.NAMES[1]]),
+            v.Html(tag="th", class_="text-right", children=[self.NAMES[2]]),
+        ]
         row = v.Html(tag="tr", children=heads)
         w_header = [v.Html(tag="thead", children=[row])]
 
@@ -50,8 +54,8 @@ class AreaSumUp(v.Layout):
 
             tds = [
                 v.Html(tag="td", children=[ptl], style_=f"color: {clr}"),
-                v.Html(tag="td", children=[f"{float(val):.1f}"]),
-                v.Html(tag="td", children=[f"{float(norm):.1f}"]),
+                v.Html(tag="td", class_="text-right", children=[f"{float(val):,.1f}"]),
+                v.Html(tag="td", class_="text-right", children=[f"{float(norm):,.1f}"]),
             ]
             row = v.Html(tag="tr", children=tds)
 
