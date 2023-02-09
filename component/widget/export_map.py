@@ -165,6 +165,6 @@ class ExportMap(WidgetControl):
                 with rio.open(tile, "r+", **profile) as dst_f:
                     dst_f.write_colormap(1, colormap)
 
-            self.alert.add_msg("map exported", "success")
+            self.alert.add_msg(f"map exported to {result_dir}", "success")
 
         return self
