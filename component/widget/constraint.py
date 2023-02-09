@@ -184,7 +184,7 @@ class Range(Constraint):
             decimals = 1 if max_ > 100 else 2
             self.widget.min = round(min_, decimals)
             self.widget.max = round(max_, decimals)
-            self.widget.step = 10 ** -decimals
+            self.widget.step = 10**-decimals
 
             # set the v_model on the "min - max" value to select the whole image by default
             self.widget.v_model = [self.widget.min, self.widget.max]
