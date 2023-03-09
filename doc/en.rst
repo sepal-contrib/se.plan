@@ -963,6 +963,8 @@ Biophysical constraints
       - T.G. Farr, P.A. Rosen, E. Caro, et al., 2007, The shuttle radar topography mission: Reviews of Geophysics, v. 45, no. 2, RG2004, at https://doi.org/10.1029/2005RG000183.
     * - Annual rainfall
       - mm/yr
+      - High-resolution estimates of total annual rainfall based on mean value from past 30 year measurements. (`view in gee <https://code.earthengine.google.com/bc5cc4ac63eedd0cd63e56b4b2e42fc7?#layer_id=projects%2Fee-amcmahon%2Fassets%2Fseplan%2Fseplan_layers%2Fera5_land_mean_annual_precip_1993_2022>`__)
+      - "Muñoz Sabater, J., (2019): ERA5-Land monthly averaged data from 1981 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb3"
       - High-resolution estimates of total annual rainfall based on mean value from past 30 year measurements. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fera5_land_1993_2022>`__)
       - "Muñoz Sabater, J., (2019): ERA5-Land monthly averaged data from 1981 to present. Copernicus Climate Change Service (C3S) Climate Data Store (CDS). https://doi.org/10.24381/cds.68d2bb3" 
     * - Baseline water stress
