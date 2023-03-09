@@ -34,10 +34,11 @@ class PriorityModel(model.Model):
 
         super().__init__()
 
-    def remove_priority(self, name: str) -> None:
+    def remove_priority(self, id: str) -> None:
         """Remove a priority using its name"""
 
-        idx = next(i for i, v in enumerate(self.names) if v == name)
+        idx = self.get_index(id)
+
         del self.names[idx]
         del self.ids[idx]
         del self.themes[idx]
@@ -47,3 +48,39 @@ class PriorityModel(model.Model):
         del self.units[idx]
 
         self.updated += 1
+
+    def add_priority(
+        self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
+    ) -> None:
+        """add a priority and trigger the update"""
+
+        self.themes.append(theme)
+        self.names.append(name)
+        self.ids.append(id)
+        self.assets.append(asset)
+        self.descs.append(desc)
+        self.weights.append(4)
+        self.units.append(unit)
+
+        self.updated += 1
+
+    def update_priority(
+        self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
+    ) -> None:
+        """update an existing priority metadata and trigger the update"""
+
+        idx = self.get_index(id)
+
+        self.themes[idx] = theme
+        self.names[idx] = name
+        self.ids[idx] = id
+        self.assets[idx] = asset
+        self.descs[idx] = desc
+        self.units[idx] = unit
+
+        self.updated += 1
+
+    def get_index(self, id: str) -> int:
+        """get the index of the searched layer id"""
+
+        return next(i for i, v in enumerate(self.ids) if v == id)

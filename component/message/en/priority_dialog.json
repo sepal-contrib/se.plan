@@ -6,6 +6,7 @@
         "theme": "benefit",
         "name": "name",
         "desc": "description",
-        "unit": "unit"
+        "unit": "unit",
+        "missing_data": "Some data are missing, please fill all of them before submitting the form"
     }
 }

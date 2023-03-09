@@ -21,7 +21,7 @@ def app(session):
     """Run the application"""
     session.install("-r", "requirements.txt")
     session.run("jupyter", "trust", "new_ui.ipynb")
-    session.run("voila", "--debug", "new_ui.ipynb")
+    session.run("voila", "--show_tracebacks=True", "new_ui.ipynb")
 
 
 @nox.session(reuse_venv=True)
