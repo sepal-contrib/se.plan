@@ -1,0 +1,11 @@
+{
+    "priority_dialog": {
+        "validate": "validate",
+        "cancel": "cancel",
+        "title": "priority",
+        "theme": "benefit",
+        "name": "name",
+        "desc": "description",
+        "unit": "unit"
+    }
+}

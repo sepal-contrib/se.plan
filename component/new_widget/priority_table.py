@@ -3,38 +3,66 @@ import pandas as pd
 
 from component.message import cm
 from component import parameter as cp
+from component import new_model as cmod
+
+
+class TableIcon(sw.Icon):
+    def __init__(self, gliph: str, name: str):
+
+        super().__init__(
+            children=[gliph],
+            icon=True,
+            small=True,
+            attributes={"data-layer": name},
+            style_="font-family: 'Font Awesome 6 Free';",
+        )
 
 
 class PriorityRow(sw.Html):
-    def __init__(self, layer_id: str, theme: str) -> None:
+
+    _DEFAULT_THEMES = pd.read_csv(cp.layer_list).layer_id
+
+    def __init__(self, model: cmod.PriorityModel, idx: int) -> None:
+
+        # get the model as a member
+        self.model = model
+
+        # extract information from the model
+        name = self.model.names[idx]
+        layer_id = self.model.ids[idx]
+        theme = self.model.themes[idx]
+        weight = self.model.weights[idx]
 
         # create the crud interface
-        edit_btn = sw.Icon(children=["fa-solid fa-pencil"])
-        delete_btn = sw.Icon(children=["fa-solid fa-trash-can"])
-        edit_btn.class_list.add("mr-2")
-        edit_btn.small = delete_btn.small = True
-        edit_btn.attributes = delete_btn.attributes = {"data-layer": layer_id}
+        self.edit_btn = TableIcon("fa-solid fa-pencil", layer_id)
+        self.delete_btn = TableIcon("fa-solid fa-trash-can", layer_id)
+        self.edit_btn.class_list.add("mr-2")
+
+        # hide the delete btn for default layers
+        if self._DEFAULT_THEMES.str.contains(layer_id).any():
+            self.delete_btn.hide()
 
         # create the checkbox_list
         self.check_list = []
         for i in range(5):
             attr = {"data-label": layer_id, "data-val": i}
-            check = sw.Checkbox(attributes=attr, v_model=i == 4)
+            check = sw.Checkbox(attributes=attr, v_model=i == weight)
             self.check_list.append(check)
 
         td_list = [
-            sw.Html(tag="td", children=[edit_btn, delete_btn]),
-            sw.Html(tag="td", children=[theme]),
-            sw.Html(tag="td", children=[layer_id]),
+            sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
+            sw.Html(tag="td", children=[cm.subtheme[theme]]),
+            sw.Html(tag="td", children=[name]),
             *[sw.Html(tag="td", children=[e]) for e in self.check_list],
         ]
 
         super().__init__(tag="tr", children=td_list)
 
         # add js behaviour
-        [e.observe(self._on_check_change, "v_model") for e in self.check_list]
+        [e.observe(self.on_check_change, "v_model") for e in self.check_list]
+        self.delete_btn.on_event("click", self.on_delete)
 
-    def _on_check_change(self, change):
+    def on_check_change(self, change):
 
         # if checkbox is unique and change == false recheck
         if change["new"] == False:
@@ -54,9 +82,17 @@ class PriorityRow(sw.Html):
 
         return
 
+    def on_delete(self, widget, data, event):
+        """remove the line from the model and trigger table update"""
+
+        self.model.remove_priority(widget.attributes["data-layer"])
+
 
 class PriorityTable(sw.SimpleTable):
-    def __init__(self) -> None:
+    def __init__(self, model: cmod.PriorityModel) -> None:
+
+        # save the model as a member
+        self.model = model
 
         # generate header using the translator
         headers = sw.Html(
@@ -73,6 +109,7 @@ class PriorityTable(sw.SimpleTable):
         )
 
         self.tbody = sw.Html(tag="tbody", children=[])
+        self.set_rows()
 
         # create the table
         super().__init__(
@@ -83,19 +120,13 @@ class PriorityTable(sw.SimpleTable):
             ],
         )
 
-        # set the default lines with all the default priorities
-        _themes = pd.read_csv(cp.layer_list).fillna("").sort_values(by=["subtheme"])
-        _themes = _themes[_themes.theme == "benefit"]
+        # add js behavior
+        self.model.observe(self.set_rows, "updated")
 
-        for _, r in _themes.iterrows():
-            self.add_row(r.layer_id, r.subtheme)
+    def set_rows(self, *args):
 
-    def add_row(self, layer_id: str, theme: str) -> None:
-        """Add a row to the table based on the layer_id"""
-
-        # create a new row
-        row = [PriorityRow(layer_id, theme)]
-        children = self.tbody.children.copy() + row
-        self.tbody.children = children
-
-        return
+        rows = []
+        for i, _ in enumerate(self.model.names):
+            row = PriorityRow(self.model, i)
+            rows.append(row)
+        self.tbody.children = rows
