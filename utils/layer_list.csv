@@ -17,7 +17,7 @@ property_rights,constraint,socio_eco,projects/john-ee-282116/assets/fao-restorat
 deforestation_rate,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/deforestation_rate,percent/yr
 climate_risk,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/future_risk,percent
 population_density,constraint,socio_eco,CIESIN/GPWv411/GPW_Population_Density/gpw_v4_population_density_rev11_2015_30_sec,people/km2
-annual_rainfall,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/era5_land_1993_2022,mm/yr
+annual_rainfall,constraint,bio,projects/ee-amcmahon/assets/seplan/seplan_layers/era5_land_mean_annual_precip_1993_2022,mm/yr
 treecover_with_potential,constraint,,projects/john-ee-282116/assets/fao-restoration/features/rest_pot_gt_treecoverfrac_mask_urban,binary
 opportunity_cost,cost,monetary,projects/ee-amcmahon/assets/seplan/seplan_layers/features/opportunity_cost_20221110,$/ha
 water_stress,constraint,bio,projects/john-ee-282116/assets/fao-restoration/features/bws_score,index (0 to 5)
