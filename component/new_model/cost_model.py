@@ -16,18 +16,21 @@ class CostModel(model.Model):
 
     updated = Int(0).tag(sync=True)
 
+    _unit = "$/ha"
+    "All cost layer must use the same unit if not aggregation will not be possible"
+
     def __init__(self):
 
         # get the default costs from the csv file
-        _themes = pd.read_csv(cp.layer_list).fillna("")
-        _themes = _themes[_themes.theme == "cost"]
+        _costs = pd.read_csv(cp.layer_list).fillna("")
+        _costs = _costs[_costs.theme == "cost"]
 
-        for _, r in _themes.iterrows():
+        for _, r in _costs.iterrows():
             self.names.append(cm.layers[r.layer_id].name)
             self.ids.append(r.layer_id)
             self.assets.append(r.gee_asset)
             self.descs.append(cm.layers[r.layer_id].detail)
-            self.units.append(r.unit)
+            self.units.append(self._unit)
 
         super().__init__()
 
@@ -44,18 +47,18 @@ class CostModel(model.Model):
 
         self.updated += 1
 
-    def add_cost(self, name: str, id: str, asset: str, desc: str, unit: str) -> None:
+    def add_cost(self, name: str, id: str, asset: str, desc: str) -> None:
         """add a cost and trigger the update"""
 
         self.names.append(name)
         self.ids.append(id)
         self.assets.append(asset)
         self.descs.append(desc)
-        self.units.append(unit)
+        self.units.append(self._unit)
 
         self.updated += 1
 
-    def update_cost(self, name: str, id: str, asset: str, desc: str, unit: str) -> None:
+    def update_cost(self, name: str, id: str, asset: str, desc: str) -> None:
         """update an existing cost metadata and trigger the update"""
 
         idx = self.get_index(id)
@@ -64,7 +67,7 @@ class CostModel(model.Model):
         self.ids[idx] = id
         self.assets[idx] = asset
         self.descs[idx] = desc
-        self.units[idx] = unit
+        self.units[idx] = self._unit
 
         self.updated += 1
 

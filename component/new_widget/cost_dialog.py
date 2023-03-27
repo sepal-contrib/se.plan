@@ -36,7 +36,13 @@ class CostDialog(sw.Dialog):
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
         self.w_asset = sw.AssetSelect()
         self.w_desc = sw.Textarea(label=cm.cost_dialog.desc, v_model=None)
-        self.w_unit = sw.TextField(label=cm.cost_dialog.unit, v_model=None)
+        self.w_unit = sw.TextField(
+            label=cm.cost_dialog.unit,
+            v_model=self.model._unit,
+            readonly=True,
+            hint="All cost layer must use the same unit if not aggregation will not be possible",
+            persistent_hint=True,
+        )
         w_content = sw.CardText(
             children=[
                 self.w_alert,
@@ -87,7 +93,6 @@ class CostDialog(sw.Dialog):
             [
                 su.check_input(self.w_name),
                 su.check_input(self.w_desc),
-                su.check_input(self.w_unit),
             ]
         ):
             raise Exception(cm.cost_dialog.missing_data)
@@ -104,7 +109,6 @@ class CostDialog(sw.Dialog):
             "id": self.w_id.v_model,
             "asset": self.w_asset.v_model,
             "desc": self.w_desc.v_model,
-            "unit": self.w_unit.v_model,
         }
         if self.w_id.v_model in self.model.ids:
             self.model.update_cost(**kwargs)
@@ -128,18 +132,16 @@ class CostDialog(sw.Dialog):
         layer_id = next(
             k for k, ly in cm.layers.items() if ly.name == self.w_name.v_model
         )
-        priority = self._COSTS[self._COSTS.layer_id == layer_id].iloc[0]
+        cost = self._COSTS[self._COSTS.layer_id == layer_id].iloc[0]
 
         # fill the different widgets
         self.w_id.v_model = layer_id
-        self.w_asset.v_model = priority.gee_asset
+        self.w_asset.v_model = cost.gee_asset
         self.w_desc.v_model = cm.layers[layer_id].detail
-        self.w_unit.v_model = priority.unit
 
-    def fill(self, name: str, id: str, asset: str, desc: str, unit: str) -> None:
+    def fill(self, name: str, id: str, asset: str, desc: str) -> None:
         """fill the dialog with data from the link"""
         self.w_name.v_model = name
         self.w_id.v_model = id
         self.w_asset.v_model = asset
         self.w_desc.v_model = desc
-        self.w_unit.v_model = unit

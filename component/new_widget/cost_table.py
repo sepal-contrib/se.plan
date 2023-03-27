@@ -67,7 +67,6 @@ class CostRow(sw.Html):
             id=self.model.ids[idx],
             asset=self.model.assets[idx],
             desc=self.model.descs[idx],
-            unit=self.model.units[idx],
         )
 
         self.dialog.value = True
