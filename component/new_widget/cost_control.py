@@ -17,7 +17,8 @@ class CostLayerRow(sm.LayerRow):
 
         super().__init__(layer)
         display_name = self.children[0].children[0].replace(prefix, "")
-        self.children[0].children[0] = display_name
+        self.children[0].children = [display_name]
+        self.w_slider.v_model = 0
 
 
 class CostLayersControl(sm.LayersControl):
@@ -41,6 +42,7 @@ class CostLayersControl(sm.LayersControl):
 
         # add an update method to force the layers when priorities are updated
         self.model.observe(self.update_costs, "updated")
+        self.aoi_model.observe(self.update_costs, "name")
 
     def update_table(self, *args) -> None:
         """silence this method"""
@@ -74,7 +76,6 @@ class CostLayersControl(sm.LayersControl):
             viz = {**cp.plt_viz["viridis"], "min": min(min_max), "max": max(min_max)}
             self.m.addLayer(dataset, viz, self._prefix + name)
             layer = self.m.find_layer(self._prefix + name)
-            layer.opacity = 0
             layers.append(layer)
 
         # create a table of layerLine

@@ -28,7 +28,7 @@ class MapTile(sw.Tile):
         self.map.add_control(cw.LayersControl(self.map))
 
         # add a layerstate (there are too many of them)
-        self.map.add_control(sm.LayerStateControl(self.map, position="topright"))
+        layer_state_control = sm.LayerStateControl(self.map, position="bottomleft")
 
         # create the models
         aoi_model = aoi.AoiModel()
@@ -56,6 +56,7 @@ class MapTile(sw.Tile):
 
         # add them on the map
         self.map.add(full_control)
+        self.map.add_control(layer_state_control)
         self.map.add(val_control)
         self.map.add(export_control)
         self.map.add(about_control)
