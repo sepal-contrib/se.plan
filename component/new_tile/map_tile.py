@@ -11,6 +11,7 @@ from .export_control import ExportControl
 from .about_control import AboutControl
 from .aoi_control import AoiControl
 from .priority_control import PriorityControl
+from .cost_control import CostControl
 
 
 class MapTile(sw.Tile):
@@ -32,6 +33,7 @@ class MapTile(sw.Tile):
         # create the models
         aoi_model = aoi.AoiModel()
         priority_model = cmod.PriorityModel()
+        cost_model = cmod.CostModel()
 
         # create the parameters controls
         full_control = sm.FullScreenControl(self.map, True, True, position="topright")
@@ -42,6 +44,7 @@ class MapTile(sw.Tile):
         priority_control = PriorityControl(
             self.map, priority_model, position="bottomright"
         )
+        cost_control = CostControl(self.map, cost_model, position="bottomright")
 
         # create the viz controls
         priority_layer_control = cw.PriorityLayersControl(
@@ -53,6 +56,7 @@ class MapTile(sw.Tile):
         self.map.add(val_control)
         self.map.add(export_control)
         self.map.add(about_control)
+        self.map.add(cost_control)
         self.map.add(priority_control)
         self.map.add(aoi_control)
         self.map.add(priority_layer_control)

@@ -39,6 +39,9 @@ class PriorityLayersControl(sm.LayersControl):
 
         super().__init__(m, **kwargs)
 
+        # change the btn
+        self.menu.v_slots[0]["children"].children[0] = "BEN"
+
         # add an update method to force the layers when priorities are updated
         self.model.observe(self.update_priorities, "updated")
 
