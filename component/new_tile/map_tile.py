@@ -50,6 +50,9 @@ class MapTile(sw.Tile):
         priority_layer_control = cw.PriorityLayersControl(
             self.map, aoi_model, priority_model, position="topleft"
         )
+        cost_layer_control = cw.CostLayersControl(
+            self.map, aoi_model, cost_model, position="topleft"
+        )
 
         # add them on the map
         self.map.add(full_control)
@@ -60,5 +63,6 @@ class MapTile(sw.Tile):
         self.map.add(priority_control)
         self.map.add(aoi_control)
         self.map.add(priority_layer_control)
+        self.map.add(cost_layer_control)
 
         super().__init__(id_="map_tile", title="", inputs=[self.map])
