@@ -1,8 +1,6 @@
 from sepal_ui import mapping as sm
 from sepal_ui import sepalwidgets as sw
 from sepal_ui import aoi
-from ipywidgets import HTML
-from IPython.display import display
 
 from component import new_model as cmod
 from component import new_widget as cw
@@ -12,6 +10,7 @@ from .about_control import AboutControl
 from .aoi_control import AoiControl
 from .priority_control import PriorityControl
 from .cost_control import CostControl
+from .constraint_control import ConstraintControl
 
 
 class MapTile(sw.Tile):
@@ -34,6 +33,7 @@ class MapTile(sw.Tile):
         aoi_model = aoi.AoiModel()
         priority_model = cmod.PriorityModel()
         cost_model = cmod.CostModel()
+        constraint_model = cmod.ConstraintModel()
 
         # create the parameters controls
         full_control = sm.FullScreenControl(self.map, True, True, position="topright")
@@ -45,6 +45,9 @@ class MapTile(sw.Tile):
             self.map, priority_model, position="bottomright"
         )
         cost_control = CostControl(self.map, cost_model, position="bottomright")
+        constraint_control = ConstraintControl(
+            self.map, constraint_model, position="bottomright"
+        )
 
         # create the viz controls
         priority_layer_control = cw.PriorityLayersControl(
@@ -56,13 +59,17 @@ class MapTile(sw.Tile):
 
         # add them on the map
         self.map.add(full_control)
+
         self.map.add_control(layer_state_control)
         self.map.add(val_control)
         self.map.add(export_control)
         self.map.add(about_control)
+
+        self.map.add(constraint_control)
         self.map.add(cost_control)
         self.map.add(priority_control)
         self.map.add(aoi_control)
+
         self.map.add(priority_layer_control)
         self.map.add(cost_layer_control)
 

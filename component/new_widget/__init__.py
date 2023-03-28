@@ -5,3 +5,6 @@ from .layer_control import *
 from .priority_control import *
 from .cost_dialog import *
 from .cost_control import *
+from .constraint_control import *
+from .constraint_dialog import *
+from .constraint_table import *
