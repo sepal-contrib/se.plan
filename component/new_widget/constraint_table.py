@@ -45,6 +45,7 @@ class ConstraintRow(sw.Html):
         td_list = [
             sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
             sw.Html(tag="td", children=[name]),
+            sw.Html(tag="td", children=[""]),
         ]
 
         super().__init__(tag="tr", children=td_list)

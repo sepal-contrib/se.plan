@@ -18,6 +18,17 @@ class ConstraintModel(model.Model):
 
     def __init__(self):
 
+        # get the default costs from the csv file
+        _costs = pd.read_csv(cp.layer_list).fillna("")
+        _costs = _costs[_costs.layer_id == "treecover_with_potential"]
+
+        for _, r in _costs.iterrows():
+            self.names.append(cm.layers[r.layer_id].name)
+            self.ids.append(r.layer_id)
+            self.assets.append(r.gee_asset)
+            self.descs.append(cm.layers[r.layer_id].detail)
+            self.units.append(r.unit)
+
         super().__init__()
 
     def remove_constraint(self, id: str) -> None:
