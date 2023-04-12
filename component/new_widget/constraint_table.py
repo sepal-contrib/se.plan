@@ -55,29 +55,29 @@ class ConstraintRow(sw.Html):
 
         # add js behaviour
         self.delete_btn.on_event("click", self.on_delete)
-        # self.edit_btn.on_event("click", self.on_edit)
+        self.edit_btn.on_event("click", self.on_edit)
 
     def on_delete(self, widget, data, event):
         """remove the line from the model and trigger table update"""
 
         self.model.remove_constraint(widget.attributes["data-layer"])
 
-    # @sd.switch("loading", on_widgets=["dialog"])
-    # def on_edit(self, widget, data, event):
-    #    """open the dialog with the data contained in the model"""
+    @sd.switch("loading", on_widgets=["dialog"])
+    def on_edit(self, widget, data, event):
+        """open the dialog with the data contained in the model"""
 
+        idx = self.model.get_index(widget.attributes["data-layer"])
 
-#
-#    idx = self.model.get_index(widget.attributes["data-layer"])
-#
-#    self.dialog.fill(
-#        name=self.model.names[idx],
-#        id=self.model.ids[idx],
-#        asset=self.model.assets[idx],
-#        desc=self.model.descs[idx],
-#    )
-#
-#    self.dialog.value = True
+        self.dialog.fill(
+            theme=self.model.themes[idx],
+            name=self.model.names[idx],
+            id=self.model.ids[idx],
+            asset=self.model.assets[idx],
+            desc=self.model.descs[idx],
+            unit=self.model.units[idx],
+        )
+
+        self.dialog.value = True
 
 
 class ConstraintTable(sw.SimpleTable):

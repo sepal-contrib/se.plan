@@ -24,6 +24,7 @@ class ConstraintModel(model.Model):
         _costs = _costs[_costs.layer_id == "treecover_with_potential"]
 
         for _, r in _costs.iterrows():
+            self.themes.append(r.subtheme)
             self.names.append(cm.layers[r.layer_id].name)
             self.ids.append(r.layer_id)
             self.assets.append(r.gee_asset)
