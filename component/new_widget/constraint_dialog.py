@@ -80,84 +80,83 @@ class ConstraintDialog(sw.Dialog):
         )
 
         # decorate the validate method with self buttons
-        # self.validate = sd.loading_button(alert=self.w_alert, button=self.w_validate)(
-        #    self.validate
-        # )
+        self.validate = sd.loading_button(alert=self.w_alert, button=self.w_validate)(
+            self.validate
+        )
 
         # add JS behaviour
-        # self.w_validate.on_event("click", self.validate)
+        self.w_validate.on_event("click", self.validate)
         self.w_cancel.on_event("click", self.cancel)
-        # self.w_theme.observe(self.theme_change, "v_model")
-        # self.w_name.observe(self.name_change, "v_model")
+        self.w_theme.observe(self.theme_change, "v_model")
+        self.w_name.observe(self.name_change, "v_model")
 
-    # def validate(self, *args) -> None:
-    #    """save the layer in the model (update or add)"""
-    #
-    #    # check values are set
-    #    if not all(
-    #        [
-    #            su.check_input(self.w_theme),
-    #            su.check_input(self.w_name),
-    #            su.check_input(self.w_desc),
-    #            su.check_input(self.w_unit),
-    #        ]
-    #    ):
-    #        raise Exception(cm.priority_dialog.missing_data)
-    #
-    #    # if layer has no layer_id, it needs to be created using the number stored
-    #    # in the object
-    #    if not self.w_id.v_model:
-    #        self.w_id.v_model = f"custom_priority_{self.count}"
-    #        self.count += 1
-    #
-    #    # decide either it's an update or a new one
-    #    kwargs = {
-    #        "theme": self.w_theme.v_model,
-    #        "name": self.w_name.v_model,
-    #        "id": self.w_id.v_model,
-    #        "asset": self.w_asset.v_model,
-    #        "desc": self.w_desc.v_model,
-    #        "unit": self.w_unit.v_model,
-    #    }
-    #    if self.w_id.v_model in self.model.ids:
-    #        self.model.update_priority(**kwargs)
-    #    else:
-    #        self.model.add_priority(**kwargs)
-    #
-    #    # close the dialog
-    #    self.value = False
-    #
+    def validate(self, *args) -> None:
+        """save the layer in the model (update or add)"""
+        # check values are set
+        if not all(
+            [
+                su.check_input(self.w_theme),
+                su.check_input(self.w_name),
+                su.check_input(self.w_desc),
+                su.check_input(self.w_unit),
+            ]
+        ):
+            raise Exception(cm.constraint.dialog.missing_data)
+
+        # if layer has no layer_id, it needs to be created using the number stored
+        # in the object
+        if not self.w_id.v_model:
+            self.w_id.v_model = f"custom_priority_{self.count}"
+            self.count += 1
+
+        # decide either it's an update or a new one
+        kwargs = {
+            "theme": self.w_theme.v_model,
+            "name": self.w_name.v_model,
+            "id": self.w_id.v_model,
+            "asset": self.w_asset.v_model,
+            "desc": self.w_desc.v_model,
+            "unit": self.w_unit.v_model,
+        }
+        if self.w_id.v_model in self.model.ids:
+            self.model.update_constraint(**kwargs)
+        else:
+            self.model.add_constraint(**kwargs)
+
+        # close the dialog
+        self.value = False
+
     def cancel(self, *args) -> None:
         """close and do nothing"""
         self.value = False
 
-    # def theme_change(self, *args) -> None:
-    #    """edit the list of default theme"""
-    #
-    #    default_layers = self._PRIORITIES[
-    #        self._PRIORITIES.subtheme == self.w_theme.v_model
-    #    ]
-    #    default_layers = default_layers.layer_id.unique().tolist()
-    #    self.w_name.items = [cm.layers[ly].name for ly in default_layers]
-    #
-    # def name_change(self, *args) -> None:
-    #    """if the selected layer is from the combo box items, select all the default informations"""
-    #
-    #    if self.w_name.v_model not in self.w_name.items:
-    #        return
-    #
-    #    # get the information from the dataframe
-    #    layer_id = next(
-    #        k for k, ly in cm.layers.items() if ly.name == self.w_name.v_model
-    #    )
-    #    priority = self._PRIORITIES[self._PRIORITIES.layer_id == layer_id].iloc[0]
-    #
-    #    # fill the different widgets
-    #    self.w_id.v_model = layer_id
-    #    self.w_asset.v_model = priority.gee_asset
-    #    self.w_desc.v_model = cm.layers[layer_id].detail
-    #    self.w_unit.v_model = priority.unit
-    #
+    def theme_change(self, *args) -> None:
+        """edit the list of default theme"""
+
+        default_layers = self._CONSTRAINTS[
+            self._CONSTRAINTS.subtheme == self.w_theme.v_model
+        ]
+        default_layers = default_layers.layer_id.unique().tolist()
+        self.w_name.items = [cm.layers[ly].name for ly in default_layers]
+
+    def name_change(self, *args) -> None:
+        """if the selected layer is from the combo box items, select all the default informations"""
+
+        if self.w_name.v_model not in self.w_name.items:
+            return
+
+        # get the information from the dataframe
+        layer_id = next(
+            k for k, ly in cm.layers.items() if ly.name == self.w_name.v_model
+        )
+        priority = self._CONSTRAINTS[self._CONSTRAINTS.layer_id == layer_id].iloc[0]
+
+        # fill the different widgets
+        self.w_id.v_model = layer_id
+        self.w_asset.v_model = priority.gee_asset
+        self.w_desc.v_model = cm.layers[layer_id].detail
+        self.w_unit.v_model = priority.unit
+
     def fill(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:

@@ -42,6 +42,9 @@ class ConstraintRow(sw.Html):
         self.delete_btn = TableIcon("fa-solid fa-trash-can", layer_id)
         self.edit_btn.class_list.add("mr-2")
 
+        # create a slider to change the values of the the constraints
+        self.w_slider = sw.SimpleSlider(attributes={"data-layer": layer_id})
+
         td_list = [
             sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
             sw.Html(tag="td", children=[name]),

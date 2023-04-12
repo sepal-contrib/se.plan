@@ -14,7 +14,8 @@
             "desc": "Description",
             "unit": "Unit",
             "validate": "Validate",
-            "cancel": "Cancel"
+            "cancel": "Cancel",
+            "missing_data": "Some data are missing, please fill all of them before submitting the form"
         }
     }
 }
