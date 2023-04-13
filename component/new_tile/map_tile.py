@@ -61,8 +61,6 @@ class MapTile(sw.Tile):
         )
 
         # add them on the map
-        self.map.add(full_control)
-
         self.map.add_control(layer_state_control)
         self.map.add(val_control)
         self.map.add(export_control)
