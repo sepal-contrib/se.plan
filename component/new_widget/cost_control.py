@@ -8,6 +8,7 @@ from ipyleaflet import TileLayer
 
 from component import new_model as cmod
 from component import parameter as cp
+from component import new_scripts as cs
 
 
 class CostLayerRow(sm.LayerRow):
@@ -18,7 +19,6 @@ class CostLayerRow(sm.LayerRow):
         super().__init__(layer)
         display_name = self.children[0].children[0].replace(prefix, "")
         self.children[0].children = [display_name]
-        self.w_slider.v_model = 0
 
 
 class CostLayersControl(sm.LayersControl):
@@ -66,23 +66,22 @@ class CostLayersControl(sm.LayersControl):
         for i, name in enumerate(self.model.names):
             aoi = self.aoi_model.feature_collection
             dataset = ee.Image(self.model.assets[i]).select(0).clip(aoi)
+            red = ee.Reducer.minMax()
             min_max = (
-                dataset.reduceRegion(
-                    reducer=ee.Reducer.minMax(), geometry=aoi, bestEffort=True
-                )
+                dataset.reduceRegion(reducer=red, geometry=aoi, scale=500)
                 .toArray()
                 .getInfo()
             )
             viz = {**cp.plt_viz["viridis"], "min": min(min_max), "max": max(min_max)}
-            self.m.addLayer(dataset, viz, self._prefix + name)
-            layer = self.m.find_layer(self._prefix + name)
+            layer = cs.get_layer(dataset, viz, self._prefix + name, False)
+            self.m.add_layer(layer)
             layers.append(layer)
 
         # create a table of layerLine
         layer_rows = []
         if len(layers) > 0:
             head = [sm.HeaderRow(ms.layer_control.layer.header)]
-            rows = [CostLayerRow(self._prefix, ly) for ly in layers]
+            rows = [CostLayerRow(self._prefix, ly) for ly in reversed(layers)]
             layer_rows = head + rows
 
         # create a table from these rows and wrap it in the radioGroup

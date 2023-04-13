@@ -1,6 +1,7 @@
 from sepal_ui import model
 from traitlets import List, Int
 import pandas as pd
+import numpy as np
 
 from component import parameter as cp
 from component.message import cm
@@ -45,6 +46,7 @@ class ConstraintModel(model.Model):
         del self.assets[idx]
         del self.descs[idx]
         del self.units[idx]
+        del self.values[idx]
 
         self.updated += 1
 
@@ -59,6 +61,7 @@ class ConstraintModel(model.Model):
         self.assets.append(asset)
         self.descs.append(desc)
         self.units.append(unit)
+        self.values.append([np.iinfo(np.int16).min, np.iinfo(np.int16).max])
 
         self.updated += 1
 
@@ -75,6 +78,14 @@ class ConstraintModel(model.Model):
         self.assets[idx] = asset
         self.descs[idx] = desc
         self.units[idx] = unit
+
+        self.updated += 1
+
+    def update_value(self, id: str, value: list) -> None:
+        """Update the value of a specific constraint"""
+
+        idx = self.get_index(id)
+        self.values[idx] = value
 
         self.updated += 1
 

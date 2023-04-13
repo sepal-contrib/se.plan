@@ -46,7 +46,7 @@ class MapTile(sw.Tile):
         )
         cost_control = CostControl(self.map, cost_model, position="bottomright")
         constraint_control = ConstraintControl(
-            self.map, constraint_model, position="bottomright"
+            self.map, constraint_model, aoi_model, position="bottomright"
         )
 
         # create the viz controls
@@ -55,6 +55,9 @@ class MapTile(sw.Tile):
         )
         cost_layer_control = cw.CostLayersControl(
             self.map, aoi_model, cost_model, position="topleft"
+        )
+        constraint_layer_control = cw.ConstraintLayersControl(
+            self.map, aoi_model, constraint_model, position="topleft"
         )
 
         # add them on the map
@@ -70,7 +73,8 @@ class MapTile(sw.Tile):
         self.map.add(priority_control)
         self.map.add(aoi_control)
 
-        self.map.add(priority_layer_control)
+        self.map.add(constraint_layer_control)
         self.map.add(cost_layer_control)
+        self.map.add(priority_layer_control)
 
         super().__init__(id_="map_tile", title="", inputs=[self.map])
