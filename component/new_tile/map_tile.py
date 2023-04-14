@@ -4,6 +4,8 @@ from sepal_ui import aoi
 
 from component import new_model as cmod
 from component import new_widget as cw
+from component import new_scripts as cs
+from component import parameter as cp
 
 from .export_control import ExportControl
 from .about_control import AboutControl
@@ -34,6 +36,11 @@ class MapTile(sw.Tile):
         priority_model = cmod.PriorityModel()
         cost_model = cmod.CostModel()
         constraint_model = cmod.ConstraintModel()
+
+        # link them in a seplan_buider
+        self.seplan_builder = cs.Seplan(
+            aoi_model, priority_model, cost_model, constraint_model
+        )
 
         # create the parameters controls
         full_control = sm.FullScreenControl(self.map, True, True, position="topright")
@@ -76,3 +83,13 @@ class MapTile(sw.Tile):
         self.map.add(priority_layer_control)
 
         super().__init__(id_="map_tile", title="", inputs=[self.map])
+
+        # add few js behavior
+        aoi_model.observe(self.compute_index, "name")
+
+    def compute_index(self, *args):
+
+        print("bite")
+        priority = self.seplan_builder.get_priority_index(clip=True)
+        viz = {**cp.plt_viz["viridis"], "min": 0, "max": 1}
+        self.map.addLayer(priority, viz, "priority")

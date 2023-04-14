@@ -42,7 +42,7 @@ class CostLayersControl(sm.LayersControl):
 
         # add an update method to force the layers when priorities are updated
         self.model.observe(self.update_costs, "updated")
-        self.aoi_model.observe(self.update_costs, "name")
+        self.aoi_model.observe(self.update_costs, "updated")
 
     def update_table(self, *args) -> None:
         """silence this method"""

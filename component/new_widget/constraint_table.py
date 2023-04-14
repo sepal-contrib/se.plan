@@ -80,7 +80,7 @@ class ConstraintRow(sw.Html):
         self.w_min.on_event("change", self.on_text_value)
         self.w_max.on_event("change", self.on_text_value)
         self.w_slider.on_event("change", self.update_value)
-        self.aoi_model.observe(self.get_limits, "name")
+        self.aoi_model.observe(self.get_limits, "updated")
 
     def on_delete(self, widget, data, event):
         """remove the line from the model and trigger table update"""
