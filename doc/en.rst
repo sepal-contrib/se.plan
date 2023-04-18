@@ -1029,7 +1029,7 @@ Socio-economic constraints
       - CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
     * - Declining population
       - binary (0 or 1)
-      - Value of 1 indicates that human population in a 5 km buffer around a site declined during 2010 – 2020, while a value of 0 indicates it rose or did not change. (`view in gee <https://code.earthengine.google.com/bc5cc4ac63eedd0cd63e56b4b2e42fc7?#layer_id=projects%2Fjohn-ee-282116%2Fassets%2Ffao-restoration%2Ffeatures%2Fpopulation_decline>`__)
+      - Value of 1 indicates that human population in a 5 km buffer around a site declined during 2010 – 2020, while a value of 0 indicates it rose or did not change. (`view in gee <https://code.earthengine.google.com/52d13698bd8bb22195d83e0868aaa2a4?#layer_id=projects%2Fee-amcmahon%2Fassets%2Fseplan%2Fseplan_layers%2Ffeatures%2Fpopulation_decline>`__)
       - Developed by se.plan team, using 2.5 arc-minute data from: CIESIN (Center for International Earth Science Information Network), 2018, Gridded Population of the World, Version 4 (GPWv4): Population Density, Revision 11, NASA Socioeconomic Data and Applications Center (SEDAC), https://doi.org/10.7927/H49C6VHW
     * - Property rights protection
       - index (−2.5 to +2.5)
