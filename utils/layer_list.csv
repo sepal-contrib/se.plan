@@ -12,7 +12,7 @@ protected_areas,constraint,socio_eco,projects/john-ee-282116/assets/fao-restorat
 slope,constraint,bio ,projects/john-ee-282116/assets/fao-restoration/features/slope,percent
 elevation,constraint,bio ,USGS/SRTMGL1_003,m
 natural_regeneration,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/Regeneration,index (0 to 1)
-declining_population,constraint,socio_eco,projects/john-ee-282116/assets/fao-restoration/features/population_decline,binary
+declining_population,constraint,socio_eco,projects/ee-amcmahon/assets/seplan/seplan_layers/features/population_decline,binary
 property_rights,constraint,socio_eco,projects/john-ee-282116/assets/fao-restoration/features/RL_gadm36_1_edited_image,index (-2.5 to 2.5)
 deforestation_rate,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/deforestation_rate,percent/yr
 climate_risk,constraint,forest,projects/john-ee-282116/assets/fao-restoration/features/future_risk,percent
