@@ -8,3 +8,4 @@ from .cost_control import *
 from .constraint_control import *
 from .constraint_dialog import *
 from .constraint_table import *
+from .index_control import *

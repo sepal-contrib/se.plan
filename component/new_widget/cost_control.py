@@ -42,7 +42,7 @@ class CostLayersControl(sm.LayersControl):
 
         # add an update method to force the layers when priorities are updated
         self.model.observe(self.update_costs, "updated")
-        self.aoi_model.observe(self.update_costs, "updated")
+        self.aoi_model.observe(self.update_costs, "name")
 
     def update_table(self, *args) -> None:
         """silence this method"""
@@ -52,14 +52,14 @@ class CostLayersControl(sm.LayersControl):
     def update_costs(self, *args) -> None:
         """Update the table content."""
 
+        # exit if aoi is not set
+        if self.aoi_model.feature_collection is None:
+            return
+
         # remove all the priority layers
         for layer in self.m.layers:
             if layer.name.startswith(self._prefix):
                 self.map.remove_layer(layer)
-
-        # exit if aoi is not set
-        if not self.aoi_model.name:
-            return
 
         # create the layers and store them in a list
         layers = []

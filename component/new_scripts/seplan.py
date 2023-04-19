@@ -37,7 +37,7 @@ def _min_max(
         reducer=ee.Reducer.minMax(), geometry=aoi.geometry(), scale=scale
     )
     low = ee.Number(min_max.get("img_min"))
-    high = ee.Number(min_max.get("img_max"))
+    high = ee.Number(min_max.get("img_max")).add(0.1e-13)
 
     return ee_image.unitScale(low, high).float()
 
@@ -88,7 +88,7 @@ class Seplan:
 
         index = ee.Image(0)
         for v in theme_images.values():
-            index.add(v["image"].divide(ee.Image(v["weight"])))
+            index = index.add(v["image"].divide(ee.Image(v["weight"])))
         index = _min_max(index, aoi)
 
         return index.clip(aoi) if clip is True else index

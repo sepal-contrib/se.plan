@@ -66,6 +66,7 @@ class MapTile(sw.Tile):
         constraint_layer_control = cw.ConstraintLayersControl(
             self.map, aoi_model, constraint_model, position="topleft"
         )
+        self.index_layer_control = cw.IndexLayersControl(self.map, position="topleft")
 
         # add them on the map
         self.map.add_control(layer_state_control)
@@ -78,6 +79,7 @@ class MapTile(sw.Tile):
         self.map.add(priority_control)
         self.map.add(aoi_control)
 
+        self.map.add(self.index_layer_control)
         self.map.add(constraint_layer_control)
         self.map.add(cost_layer_control)
         self.map.add(priority_layer_control)
@@ -89,7 +91,7 @@ class MapTile(sw.Tile):
 
     def compute_index(self, *args):
 
-        print("bite")
         priority = self.seplan_builder.get_priority_index(clip=True)
         viz = {**cp.plt_viz["viridis"], "min": 0, "max": 1}
-        self.map.addLayer(priority, viz, "priority")
+        self.map.addLayer(priority, viz, "[index]normalized priority index")
+        self.index_layer_control.update_index()
