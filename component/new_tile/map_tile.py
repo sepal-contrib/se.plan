@@ -6,6 +6,7 @@ from component import new_model as cmod
 from component import new_widget as cw
 from component import new_scripts as cs
 from component import parameter as cp
+from component.message import cm
 
 from .export_control import ExportControl
 from .about_control import AboutControl
@@ -100,7 +101,7 @@ class MapTile(sw.Tile):
         # priority only indicatior
         index = self.seplan_builder.get_priority_index(clip=True).multiply(4).add(1)
         layer = cs.get_layer(
-            index, cp.final_viz, _prefix + "normalized priority index", False
+            index, cp.final_viz, _prefix + cm.index.layers.priorities, False
         )
         self.map.add_layer(layer)
 
@@ -109,15 +110,13 @@ class MapTile(sw.Tile):
             self.seplan_builder.get_priority_cost_index(clip=True).multiply(4).add(1)
         )
         layer = cs.get_layer(
-            index, cp.final_viz, _prefix + "priorities/costs ratio", False
+            index, cp.final_viz, _prefix + cm.index.layers.ratio, False
         )
         self.map.add_layer(layer)
 
         # filtered by constraints
         index = self.seplan_builder.get_constraint_index(clip=True).multiply(4).add(1)
-        layer = cs.get_layer(
-            index, cp.final_viz, _prefix + "deforestation suitability index", True
-        )
+        layer = cs.get_layer(index, cp.final_viz, _prefix + cm.index.layers.final, True)
         self.map.add_layer(layer)
 
         # update the layer control

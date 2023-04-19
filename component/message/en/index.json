@@ -1,0 +1,9 @@
+{
+    "index": {
+        "layers": {
+            "priorities": "Priority sum",
+            "ratio": "priority/cost ratio",
+            "final": "restoration feasability index"
+        }
+    }
+}
