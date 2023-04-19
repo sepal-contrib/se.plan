@@ -71,9 +71,11 @@ class Seplan:
     def get_priority_index(self, clip: bool = False) -> ee.Image:
         """Build the index exclusively on the benefits weighted approach"""
 
-        # normaized all the priority on the aoi
+        # normalize all the priority on the aoi
         aoi = self.aoi_model.feature_collection
-        images = [_percentile(ee.Image(i), aoi) for i in self.priority_model.assets]
+        images = [
+            _percentile(ee.Image(i).unmask(), aoi) for i in self.priority_model.assets
+        ]
 
         default = {"image": ee.Image(0), "weight": 0, "nb": 0}
         theme_images = {k: default.copy() for k in set(self.priority_model.themes)}
@@ -89,14 +91,44 @@ class Seplan:
         index = ee.Image(0)
         for v in theme_images.values():
             index = index.add(v["image"].divide(ee.Image(v["weight"])))
-        index = _min_max(index, aoi)
+        index = _percentile(index, aoi)
 
         return index.clip(aoi) if clip is True else index
 
-    def get_priority_cost_index(self) -> ee.Image:
+    def get_priority_cost_index(self, clip: bool = False) -> ee.Image:
+        """Build the priority/cost ratio"""
 
-        pass
+        # unmask the images without normalizing as everything is in $/ha
+        aoi = self.aoi_model.feature_collection
+        images = [ee.Image(i).unmask() for i in self.cost_model.assets]
 
-    def get_constraint_index(self) -> ee.Image:
+        # create a normalized sum
+        norm_cost = ee.Image(0)
+        for v in images:
+            norm_cost = norm_cost.add(v)
+        norm_cost = _min_max(norm_cost, aoi)
 
-        pass
+        # create the benefits cost ratio
+        index = self.get_priority_index().divide(norm_cost)
+        index = _percentile(index, aoi)
+
+        return index.clip(aoi) if clip is True else index
+
+    def get_constraint_index(self, clip: bool = False) -> ee.Image:
+
+        aoi = self.aoi_model.feature_collection
+
+        # create the mask from the constraints
+        mask_image = ee.Image(0)
+        for i, asset in enumerate(self.constraint_model.assets):
+            min_, max_ = self.constraint_model.values[i]
+            image = ee.Image(asset).select(0).unmask()
+            local_mask = image.gt(max_).add(image.lt(min_))
+            mask_image = mask_image.add(local_mask)
+
+        # set any pixel with a sum of 0 to 0 (i.e. masked at least once)
+        mask_image = mask_image.gt(0).add(-1).multiply(-1)
+
+        index = _percentile(self.get_priority_cost_index().mask(mask_image), aoi)
+
+        return index.clip(aoi) if clip is True else index

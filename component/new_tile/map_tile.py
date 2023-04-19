@@ -32,14 +32,14 @@ class MapTile(sw.Tile):
         layer_state_control = sm.LayerStateControl(self.map, position="bottomleft")
 
         # create the models
-        aoi_model = aoi.AoiModel()
+        self.aoi_model = aoi.AoiModel()
         priority_model = cmod.PriorityModel()
         cost_model = cmod.CostModel()
         constraint_model = cmod.ConstraintModel()
 
         # link them in a seplan_buider
         self.seplan_builder = cs.Seplan(
-            aoi_model, priority_model, cost_model, constraint_model
+            self.aoi_model, priority_model, cost_model, constraint_model
         )
 
         # create the parameters controls
@@ -47,24 +47,24 @@ class MapTile(sw.Tile):
         val_control = sm.InspectorControl(self.map, False, position="bottomleft")
         export_control = ExportControl(position="bottomleft")
         about_control = AboutControl(position="bottomleft")
-        aoi_control = AoiControl(self.map, aoi_model, position="bottomright")
+        aoi_control = AoiControl(self.map, self.aoi_model, position="bottomright")
         priority_control = PriorityControl(
             self.map, priority_model, position="bottomright"
         )
         cost_control = CostControl(self.map, cost_model, position="bottomright")
         constraint_control = ConstraintControl(
-            self.map, constraint_model, aoi_model, position="bottomright"
+            self.map, constraint_model, self.aoi_model, position="bottomright"
         )
 
         # create the viz controls
         priority_layer_control = cw.PriorityLayersControl(
-            self.map, aoi_model, priority_model, position="topleft"
+            self.map, self.aoi_model, priority_model, position="topleft"
         )
         cost_layer_control = cw.CostLayersControl(
-            self.map, aoi_model, cost_model, position="topleft"
+            self.map, self.aoi_model, cost_model, position="topleft"
         )
         constraint_layer_control = cw.ConstraintLayersControl(
-            self.map, aoi_model, constraint_model, position="topleft"
+            self.map, self.aoi_model, constraint_model, position="topleft"
         )
         self.index_layer_control = cw.IndexLayersControl(self.map, position="topleft")
 
@@ -87,11 +87,38 @@ class MapTile(sw.Tile):
         super().__init__(id_="map_tile", title="", inputs=[self.map])
 
         # add few js behavior
-        aoi_model.observe(self.compute_index, "name")
+        self.aoi_model.observe(self.compute_index, "name")
 
     def compute_index(self, *args):
 
-        priority = self.seplan_builder.get_priority_index(clip=True)
-        viz = {**cp.plt_viz["viridis"], "min": 0, "max": 1}
-        self.map.addLayer(priority, viz, "[index]normalized priority index")
+        if self.aoi_model.feature_collection is None:
+            return
+
+        # ste the prefix
+        _prefix = "[index]"
+
+        # priority only indicatior
+        index = self.seplan_builder.get_priority_index(clip=True).multiply(4).add(1)
+        layer = cs.get_layer(
+            index, cp.final_viz, _prefix + "normalized priority index", False
+        )
+        self.map.add_layer(layer)
+
+        # priority/cost ratio
+        index = (
+            self.seplan_builder.get_priority_cost_index(clip=True).multiply(4).add(1)
+        )
+        layer = cs.get_layer(
+            index, cp.final_viz, _prefix + "priorities/costs ratio", False
+        )
+        self.map.add_layer(layer)
+
+        # filtered by constraints
+        index = self.seplan_builder.get_constraint_index(clip=True).multiply(4).add(1)
+        layer = cs.get_layer(
+            index, cp.final_viz, _prefix + "deforestation suitability index", True
+        )
+        self.map.add_layer(layer)
+
+        # update the layer control
         self.index_layer_control.update_index()
