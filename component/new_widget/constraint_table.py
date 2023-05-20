@@ -1,6 +1,7 @@
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from sepal_ui.aoi import AoiModel
+from sepal_ui import mapping as sm
 import pandas as pd
 import numpy as np
 import ee
@@ -31,6 +32,7 @@ class ConstraintRow(sw.Html):
 
     def __init__(
         self,
+        m: sm.SepalMap,
         model: cmod.ConstraintModel,
         idx: int,
         dialog: ConstraintDialog,
@@ -41,6 +43,7 @@ class ConstraintRow(sw.Html):
         self.model = model
         self.dialog = dialog
         self.aoi_model = aoi_model
+        self.map = m
 
         # extract information from the model
         name = self.model.names[idx]

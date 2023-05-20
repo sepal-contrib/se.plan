@@ -16,7 +16,9 @@ class ConstraintModel(model.Model):
     descs = List([]).tag(sync=True)
     units = List([]).tag(sync=True)
     values = List([]).tag(sync=True)
+
     updated = Int(0).tag(sync=True)
+    validated = Int(0).tag(sync=True)
 
     def __init__(self):
 

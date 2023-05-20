@@ -14,6 +14,7 @@ from .aoi_control import AoiControl
 from .priority_control import PriorityControl
 from .cost_control import CostControl
 from .constraint_control import ConstraintControl
+from .dashboard_control import DashBoardControl
 
 
 class MapTile(sw.Tile):
@@ -56,6 +57,7 @@ class MapTile(sw.Tile):
         constraint_control = ConstraintControl(
             self.map, constraint_model, self.aoi_model, position="bottomright"
         )
+        dashboard_control = DashBoardControl()
 
         # create the viz controls
         priority_layer_control = cw.PriorityLayersControl(
@@ -75,6 +77,7 @@ class MapTile(sw.Tile):
         self.map.add(export_control)
         self.map.add(about_control)
 
+        self.map.add(dashboard_control)
         self.map.add(constraint_control)
         self.map.add(cost_control)
         self.map.add(priority_control)
@@ -89,6 +92,9 @@ class MapTile(sw.Tile):
 
         # add few js behavior
         self.aoi_model.observe(self.compute_index, "name")
+        cost_model.observe(self.compute_index, "validated")
+        priority_model.observe(self.compute_index, "validated")
+        constraint_model.observe(self.compute_index, "validated")
 
     def compute_index(self, *args):
 

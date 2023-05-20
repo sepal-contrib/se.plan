@@ -37,7 +37,6 @@ class ConstraintLayersControl(sm.LayersControl):
         # save the models
         self.aoi_model = aoi_model
         self.model = model
-        self.map = m
 
         super().__init__(m, **kwargs)
 
@@ -45,7 +44,7 @@ class ConstraintLayersControl(sm.LayersControl):
         self.menu.v_slots[0]["children"].children[0] = "CON"
 
         # add an update method to force the layers when priorities are updated
-        self.model.observe(self.update_costs, "updated")
+        self.model.observe(self.update_costs, "validated")
         self.aoi_model.observe(self.update_costs, "name")
 
     def update_table(self, *args) -> None:
@@ -63,7 +62,7 @@ class ConstraintLayersControl(sm.LayersControl):
         # remove all the priority layers
         for layer in self.m.layers:
             if layer.name.startswith(self._prefix):
-                self.map.remove_layer(layer)
+                self.m.remove_layer(layer)
 
         # create the layers and store them in a list
         layers = []

@@ -17,13 +17,19 @@ class ConstraintView(sw.Tile):
         self.w_new = sw.Btn(
             "New Constraint", "fa-solid fa-plus", small=True, type_="success"
         )
+        self.w_validate = sw.Btn(
+            "validate", "fa-solid fa-check", small=True, class_="ml-1"
+        )
         table = cw.ConstraintTable(model, self.dialog, aoi_model)
-        row = sw.Row(children=[sw.Spacer(), self.w_new], class_="my-2 mx-1")
+        row = sw.Row(
+            children=[sw.Spacer(), self.w_new, self.w_validate], class_="my-2 mx-1"
+        )
 
         super().__init__("nested", "constraints", [row, table, self.dialog])
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
+        self.w_validate.on_event("click", self.validate)
 
     @sd.switch("loading", on_widgets=["dialog"])
     def open_new_dialog(self, *args) -> None:
@@ -40,6 +46,9 @@ class ConstraintView(sw.Tile):
             None,
         )
 
+    def validate(self, *args):
+        self.model.validated += 1
+
 
 class ConstraintControl(sm.MenuControl):
     def __init__(
@@ -48,3 +57,4 @@ class ConstraintControl(sm.MenuControl):
         self.view = ConstraintView(model, aoi_model)
         super().__init__(icon_content="CNT", card_content=self.view, m=m, **kwargs)
         self.set_size(None, "80vw", None, "80vh")
+        model.observe(lambda *_: setattr(self.menu, "v_model", False), "validated")

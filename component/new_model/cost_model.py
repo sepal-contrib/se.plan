@@ -15,6 +15,7 @@ class CostModel(model.Model):
     units = List([]).tag(sync=True)
 
     updated = Int(0).tag(sync=True)
+    validated = Int(0).tag(sync=True)
 
     _unit = "$/ha"
     "All cost layer must use the same unit if not aggregation will not be possible"
