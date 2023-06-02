@@ -139,6 +139,7 @@
         "bii": "Biodiversity conservation",
         "bio": "Biophysical",
         "forest": "Forest change",
-        "money": "Monetary"
+        "money": "Monetary",
+        "custom": "Custom"
     }
 }

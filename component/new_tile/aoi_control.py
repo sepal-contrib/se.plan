@@ -6,7 +6,7 @@ from component.message import cm
 
 
 class AoiControl(sm.MenuControl):
-    def __init__(self, map_, **kwargs):
+    def __init__(self, map_: sm.SepalMap, aoi_model: aoi.AoiModel, **kwargs):
 
         # create the view
         style = {
@@ -16,7 +16,7 @@ class AoiControl(sm.MenuControl):
             "opacity": 1,
             "fill": False,
         }
-        self.view = aoi.AoiView(map_=map_, map_style=style)
+        self.view = aoi.AoiView(map_=map_, map_style=style, model=aoi_model)
         self.view.elevation = False
         self.view.btn.color = "secondary"
         self.view.class_list.add("ma-5")
