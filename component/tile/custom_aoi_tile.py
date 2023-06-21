@@ -18,7 +18,6 @@ class CustomAoiTile(aoi.AoiTile):
     """
 
     def __init__(self, methods="ALL", gee=True, **kwargs):
-
         # create the map
         self.map = CustomMap(dc=True, gee=gee)
         self.map.dc.hide()
@@ -51,22 +50,20 @@ class CustomAoiTile(aoi.AoiTile):
 
         # check over the lmic country number
         if self.view.model.admin:
-
             code = self.view.model.admin
 
             # get the country code out of the admin one (that can be level 1 or 2)
-            df = pd.read_csv(self.view.model.FILE[1])
+            df = pd.read_parquet(self.view.model.FILE[1]).astype(str)
             level_0_code = df[
                 (df.ADM0_CODE == code) | (df.ADM1_CODE == code) | (df.ADM2_CODE == code)
             ].ADM0_CODE.iloc[0]
 
             # read the country file
-            country_codes = pd.read_csv(cp.country_list).GAUL
+            country_codes = pd.read_csv(cp.country_list).GAUL.astype(str)
             included = (country_codes == level_0_code).any()
 
         # check if the aoi is in the LMIC
         else:
-
             lmic_raster = ee.Image(
                 "projects/john-ee-282116/assets/fao-restoration/misc/lmic_global_1k"
             )
