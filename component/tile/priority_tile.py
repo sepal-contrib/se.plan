@@ -2,18 +2,16 @@ from traitlets import HasTraits, Unicode
 import json
 
 from sepal_ui import sepalwidgets as sw
-from ipywidgets import jslink
+from traitlets import link
 
 from component import widget as cw
 from component.message import cm
 
 
 class PriorityTile(sw.Tile, HasTraits):
-
     custom_v_model = Unicode().tag(sync=True)
 
     def __init__(self, **kwargs):
-
         # name the tile
         title = cm.benefits.title
         id_ = "nested_widget"
@@ -30,4 +28,4 @@ class PriorityTile(sw.Tile, HasTraits):
         self.children[0].elevation = 0
 
         # link the widgets to the tile
-        jslink((self, "v_model"), (self.table, "v_model"))
+        link((self, "v_model"), (self.table, "v_model"))
