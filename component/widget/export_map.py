@@ -21,7 +21,6 @@ ee.Initialize()
 
 class ExportMap(WidgetControl):
     def __init__(self, **kwargs):
-
         # init the downloadable informations
         self.geometry = None
         self.dataset = None

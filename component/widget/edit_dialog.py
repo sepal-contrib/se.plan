@@ -18,11 +18,9 @@ ee.Initialize()
 
 
 class EditDialog(sw.Dialog):
-
     updated = Unicode("").tag(sync=True)  # the update traitlets
 
     def __init__(self, aoi_vew, model):
-
         # save the model
         self.model = model
 
@@ -78,7 +76,6 @@ class EditDialog(sw.Dialog):
 
     @su.switch("loading", on_widgets=["card", "layer"])
     def _on_layer_change(self, widget, event, data):
-
         # do nothing if it's no_layer
         if widget.v_model == "no Layer":
             return self
@@ -89,7 +86,6 @@ class EditDialog(sw.Dialog):
 
         # if the layer is different than the init one
         elif widget.v_model != self.init_layer:
-
             # display it on the map
             geometry = self.view.model.feature_collection
             image = Path(widget.v_model)
@@ -103,7 +99,6 @@ class EditDialog(sw.Dialog):
         return self
 
     def _cancel_click(self, widget, data, event):
-
         # close without doing anything
         self.value = False
         self.updated = ""
@@ -112,7 +107,6 @@ class EditDialog(sw.Dialog):
 
     @su.switch("loading", on_widgets=["save", "cancel"])
     def _save_click(self, widget, data, event):
-
         # change the model according to the selected informations
         self.model.layer_list[self.index].update(
             layer=self.layer.v_model, unit=self.unit.v_model
@@ -127,7 +121,6 @@ class EditDialog(sw.Dialog):
         return
 
     def _update_aoi(self, change):
-
         # get the aoi
         aoi_ee = self.view.model.feature_collection
 
@@ -142,7 +135,6 @@ class EditDialog(sw.Dialog):
 
     @su.switch("loading", on_widgets=["card"])
     def set_dialog(self, layer_id=None):
-
         # show the dialog
         self.value = True
 
@@ -157,7 +149,6 @@ class EditDialog(sw.Dialog):
 
         # if data are empty
         if not layer_id:
-
             # default variables
             self.id = ""
             self.index = None
@@ -180,7 +171,6 @@ class EditDialog(sw.Dialog):
             self.save.disabled = True
 
         else:
-
             # find the index of the item to modify in the model
             self.index = next(
                 (i, l)

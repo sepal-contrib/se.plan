@@ -6,12 +6,10 @@ from component import parameter as cp
 
 
 class CostTile(sw.Tile):
-
     _COSTS = pd.read_csv(cp.layer_list).fillna("")
     _COSTS = _COSTS[_COSTS.theme == "cost"]
 
     def __init__(self):
-
         # name the tile
         title = cm.cost.title
         id_ = "nested_widget"

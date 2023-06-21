@@ -11,7 +11,6 @@ class CustomVector(sw.VectorField):
         """remove the select 'all feature' option as feature is used to name the AOIs"""
 
         def __init__(self, **kwargs):
-
             super().__init__(**kwargs)
 
             self.w_column.v_model = None
@@ -28,7 +27,6 @@ class CustomVector(sw.VectorField):
 
 class LoadShapes(v.ExpansionPanels):
     def __init__(self):
-
         # add a btn to click
         self.btn = sw.Btn(cm.map.shapes.btn, icon="mdi-download", class_="ml-2")
 
@@ -52,7 +50,6 @@ class LoadShapes(v.ExpansionPanels):
 
     @su.loading_button(debug=False)
     def read_data(self):
-
         # extract information for compacity
         value = self.w_vector.v_model["value"]
         column = self.w_vector.v_model["column"]

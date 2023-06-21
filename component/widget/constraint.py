@@ -27,7 +27,6 @@ class Constraint(sw.Row):
     "the custom dict v_model to transfer information to the other widgets of the application"
 
     def __init__(self, widget, name, header, layer, id_, **kwargs):
-
         # default
         self.id = id_
         self.layer = layer
@@ -98,7 +97,6 @@ class Binary(Constraint):
     """
 
     def __init__(self, name, header, layer, **kwargs):
-
         # get the translated name from cm
         t_name = getattr(cm.layers, name).name
 
@@ -128,7 +126,6 @@ class Range(Constraint):
     "(int): the number of steps used in the sliders"
 
     def __init__(self, name, header, unit, layer, **kwargs):
-
         # get the translated name from cm
         t_name = getattr(cm.layers, name).name
 
@@ -167,7 +164,6 @@ class Range(Constraint):
         # if noneType it means that my AOI is out of bounds with respect to my constraint
         # as it won't be usable I need to add a hint to the end user
         if any([min_ is None, max_ is None]):
-
             self.widget.error_messages = cm.constraints.error.out_of_aoi
             self.widget.min = 0
             self.widget.max = 1
@@ -175,7 +171,6 @@ class Range(Constraint):
             self.widget.step = 0.01
 
         else:
-
             # remove the error state
             self.widget.error_messages = []
 
@@ -199,7 +194,6 @@ class Range(Constraint):
 
 class CustomPanel(sw.ExpansionPanel):
     def __init__(self, category, criterias):
-
         # save title name
         self.title = getattr(cm.subtheme, category)
 
@@ -243,7 +237,6 @@ class CustomPanel(sw.ExpansionPanel):
         return self
 
     def _show_crit(self, change):
-
         for c in self.criterias:
             c.unable() if c.name in change["new"] else c.disable()
 

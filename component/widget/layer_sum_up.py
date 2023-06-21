@@ -7,9 +7,9 @@ from matplotlib import pyplot as plt
 from component import parameter as cp
 from component.message import cm
 
+
 # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
 def human_format(num, round_to=2):
-
     magnitude = 0
     while abs(num) >= 1000:
         magnitude += 1
@@ -22,7 +22,6 @@ def human_format(num, round_to=2):
 
 class LayerFull(sw.Layout):
     def __init__(self, layer_id, values, aoi_names, colors):
-
         # add one extra color for the AOI
         colors = [c for c in reversed([scolor.primary] + colors)]
 
@@ -50,7 +49,6 @@ class LayerFull(sw.Layout):
         # create a matplotlib stack horizontal bar chart
         w_chart = Output()
         with w_chart:
-
             # change pyplot style
             plt.style.use("dark_background")
 
@@ -88,7 +86,6 @@ class LayerFull(sw.Layout):
 
 class LayerPercentage(sw.Layout):
     def __init__(self, layer_id, pcts, colors):
-
         # add one extra color for the AOI
         colors = [scolor.primary] + colors
 

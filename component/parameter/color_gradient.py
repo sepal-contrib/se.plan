@@ -33,7 +33,6 @@ def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
 
     # Calcuate a color at each evenly spaced value of t from 1 to n
     for t in range(1, n):
-
         # Interpolate RGB vector for color at the current value of t
         curr_vector = []
         for j in range(3):

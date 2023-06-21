@@ -13,7 +13,6 @@ from component import parameter as cp
 
 class ValidationTile(sw.Tile):
     def __init__(self, aoi_tile, questionnaire_tile):
-
         # gather the io
         self.layer_model = questionnaire_tile.layer_model
         self.aoi_model = aoi_tile.view.model

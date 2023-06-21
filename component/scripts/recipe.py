@@ -21,7 +21,6 @@ def save_recipe(layer_model, aoi_model, question_model, recipe_name):
     json_file = res_dir / f"{utils.normalize_str(recipe_name)}.json"
 
     with json_file.open("w") as f:
-
         # remove gdf and feature_collection from aoi_model
         # it's not serializable
         aoi_dict = copy(aoi_model).export_data()
@@ -47,7 +46,6 @@ def load_recipe(aoi_tile, questionnaire_tile, path):
 
     # open the file and load the models
     with path.open() as f:
-
         data = json.loads(f.read())
 
         # empty the AoiView

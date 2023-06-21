@@ -9,7 +9,6 @@ from component.message import cm
 
 
 class PriorityTable(v.SimpleTable):
-
     _colors = cp.gradient(5)
 
     _BENEFITS = pd.read_csv(cp.layer_list).fillna("").sort_values(by=["subtheme"])
@@ -18,7 +17,6 @@ class PriorityTable(v.SimpleTable):
     _DEFAULT_V_MODEL = {layer_id: 4 for layer_id in _BENEFITS.layer_id}
 
     def __init__(self):
-
         # construct the checkbox list
         self.checkbox_list = {}
         for layer_id in self._BENEFITS.layer_id:
@@ -75,7 +73,6 @@ class PriorityTable(v.SimpleTable):
                 check.observe(self._on_check_change, "v_model")
 
     def _on_check_change(self, change):
-
         line = change["owner"]._metadata["label"]
 
         # if checkbox is unique and change == false recheck

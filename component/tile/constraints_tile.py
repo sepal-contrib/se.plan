@@ -11,7 +11,6 @@ from component import widget as cw
 
 
 class ConstraintTile(sw.Tile, HasTraits):
-
     _BENEFITS = pd.read_csv(cp.layer_list).fillna("").applymap(str.strip)
 
     # create custom_v_model as a traitlet
@@ -19,7 +18,6 @@ class ConstraintTile(sw.Tile, HasTraits):
     custom_v_model = Unicode("").tag(sync=True)
 
     def __init__(self, aoi_view, layer_model):
-
         # get the models
         self.aoi_model = aoi_view.model
         self.layer_model = layer_model
@@ -37,7 +35,6 @@ class ConstraintTile(sw.Tile, HasTraits):
         # create the criteria list
         self.criterias = []
         for key, c in cp.criterias.items():
-
             layer_row = layer_list[layer_list.layer_id == c["layer"]]
             unit = layer_row.unit.values[0]
             header = c["header"]
@@ -144,7 +141,6 @@ class ConstraintTile(sw.Tile, HasTraits):
         return self
 
     def _on_change(self, change):
-
         # insert the new values in custom_v_model
         tmp = json.loads(self.custom_v_model)
         tmp[change["owner"].id] = change["new"]

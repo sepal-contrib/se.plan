@@ -9,7 +9,6 @@ from component import parameter as cp
 
 
 class QuestionnaireModel(model.Model):
-
     constraints = Any("").tag(sync=True)
     priorities = Any("").tag(sync=True)
     recipe_name = Any("").tag(sync=True)

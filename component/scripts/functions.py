@@ -104,7 +104,6 @@ def set_constraints(constraints, constraint_list):
 
     # loop through all the constraint in the json list
     for name, value in constraints.items():
-
         # skip if the constraint is disabled
         if value is None or value == -1:
             continue
@@ -324,7 +323,6 @@ def _quintile(ee_image, ee_aoi, scale=100, name="layer_id"):
     vaild_quintiles_list = valid_quintiles.toList(valid_quintiles.size())
 
     def conditions(feature):
-
         feature = ee.Feature(feature)
 
         quintiles = ee.Image().byte()
@@ -365,7 +363,6 @@ def normalize_image(layer, ee_aoi, method="mixmax"):
 
 
 def get_expression(benefit_list, cost_list):
-
     fdict_bene, idict_bene, benefits_exp = get_benefit_expression(benefit_list)
     idict_cost, costs_exp = get_cost_expression(cost_list)
 
@@ -376,7 +373,6 @@ def get_expression(benefit_list, cost_list):
 
 
 def get_benefit_expression(benefit_list):
-
     # build expressions for benefits
     fdict_bene = {f"f{i}": e["norm_weight"] for i, e in enumerate(benefit_list)}
     idict_bene = {f"b{i}": e["eeimage"] for i, e in enumerate(benefit_list)}
@@ -389,7 +385,6 @@ def get_benefit_expression(benefit_list):
 
 
 def get_cost_expression(cost_list):
-
     idict = {f"c{i}": e["eeimage"] for i, e in enumerate(cost_list)}
     exp = [f"(c{i})" for i, e in enumerate(cost_list)]
     exp_string = f"({'+'.join(exp)})"
@@ -398,7 +393,6 @@ def get_cost_expression(cost_list):
 
 
 def get_constraint_expression(constraint_list):
-
     idict = {f"cn{i}": e["eeimage"] for i, e in enumerate(constraint_list)}
     exp = [f"(cn{i})" for i, e in enumerate(constraint_list)]
     exp_string = f"({'*'.join(exp)})"

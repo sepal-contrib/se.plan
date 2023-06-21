@@ -74,7 +74,6 @@ def get_image_stats(image, name, mask, geom, scale=100):
 
 
 def get_aoi_count(aoi, name):
-
     count_aoi = (
         ee.Image.constant(1)
         .rename(name)
@@ -87,7 +86,6 @@ def get_aoi_count(aoi, name):
 
 
 def get_image_percent_cover_pixelarea(image, aoi, name):
-
     image = image.rename("image")
     pixelArea = ee.Image.pixelArea().divide(10000)
     reducer = ee.Reducer.sum().group(1, "image")
@@ -195,7 +193,6 @@ def get_image_sum(image, aoi, name, mask):
 def get_benefits(
     layer_list: list, geom: ee.Geometry, constraint_mask: ee.Image
 ) -> ee.Dictionary:
-
     all_benefits_layers = [i for i in layer_list if i["theme"] == "benefit"]
     fn_all_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
     list(map(fn_all_benefit, all_benefits_layers))
@@ -260,7 +257,6 @@ def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
 
 
 def get_area_dashboard(stats):
-
     tmp = {}
     for i in stats:
         suitability_i = json.loads(i)
@@ -316,7 +312,6 @@ def get_theme_dashboard(stats):
 
 
 def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
-
     # create the final featureCollection
     # the first one is the aoi and the rest are sub areas
     ee_aoi_list = [aoi_model.feature_collection]

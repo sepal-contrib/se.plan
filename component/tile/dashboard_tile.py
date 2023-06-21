@@ -15,7 +15,6 @@ ID = "dashboard_widget"
 
 class DashThemeTile(sw.Tile):
     def __init__(self):
-
         txt = sw.Markdown(cm.dashboard.theme.txt)
 
         # TODO for no reason this alert is shared between DashThemeTile and
@@ -26,7 +25,6 @@ class DashThemeTile(sw.Tile):
         super().__init__(id_=ID, title=cm.dashboard.theme.title, alert=alert)
 
     def dev_set_summary(self, json_themes_values, aoi_names, colors):
-
         # init the layer list
         ben_layer, const_layer, cost_layer = [], [], []
 
@@ -38,7 +36,6 @@ class DashThemeTile(sw.Tile):
 
         for theme, layers in json_themes_values.items():
             for name, values in layers.items():
-
                 values = values["values"]
                 if theme == "benefit":
                     ben_layer.append(cw.LayerFull(name, values, aoi_names, colors))
@@ -81,11 +78,9 @@ class DashThemeTile(sw.Tile):
 
 class DashRegionTile(sw.Tile):
     def __init__(self):
-
         super().__init__(id_=ID, title=cm.dashboard.region.title)
 
     def set_summary(self, json_feature_values):
-
         feats = []
         for feat in json_feature_values:
             raw = json_feature_values[feat]["values"]

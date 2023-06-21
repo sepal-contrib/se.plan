@@ -10,7 +10,6 @@ from .cost_tile import CostTile
 
 class QuestionnaireTile(sw.Tile):
     def __init__(self, question_model, layer_model, aoi_view):
-
         # name the tile
         title = cm.questionnaire.title
         id_ = "questionnaire_widget"
@@ -25,7 +24,6 @@ class QuestionnaireTile(sw.Tile):
         # build the content and the stepper header
         tab_content = []
         for i, tile in enumerate(self.tiles):
-
             # add the title and content
             tab_content.append(v.Tab(children=[tile.get_title()]))
             tab_content.append(v.TabItem(children=[tile]))

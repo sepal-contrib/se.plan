@@ -14,12 +14,10 @@ ee.Initialize()
 
 
 def add_area(feature):
-
     return feature.set({"rp_area": feature.geometry().area()})
 
 
 def display_layer(layer, aoi_model, m):
-
     aoi_ee = aoi_model.feature_collection
     m.zoom_ee_object(aoi_ee.geometry())
     m.addLayer(layer.round().clip(aoi_ee.geometry()), cp.final_viz, "restoration layer")
@@ -28,13 +26,11 @@ def display_layer(layer, aoi_model, m):
 
 
 def export_as_csv(area, theme, aoi_name, recipe_name):
-
     # path to the dst file
     # the folder already exist as the recipe is exported
     dst = cp.result_dir / aoi_name / f"dashboard_{recipe_name}.csv"
 
     with dst.open("w") as dst:
-
         # get the aoi name list
         aoi_names = [aoi for aoi in area]
 

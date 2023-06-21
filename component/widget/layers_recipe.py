@@ -10,14 +10,12 @@ from component import widget as cw
 
 
 class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
-
     # load the layers
     LAYER_LIST = pd.read_csv(cp.layer_list).fillna("")
     LAYER_LIST = LAYER_LIST.rename(columns={"gee_asset": "layer", "layer_name": "name"})
     LAYER_LIST["weight"] = [0 for i in range(len(LAYER_LIST))]
 
     def __init__(self):
-
         super().__init__(class_="mt-5 mb-5", accordion=True, focusable=True)
 
         # display the default values (all with default layer and 0 valued weight)
@@ -41,7 +39,6 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
 
         ep_content = []
         for theme in cp.themes:
-
             # filter the layers
             tmp_layers = layer_list[layer_list.theme == theme]
 
@@ -51,7 +48,6 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
             # loop in these layers and create the widgets
             theme_layer_widgets = []
             for id_, asset in zip(tmp_layers.id, tmp_layers.layer):
-
                 # get the asset name as displayed in the hints
                 original_row = self.LAYER_LIST[self.LAYER_LIST.layer_id == id_]
                 original_asset = original_row["layer"].squeeze()
@@ -63,20 +59,17 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
 
                 # cannot make the slots work with icons so I need to move to intermediate layout
                 if theme == "benefit":
-
                     # get the informations to display from questionnaire
                     weight = json.loads(question_model.priorities)[id_]
                     color = cp.gradient(5)[weight]
                     icon = f"mdi-numeric-{weight}-circle"
 
                 elif theme == "cost":
-
                     # get the informations to display from questionnaire
                     color = cp.gradient(2)[1]  # always true
                     icon = "mdi-circle-slice-8"
 
                 elif id_ not in ["ecozones", "land_cover", "treecover_with_potential"]:
-
                     # get the informations to display from questionnaire
                     active = json.loads(question_model.constraints)[id_] != -1
                     color = cp.gradient(2)[active]

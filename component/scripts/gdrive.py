@@ -13,7 +13,6 @@ logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
 class gdrive(object):
     def __init__(self):
-
         self.initialize = ee.Initialize()
         self.credentials = ee.Credentials()
         self.service = discovery.build(
@@ -106,7 +105,6 @@ class gdrive(object):
         return local_files
 
     def delete_files(self, files):
-
         service = self.service
 
         for f in files:

@@ -5,12 +5,10 @@ from component.message import cm
 
 
 class CustomAoiDialog(sw.Dialog):
-
     feature = None
     "the geo_json feature selected by th user"
 
     def __init__(self):
-
         # create the widgets
         self.w_name = sw.TextField(label=cm.map.dialog.label, v_model=None)
         self.btn = sw.Btn(cm.map.dialog.btn, "mdi-check")
@@ -28,7 +26,6 @@ class CustomAoiDialog(sw.Dialog):
         self.btn.on_event("click", self._on_click)
 
     def _on_click(self, widget, data, event):
-
         # close the dialog
         # it will trigger the saving
         self.value = False
