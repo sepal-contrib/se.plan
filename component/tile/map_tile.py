@@ -14,7 +14,6 @@ from ipyleaflet import WidgetControl
 from ipyleaflet import GeoJSON, basemap_to_tiles, basemaps
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
-from ipywidgets import HTML
 
 from component.message import cm
 from component import parameter as cp
@@ -23,11 +22,9 @@ from component import widget as cw
 
 
 class MapTile(sw.Tile):
-
     EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
 
     def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile):
-
         # add the explanation
         mkd = sw.Markdown("  \n".join(cm.map.txt))
 
@@ -43,8 +40,7 @@ class MapTile(sw.Tile):
         )
 
         # create a window to display AOI information
-        self.html = HTML()
-        self.html.layout.margin = "0em 2em 0em 20em"
+        self.html = v.Html(tag="h3", style_="margin:0em 2em 0em 2em;")
         control = WidgetControl(widget=self.html, position="bottomright")
         self.m.add_control(control)
 
@@ -108,7 +104,6 @@ class MapTile(sw.Tile):
         self.name_dialog.observe(self.save_draw, "value")
 
     def _load_shapes(self, widget, event, data):
-
         # get the data from the selected file
         gdf, column = self.load_shape.read_data()
 
@@ -116,7 +111,6 @@ class MapTile(sw.Tile):
 
         # add them to the map
         for i, row in gdf.iterrows():
-
             # transform the data into a feature
             feat = {
                 "type": "Feature",
@@ -140,7 +134,6 @@ class MapTile(sw.Tile):
         return
 
     def _add_geom(self, geo_json, name):
-
         geo_json["properties"]["name"] = name
         self.draw_features["features"].append(geo_json)
 
@@ -241,7 +234,6 @@ class MapTile(sw.Tile):
         return self
 
     def _dashboard(self, widget, data, event):
-
         # handle the drawing features, affect them with a color an display them on the map as layers
         self._save_features()
 
@@ -281,14 +273,12 @@ class MapTile(sw.Tile):
             geo_json = self.polygonize(geo_json)
 
         if action == "created":  # no edit as you don't know which one to change
-
             # open the naming dialog (the popup will do the saving instead of this function)
             self.name_dialog.update_aoi(
                 geo_json, len(self.draw_features["features"]) + 1
             )
 
         elif action == "deleted":
-
             for feat in self.draw_features["features"]:
                 if feat["geometry"] == geo_json["geometry"]:
                     self.draw_features["features"].remove(feat)
@@ -315,7 +305,7 @@ class MapTile(sw.Tile):
             if "name" in feature["properties"]
             else "Main AOI"
         )
-        self.html.value = f"<h3><b>{name}</b></h3>"
+        self.html.children = [name]
 
         return self
 
