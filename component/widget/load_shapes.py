@@ -1,14 +1,14 @@
+import geopandas as gpd
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
-import geopandas as gpd
 
 from component.message import cm
 
 
 class CustomVector(sw.VectorField):
     def _update_file(self, change):
-        """remove the select 'all feature' option as feature is used to name the AOIs"""
+        """remove the select 'all feature' option as feature is used to name the AOIs."""
 
         def __init__(self, **kwargs):
             super().__init__(**kwargs)

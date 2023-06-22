@@ -1,12 +1,12 @@
 import json
 
 import ipyvuetify as v
-from sepal_ui import sepalwidgets as sw
 import pandas as pd
+from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
-from component.message import cm
 from component import widget as cw
+from component.message import cm
 
 
 class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
@@ -22,13 +22,13 @@ class layerRecipe(v.ExpansionPanels, sw.SepalWidget):
         self.digest_layers()
 
     def digest_layers(self, layer_model=None, question_model=None):
-        """
-        Digest the layers as a json list. This list should be composed of at least 6 information : id, name, layer, theme and subtheme
+        """Digest the layers as a json list.
+
+        This list should be composed of at least 6 information : id, name, layer, theme and subtheme
         When digestion, the layout will represent each layer sorted by categories
         fore each one of them if the layer used is the default one we'll write default, if not the name of the layer.
-        for each one of them the value of the weight will also be set
+        for each one of them the value of the weight will also be set.
         """
-
         # exit if models are not set
         if any([layer_model is None, question_model is None]):
             return self

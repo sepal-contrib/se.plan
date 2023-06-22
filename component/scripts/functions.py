@@ -1,9 +1,8 @@
-import ee
 import json
-from traitlets import Any, HasTraits
+
+import ee
 
 from component import parameter as cp
-from component import model
 from component.message import cm
 
 ee.Initialize()
@@ -24,9 +23,9 @@ bool_constraint_names = [
 
 
 def wlc(layer_list, constraints, priorities, aoi_ee):
-    """
-    Compute the resoration suitability indicator over the specified AOI
-    the computation will take into account all the parameters specified by the user in the app
+    """Compute the resoration suitability indicator over the specified AOI.
+
+    The computation will take into account all the parameters specified by the user in the app.
 
     Args:
         layer_list (dict): the list of layers items
@@ -45,7 +44,10 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
     benefit_list = [
         i for i in layer_list if i["theme"] == "benefit" and priorities[i["id"]] != 0
     ]
-    fn_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+
+    def fn_benefit(i):
+        return i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+
     list(map(fn_benefit, benefit_list))
 
     cost_list = [i for i in layer_list if i["theme"] == "cost"]
@@ -63,9 +65,10 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
 
     # normalize benefit weights to 0 - 1
     sum_ = sum(priorities[i["id"]] for i in benefit_list)
-    fn_weight = lambda i: i.update(
-        {"norm_weight": round((priorities[i["id"]] / sum_), 5)}
-    )
+
+    def fn_weight(i):
+        return i.update({"norm_weight": round(priorities[i["id"]] / sum_, 5)})
+
     list(map(fn_weight, benefit_list))
 
     # calc wlc image
@@ -91,8 +94,7 @@ def wlc(layer_list, constraints, priorities, aoi_ee):
 
 
 def set_constraints(constraints, constraint_list):
-    """
-    Update the constraint_layers list with filtered ee.Images according to user parameters
+    """Update the constraint_layers list with filtered ee.Images according to user parameters.
 
     Args:
         constraints (dict): a str json formatted list of constraints. Use the formatting specified in the QuestionModel
@@ -101,7 +103,6 @@ def set_constraints(constraints, constraint_list):
     Return:
         (list): the updated version of the constraints_layers
     """
-
     # loop through all the constraint in the json list
     for name, value in constraints.items():
         # skip if the constraint is disabled
@@ -145,15 +146,15 @@ def set_constraints(constraints, constraint_list):
 
 
 def get_layer(layer_name, constraint_list):
-    """Return the layer dict
+    """Return the layer dict.
 
     Args:
         layer_name(str): the layer name (with spaces)
         constraint_list(list of dict): the list of each layer and it's eeimage
 
     Return:
-        (dict): the layer dict"""
-
+    (dict): the layer dict
+    """
     # for all land cover constraints we use the same layer
     if layer_name in cp.land_use_criterias:
         constraint_layer = next(i for i in constraint_list if i["id"] == "land_cover")
@@ -166,8 +167,7 @@ def get_layer(layer_name, constraint_list):
 
 
 def get_cat_constraint(cat_id, value, name, layer_id):
-    """
-    Return fully defined layer dict for the constraint list
+    """Return fully defined layer dict for the constraint list.
 
     Args:
         cat_id (int): the category number to mask in the landcover image
@@ -178,7 +178,6 @@ def get_cat_constraint(cat_id, value, name, layer_id):
     Return:
         (dict): the fully qualified layer dict
     """
-
     # read the ee image and mask it according to the value
     image = ee.Image(layer_id).select("discrete_classification").unmask()
     image = image.neq(cat_id) if value else image.eq(cat_id)
@@ -193,9 +192,9 @@ def get_cat_constraint(cat_id, value, name, layer_id):
 
 
 def get_range_constraint(values, layer_id):
-    """
-    set a contraint in the provided layer list using the name provided by the criteria and the values provided by the user.
-    The function will find the layer in the list and update the eeimage mask
+    """Set a contraint in the provided layer list using the name provided by the criteria and the values provided by the user.
+
+    The function will find the layer in the list and update the eeimage mask.
 
     Args:
         values (list): the min and max value of the specified range
@@ -204,7 +203,6 @@ def get_range_constraint(values, layer_id):
     Return:
         (ee.Image): the masked gee image
     """
-
     # extract an ee.Image
     image = ee.Image(layer_id)
 
@@ -215,9 +213,9 @@ def get_range_constraint(values, layer_id):
 
 
 def get_bool_constraint(value, layer_id):
-    """
-    set a contraint in the provided layer list using the name provided by the criteria and the value provided by the user.
-    The function will find the layer in the list and update the eeimage mask
+    """Set a contraint in the provided layer list using the name provided by the criteria and the value provided by the user.
+
+    The function will find the layer in the list and update the eeimage mask.
 
     Args:
         value (bool): a bool value to mask the category. True: mask it, False: keep only this one
@@ -226,7 +224,6 @@ def get_bool_constraint(value, layer_id):
     Return:
         (ee.Image): the masked gee image
     """
-
     # extract an ee.Image
     image = ee.Image(layer_id)
 
@@ -237,8 +234,7 @@ def get_bool_constraint(value, layer_id):
 
 
 def normalize_benefits(benefit_list, ee_aoi, method="minmax"):
-    """
-    Normalize each benefits using the provided method
+    """Normalize each benefits using the provided method.
 
     Args:
         benefit_list (list): the list of the benefit
@@ -249,7 +245,6 @@ def normalize_benefits(benefit_list, ee_aoi, method="minmax"):
     Return:
         the normalized benefit_list
     """
-
     # update the layer images
     for layer in benefit_list:
         layer.update(eeimage=normalize_image(layer, ee_aoi, method))
@@ -258,8 +253,7 @@ def normalize_benefits(benefit_list, ee_aoi, method="minmax"):
 
 
 def _minmax(ee_image, ee_aoi, scale=10000, name="layer_id"):
-    """use the minmax normalization"""
-
+    """Use the minmax normalization."""
     mmvalues = ee_image.reduceRegion(
         reducer=ee.Reducer.minMax(),
         geometry=ee_aoi.geometry(),
@@ -280,8 +274,7 @@ def _minmax(ee_image, ee_aoi, scale=10000, name="layer_id"):
 
 
 def _percentile(ee_image, ee_aoi, scale=10000, percentile=[3, 97], name="layer_id"):
-    """Use the percentile normalization"""
-
+    """Use the percentile normalization."""
     tmp_ee_image = ee_image.rename("img")
 
     percents = tmp_ee_image.reduceRegion(
@@ -297,8 +290,7 @@ def _percentile(ee_image, ee_aoi, scale=10000, percentile=[3, 97], name="layer_i
 
 
 def _quintile(ee_image, ee_aoi, scale=100, name="layer_id"):
-    """use quintile normailzation"""
-
+    """Use quintile normailzation."""
     quintile_collection = ee_image.reduceRegions(
         collection=ee_aoi,
         reducer=ee.Reducer.percentile(
@@ -347,15 +339,13 @@ def _quintile(ee_image, ee_aoi, scale=100, name="layer_id"):
 
 
 def normalize_image(layer, ee_aoi, method="mixmax"):
-    """
-    Return the normalize image of a set layer using the provided method
+    """Return the normalize image of a set layer using the provided method.
 
     Args:
         layer (dict): the fully qualified layer dict
         ee_aoi (ee.FeatureCollection): the defined aoi
         method (str): the method to use
     """
-
     normalize = {"minmax": _minmax, "quintile": _quintile}
     return normalize[method](
         ee.Image(layer["layer"]), ee_aoi, name=getattr(cm.layers, layer["id"]).name

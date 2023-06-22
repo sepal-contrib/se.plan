@@ -2,7 +2,6 @@ import json
 
 import ipyvuetify as v
 import pandas as pd
-import numpy as np
 
 from component import parameter as cp
 from component.message import cm
@@ -76,10 +75,10 @@ class PriorityTable(v.SimpleTable):
         line = change["owner"]._metadata["label"]
 
         # if checkbox is unique and change == false recheck
-        if change["new"] == False:
+        if change["new"] is False:
             unique = True
             for check in self.checkbox_list[line]:
-                if check.v_model == True:
+                if check.v_model is True:
                     unique = False
                     break
 
@@ -99,12 +98,11 @@ class PriorityTable(v.SimpleTable):
         return
 
     def load_data(self, data):
-        """load the data from a questionnaire io"""
-
+        """load the data from a questionnaire io."""
         data = json.loads(data)
 
         # check the appropriate checkboxes
-        for k, v in data.items():
-            self.checkbox_list[k][v].v_model = True
+        for k, val in data.items():
+            self.checkbox_list[k][val].v_model = True
 
         return self

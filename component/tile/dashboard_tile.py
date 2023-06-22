@@ -1,13 +1,8 @@
-from random import random
-
-from sepal_ui import sepalwidgets as sw
-import pandas as pd
 import ipyvuetify as v
+from sepal_ui import sepalwidgets as sw
 
-from component.message import cm
 from component import widget as cw
-from component import parameter as cp
-
+from component.message import cm
 
 ID = "dashboard_widget"
 "the dashboard tiles share id"
@@ -15,7 +10,7 @@ ID = "dashboard_widget"
 
 class DashThemeTile(sw.Tile):
     def __init__(self):
-        txt = sw.Markdown(cm.dashboard.theme.txt)
+        sw.Markdown(cm.dashboard.theme.txt)
 
         # TODO for no reason this alert is shared between DashThemeTile and
         # DashRegionTile. that's a wanted behaviour but I would like to have more control over it

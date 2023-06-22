@@ -1,5 +1,3 @@
-import random
-
 import pandas as pd
 from sepal_ui import model
 from traitlets import Any

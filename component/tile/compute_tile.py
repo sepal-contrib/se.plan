@@ -1,14 +1,13 @@
 from datetime import datetime
 from pathlib import Path
-from traitlets import link
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
-from component import scripts as cs
-from component.message import cm
-from component import widget as cw
 from component import parameter as cp
+from component import scripts as cs
+from component import widget as cw
+from component.message import cm
 
 
 class ValidationTile(sw.Tile):
@@ -67,15 +66,13 @@ class ValidationTile(sw.Tile):
         self.w_name.on_event("blur", self._normalize_name)
 
     def _normalize_name(self, widget, event, data):
-        """normalize the recipe name on blur as it will be used everywhere else"""
-
+        """normalize the recipe name on blur as it will be used everywhere else."""
         widget.v_model is None or su.normalize_str(widget.v_model)
 
         return self
 
     def _recipe_placeholder(self, change):
-        """name the recipe with the date"""
-
+        """name the recipe with the date."""
         now = datetime.now()
 
         self.w_name.v_model = f'recipe_{now.strftime("%Y-%m-%d")}'
@@ -84,8 +81,7 @@ class ValidationTile(sw.Tile):
 
     @su.loading_button(debug=True)
     def _validate_data(self, widget, event, data):
-        """validate the data and release the computation btn"""
-
+        """validate the data and release the computation btn."""
         # watch the inputs
         self.layers_recipe.digest_layers(self.layer_model, self.question_model)
         self.layers_recipe.show()
@@ -98,8 +94,7 @@ class ValidationTile(sw.Tile):
         return self
 
     def load_recipe(self, widget, event, data, path=None):
-        """load the recipe file into the different io, then update the display of the table"""
-
+        """load the recipe file into the different io, then update the display of the table."""
         # check if path is set, if not use the one frome file select
         path = path or self.file_select.v_model
 
