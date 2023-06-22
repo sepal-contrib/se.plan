@@ -1,8 +1,8 @@
 import pandas as pd
 from sepal_ui import sepalwidgets as sw
 
-from component.message import cm
 from component import parameter as cp
+from component.message import cm
 
 
 class CostTile(sw.Tile):

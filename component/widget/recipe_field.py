@@ -2,9 +2,7 @@ from sepal_ui import sepalwidgets as sw
 
 
 class RecipeTextField(sw.TextField):
-    """
-    preformated textfield design to display information in the compute resume
-    """
+    """Preformated textfield design to display information in the compute resume."""
 
     def __init__(self, color, name, asset_name):
         super().__init__(
@@ -18,9 +16,7 @@ class RecipeTextField(sw.TextField):
 
 
 class RecipeIcon(sw.Icon):
-    """
-    preformated Icon design to display information in the compute resume
-    """
+    """Preformated Icon design to display information in the compute resume."""
 
     def __init__(self, color, icon):
         super().__init__(

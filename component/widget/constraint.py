@@ -1,19 +1,18 @@
 import re
 
-from traitlets import HasTraits, Any, observe, dlink
-from sepal_ui import sepalwidgets as sw
 import ee
+from sepal_ui import sepalwidgets as sw
+from traitlets import Any
 
 from component.message import cm
-from component import parameter as cp
 
 ee.Initialize()
 
 
 class Constraint(sw.Row):
-    """
-    Custom Constraint using a slider to define the used values. Anything between
-    min and max will be included in the computation of the restoration index
+    """Custom Constraint using a slider to define the used values.
+
+    Anything between min and max will be included in the computation of the restoration index.
 
     Args:
         widget (v.Widget): any widget used to define the value of the constraint filter
@@ -51,8 +50,7 @@ class Constraint(sw.Row):
         self.widget.observe(self._on_change, "v_model")
 
     def _on_change(self, change):
-        """update v_model when the widget is changed"""
-
+        """update v_model when the widget is changed."""
         # update the custom v_model
         # if the widget is displayed on the questionnaire
         if self.viz:
@@ -61,8 +59,7 @@ class Constraint(sw.Row):
         return
 
     def disable(self):
-        """overwrite disable method to set the custom_v_model to -1"""
-
+        """overwrite disable method to set the custom_v_model to -1."""
         # update the custom v_model
         self.custom_v_model = -1
 
@@ -72,11 +69,10 @@ class Constraint(sw.Row):
         return self
 
     def unable(self):
-        """
-        Overwrite unable method to set the custom_v_model to the widget current value
-        (kept when successively hide and show the same constraint)
-        """
+        """Overwrite unable method to set the custom_v_model to the widget current value.
 
+        (kept when successively hide and show the same constraint).
+        """
         # update the custom v_model
         self.custom_v_model = self.widget.v_model
 
@@ -87,8 +83,9 @@ class Constraint(sw.Row):
 
 
 class Binary(Constraint):
-    """
-    Custom Constraint using a Switch to define the used values. if value is 1 then we use all the ones, if not we use the 0s.
+    """Custom Constraint using a Switch to define the used values.
+
+    If value is 1 then we use all the ones, if not we use the 0s.
 
     Args:
         name (str): the id of the layer in the parameter dict
@@ -111,9 +108,9 @@ class Binary(Constraint):
 
 
 class Range(Constraint):
-    """
-    Custom Constraint using a slider to define the used values. Anything between
-    min and max will be included in the computation of the restoration index
+    """Custom Constraint using a slider to define the used values.
+
+    Anything between min and max will be included in the computation of the restoration index.
 
     Args:
         name (str): the id of the layer in the parameter dict
@@ -142,16 +139,15 @@ class Range(Constraint):
         super().__init__(widget, name=t_name, header=header, id_=name, layer=layer)
 
     def set_values(self, geometry, layer, unit):
-        """
-        Compute the extreme value of the layer on the AOI and use them as min and max values of the slider.
-        Use 1000 step to navigate from these values
+        """Compute the extreme value of the layer on the AOI and use them as min and max values of the slider.
+
+        Use 1000 step to navigate from these values.
 
         Args:
             geometry (ee.Geometry): the AOI to compute min and max
             layer (str): the Asset id of the layer
             unit (str): the unit of the customized layer
         """
-
         # compute the min and the max for the specific geometry and layer
         ee_image = ee.Image(layer).select(0)
 
@@ -229,8 +225,7 @@ class CustomPanel(sw.ExpansionPanel):
         self.select.observe(self._on_change, "v_model")
 
     def _on_change(self, change):
-        """remove the menu-props if at least 1 items is added"""
-
+        """remove the menu-props if at least 1 items is added."""
         if len(change["old"]) == 0:
             self.select.menu_props = {}
 
@@ -243,8 +238,7 @@ class CustomPanel(sw.ExpansionPanel):
         return self
 
     def expand(self):
-        """when the custom panel expand I want to display only the title"""
-
+        """when the custom panel expand I want to display only the title."""
         self.header.children = [self.title]
 
         # automatically open the criterias if none are selected
@@ -254,13 +248,14 @@ class CustomPanel(sw.ExpansionPanel):
         return self
 
     def shrunk(self):
-        """when shrunked I want to display the chips int the header along the title"""
-
+        """when shrunked I want to display the chips int the header along the title."""
         # automatically close the criterias if none are selected
         self.select.menu_props = {}
 
         # get the chips
-        chip = lambda label: sw.Chip(class_="ml-1 mr-1", small=True, children=[label])
+        def chip(label):
+            return sw.Chip(class_="ml-1 mr-1", small=True, children=[label])
+
         chips = sw.Flex(children=[chip(c.name) for c in self.criterias if c.viz])
 
         # write the new header content

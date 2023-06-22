@@ -1,9 +1,9 @@
-from sepal_ui import aoi
-from sepal_ui.message import ms
-import pandas as pd
 import ee
 import ipyvuetify as v
+import pandas as pd
+from sepal_ui import aoi
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.message import ms
 
 from component import parameter as cp
 from component.message import cm
@@ -13,9 +13,7 @@ ee.Initialize()
 
 
 class CustomAoiTile(aoi.AoiTile):
-    """
-    overwrite the map of the tile to replace it with a customMap
-    """
+    """Overwrite the map of the tile to replace it with a customMap."""
 
     def __init__(self, methods="ALL", gee=True, **kwargs):
         # create the map
@@ -46,8 +44,7 @@ class CustomAoiTile(aoi.AoiTile):
         self.view.observe(self._check_lmic, "updated")
 
     def _check_lmic(self, change):
-        """Every time a new aoi is set check if it fits the LMIC country list"""
-
+        """Every time a new aoi is set check if it fits the LMIC country list."""
         # check over the lmic country number
         if self.view.model.admin:
             code = self.view.model.admin

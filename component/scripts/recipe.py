@@ -1,7 +1,7 @@
 import json
-from datetime import datetime
 from copy import copy
 from pathlib import Path
+
 import ee
 from sepal_ui.scripts import utils
 
@@ -11,8 +11,7 @@ ee.Initialize()
 
 
 def save_recipe(layer_model, aoi_model, question_model, recipe_name):
-    """save the recipe in a json file with a timestamp"""
-
+    """Save the recipe in a json file with a timestamp."""
     # get the result folder
     res_dir = cp.result_dir / aoi_model.name
     res_dir.mkdir(exist_ok=True)
@@ -39,8 +38,7 @@ def save_recipe(layer_model, aoi_model, question_model, recipe_name):
 
 
 def load_recipe(aoi_tile, questionnaire_tile, path):
-    """load the recipe element in the different element of the app"""
-
+    """Load the recipe element in the different element of the app."""
     # cast to pathlib
     path = Path(path)
 

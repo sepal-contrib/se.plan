@@ -1,8 +1,7 @@
-from traitlets import HasTraits, Unicode
 import json
 
 from sepal_ui import sepalwidgets as sw
-from traitlets import link
+from traitlets import HasTraits, Unicode, link
 
 from component import widget as cw
 from component.message import cm

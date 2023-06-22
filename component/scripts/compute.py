@@ -1,14 +1,9 @@
 from math import isclose
 
-from traitlets import Unicode
-import ipyvuetify as v
 import ee
-from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
-from component import scripts as cs
 from component.message import cm
-
 
 ee.Initialize()
 

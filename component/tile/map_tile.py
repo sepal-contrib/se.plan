@@ -1,24 +1,21 @@
-from pathlib import Path
 import json
 from copy import deepcopy
 
-from sepal_ui import color as sc
-from sepal_ui import sepalwidgets as sw
-from sepal_ui import mapping as sm
-from sepal_ui.scripts import utils as su
-import ipyvuetify as v
-from shapely import geometry as sg
 import geopandas as gpd
-import ee
-from ipyleaflet import WidgetControl
-from ipyleaflet import GeoJSON, basemap_to_tiles, basemaps
+import ipyvuetify as v
+from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
+from sepal_ui import color as sc
+from sepal_ui import mapping as sm
+from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts import utils as su
+from shapely import geometry as sg
 
-from component.message import cm
 from component import parameter as cp
 from component import scripts as cs
 from component import widget as cw
+from component.message import cm
 
 
 class MapTile(sw.Tile):
@@ -140,8 +137,7 @@ class MapTile(sw.Tile):
         return self
 
     def _compute(self, widget, data, event):
-        """compute the restoration plan and display the map"""
-
+        """compute the restoration plan and display the map."""
         # remove the previous sub aoi from the map
         self.m.remove_all()
         self.m.dc.clear()
@@ -189,14 +185,13 @@ class MapTile(sw.Tile):
         return self
 
     def _save_features(self):
-        """save the features as layers on the map"""
-
+        """save the features as layers on the map."""
         # remove any sub aoi layer
         l_2_keep = ["restoration layer", self.aoi_model.name]
         [
-            self.m.remove_layer(l, none_ok=True)
-            for l in self.m.layers
-            if l.name not in l_2_keep
+            self.m.remove_layer(lyr, none_ok=True)
+            for lyr in self.m.layers
+            if lyr.name not in l_2_keep
         ]
 
         # save the drawn features
@@ -266,8 +261,7 @@ class MapTile(sw.Tile):
         return self
 
     def _handle_draw(self, target, action, geo_json):
-        """handle the draw on map event"""
-
+        """handle the draw on map event."""
         # polygonize circles
         if "radius" in geo_json["properties"]["style"]:
             geo_json = self.polygonize(geo_json)
@@ -286,9 +280,8 @@ class MapTile(sw.Tile):
         return self
 
     def save_draw(self, change):
-        """save the geojson after the click on the button with it's custom name"""
-
-        if change["new"] == True:
+        """save the geojson after the click on the button with it's custom name."""
+        if change["new"] is True:
             return self
 
         self._add_geom(self.name_dialog.feature, self.name_dialog.w_name.v_model)
@@ -296,8 +289,7 @@ class MapTile(sw.Tile):
         return self
 
     def _display_name(self, feature, **kwargs):
-        """update the AOI in the html viewver widget"""
-
+        """update the AOI in the html viewver widget."""
         # if the feature is a aoi it has no name so I display only the sub AOI name
         # it will be solved with: https://github.com/12rambau/sepal_ui/issues/390
         name = (
@@ -311,8 +303,7 @@ class MapTile(sw.Tile):
 
     @staticmethod
     def polygonize(geo_json):
-        """
-        Transform a ipyleaflet circle (a point with a radius) into a GeoJson multipolygon
+        """Transform a ipyleaflet circle (a point with a radius) into a GeoJson multipolygon.
 
         Params:
             geo_json (json): the circle geojson
@@ -320,7 +311,6 @@ class MapTile(sw.Tile):
         Return:
             (json): the polygonised circle
         """
-
         # get the input
         radius = geo_json["properties"]["style"]["radius"]
         coordinates = geo_json["geometry"]["coordinates"]

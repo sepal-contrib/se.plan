@@ -1,8 +1,8 @@
-from sepal_ui import color as scolor
-from sepal_ui import sepalwidgets as sw
 import pandas as pd
 from ipywidgets import Output
 from matplotlib import pyplot as plt
+from sepal_ui import color as scolor
+from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
 from component.message import cm
@@ -94,7 +94,7 @@ class LayerPercentage(sw.Layout):
 
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_row = layer_list[layer_list.layer_id == layer_id].squeeze()
+        layer_list[layer_list.layer_id == layer_id].squeeze()
 
         # deal with land_use special case
         if layer_id in [*cp.land_use_criterias]:
@@ -107,7 +107,7 @@ class LayerPercentage(sw.Layout):
                 "unit",
             ]
             content = ["", "", layer_id, "", layer_id, "HA"]
-            layer_row = pd.Series(dict(zip(columns, content)))
+            pd.Series(dict(zip(columns, content)))
 
         # add the title
         w_title = sw.Html(tag="h4", children=[t_layer.name])

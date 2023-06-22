@@ -1,16 +1,26 @@
-from traitlets import HasTraits, Unicode
+"""This module provides a tile for creating and managing constraints for a given area of interest (AOI)."""
 import json
 from itertools import product
-from sepal_ui import sepalwidgets as sw
+
 import ipyvuetify as v
 import pandas as pd
+from sepal_ui import sepalwidgets as sw
+from traitlets import HasTraits, Unicode
 
-from component.message import cm
 from component import parameter as cp
 from component import widget as cw
+from component.message import cm
 
 
 class ConstraintTile(sw.Tile, HasTraits):
+    """A tile for creating and managing constraints for a given area of interest (AOI).
+
+    Attributes:
+        custom_v_model (str): A JSON string representing the current values of the constraints.
+        aoi_model (sepal_ui.scripts.utils.AoiModel): The AOI model.
+        layer_model (component.parameter.LayerModel): The layer model.
+    """
+
     _BENEFITS = pd.read_csv(cp.layer_list).fillna("").applymap(str.strip)
 
     # create custom_v_model as a traitlet
@@ -76,51 +86,47 @@ class ConstraintTile(sw.Tile, HasTraits):
         aoi_view.observe(self._update_constraints, "updated")
 
     def _update_constraints(self, change):
-        """update all the constraints using sliders based on the geometry and the layer they use"""
-
+        """update all the constraints using sliders based on the geometry and the layer they use."""
         # unable constraint selection
-        for cp in self.panels.children:
-            cp.select.disabled = False
-            cp.select.persistent_hint = False
-            cp.select.hint = None
+        for chld_panel in self.panels.children:
+            chld_panel.select.disabled = False
+            chld_panel.select.persistent_hint = False
+            chld_panel.select.hint = None
 
         # reevaluate every layer over the AOI with the default layer
-        for c in self.criterias:
-            if isinstance(c, cw.Range):
+        for criteria in self.criterias:
+            if isinstance(criteria, cw.Range):
                 layer_list = self.layer_model.layer_list
-                layer = next(l for l in layer_list if l["id"] == c.id)
+                layer = next(lyr for lyr in layer_list if lyr["id"] == criteria.id)
                 asset = layer["layer"]
                 unit = layer["unit"]
                 geometry = self.aoi_model.feature_collection.geometry()
-                c.set_values(geometry, asset, unit)
+                criteria.set_values(geometry, asset, unit)
 
         return self
 
     def _reset_constraint(self, change):
-        """update the specified constraint if using slider based on the geometry and the layer it uses"""
-
+        """update the specified constraint if using slider based on the geometry and the layer it uses."""
         if change["new"] == "":
             return self
 
-        for c in self.criterias:
-            if c.id == change["new"] and isinstance(c, cw.Range):
+        for criteria in self.criterias:
+            if criteria.id == change["new"] and isinstance(criteria, cw.Range):
                 layer_list = self.layer_model.layer_list
-                layer = next(l for l in layer_list if l["id"] == c.id)
+                layer = next(lyr for lyr in layer_list if lyr["id"] == criteria.id)
                 asset = layer["layer"]
                 unit = layer["unit"]
                 geometry = self.aoi_model.feature_collection.geometry()
-                c.set_values(geometry, asset, unit)
+                criteria.set_values(geometry, asset, unit)
 
         return self
 
     def load_data(self, data):
-        """
-        load the data from a json string
+        """Load the data from a json string.
 
         Args:
             data (dict): data to load in the panel using the same format as the queltion_model
         """
-
         # load the data
         data = json.loads(data)
 
@@ -128,15 +134,15 @@ class ConstraintTile(sw.Tile, HasTraits):
         self._update_constraints(None)
 
         # activate every criteria via their panels selector
-        for p in self.panels.children:
+        for panel in self.panels.children:
             criterias = []
-            for c, (k, v) in product(p.criterias, data.items()):
-                if c.id == k and v != -1:
-                    c.widget.v_model = v
-                    criterias.append(c.name)
+            for criteria, (key, value) in product(panel.criterias, data.items()):
+                if criteria.id == key and value != -1:
+                    criteria.widget.v_model = value
+                    criterias.append(criteria.name)
 
-            p.select.v_model = criterias
-            p.shrunk()
+            panel.select.v_model = criterias
+            panel.shrunk()
 
         return self
 
@@ -149,8 +155,7 @@ class ConstraintTile(sw.Tile, HasTraits):
         return
 
     def _on_panel_change(self, change):
-        """revaluate each panel title when the v_model of the expansionpanels is changed"""
-
+        """revaluate each panel title when the v_model of the expansionpanels is changed."""
         # loop in the custom panels
         for i, p in enumerate(self.panels.children):
             p.expand() if i == change["new"] else p.shrunk()

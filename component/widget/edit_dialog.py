@@ -1,14 +1,12 @@
-from traitlets import Unicode
-import json
 from pathlib import Path
 
-from sepal_ui import sepalwidgets as sw
-from sepal_ui import mapping as sm
-from sepal_ui import color
-from sepal_ui.scripts import utils as su
-import pandas as pd
 import ee
+import pandas as pd
 from ipyleaflet import WidgetControl
+from sepal_ui import color
+from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts import utils as su
+from traitlets import Unicode
 
 from component import parameter as cp
 from component.message import cm
@@ -93,7 +91,7 @@ class EditDialog(sw.Dialog):
             # if the map cannot be displayed then return to init
             try:
                 self.display_on_map(image, geometry)
-            except Exception as e:
+            except Exception:
                 widget.v_model = self.init_layer
 
         return self
@@ -139,9 +137,9 @@ class EditDialog(sw.Dialog):
         self.value = True
 
         # remove the images
-        for l in self.m.layers:
-            if not (l.name in ["aoi", "CartoDB.DarkMatter", "CartoDB.Positron"]):
-                self.m.remove_layer(l)
+        for lyr in self.m.layers:
+            if lyr.name not in ["aoi", "CartoDB.DarkMatter", "CartoDB.Positron"]:
+                self.m.remove_layer(lyr)
 
         # disable the updated value
         # to trigger the change on exit
@@ -173,9 +171,9 @@ class EditDialog(sw.Dialog):
         else:
             # find the index of the item to modify in the model
             self.index = next(
-                (i, l)
-                for i, l in enumerate(self.model.layer_list)
-                if l["id"] == layer_id
+                (i, lyr)
+                for i, lyr in enumerate(self.model.layer_list)
+                if lyr["id"] == layer_id
             )[0]
             self.id = layer_id
 
@@ -211,14 +209,12 @@ class EditDialog(sw.Dialog):
         return
 
     def display_on_map(self, image, geometry):
-        """
-        Display the image on the map
+        """Display the image on the map.
 
         Args:
             image (str): the asset name of the image
             geometry (ee.Geometry): the geometry of the AOI
         """
-
         # clip image
         ee_image = ee.Image(image).clip(geometry)
 

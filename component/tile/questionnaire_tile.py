@@ -1,11 +1,12 @@
-from sepal_ui import sepalwidgets as sw
 import ipyvuetify as v
+from sepal_ui import sepalwidgets as sw
 
-from component.message import cm
 from component import widget as cw
+from component.message import cm
+
 from .constraints_tile import ConstraintTile
-from .priority_tile import PriorityTile
 from .cost_tile import CostTile
+from .priority_tile import PriorityTile
 
 
 class QuestionnaireTile(sw.Tile):
@@ -57,16 +58,14 @@ class QuestionnaireTile(sw.Tile):
         self.dialog.observe(self.constraint_tile._reset_constraint, "updated")
 
     def _open_dialog(self, widget, event, data):
-        """populate and update the dialog"""
-
+        """populate and update the dialog."""
         # get the layer informations and
         self.dialog.set_dialog(widget._metadata["layer"])
 
         return
 
     def load_data(self, data):
-        """load a questionnaire from a dict source"""
-
+        """load a questionnaire from a dict source."""
         # relaod the "range" constraints
         self.constraint_tile._update_constraints()
 

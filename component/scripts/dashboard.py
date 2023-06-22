@@ -1,14 +1,11 @@
-import ee
 import json
-from datetime import datetime as dt
-import os
 
+import ee
 from sepal_ui.scripts import utils as su
 
 
 def _quintile(image, geometry, scale=100):
-    """Computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties"""
-
+    """Computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties."""
     quintile_collection = image.reduceRegion(
         geometry=geometry,
         reducer=ee.Reducer.percentile(
@@ -38,7 +35,7 @@ def get_areas(image, geometry, scale=100):
 
     total = areas_list.reduce(ee.Reducer.sum())
 
-    sum_img = image.reduceRegion(
+    image.reduceRegion(
         reducer=ee.Reducer.sum(),
         geometry=geometry,
         scale=100,
@@ -61,7 +58,6 @@ def get_image_stats(image, name, mask, geom, scale=100):
     Returns:
         eedictionary : a dictionary of suitability with the name of the region of intrest, list of values for each category, and total area.
     """
-
     image = image.where(mask.eq(0), 6)
 
     list_values, total = get_areas(image, geom)
@@ -116,8 +112,10 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
 
 
 def get_image_percent_cover(image, aoi, name):
-    """computes the percent coverage of a constraint in relation to the total aoi. returns dict name:{value:[],total:[]}"""
+    """Computes the percent coverage of a constraint in relation to the total aoi.
 
+    returns dict name:{value:[],total:[]}.
+    """
     count_img = (
         image.Not()
         .selfMask()
@@ -147,8 +145,7 @@ def get_image_percent_cover(image, aoi, name):
 
 
 def get_image_mean(image, aoi, name, mask):
-    """computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
-
+    """Computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}."""
     mean_img = image.updateMask(mask).reduceRegion(
         reducer=ee.Reducer.mean(),
         geometry=aoi,
@@ -169,8 +166,10 @@ def get_image_mean(image, aoi, name, mask):
 
 
 def get_image_sum(image, aoi, name, mask):
-    """computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}"""
+    """Computes the sum of image values not masked by constraints in relation to the total aoi.
 
+    returns dict name:{value:[],total:[]}.
+    """
     sum_img = image.updateMask(mask).reduceRegion(
         reducer=ee.Reducer.sum(),
         geometry=aoi,
@@ -194,10 +193,14 @@ def get_benefits(
     layer_list: list, geom: ee.Geometry, constraint_mask: ee.Image
 ) -> ee.Dictionary:
     all_benefits_layers = [i for i in layer_list if i["theme"] == "benefit"]
-    fn_all_benefit = lambda i: i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+
+    def fn_all_benefit(i):
+        return i.update({"eeimage": ee.Image(i["layer"]).unmask()})
+
     list(map(fn_all_benefit, all_benefits_layers))
 
-    fn_benefits = lambda i: get_image_mean(i["eeimage"], geom, i["id"], constraint_mask)
+    def fn_benefits(i):
+        return get_image_mean(i["eeimage"], geom, i["id"], constraint_mask)
 
     return ee.Dictionary({"benefit": list(map(fn_benefits, all_benefits_layers))})
 
@@ -205,16 +208,18 @@ def get_benefits(
 def get_costs(
     costs: list, geom: ee.Geometry, constraint_mask: ee.Image
 ) -> ee.Dictionary:
-    fn_costs = lambda i: get_image_sum(i["eeimage"], geom, i["id"], constraint_mask)
+    def fn_costs(i):
+        return get_image_sum(i["eeimage"], geom, i["id"], constraint_mask)
+
     return ee.Dictionary({"cost": list(map(fn_costs, costs))})
 
 
 def get_constraints(
     constraints: list, geom: ee.Geometry, constraint_mask: ee.Image
 ) -> ee.Dictionary:
-    fn_constraint = lambda i: get_image_percent_cover_pixelarea(
-        i["eeimage"], geom, i["id"]
-    )
+    def fn_constraint(i):
+        return get_image_percent_cover_pixelarea(i["eeimage"], geom, i["id"])
+
     return ee.Dictionary({"constraint": list(map(fn_constraint, constraints))})
 
 
@@ -225,8 +230,7 @@ def make_mask_constraints(constraints: list) -> ee.Image:
 
 
 def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
-    """returns summarys for the dashboard."""
-
+    """Returns summarys for the dashboard."""
     # unpack restoration suitability results
     wlc, benefits, constraints, costs = wlc_outputs
 
@@ -267,14 +271,14 @@ def get_area_dashboard(stats):
 
 def get_theme_dashboard(stats):
     """Prepares the dashboard export for plotting on the theme area of the dashboard by appending values for each layer and AOI into a single dictionary.
-    args:
-        json_dashboard (list): List of string dicts. Each feature with summary values for benefits, costs, risks and constraints.
 
-    returns:
+    Args:
+        stats (list): List of string dicts. Each feature with summary values for benefits, costs, risks and constraints.
+
+    Returns:
         json_themes_values (dict):Theme formatted dictionay of {THEME: {LAYER: 'total':float, 'values':[float]}}
     """
     tmp_dict = {}
-    names = []
 
     for aoi in stats:
         # read information as they are stored as a string

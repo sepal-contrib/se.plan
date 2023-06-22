@@ -9,9 +9,9 @@ themes = ["benefit", "constraint", "cost"]
 
 
 def _crit(*args):
-    """
-    return a dict of the criteria caracteristic. args need to be given in the keys order
-    used to reduce duplicate code
+    """Return a dict of the criteria caracteristic.
+
+    Args need to be given in the keys order used to reduce duplicate code.
     """
     keys = ["tooltip", "layer", "header", "content"]
     return dict(zip(keys, args))

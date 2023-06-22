@@ -1,14 +1,12 @@
-import random
-import json
+"""questionnaire model to store the questionnaire data."""
 
-import pandas as pd
 from sepal_ui import model
 from traitlets import Any
 
-from component import parameter as cp
-
 
 class QuestionnaireModel(model.Model):
+    """Store the questionnaire data."""
+
     constraints = Any("").tag(sync=True)
     priorities = Any("").tag(sync=True)
     recipe_name = Any("").tag(sync=True)

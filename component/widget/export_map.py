@@ -1,20 +1,18 @@
 from datetime import datetime as dt
 from pathlib import Path
 
-from sepal_ui import sepalwidgets as sw
-from sepal_ui import mapping as sm
-from sepal_ui.scripts import gee
-from sepal_ui.scripts import utils as su
 import ee
-import ipyvuetify as v
+import rasterio as rio
 from ipyleaflet import WidgetControl
 from matplotlib.colors import to_rgba
-import rasterio as rio
+from sepal_ui import mapping as sm
+from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts import gee
+from sepal_ui.scripts import utils as su
 
-from component.message import cm
-from component import scripts as cs
 from component import parameter as cp
-from component.parameter.color_gradient import red_to_green
+from component import scripts as cs
+from component.message import cm
 
 ee.Initialize()
 
@@ -44,7 +42,7 @@ class ExportMap(WidgetControl):
         self.btn = sw.Btn(cm.export.apply, small=True)
         title = sw.Html(tag="h3", children=[cm.export.title], class_="pl-1")
         close_btn = sw.Icon(children=["fas fa-times"], small=True)
-        card_title = sw.CardTitle(children=[title, sw.Spacer(), close_btn])
+        sw.CardTitle(children=[title, sw.Spacer(), close_btn])
         text = sw.CardText(
             children=[
                 w_scale_lbl,
@@ -81,8 +79,7 @@ class ExportMap(WidgetControl):
         close_btn.on_event("click", lambda *_: setattr(self.menu, "v_model", False))
 
     def set_data(self, dataset, geometry, name, aoi_name):
-        """set the dataset and the geometry to allow the download"""
-
+        """set the dataset and the geometry to allow the download."""
         self.geometry = geometry
         self.dataset = dataset
         self.name = name
@@ -108,12 +105,11 @@ class ExportMap(WidgetControl):
 
     @su.loading_button(debug=False)
     def _apply(self, widget, event, data):
-        """download the dataset using the given parameters"""
-
+        """download the dataset using the given parameters."""
         folder = Path(ee.data.getAssetRoots()[0]["id"])
 
         # check if a dataset is existing
-        if any([self.dataset == None, self.geometry == None]):
+        if any([self.dataset is None, self.geometry is None]):
             return self
 
         # set the parameters

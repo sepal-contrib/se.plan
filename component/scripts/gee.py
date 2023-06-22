@@ -1,6 +1,6 @@
-import ee
 import time
-import sys
+
+import ee
 
 ee.Initialize()
 
@@ -8,7 +8,7 @@ STATUS = "Status: {}"
 
 
 def wait_for_completion(task_descripsion, widget_alert):
-    """Wait until the selected process is finished. Display some output information
+    """Wait until the selected process is finished. Display some output information.
 
     Args:
         task_descripsion (str) : name of the running task
@@ -25,15 +25,14 @@ def wait_for_completion(task_descripsion, widget_alert):
 
 
 def isTask(task_descripsion):
-    """Search for the described task in the user Task list return None if nothing is find
+    """Search for the described task in the user Task list return None if nothing is find.
 
     Args:
         task_descripsion (str): the task descripsion
 
-    Returns
+    Returns:
         task (ee.Task) : return the found task else None
     """
-
     tasks_list = ee.batch.Task.list()
     current_task = None
     for task in tasks_list:
