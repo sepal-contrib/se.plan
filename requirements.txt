@@ -2,29 +2,18 @@
 jupyter
 voila
 toml
-# these libs are requested to build application env
-jupyter
-voila
-toml
 
-# the base lib to run any sepal_ui based app
-# the base lib to run any sepal_ui based app
-# don't forget to fix it to a specific version when you're app is ready
-git+https://github.com/12rambau/sepal_ui.git
-sepal-ui==2.16.4
-
-# use master branch to get the latest version (fixed nav drawers)
-git+https://github.com/12rambau/sepal_ui.git@5277a82db3fe4e5bb971eb6676b28d9652b90564
+git+git@github.com:12rambau/sepal_ui.git@5277a82db3fe4e5bb971eb6676b28d9652b90564
 
 # custom libs
-pandas==1.1.5
-Shapely==1.7.1
-matplotlib==3.3.4
-google-api-python-client<2,>=1.12.1
-geopandas==0.9.0
-numpy==1.22.4
-ipyleaflet==0.16.0
-numexpr==2.7.3
+earthengine-api
+pandas
+Shapely
+matplotlib
+geopandas
+numpy
+ipyleaflet
+numexpr
 
 # To make it work on sepal
 ipyvuetify==1.8.1
