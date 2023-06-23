@@ -10,7 +10,6 @@ from component import parameter as cp
 
 
 class ConstraintDialog(sw.Dialog):
-
     _CONSTRAINTS = pd.read_csv(cp.layer_list)
     _CONSTRAINTS = _CONSTRAINTS[_CONSTRAINTS.theme == "constraint"]
 
@@ -19,7 +18,6 @@ class ConstraintDialog(sw.Dialog):
     loading = Bool(False).tag(sync=True)
 
     def __init__(self, model: cmod.ConstraintModel):
-
         # save the model as a member
         self.model = model
 
@@ -30,8 +28,10 @@ class ConstraintDialog(sw.Dialog):
         w_title = sw.CardTitle(children=[cm.constraint.dialog.title])
 
         # create the content
-        default_theme = self._CONSTRAINTS.subtheme.unique().tolist()
-        theme_names = [{"text": cm.subtheme[ly], "value": ly} for ly in default_theme]
+        default_theme = self._CONSTRAINTS.subtheme.dropna().unique().tolist()
+        theme_names = [
+            {"text": cm.subtheme[ly], "value": ly} for ly in default_theme if ly
+        ]
         theme_names = theme_names + [{"text": cm.subtheme["custom"], "value": "custom"}]
         self.w_theme = sw.Select(
             label=cm.constraint.dialog.theme,

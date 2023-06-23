@@ -1,7 +1,8 @@
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from sepal_ui.aoi import AoiModel
-from sepal_ui import mapping as sm
+
+# from sepal_ui import mapping as sm
 import pandas as pd
 import numpy as np
 import ee
@@ -16,7 +17,6 @@ from .simple_range_slider import SimpleRangeSlider
 
 class TableIcon(sw.Icon):
     def __init__(self, gliph: str, name: str):
-
         super().__init__(
             children=[gliph],
             icon=True,
@@ -27,23 +27,21 @@ class TableIcon(sw.Icon):
 
 
 class ConstraintRow(sw.Html):
-
     _DEFAULT_LAYERS = pd.read_csv(cp.layer_list).layer_id
 
     def __init__(
         self,
-        m: sm.SepalMap,
+        # m: sm.SepalMap,
         model: cmod.ConstraintModel,
         idx: int,
         dialog: ConstraintDialog,
         aoi_model: AoiModel,
     ) -> None:
-
         # get the models as a member
         self.model = model
         self.dialog = dialog
         self.aoi_model = aoi_model
-        self.map = m
+        # self.map = m
 
         # extract information from the model
         name = self.model.names[idx]
@@ -122,7 +120,6 @@ class ConstraintRow(sw.Html):
 
     @sd.need_ee
     def get_limits(self, *args) -> None:
-
         if self.aoi_model.feature_collection is None:
             max_, min_ = (np.iinfo(np.int16).max, np.iinfo(np.int16).min)
         else:
@@ -144,7 +141,6 @@ class ConstraintTable(sw.SimpleTable):
     def __init__(
         self, model: cmod.ConstraintModel, dialog: ConstraintDialog, aoi_model: AoiModel
     ) -> None:
-
         # save the model and dialog as a member
         self.model = model
         self.dialog = dialog
@@ -182,7 +178,6 @@ class ConstraintTable(sw.SimpleTable):
         self.model.observe(self.set_rows, "updated")
 
     def set_rows(self, *args):
-
         rows = []
         for i, _ in enumerate(self.model.names):
             row = ConstraintRow(self.model, i, self.dialog, self.aoi_model)

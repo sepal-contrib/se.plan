@@ -10,7 +10,6 @@ from component import parameter as cp
 
 
 class PriorityDialog(sw.Dialog):
-
     _PRIORITIES = pd.read_csv(cp.layer_list)
     _PRIORITIES = _PRIORITIES[_PRIORITIES.theme == "benefit"]
 
@@ -19,7 +18,6 @@ class PriorityDialog(sw.Dialog):
     loading = Bool(False).tag(sync=True)
 
     def __init__(self, model: cmod.PriorityModel):
-
         # save the model as a member
         self.model = model
 
@@ -31,7 +29,9 @@ class PriorityDialog(sw.Dialog):
 
         # create the content
         default_theme = self._PRIORITIES.subtheme.unique().tolist()
-        theme_names = [{"text": cm.subtheme[ly], "value": ly} for ly in default_theme]
+        theme_names = [
+            {"text": cm.subtheme[ly], "value": ly} for ly in default_theme if ly
+        ]
         theme_names = theme_names + [{"text": cm.subtheme["custom"], "value": "custom"}]
         self.w_theme = sw.Select(
             label=cm.priority_dialog.theme,
