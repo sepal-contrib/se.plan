@@ -1,0 +1,12 @@
+{
+    "priority_dialog": {
+        "validate": "validate",
+        "cancel": "cancel",
+        "title": "priority",
+        "theme": "benefit",
+        "name": "name",
+        "desc": "description",
+        "unit": "unit",
+        "missing_data": "Some data are missing, please fill all of them before submitting the form"
+    }
+}

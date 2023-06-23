@@ -1,0 +1,21 @@
+{
+    "constraint": {
+        "table": {
+            "header": {
+                "action": "action",
+                "name": "name",
+                "parameter": "parameters"
+            }
+        },
+        "dialog": {
+            "title": "Constraint",
+            "theme": "Theme",
+            "name": "Name",
+            "desc": "Description",
+            "unit": "Unit",
+            "validate": "Validate",
+            "cancel": "Cancel",
+            "missing_data": "Some data are missing, please fill all of them before submitting the form"
+        }
+    }
+}
