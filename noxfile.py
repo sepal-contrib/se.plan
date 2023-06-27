@@ -18,7 +18,7 @@ def lint(session):
 @nox.session(reuse_venv=True)
 def app(session):
     """Run the application."""
-    entry_point = str(Path("ui.ipynb"))
+    entry_point = str(Path("new_ui.ipynb"))
 
     session.install("-r", "requirements.txt")
     session.run("jupyter", "trust", entry_point)

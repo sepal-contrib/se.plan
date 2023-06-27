@@ -3,7 +3,7 @@ jupyter
 voila
 toml
 
-git+git@github.com:12rambau/sepal_ui.git@5277a82db3fe4e5bb971eb6676b28d9652b90564
+git+https://github.com/12rambau/sepal_ui.git@5277a82db3fe4e5bb971eb6676b28d9652b90564
 
 # custom libs
 earthengine-api
