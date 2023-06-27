@@ -7,5 +7,4 @@ from .export_map import *
 from .layer_sum_up import *
 from .layers_recipe import *
 from .load_shapes import *
-from .priority_table import *
 from .recipe_field import *
