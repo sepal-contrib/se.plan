@@ -7,6 +7,9 @@ benefit_types = ["local_live", "wood_prod", "carbon", "bio"]
 # list of the layer themes
 themes = ["benefit", "constraint", "cost"]
 
+# list of data types
+data_types = ["continuous", "categorical", "binary"]
+
 
 def _crit(*args):
     """Return a dict of the criteria caracteristic.

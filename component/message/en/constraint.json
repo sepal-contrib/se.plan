@@ -13,6 +13,7 @@
             "name": "Name",
             "desc": "Description",
             "unit": "Unit",
+            "data_type": "Data type",
             "validate": "Validate",
             "cancel": "Cancel",
             "missing_data": "Some data are missing, please fill all of them before submitting the form"

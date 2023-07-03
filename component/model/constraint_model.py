@@ -15,16 +15,17 @@ class ConstraintModel(model.Model):
     descs = List([]).tag(sync=True)
     units = List([]).tag(sync=True)
     values = List([]).tag(sync=True)
+    data_type = List([]).tag(sync=True)
 
     updated = Int(0).tag(sync=True)
     validated = Int(0).tag(sync=True)
 
     def __init__(self):
-        # get the default costs from the csv file
-        _costs = pd.read_csv(cp.layer_list).fillna("")
-        _costs = _costs[_costs.layer_id == "treecover_with_potential"]
+        # get the default constraint from the csv file
+        _constraint = pd.read_csv(cp.layer_list).fillna("")
+        _constraint = _constraint[_constraint.layer_id == "treecover_with_potential"]
 
-        for _, r in _costs.iterrows():
+        for _, r in _constraint.iterrows():
             self.themes.append(r.subtheme)
             self.names.append(cm.layers[r.layer_id].name)
             self.ids.append(r.layer_id)
@@ -46,11 +47,19 @@ class ConstraintModel(model.Model):
         del self.descs[idx]
         del self.units[idx]
         del self.values[idx]
+        del self.data_type[idx]
 
         self.updated += 1
 
     def add_constraint(
-        self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
+        self,
+        theme: str,
+        name: str,
+        id: str,
+        asset: str,
+        desc: str,
+        unit: str,
+        data_type: str,
     ) -> None:
         """add a constraint and trigger the update."""
         self.themes.append(theme)
@@ -60,11 +69,19 @@ class ConstraintModel(model.Model):
         self.descs.append(desc)
         self.units.append(unit)
         self.values.append([np.iinfo(np.int16).min, np.iinfo(np.int16).max])
+        self.data_type.append(data_type)
 
         self.updated += 1
 
     def update_constraint(
-        self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
+        self,
+        theme: str,
+        name: str,
+        id: str,
+        asset: str,
+        desc: str,
+        unit: str,
+        data_type: str,
     ) -> None:
         """update an existing constraint metadata and trigger the update."""
         idx = self.get_index(id)
@@ -75,6 +92,7 @@ class ConstraintModel(model.Model):
         self.assets[idx] = asset
         self.descs[idx] = desc
         self.units[idx] = unit
+        self.data_type[idx] = data_type
 
         self.updated += 1
 
@@ -82,8 +100,6 @@ class ConstraintModel(model.Model):
         """Update the value of a specific constraint."""
         idx = self.get_index(id)
         self.values[idx] = value
-
-        # self.updated += 1
 
     def get_index(self, id: str) -> int:
         """get the index of the searched layer id."""

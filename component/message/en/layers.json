@@ -158,5 +158,11 @@
         "forest": "Forest change",
         "money": "Monetary",
         "custom": "Custom"
-    }
+    },
+    "data_type" : {
+        "categorical" : "Categorical",
+        "continuous" : "Continuous",
+        "binary" : "Binary"
+    },
+    "default_asset_header" : "Default asset"
 }

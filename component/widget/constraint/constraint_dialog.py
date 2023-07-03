@@ -44,15 +44,26 @@ class ConstraintDialog(sw.Dialog):
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
         self.w_asset = sw.AssetSelect()
         self.w_desc = sw.Textarea(label=cm.constraint.dialog.desc, v_model=None)
-        self.w_unit = sw.TextField(label=cm.constraint.dialog.unit, v_model=None)
+        self.w_unit = sw.TextField(
+            label=cm.constraint.dialog.unit, v_model=None, class_="mr-2"
+        )
+        self.w_data_type = sw.Select(
+            label=cm.constraint.dialog.data_type,
+            items=[
+                {"text": cm.data_type[data_type], "value": data_type}
+                for data_type in cp.data_types
+            ],
+            v_model="",
+            class_="on-dialog",
+        )
         w_content = sw.CardText(
             children=[
                 self.w_theme,
                 self.w_name,
                 self.w_id,
                 self.w_asset,
+                sw.Flex(class_="d-flex", children=[self.w_unit, self.w_data_type]),
                 self.w_desc,
-                self.w_unit,
                 self.w_alert,
             ]
         )
@@ -88,6 +99,23 @@ class ConstraintDialog(sw.Dialog):
         self.w_cancel.on_event("click", self.cancel)
         self.w_theme.observe(self.theme_change, "v_model")
         self.w_name.observe(self.name_change, "v_model")
+        self.w_asset.observe(self.on_asset_change, "v_model")
+
+    def on_asset_change(self, change) -> None:
+        """Set the default data type depending on the asset."""
+        # check if the asset is in the default list of layers
+
+        if change["new"] in self._CONSTRAINTS.gee_asset.tolist():
+            self.w_data_type.v_model = self._CONSTRAINTS[
+                self._CONSTRAINTS.gee_asset == change["new"]
+            ].data_type.values[0]
+
+            # keep readonly
+            self.w_data_type.readonly = True
+            self.w_data_type.disabled = True
+        else:
+            self.w_data_type.readonly = False
+            self.w_data_type.disabled = False
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
@@ -98,6 +126,7 @@ class ConstraintDialog(sw.Dialog):
                 self.w_name.v_model,
                 self.w_desc.v_model,
                 self.w_unit.v_model,
+                self.w_data_type.v_model,
             ]
         ):
             raise Exception(cm.constraint.dialog.missing_data)
@@ -116,6 +145,7 @@ class ConstraintDialog(sw.Dialog):
             "asset": self.w_asset.v_model,
             "desc": self.w_desc.v_model,
             "unit": self.w_unit.v_model,
+            "data_type": self.w_data_type.v_model,
         }
         if self.w_id.v_model in self.model.ids:
             self.model.update_constraint(**kwargs)
@@ -130,8 +160,7 @@ class ConstraintDialog(sw.Dialog):
         # reset the alert
         self.w_alert.reset()
 
-        # reset the fields, 6 means the number of widgets to reset
-        self.fill(*[None] * 6)
+        self.fill(*[None] * 7)
 
         # open the dialog
         self.value = True
@@ -152,7 +181,7 @@ class ConstraintDialog(sw.Dialog):
     def name_change(self, *args) -> None:
         """if the selected layer is from the combo box items, select all the default informations."""
         if not self.w_name.v_model:
-            self.fill("custom", *[""] * 5)
+            self.fill("custom", *[""] * 6)
             return
 
         if self.w_name.v_model not in self.w_name.items:
@@ -167,11 +196,24 @@ class ConstraintDialog(sw.Dialog):
         # fill the different widgets
         self.w_id.v_model = layer_id
         self.w_asset.v_model = priority.gee_asset
+        # add the asset as default value so it won't be lost if the user change it,, do this manually otherewise it will take sometime
+        header = {"header": cm.default_asset_header}
+        default_asset_item = [header, priority.gee_asset]
+        if header not in self.w_asset.items:
+            self.w_asset.items = default_asset_item + self.w_asset.items
+
         self.w_desc.v_model = cm.layers[layer_id].detail
         self.w_unit.v_model = priority.unit
 
     def fill(
-        self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
+        self,
+        theme: str,
+        name: str,
+        id: str,
+        asset: str,
+        desc: str,
+        unit: str,
+        data_type: str,
     ) -> None:
         """fill the dialog with data from the link."""
         self.w_theme.v_model = theme
@@ -180,3 +222,4 @@ class ConstraintDialog(sw.Dialog):
         self.w_asset.v_model = asset
         self.w_desc.v_model = desc
         self.w_unit.v_model = unit
+        self.w_data_type.v_model = data_type

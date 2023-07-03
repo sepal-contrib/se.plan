@@ -132,7 +132,7 @@ class CostDialog(sw.Dialog):
     def name_change(self, *args) -> None:
         """if the selected layer is from the combo box items, select all the default informations."""
         if not self.w_name.v_model:
-            self.fill("custom", *[""] * 3)
+            self.fill(self.w_name.items[0], *[""] * 3)
             return
 
         if self.w_name.v_model not in self.w_name.items:

@@ -1,8 +1,8 @@
-"""All tools to build the suitability index"""
+"""All tools to build the suitability index."""
 from typing import List
 
-from sepal_ui.aoi import AoiModel
 import ee
+from sepal_ui.aoi import AoiModel
 
 from component import new_model as cmod
 
@@ -13,7 +13,7 @@ def _percentile(
     scale: int = 10000,
     percentile: List[int] = [3, 97],
 ) -> ee.Image:
-    """Return a normalized version of the layer image"""
+    """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
     percents = ee_image.rename("img").reduceRegion(
         reducer=ee.Reducer.percentile(percentiles=percentile),
@@ -31,7 +31,7 @@ def _min_max(
     aoi: ee.FeatureCollection,
     scale: int = 10000,
 ) -> ee.Image:
-    """Return a normalized version of the layer image"""
+    """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
     min_max = ee_image.rename("img").reduceRegion(
         reducer=ee.Reducer.minMax(), geometry=aoi.geometry(), scale=scale
@@ -43,7 +43,6 @@ def _min_max(
 
 
 class Seplan:
-
     # -- model parameters -----------------------
     aoi_model: AoiModel
     cost_model: cmod.CostModel
@@ -61,7 +60,6 @@ class Seplan:
 
         We use a class instead of a comparaison to be able to compare multiple scenarios
         """
-
         # save the models as members
         self.aoi_model = aoi_model
         self.cost_model = cost_model
@@ -69,7 +67,8 @@ class Seplan:
         self.constraint_model = constraint_model
 
     def get_priority_index(self, clip: bool = False) -> ee.Image:
-        """Build the index exclusively on the benefits weighted approach"""
+        """Build the index exclusively on the benefits weighted approach."""
+        # This is priority sum
 
         # normalize all the priority on the aoi
         aoi = self.aoi_model.feature_collection
@@ -96,7 +95,8 @@ class Seplan:
         return index.clip(aoi) if clip is True else index
 
     def get_priority_cost_index(self, clip: bool = False) -> ee.Image:
-        """Build the priority/cost ratio"""
+        """Build the priority/cost ratio."""
+        # This is 'priority/cost ratio'
 
         # unmask the images without normalizing as everything is in $/ha
         aoi = self.aoi_model.feature_collection
@@ -115,7 +115,6 @@ class Seplan:
         return index.clip(aoi) if clip is True else index
 
     def get_constraint_index(self, clip: bool = False) -> ee.Image:
-
         aoi = self.aoi_model.feature_collection
 
         # create the mask from the constraints
@@ -123,11 +122,11 @@ class Seplan:
         for i, asset in enumerate(self.constraint_model.assets):
             min_, max_ = self.constraint_model.values[i]
             image = ee.Image(asset).select(0).unmask()
-            local_mask = image.gt(max_).add(image.lt(min_))
+            local_mask = image.gt(max_).Or(image.lt(min_))
             mask_image = mask_image.add(local_mask)
 
         # set any pixel with a sum of 0 to 0 (i.e. masked at least once)
-        mask_image = mask_image.gt(0).add(-1).multiply(-1)
+        mask_image = mask_image.gt(0).Not()
 
         index = _percentile(self.get_priority_cost_index().mask(mask_image), aoi)
 
