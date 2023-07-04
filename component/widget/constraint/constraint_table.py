@@ -4,13 +4,11 @@ import ee
 import numpy as np
 
 # from sepal_ui import mapping as sm
-import pandas as pd
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.aoi import AoiModel
 from sepal_ui.scripts import decorator as sd
 from traitlets import List, link, observe
 
-from component import parameter as cp
 from component.message import cm
 from component.model.constraint_model import ConstraintModel
 from component.widget import custom_widgets as cw
@@ -18,40 +16,35 @@ from component.widget import custom_widgets as cw
 from .constraint_dialog import ConstraintDialog
 
 
-class ConstraintRange(sw.Layout):
+class ConstraintWidget(sw.Layout):
     """Custom widget to allow user to select the values that will be masked out of the analysis.
 
     This element will be different depending on the data type of the constraint.
-
-    continuous: a slider will be displayed to select the min and max values
-    discrete: a message will be displayed to inform the user that the constraint will be used as a mask besides a swith button to change default mask value, to switch between 0 and 1.
-    categorical: a select list containing all the possible values in the layer.
     """
 
     items = List([]).tag(sync=True)
     "list: list of possible values for Select widget"
 
-    v_model = List([]).tag(sync=True)
+    v_model = List([], allow_none=True).tag(sync=True)
     "list: value selected in the widget"
 
     def __init__(
         self,
         data_type: Literal["continuous", "discrete", "categorical"],
-        value: list,
         layer_id: str,
+        v_model: List = None,
     ):
         self.data_type = data_type
         self.layer_id = layer_id
-        self.class_ = "d-block"
+        self.class_ = "align-center"
         self.attributes = {"data-layer": layer_id}
 
         super().__init__()
 
         if self.data_type == "continuous":
-            w_min = sw.TextField(v_model=value[0], style_="width:3em;", xs1=True)
-            w_max = sw.TextField(v_model=value[1], style_="width:3em;", xs1=True)
-            slider = sw.RangeSlider(v_model=value, xs1=True, xs10=True)
-            slider.class_list.add("v-no-messages")
+            w_min = sw.TextField(v_model=None, xs1=True)
+            w_max = sw.TextField(v_model=None, xs1=True)
+            slider = sw.RangeSlider(v_model=[0, 1], xs1=True, xs10=True, class_="mt-4")
 
             def transform(type_):
                 """Transform method between text and slider widgets."""
@@ -65,42 +58,49 @@ class ConstraintRange(sw.Layout):
             link((w_max, "v_model"), (slider, "v_model"), transform=transform("max"))
             link((slider, "v_model"), (self, "v_model"))
 
-            self.widget = sw.Row(
+            self.widget = sw.Flex(
+                class_="d-flex",
                 children=[
                     sw.Flex(children=[w_min], xs1=True),
-                    sw.Flex(children=[slider], xs1=True),
-                    sw.Flex(children=[w_max], xs9=True),
+                    sw.Flex(children=[slider], xs10=True),
+                    sw.Flex(children=[w_max], xs1=True),
                 ],
             )
 
-        elif self.data_type == "discrete":
-            radio_group = sw.RadioGroup(
+        elif self.data_type == "binary":
+            self.widget = sw.RadioGroup(
                 row=True,
-                label="Value to mask out:",
-                v_model=[1],
+                label=cm.constraint.widget.binary.label,
+                v_model=None,
                 small=True,
+                messages=[cm.constraint.widget.binary.mask_0],
                 children=[
-                    sw.Radio(label="0", v_model=[0], xsmall=True),
-                    sw.Radio(label="1", v_model=[1], xsmall=True),
+                    sw.Radio(label="0", v_model=0),
+                    sw.Radio(label="1", v_model=1),
                 ],
             )
 
-            self.widget = sw.Flex(
-                children=[
-                    radio_group,
-                    "Values in the map with 0 will be masked out from the analysis",
-                ]
+            self.widget.observe(
+                lambda change: setattr(
+                    self.widget,
+                    "messages",
+                    [cm.constraint.widget.binary[f"mask_{change['new']}"]],
+                ),
+                "v_model",
             )
 
-            link((radio_group, "v_model"), (self, "v_model"))
+            link(
+                (self.widget, "v_model"),
+                (self, "v_model"),
+                transform=[lambda x: [x], lambda x: x[0]],
+            )
 
         elif self.data_type == "categorical":
             self.widget = sw.Select(
-                label="cm.constraint.dialog.mask",
+                label=cm.constraint.widget.categorical.label,
                 multiple=True,
                 items=[],
-                v_model=[],
-                attributes={"data-layer": layer_id},
+                v_model=None,
             )
 
             link((self.widget, "v_model"), (self, "v_model"))
@@ -117,8 +117,6 @@ class ConstraintRange(sw.Layout):
 
 
 class ConstraintRow(sw.Html):
-    _DEFAULT_LAYERS = pd.read_csv(cp.layer_list).layer_id
-
     def __init__(
         self,
         model: ConstraintModel,
@@ -134,24 +132,24 @@ class ConstraintRow(sw.Html):
         # extract information from the model
         name = self.model.names[idx]
         unit = self.model.units[idx]
-        layer_id = self.model.ids[idx]
+        self.layer_id = self.model.ids[idx]
         value = self.model.values[idx]
+        data_type = self.model.data_type[idx]
         self.asset = self.model.assets[idx]
 
         # create the crud interface
-        self.edit_btn = cw.TableIcon("fa-solid fa-pencil", layer_id)
-        self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", layer_id)
+        self.edit_btn = cw.TableIcon("fa-solid fa-pencil", self.layer_id)
+        self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
         self.edit_btn.class_list.add("mr-2")
 
         # create Maskout widget
-
-        ConstraintRange(
-            data_type=self.model.data_type[idx],
-            value=value,
-            layer_id=layer_id,
+        self.w_maskout = ConstraintWidget(
+            data_type=data_type,
+            layer_id=self.layer_id,
+            v_model=value,
         )
 
-        self.get_limits()
+        # self.get_limits()
 
         td_list = [
             sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
@@ -164,9 +162,7 @@ class ConstraintRow(sw.Html):
         # add js behaviour
         self.delete_btn.on_event("click", self.on_delete)
         self.edit_btn.on_event("click", self.on_edit)
-
-        self.w_maskout.on_event("change", self.update_value)
-        self.w_maskout.observe(self.on_slide, "v_model")
+        self.w_maskout.observe(self.update_value, "v_model")
         self.aoi_model.observe(self.get_limits, "updated")
 
     def on_delete(self, widget, data, event):
@@ -190,18 +186,9 @@ class ConstraintRow(sw.Html):
 
         self.dialog.value = True
 
-    def on_slide(self, c):
-        """Update the text value when the slider is moved."""
-        if len(self.w_slider.v_model) != 2:
-            return
-        self.w_min.v_model, self.w_max.v_model = self.w_slider.v_model
-        print("on slide done")
-
     def update_value(self, widget, *args):
         print("update value")
-        self.model.update_value(
-            self.w_slider.attributes["data-layer"], self.w_slider.v_model
-        )
+        self.model.update_value(self.layer_id, self.w_maskout.v_model)
         print("update value done")
 
     @sd.need_ee
@@ -220,8 +207,7 @@ class ConstraintRow(sw.Html):
             )
             max_, min_ = max(max_min), min(max_min)
 
-        self.w_slider.min = min_
-        self.w_slider.max = max_
+        self.w_maskout.v_model = [min_, max_]
 
 
 class ConstraintTable(sw.Layout):
@@ -243,15 +229,21 @@ class ConstraintTable(sw.Layout):
         headers = sw.Html(
             tag="tr",
             children=[
-                sw.Html(tag="th", children=[cm.constraint.table.header.action]),
-                sw.Html(tag="th", children=[cm.constraint.table.header.name]),
-                sw.Html(tag="th", children=[""], style_="width: 5em;"),
+                sw.Html(
+                    tag="th",
+                    children=[cm.constraint.table.header.action],
+                    style_="width: 5%;",
+                ),
+                sw.Html(
+                    tag="th",
+                    children=[cm.constraint.table.header.name],
+                    style_="width: 35%;",
+                ),
                 sw.Html(
                     tag="th",
                     children=[cm.constraint.table.header.parameter],
-                    style_="width: 40em;",
+                    style_="width: 70%;",
                 ),
-                sw.Html(tag="th", children=[""], style_="width: 5em;"),
             ],
         )
 
@@ -275,6 +267,7 @@ class ConstraintTable(sw.Layout):
     def set_rows(self, *args):
         rows = []
         for i, _ in enumerate(self.model.names):
+            print(i)
             row = ConstraintRow(self.model, i, self.dialog, self.aoi_model)
             rows.append(row)
         self.tbody.children = rows
