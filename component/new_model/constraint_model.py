@@ -1,14 +1,13 @@
-from sepal_ui import model
-from traitlets import List, Int
-import pandas as pd
 import numpy as np
+import pandas as pd
+from sepal_ui import model
+from traitlets import Int, List
 
 from component import parameter as cp
 from component.message import cm
 
 
 class ConstraintModel(model.Model):
-
     names = List([]).tag(sync=True)
     ids = List([]).tag(sync=True)
     themes = List([]).tag(sync=True)
@@ -21,7 +20,6 @@ class ConstraintModel(model.Model):
     validated = Int(0).tag(sync=True)
 
     def __init__(self):
-
         # get the default costs from the csv file
         _costs = pd.read_csv(cp.layer_list).fillna("")
         _costs = _costs[_costs.layer_id == "treecover_with_potential"]
@@ -38,8 +36,7 @@ class ConstraintModel(model.Model):
         super().__init__()
 
     def remove_constraint(self, id: str) -> None:
-        """Remove a constraint using its name"""
-
+        """Remove a constraint using its name."""
         idx = self.get_index(id)
 
         del self.names[idx]
@@ -55,8 +52,7 @@ class ConstraintModel(model.Model):
     def add_constraint(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:
-        """add a constraint and trigger the update"""
-
+        """add a constraint and trigger the update."""
         self.themes.append(theme)
         self.names.append(name)
         self.ids.append(id)
@@ -70,8 +66,7 @@ class ConstraintModel(model.Model):
     def update_constraint(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:
-        """update an existing constraint metadata and trigger the update"""
-
+        """update an existing constraint metadata and trigger the update."""
         idx = self.get_index(id)
 
         self.themes[idx] = theme
@@ -84,14 +79,12 @@ class ConstraintModel(model.Model):
         self.updated += 1
 
     def update_value(self, id: str, value: list) -> None:
-        """Update the value of a specific constraint"""
-
+        """Update the value of a specific constraint."""
         idx = self.get_index(id)
         self.values[idx] = value
 
         self.updated += 1
 
     def get_index(self, id: str) -> int:
-        """get the index of the searched layer id"""
-
+        """get the index of the searched layer id."""
         return next(i for i, v in enumerate(self.ids) if v == id)

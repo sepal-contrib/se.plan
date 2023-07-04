@@ -3,7 +3,7 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from traitlets import Bool, link
 
-from component import new_model as cmod
+import component.model as cmod
 from component import parameter as cp
 from component.message import cm
 
@@ -13,7 +13,7 @@ class ConstraintDialog(sw.Dialog):
     _CONSTRAINTS = _CONSTRAINTS[_CONSTRAINTS.theme == "constraint"]
 
     count = 0
-
+    edit_id = None
     loading = Bool(False).tag(sync=True)
 
     def __init__(self, model: cmod.ConstraintModel):

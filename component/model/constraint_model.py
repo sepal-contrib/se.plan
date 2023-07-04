@@ -32,7 +32,7 @@ class ConstraintModel(model.Model):
             self.assets.append(r.gee_asset)
             self.descs.append(cm.layers[r.layer_id].detail)
             self.units.append(r.unit)
-            self.values.append([1, 1])
+            self.values.append([0, 1])
             self.data_type.append(r.data_type)
 
         super().__init__()

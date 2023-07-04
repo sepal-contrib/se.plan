@@ -2,7 +2,7 @@
     "constraint": {
         "table": {
             "header": {
-                "action": "action",
+                "action": "Action",
                 "name": "Name",
                 "parameter": "Parameters"
             }
@@ -10,11 +10,11 @@
         "widget" : {
             "binary" : {
                 "label" : "Value to mask out:",
-                "mask_0" : "Values on the map with 0 will be excluded of the analysis.",
-                "mask_1" : "Values on the map with 1 will be excluded of the analysis."
+                "mask_0" : "Values on the map with 0 will be excluded from the analysis.",
+                "mask_1" : "Values on the map with 1 will be excluded from the analysis."
             },
             "categorical" : {
-                "label" : "Values to include in the analysis:"
+                "label" : "Values to include"
             }
         },
         "dialog": {

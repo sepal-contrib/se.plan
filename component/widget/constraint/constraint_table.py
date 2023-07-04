@@ -71,7 +71,7 @@ class ConstraintWidget(sw.Layout):
             self.widget = sw.RadioGroup(
                 row=True,
                 label=cm.constraint.widget.binary.label,
-                v_model=None,
+                v_model=0,
                 small=True,
                 messages=[cm.constraint.widget.binary.mask_0],
                 children=[
@@ -104,7 +104,9 @@ class ConstraintWidget(sw.Layout):
             )
 
             link((self.widget, "v_model"), (self, "v_model"))
+            link((self.widget, "items"), (self, "v_model"))
 
+        self.v_model = v_model
         self.children = [self.widget]
 
     @observe("items")
@@ -125,18 +127,27 @@ class ConstraintRow(sw.Html):
         aoi_model: AoiModel,
     ) -> None:
         # get the models as a member
+
+        self.tag = "tr"
+
+        super().__init__()
+
         self.model = model
         self.dialog = dialog
         self.aoi_model = aoi_model
 
         # extract information from the model
-        name = self.model.names[idx]
-        unit = self.model.units[idx]
+        self.name = self.model.names[idx]
+        self.unit = self.model.units[idx]
         self.layer_id = self.model.ids[idx]
-        value = self.model.values[idx]
-        data_type = self.model.data_type[idx]
+        self.value = self.model.values[idx]
+        self.data_type = self.model.data_type[idx]
         self.asset = self.model.assets[idx]
 
+        self.update_view()
+
+    def update_view(self):
+        """Create the view of the widget based on the model."""
         # create the crud interface
         self.edit_btn = cw.TableIcon("fa-solid fa-pencil", self.layer_id)
         self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
@@ -144,20 +155,20 @@ class ConstraintRow(sw.Html):
 
         # create Maskout widget
         self.w_maskout = ConstraintWidget(
-            data_type=data_type,
+            data_type=self.data_type,
             layer_id=self.layer_id,
-            v_model=value,
+            v_model=self.value,
         )
 
         # self.get_limits()
 
         td_list = [
             sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
-            sw.Html(tag="td", children=[name + f" ({unit})"]),
+            sw.Html(tag="td", children=[self.name + f" ({self.unit})"]),
             sw.Html(tag="td", children=[self.w_maskout]),
         ]
 
-        super().__init__(tag="tr", children=td_list)
+        self.children = td_list
 
         # add js behaviour
         self.delete_btn.on_event("click", self.on_delete)
@@ -167,6 +178,7 @@ class ConstraintRow(sw.Html):
 
     def on_delete(self, widget, data, event):
         """Remove the line from the model and trigger table update."""
+        self.dialog.edit_id = None
         self.model.remove_constraint(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])
@@ -183,11 +195,13 @@ class ConstraintRow(sw.Html):
             unit=self.model.units[idx],
             data_type=self.model.data_type[idx],
         )
-
+        self.edit_id = idx
         self.dialog.value = True
 
     def update_value(self, widget, *args):
         print("update value")
+
+        self.dialog.edit_id = None
         self.model.update_value(self.layer_id, self.w_maskout.v_model)
         print("update value done")
 
@@ -265,9 +279,42 @@ class ConstraintTable(sw.Layout):
         self.model.observe(self.set_rows, "updated")
 
     def set_rows(self, *args):
-        rows = []
-        for i, _ in enumerate(self.model.names):
-            print(i)
-            row = ConstraintRow(self.model, i, self.dialog, self.aoi_model)
-            rows.append(row)
-        self.tbody.children = rows
+        """Add, remove or update rows in the table."""
+        # We don't want to recreate all the elements of the table each time
+        # since that's so expensive (specially the get_limits method)
+        current_ids = [row.layer_id for row in self.tbody.children]
+
+        # get all the ids of the rows that are currently in the model
+        model_ids = self.model.ids
+        new_ids = list(set(model_ids) - set(current_ids))
+        old_ids = list(set(current_ids) - set(model_ids))
+        edited_id = self.dialog.edit_id
+
+        # Add the rows that are in the model but not in the view
+        if new_ids:
+            for new_id in new_ids:
+                idx = self.model.get_index(new_id)
+                row = ConstraintRow(self.model, idx, self.dialog, self.aoi_model)
+                self.tbody.children = self.tbody.children + [row]
+
+        # Remove the rows that are in the view but not in the model
+        elif old_ids:
+            for old_id in old_ids:
+                for row in self.tbody.children:
+                    if row.layer_id == old_id:
+                        self.tbody.children = [
+                            child for child in self.tbody.children if child != row
+                        ]
+        # Edit the rows that have been edited
+        elif edited_id:
+            row_to_edit = self.get_children(attr="layer_id", value=edited_id)[0]
+            row_to_edit.update_view()
+
+        else:
+            # if nothing has changed, it means that this is the first time
+            rows = []
+            for i, _ in enumerate(self.model.names):
+                print(i)
+                row = ConstraintRow(self.model, i, self.dialog, self.aoi_model)
+                rows.append(row)
+            self.tbody.children = rows
