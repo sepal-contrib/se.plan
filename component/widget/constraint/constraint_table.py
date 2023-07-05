@@ -122,19 +122,22 @@ class ConstraintRow(sw.Html):
     def __init__(
         self,
         model: ConstraintModel,
-        idx: int,
+        layer_id: str,
         dialog: ConstraintDialog,
         aoi_model: AoiModel,
     ) -> None:
         # get the models as a member
 
         self.tag = "tr"
+        self.attributes = {"layer_id": layer_id}
 
         super().__init__()
 
         self.model = model
         self.dialog = dialog
         self.aoi_model = aoi_model
+
+        idx = model.get_index(id=layer_id)
 
         # extract information from the model
         self.name = self.model.names[idx]
@@ -178,7 +181,6 @@ class ConstraintRow(sw.Html):
 
     def on_delete(self, widget, data, event):
         """Remove the line from the model and trigger table update."""
-        self.dialog.edit_id = None
         self.model.remove_constraint(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])
@@ -195,13 +197,11 @@ class ConstraintRow(sw.Html):
             unit=self.model.units[idx],
             data_type=self.model.data_type[idx],
         )
-        self.edit_id = idx
         self.dialog.value = True
 
     def update_value(self, widget, *args):
         print("update value")
 
-        self.dialog.edit_id = None
         self.model.update_value(self.layer_id, self.w_maskout.v_model)
         print("update value done")
 
@@ -280,41 +280,40 @@ class ConstraintTable(sw.Layout):
 
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""
-        # We don't want to recreate all the elements of the table each time
-        # since that's so expensive (specially the get_limits method)
-        current_ids = [row.layer_id for row in self.tbody.children]
+        # We don't want to recreate all the elements of the table each time since
+        # that's so expensive (specially the get_limits method)
 
-        # get all the ids of the rows that are currently in the model
+        view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
-        new_ids = list(set(model_ids) - set(current_ids))
-        old_ids = list(set(current_ids) - set(model_ids))
-        edited_id = self.dialog.edit_id
 
-        # Add the rows that are in the model but not in the view
+        new_ids = [id_ for id_ in model_ids if id_ not in view_ids]
+        old_ids = [id_ for id_ in view_ids if id_ not in model_ids]
+        edited_id = (
+            self.dialog.w_id.v_model if self.dialog.w_id.v_model in view_ids else False
+        )
         if new_ids:
             for new_id in new_ids:
-                idx = self.model.get_index(new_id)
-                row = ConstraintRow(self.model, idx, self.dialog, self.aoi_model)
+                row = ConstraintRow(self.model, new_id, self.dialog, self.aoi_model)
                 self.tbody.children = self.tbody.children + [row]
 
-        # Remove the rows that are in the view but not in the model
         elif old_ids:
             for old_id in old_ids:
-                for row in self.tbody.children:
-                    if row.layer_id == old_id:
-                        self.tbody.children = [
-                            child for child in self.tbody.children if child != row
-                        ]
-        # Edit the rows that have been edited
+                row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
+                    0
+                ]
+                self.tbody.children = [
+                    row for row in self.tbody.children if row != row_to_remove
+                ]
         elif edited_id:
-            row_to_edit = self.get_children(attr="layer_id", value=edited_id)[0]
-            row_to_edit.update_view()
+            if edited_id:
+                row_to_edit = self.tbody.get_children(attr="layer_id", value=edited_id)[
+                    0
+                ]
+                row_to_edit.update_view()
 
-        else:
-            # if nothing has changed, it means that this is the first time
-            rows = []
-            for i, _ in enumerate(self.model.names):
-                print(i)
-                row = ConstraintRow(self.model, i, self.dialog, self.aoi_model)
-                rows.append(row)
+        elif not (new_ids or old_ids or edited_id):
+            rows = [
+                ConstraintRow(self.model, i, self.dialog, self.aoi_model)
+                for i, _ in enumerate(self.model.names)
+            ]
             self.tbody.children = rows

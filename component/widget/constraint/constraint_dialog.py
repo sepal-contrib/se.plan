@@ -13,7 +13,7 @@ class ConstraintDialog(sw.Dialog):
     _CONSTRAINTS = _CONSTRAINTS[_CONSTRAINTS.theme == "constraint"]
 
     count = 0
-    edit_id = None
+    on_edit = False
     loading = Bool(False).tag(sync=True)
 
     def __init__(self, model: cmod.ConstraintModel):
@@ -90,9 +90,9 @@ class ConstraintDialog(sw.Dialog):
         )
 
         # decorate the validate method with self buttons
-        self.validate = sd.loading_button(alert=self.w_alert, button=self.w_validate)(
-            self.validate
-        )
+        self.validate = sd.loading_button(
+            alert=self.w_alert, button=self.w_validate, debug=True
+        )(self.validate)
 
         # add JS behaviour
         self.w_validate.on_event("click", self.validate)
