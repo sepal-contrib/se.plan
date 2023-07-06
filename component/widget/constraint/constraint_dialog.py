@@ -13,7 +13,6 @@ class ConstraintDialog(sw.Dialog):
     _CONSTRAINTS = _CONSTRAINTS[_CONSTRAINTS.theme == "constraint"]
 
     count = 0
-    on_edit = False
     loading = Bool(False).tag(sync=True)
 
     def __init__(self, model: cmod.ConstraintModel):

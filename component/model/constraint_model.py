@@ -69,7 +69,7 @@ class ConstraintModel(model.Model):
         self.assets.append(asset)
         self.descs.append(desc)
         self.units.append(unit)
-        self.values.append([np.iinfo(np.int16).min, np.iinfo(np.int16).max])
+        self.values.append([np.iinfo(np.int8).min, np.iinfo(np.int8).max])
         self.data_type.append(data_type)
 
         self.updated += 1
