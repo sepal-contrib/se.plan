@@ -21,10 +21,12 @@ class CustomNumber(Any):
             try:
                 return round(float(value), 4)
             except:
+                print("float")
                 return 0
         try:
             return int(value)
         except:
+            print("int")
             return 0
 
 
@@ -45,16 +47,19 @@ class ConstraintWidget(sw.Layout):
     """
 
     items = List([]).tag(sync=True)
-    "list: list of possible values for Select widget"
+    "list: list of possible values for Select widget. When the data type is categorical."
 
     v_model = List([], allow_none=True).tag(sync=True)
     "list: value selected in the widget"
 
     min_ = Int(0).tag(sync=True)
+    """int: minimum value of the slider. When the data type is continuous."""
 
     max_ = Int(1).tag(sync=True)
+    """int: maximum value of the slider. When the data type is continuous."""
 
     step = Int(1).tag(sync=True)
+    """int: step of the slider. When the data type is continuous."""
 
     def __init__(
         self,
@@ -65,7 +70,7 @@ class ConstraintWidget(sw.Layout):
         self.data_type = data_type
         self.layer_id = layer_id
         self.class_ = "align-center"
-        self.attributes = {"data-layer": layer_id}
+        self.attributes = {"data-layer": layer_id, "id": f"{layer_id}_widget"}
         self.v_model = []
 
         super().__init__()
@@ -111,7 +116,7 @@ class ConstraintWidget(sw.Layout):
                 v_model=None,
             )
 
-            directional_link((self.widget, "v_model"), (self, "v_model"))
+            link((self.widget, "v_model"), (self, "v_model"))
 
         self.v_model = v_model
         self.children = [self.widget]
@@ -185,14 +190,17 @@ class CustomSlider(sw.Layout):
         self.observe(self.set_slider, "v_model")
 
     def set_slider(self, change):
+        """Set slider v_model based on self.v_model"""
+
         if not change["new"]:
             return
 
         self.slider.v_model = change["new"]
 
     def set_v_model(self, change):
-        """Set v_model based on the w_min and w_min."""
-        if not change["new"]:
+        """Set v_model based on the w_min and w_min widgets"""
+
+        if change["new"] in ["", None]:
             return
 
         new_val = change["new"]
