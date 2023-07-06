@@ -43,25 +43,17 @@ class ToolBar(sw.Toolbar):
         self.w_new = sw.Btn(
             f"New {name}", "fa-solid fa-plus", small=True, type_="success"
         )
-        self.w_validate = sw.Btn(
-            "validate", "fa-solid fa-check", small=True, class_="ml-1"
-        )
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
-        self.w_validate.on_event("click", self.validate)
 
         self.children = [
             sw.Spacer(),
             sw.Divider(vertical=True, class_="mr-2"),
             self.w_new,
-            self.w_validate,
         ]
 
     @sd.switch("loading", on_widgets=["dialog"])
     def open_new_dialog(self, *args) -> None:
         """open the new priority dialog."""
         self.dialog.open_new()
-
-    def validate(self, *args):
-        self.model.validated += 1
