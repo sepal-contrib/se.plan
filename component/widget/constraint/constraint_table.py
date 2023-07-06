@@ -1,5 +1,3 @@
-from typing import Literal
-
 import ee
 import numpy as np
 
@@ -7,115 +5,13 @@ import numpy as np
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.aoi import AoiModel
 from sepal_ui.scripts import decorator as sd
-from traitlets import List, link, observe
 
 from component.message import cm
 from component.model.constraint_model import ConstraintModel
 from component.widget import custom_widgets as cw
 
 from .constraint_dialog import ConstraintDialog
-
-
-class ConstraintWidget(sw.Layout):
-    """Custom widget to allow user to select the values that will be masked out of the analysis.
-
-    This element will be different depending on the data type of the constraint.
-    """
-
-    items = List([]).tag(sync=True)
-    "list: list of possible values for Select widget"
-
-    v_model = List([], allow_none=True).tag(sync=True)
-    "list: value selected in the widget"
-
-    def __init__(
-        self,
-        data_type: Literal["continuous", "discrete", "categorical"],
-        layer_id: str,
-        v_model: List = None,
-    ):
-        self.data_type = data_type
-        self.layer_id = layer_id
-        self.class_ = "align-center"
-        self.attributes = {"data-layer": layer_id}
-
-        super().__init__()
-
-        if self.data_type == "continuous":
-            w_min = sw.TextField(v_model=None, xs1=True)
-            w_max = sw.TextField(v_model=None, xs1=True)
-            slider = sw.RangeSlider(v_model=[0, 1], xs1=True, xs10=True, class_="mt-4")
-
-            def transform(type_):
-                """Transform method between text and slider widgets."""
-                position = type_ == "min"
-                return [
-                    lambda min_val: [min_val, slider.v_model[position]],
-                    lambda slider_vmodel: slider_vmodel[not position],
-                ]
-
-            link((w_min, "v_model"), (slider, "v_model"), transform=transform("min"))
-            link((w_max, "v_model"), (slider, "v_model"), transform=transform("max"))
-            link((slider, "v_model"), (self, "v_model"))
-
-            self.widget = sw.Flex(
-                class_="d-flex",
-                children=[
-                    sw.Flex(children=[w_min], xs1=True),
-                    sw.Flex(children=[slider], xs10=True),
-                    sw.Flex(children=[w_max], xs1=True),
-                ],
-            )
-
-        elif self.data_type == "binary":
-            self.widget = sw.RadioGroup(
-                row=True,
-                label=cm.constraint.widget.binary.label,
-                v_model=0,
-                small=True,
-                messages=[cm.constraint.widget.binary.mask_0],
-                children=[
-                    sw.Radio(label="0", v_model=0),
-                    sw.Radio(label="1", v_model=1),
-                ],
-            )
-
-            self.widget.observe(
-                lambda change: setattr(
-                    self.widget,
-                    "messages",
-                    [cm.constraint.widget.binary[f"mask_{change['new']}"]],
-                ),
-                "v_model",
-            )
-
-            link(
-                (self.widget, "v_model"),
-                (self, "v_model"),
-                transform=[lambda x: [x], lambda x: x[0]],
-            )
-
-        elif self.data_type == "categorical":
-            self.widget = sw.Select(
-                label=cm.constraint.widget.categorical.label,
-                multiple=True,
-                items=[],
-                v_model=None,
-            )
-
-            link((self.widget, "v_model"), (self, "v_model"))
-            link((self.widget, "items"), (self, "v_model"))
-
-        self.v_model = v_model
-        self.children = [self.widget]
-
-    @observe("items")
-    def update_items(self, change):
-        """Update items of a categorical widget when it changes."""
-        if not self.data_type == "categorical":
-            raise ValueError("This is not a categorical widget")
-
-        self.widget.items = change["new"]
+from .constraint_widget import ConstraintWidget
 
 
 class ConstraintRow(sw.Html):
@@ -163,7 +59,7 @@ class ConstraintRow(sw.Html):
             v_model=self.value,
         )
 
-        # self.get_limits()
+        self.get_limits()
 
         td_list = [
             sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
@@ -200,28 +96,70 @@ class ConstraintRow(sw.Html):
         self.dialog.value = True
 
     def update_value(self, widget, *args):
-        print("update value")
-
+        """Update the value of the model."""
         self.model.update_value(self.layer_id, self.w_maskout.v_model)
-        print("update value done")
 
     @sd.need_ee
     def get_limits(self, *args) -> None:
         """Get the min and max value of the asset in the aoi."""
         if not self.aoi_model.feature_collection:
-            max_, min_ = (np.iinfo(np.int8).max, np.iinfo(np.int8).min)
-        else:
-            ee_image = ee.Image(self.asset).select(0)
-            red = ee.Reducer.minMax()
-            geom = self.aoi_model.feature_collection
-            max_min = (
-                ee_image.reduceRegion(reducer=red, geometry=geom, scale=500)
-                .toArray()
-                .getInfo()
-            )
-            max_, min_ = max(max_min), min(max_min)
+            values = (np.iinfo(np.int8).max, np.iinfo(np.int8).min)
 
-        self.w_maskout.v_model = [min_, max_]
+        print(self.data_type)
+
+        if self.data_type in ["binary", "continuous"]:
+            reducer = ee.Reducer.minMax()
+
+            def get_value(reduction):
+                return list(reduction.getInfo().values())
+
+        else:
+            reducer = ee.Reducer.frequencyHistogram()
+
+            def get_value(reduction):
+                return (
+                    ee.Dictionary(
+                        reduction.get(ee.Image(self.asset).bandNames().get(0))
+                    )
+                    .keys()
+                    .getInfo()
+                )
+
+        ee_image = ee.Image(self.asset).select(0)
+        geom = self.aoi_model.feature_collection
+
+        values = get_value(
+            ee_image.reduceRegion(
+                reducer=reducer,
+                geometry=geom,
+                scale=ee_image.projection().nominalScale().multiply(2),
+            )
+        )
+
+        if self.data_type == "binary":
+            if not all(val in values for val in [0, 1]):
+                raise Exception("Binary asset must have only 0 and 1 values")
+            self.w_maskout.v_model = [values[1]]
+
+        elif self.data_type == "categorical":
+            if len(values) > 256:
+                raise Exception("Categorical asset must have less than 256 values")
+            self.w_maskout.items = values
+
+        elif self.data_type == "continuous":
+            print(values)
+            # There's no way to set min, max as float,
+            values = [int(val) for val in values]
+            self.w_maskout.widget.max_ = values[0]
+            self.w_maskout.widget.min_ = values[-1]
+            self.w_maskout.widget.v_model = [values[-1], values[0]]
+
+            if (values[0] - values[-1]) == 1:
+                self.w_maskout.widget.step = 0
+            else:
+                self.w_maskout.widget.step = 1
+
+        self.update_value(None)
 
 
 class ConstraintTable(sw.Layout):
