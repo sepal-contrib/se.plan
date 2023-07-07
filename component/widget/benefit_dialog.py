@@ -24,7 +24,7 @@ class BenefitDialog(sw.Dialog):
         self.w_alert = sw.Alert()
 
         # create the title
-        w_title = sw.CardTitle(children=[cm.benefit.title])
+        w_title = sw.CardTitle(children=[cm.benefit.dialog.title])
 
         # create the content
         default_theme = self._BENEFITS.subtheme.unique().tolist()

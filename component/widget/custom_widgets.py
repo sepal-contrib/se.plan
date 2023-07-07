@@ -2,6 +2,7 @@ from typing import Union
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from traitlets import Int, link
 
 from component.model import BenefitModel, ConstraintModel, CostModel
 
@@ -58,3 +59,37 @@ class ToolBar(sw.Toolbar):
     def open_new_dialog(self, *args) -> None:
         """open the new benefit dialog."""
         self.dialog.open_new()
+
+
+class Tabs(sw.Card):
+    current = Int(0).tag(sync=True)
+
+    def __init__(self, titles, content, **kwargs):
+        self.background_color = "primary"
+        self.dark = True
+
+        self.tabs = [
+            sw.Tabs(
+                v_model=self.current,
+                children=[
+                    sw.Tab(children=[title], key=key)
+                    for key, title in enumerate(titles)
+                ],
+            )
+        ]
+
+        self.content = [
+            sw.TabsItems(
+                v_model=self.current,
+                children=[
+                    sw.TabItem(children=[content], key=key)
+                    for key, content in enumerate(content)
+                ],
+            )
+        ]
+
+        self.children = self.tabs + self.content
+
+        link((self.tabs[0], "v_model"), (self.content[0], "v_model"))
+
+        super().__init__(**kwargs)

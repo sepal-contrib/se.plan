@@ -19,27 +19,27 @@ class Table(sw.Layout):
     def __init__(
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
-        dialog: Union[ConstraintDialog, CostDialog, BenefitDialog],
         aoi_model: Optional[AoiModel] = None,
     ) -> None:
-        # save the model and dialog as a member
-
         self.model = model
-        self.dialog = dialog
-        self.toolbar = cw.ToolBar(model, dialog)
         self.aoi_model = aoi_model
 
         if isinstance(model, BenefitModel):
             type_ = "benefit"
             self.Row = BenefitRow
+            self.dialog = BenefitDialog(model=model)
 
         elif isinstance(model, ConstraintModel):
             type_ = "constraint"
             self.Row = ConstraintRow
+            self.dialog = ConstraintDialog(model=model)
 
         elif isinstance(model, CostModel):
             type_ = "cost"
             self.Row = CostRow
+            self.dialog = CostDialog(model=model)
+
+        self.toolbar = cw.ToolBar(model, self.dialog)
 
         # create the table
         super().__init__()
@@ -67,7 +67,7 @@ class Table(sw.Layout):
             ],
         )
 
-        self.children = [self.toolbar, self.table]
+        self.children = [self.dialog, self.toolbar, self.table]
 
         # add js behavior
         self.model.observe(self.set_rows, "updated")
