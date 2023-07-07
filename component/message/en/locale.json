@@ -112,21 +112,6 @@
 			}
 		}
 	},
-	"benefits": {
-		"title": "Restoration benefits",
-		"table": {
-			"action": "action",
-			"theme": "benefit",
-			"indicator": "indicator",
-			"labels": {
-				"0": "no importance",
-				"1": "low importance",
-				"2": "neutral",
-				"3": "important",
-				"4": "very important"
-			}
-		}
-	},
 	"export": {
 		"title": "Export map",
 		"scale": "Resolution (m)",
