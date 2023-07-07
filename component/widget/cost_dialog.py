@@ -24,17 +24,17 @@ class CostDialog(sw.Dialog):
         self.w_alert = sw.Alert()
 
         # create the title
-        w_title = sw.CardTitle(children=[cm.cost_dialog.title.capitalize()])
+        w_title = sw.CardTitle(children=[cm.cost.dialog.title])
 
         # create the content
-        self.w_name = sw.Combobox(label=cm.cost_dialog.name, items=[], v_model=None)
+        self.w_name = sw.Combobox(label=cm.cost.dialog.name, items=[], v_model=None)
         default_layers = self._COSTS.layer_id.unique().tolist()
         self.w_name.items = [cm.layers[ly].name for ly in default_layers]
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
         self.w_asset = sw.AssetSelect()
-        self.w_desc = sw.Textarea(label=cm.cost_dialog.desc, v_model=None)
+        self.w_desc = sw.Textarea(label=cm.cost.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
-            label=cm.cost_dialog.unit,
+            label=cm.cost.dialog.unit,
             v_model=self.model._unit,
             readonly=True,
             hint="All cost layer must use the same unit if not aggregation will not be possible",
@@ -53,10 +53,10 @@ class CostDialog(sw.Dialog):
 
         # create the actions
         self.w_validate = sw.Btn(
-            cm.cost_dialog.validate, "fa-solid fa-check", type_="success"
+            cm.cost.dialog.validate, "fa-solid fa-check", type_="success"
         )
         self.w_cancel = sw.Btn(
-            cm.cost_dialog.cancel, "fa-solid fa-times", type_="error"
+            cm.cost.dialog.cancel, "fa-solid fa-times", type_="error"
         )
         w_actions = sw.CardActions(
             children=[sw.Spacer(), self.w_validate, self.w_cancel]
@@ -91,12 +91,12 @@ class CostDialog(sw.Dialog):
                 self.w_desc.v_model,
             ]
         ):
-            raise Exception(cm.cost_dialog.missing_data)
+            raise Exception(cm.cost.dialog.missing_data)
 
         # if layer has no layer_id, it needs to be created using the number stored
         # in the object
         if not self.w_id.v_model:
-            self.w_id.v_model = f"custom_priority_{self.count}"
+            self.w_id.v_model = f"custom_benefit_{self.count}"
             self.count += 1
 
         # decide either it's an update or a new one

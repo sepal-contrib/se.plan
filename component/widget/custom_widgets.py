@@ -3,10 +3,11 @@ from typing import Union
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 
-from component.model import ConstraintModel, CostModel, PriorityModel
-from component.widget.constraint.constraint_dialog import ConstraintDialog
-from component.widget.cost.cost_dialog import CostDialog
-from component.widget.priority.priority_dialog import PriorityDialog
+from component.model import BenefitModel, ConstraintModel, CostModel
+
+from .benefit_dialog import BenefitDialog
+from .constraint_dialog import ConstraintDialog
+from .cost_dialog import CostDialog
 
 
 class TableIcon(sw.Icon):
@@ -25,16 +26,16 @@ class TableIcon(sw.Icon):
 class ToolBar(sw.Toolbar):
     def __init__(
         self,
-        model: Union[PriorityModel, ConstraintModel, CostModel],
-        dialog: Union[ConstraintDialog, CostDialog, PriorityDialog],
+        model: Union[BenefitModel, ConstraintModel, CostModel],
+        dialog: Union[ConstraintDialog, CostDialog, BenefitDialog],
     ) -> None:
         super().__init__()
 
         self.model = model
         self.dialog = dialog
 
-        if isinstance(model, PriorityModel):
-            name = "priority"
+        if isinstance(model, BenefitModel):
+            name = "benefit"
         elif isinstance(model, ConstraintModel):
             name = "constraint"
         elif isinstance(model, CostModel):
@@ -55,5 +56,5 @@ class ToolBar(sw.Toolbar):
 
     @sd.switch("loading", on_widgets=["dialog"])
     def open_new_dialog(self, *args) -> None:
-        """open the new priority dialog."""
+        """open the new benefit dialog."""
         self.dialog.open_new()

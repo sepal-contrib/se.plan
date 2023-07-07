@@ -47,7 +47,7 @@ class ConstraintDialog(sw.Dialog):
             label=cm.constraint.dialog.unit, v_model=None, class_="mr-2"
         )
         self.w_data_type = sw.Select(
-            label=cm.constraint.dialog.data_type,
+            label=cm.data_type.label,
             items=[
                 {"text": cm.data_type[data_type], "value": data_type}
                 for data_type in cp.data_types
@@ -133,7 +133,7 @@ class ConstraintDialog(sw.Dialog):
         # if layer has no layer_id, it needs to be created using the number stored
         # in the object
         if not self.w_id.v_model:
-            self.w_id.v_model = f"custom_priority_{self.count}"
+            self.w_id.v_model = f"custom_benefit_{self.count}"
             self.count += 1
 
         # decide either it's an update or a new one
@@ -190,19 +190,20 @@ class ConstraintDialog(sw.Dialog):
         layer_id = next(
             k for k, ly in cm.layers.items() if ly.name == self.w_name.v_model
         )
-        priority = self._CONSTRAINTS[self._CONSTRAINTS.layer_id == layer_id].iloc[0]
+        # TODO: why this is called constraints?
+        benefit = self._CONSTRAINTS[self._CONSTRAINTS.layer_id == layer_id].iloc[0]
 
         # fill the different widgets
         self.w_id.v_model = layer_id
-        self.w_asset.v_model = priority.gee_asset
+        self.w_asset.v_model = benefit.gee_asset
         # add the asset as default value so it won't be lost if the user change it,, do this manually otherewise it will take sometime
         header = {"header": cm.default_asset_header}
-        default_asset_item = [header, priority.gee_asset]
+        default_asset_item = [header, benefit.gee_asset]
         if header not in self.w_asset.items:
             self.w_asset.items = default_asset_item + self.w_asset.items
 
         self.w_desc.v_model = cm.layers[layer_id].detail
-        self.w_unit.v_model = priority.unit
+        self.w_unit.v_model = benefit.unit
 
     def fill(
         self,

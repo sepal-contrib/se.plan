@@ -5,18 +5,18 @@ from traitlets import Bool, link
 
 from component import parameter as cp
 from component.message import cm
-from component.model.priority_model import PriorityModel
+from component.model.benefit_model import BenefitModel
 
 
-class PriorityDialog(sw.Dialog):
-    _PRIORITIES = pd.read_csv(cp.layer_list)
-    _PRIORITIES = _PRIORITIES[_PRIORITIES.theme == "benefit"]
+class BenefitDialog(sw.Dialog):
+    _BENEFITS = pd.read_csv(cp.layer_list)
+    _BENEFITS = _BENEFITS[_BENEFITS.theme == "benefit"]
 
     count = 0
 
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: PriorityModel):
+    def __init__(self, model: BenefitModel):
         # save the model as a member
         self.model = model
 
@@ -24,31 +24,25 @@ class PriorityDialog(sw.Dialog):
         self.w_alert = sw.Alert()
 
         # create the title
-        w_title = sw.CardTitle(children=[cm.priority_dialog.title.capitalize()])
+        w_title = sw.CardTitle(children=[cm.benefit.title])
 
         # create the content
-        default_theme = self._PRIORITIES.subtheme.unique().tolist()
+        default_theme = self._BENEFITS.subtheme.unique().tolist()
         theme_names = [
             {"text": cm.subtheme[ly], "value": ly} for ly in default_theme if ly
         ]
         theme_names = theme_names + [{"text": cm.subtheme["custom"], "value": "custom"}]
         self.w_theme = sw.Select(
-            label=cm.priority_dialog.theme.capitalize(),
+            label=cm.benefit.dialog.theme,
             items=theme_names,
             class_="on-dialog",
             v_model=None,
         )
-        self.w_name = sw.Combobox(
-            label=cm.priority_dialog.name.capitalize(), items=[], v_model=None
-        )
+        self.w_name = sw.Combobox(label=cm.benefit.dialog.name, items=[], v_model=None)
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
         self.w_asset = sw.AssetSelect()
-        self.w_desc = sw.Textarea(
-            label=cm.priority_dialog.desc.capitalize(), v_model=None
-        )
-        self.w_unit = sw.TextField(
-            label=cm.priority_dialog.unit.capitalize(), v_model=None
-        )
+        self.w_desc = sw.Textarea(label=cm.benefit.dialog.desc, v_model=None)
+        self.w_unit = sw.TextField(label=cm.benefit.dialog.unit, v_model=None)
         w_content = sw.CardText(
             children=[
                 self.w_theme,
@@ -63,10 +57,10 @@ class PriorityDialog(sw.Dialog):
 
         # create the actions
         self.w_validate = sw.Btn(
-            cm.priority_dialog.validate, "fa-solid fa-check", type_="success"
+            cm.benefit.dialog.validate, "fa-solid fa-check", type_="success"
         )
         self.w_cancel = sw.Btn(
-            cm.priority_dialog.cancel, "fa-solid fa-times", type_="error"
+            cm.benefit.dialog.cancel, "fa-solid fa-times", type_="error"
         )
         w_actions = sw.CardActions(
             children=[sw.Spacer(), self.w_validate, self.w_cancel]
@@ -104,12 +98,12 @@ class PriorityDialog(sw.Dialog):
                 self.w_unit.v_model,
             ]
         ):
-            raise Exception(cm.priority_dialog.missing_data)
+            raise Exception(cm.benefit.dialog.missing_data)
 
         # if layer has no layer_id, it needs to be created using the number stored
         # in the object
         if not self.w_id.v_model:
-            self.w_id.v_model = f"custom_priority_{self.count}"
+            self.w_id.v_model = f"custom_benefit_{self.count}"
             self.count += 1
 
         # decide either it's an update or a new one
@@ -122,9 +116,9 @@ class PriorityDialog(sw.Dialog):
             "unit": self.w_unit.v_model,
         }
         if self.w_id.v_model in self.model.ids:
-            self.model.update_priority(**kwargs)
+            self.model.update_benefit(**kwargs)
         else:
-            self.model.add_priority(**kwargs)
+            self.model.add_benefit(**kwargs)
 
         # close the dialog
         self.value = False
@@ -146,9 +140,7 @@ class PriorityDialog(sw.Dialog):
 
     def theme_change(self, *args) -> None:
         """edit the list of default theme."""
-        default_layers = self._PRIORITIES[
-            self._PRIORITIES.subtheme == self.w_theme.v_model
-        ]
+        default_layers = self._BENEFITS[self._BENEFITS.subtheme == self.w_theme.v_model]
         default_layers = default_layers.layer_id.unique().tolist()
         self.w_name.items = [cm.layers[ly].name for ly in default_layers]
         self.w_name.v_model = next(iter(self.w_name.items), "")
@@ -166,13 +158,13 @@ class PriorityDialog(sw.Dialog):
         layer_id = next(
             k for k, ly in cm.layers.items() if ly.name == self.w_name.v_model
         )
-        priority = self._PRIORITIES[self._PRIORITIES.layer_id == layer_id].iloc[0]
+        benefit = self._BENEFITS[self._BENEFITS.layer_id == layer_id].iloc[0]
 
         # fill the different widgets
         self.w_id.v_model = layer_id
-        self.w_asset.v_model = priority.gee_asset
+        self.w_asset.v_model = benefit.gee_asset
         self.w_desc.v_model = cm.layers[layer_id].detail
-        self.w_unit.v_model = priority.unit
+        self.w_unit.v_model = benefit.unit
 
     def fill(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str

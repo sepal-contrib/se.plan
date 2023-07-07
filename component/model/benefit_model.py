@@ -6,7 +6,7 @@ from component import parameter as cp
 from component.message import cm
 
 
-class PriorityModel(model.Model):
+class BenefitModel(model.Model):
     names = List([]).tag(sync=True)
     ids = List([]).tag(sync=True)
     themes = List([]).tag(sync=True)
@@ -19,7 +19,7 @@ class PriorityModel(model.Model):
     validated = Int(0).tag(sync=True)
 
     def __init__(self):
-        # get the default priority from the csv file
+        # get the default benefit from the csv file
         _themes = pd.read_csv(cp.layer_list).fillna("").sort_values(by=["subtheme"])
         _themes = _themes[_themes.theme == "benefit"]
 
@@ -34,8 +34,8 @@ class PriorityModel(model.Model):
 
         super().__init__()
 
-    def remove_priority(self, id: str) -> None:
-        """Remove a priority using its name."""
+    def remove_benefit(self, id: str) -> None:
+        """Remove a benefit using its name."""
         idx = self.get_index(id)
 
         del self.names[idx]
@@ -48,10 +48,10 @@ class PriorityModel(model.Model):
 
         self.updated += 1
 
-    def add_priority(
+    def add_benefit(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:
-        """add a priority and trigger the update."""
+        """add a benefit and trigger the update."""
         self.themes.append(theme)
         self.names.append(name)
         self.ids.append(id)
@@ -62,10 +62,10 @@ class PriorityModel(model.Model):
 
         self.updated += 1
 
-    def update_priority(
+    def update_benefit(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:
-        """update an existing priority metadata and trigger the update."""
+        """update an existing benefit metadata and trigger the update."""
         idx = self.get_index(id)
 
         self.themes[idx] = theme
