@@ -1,71 +1,36 @@
 import json
 from copy import deepcopy
 
-import geopandas as gpd
-import ipyvuetify as v
-from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
+from ipyleaflet import GeoJSON
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from sepal_ui import color as sc
-from sepal_ui import mapping as sm
 from sepal_ui import sepalwidgets as sw
-from sepal_ui.scripts import utils as su
-from shapely import geometry as sg
 
 from component import parameter as cp
 from component import scripts as cs
-from component import widget as cw
 from component.message import cm
+from component.scripts.seplan import Seplan
+from component.widget.map import SeplanMap
+from component.widget.map_toolbar import MapBar
 
 
-class MapTile(sw.Tile):
-    EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
+class MapTile(sw.Layout):
+    def __init__(self, seplan_model: Seplan, area_tile, theme_tile):
+        self.attributes = {"_metadata": "map_widget"}
+        self.class_ = "d-block"
 
-    def __init__(self, questionnaire_tile, aoi_model, area_tile, theme_tile):
-        # add the explanation
-        mkd = sw.Markdown("  \n".join(cm.map.txt))
+        super().__init__()
 
-        # create a save widget
-        self.save = cw.ExportMap(position="topleft")
+        self.seplan_model = seplan_model
 
-        # create the map
-        self.m = cw.CustomMap(["SATELLITE"], dc=True, vinspector=True).hide_dc()
-        self.m.add_control(self.save)
-        self.m.add_control(sm.FullScreenControl(self.m, position="topright"))
-        self.m.add_colorbar(
-            colors=cp.red_to_green, vmin=1, vmax=5, layer_name=cm.map.legend.title
-        )
+        title = sw.Html(tag="h2", children=[cm.map.title])
+        description = sw.Markdown("  \n".join(cm.map.txt))
 
-        # create a window to display AOI information
-        self.html = v.Html(tag="h3", style_="margin:0em 2em 0em 2em;")
-        control = WidgetControl(widget=self.html, position="bottomright")
-        self.m.add_control(control)
-
-        # drawing managment
-        self.draw_features = deepcopy(self.EMPTY_FEATURES)
         self.colors = []
-        self.name_dialog = cw.CustomAoiDialog()
-
-        # add cartoDB layer after everything to make sure it stays on top
-        # workaround of https://github.com/jupyter-widgets/ipyleaflet/issues/452
-        default = "Positron" if v.theme.dark is False else "DarkMatter"
-        carto = basemap_to_tiles(basemaps.CartoDB[default])
-        carto.base = True
-        self.m.add_layer(carto)
-
-        # create a layout with 2 btn
-        self.map_btn = sw.Btn(cm.compute.btn, class_="ma-2")
-        self.compute_dashboard = sw.Btn(
-            cm.map.compute_dashboard, class_="ma-2", disabled=True
-        )
-
-        # models
-        self.layer_model = questionnaire_tile.layer_model
-        self.question_model = questionnaire_tile.question_model
-        self.aoi_model = aoi_model
-
-        # create the shape loader
-        self.load_shape = cw.LoadShapes()
+        self.alert = sw.Alert()
+        self.map_ = SeplanMap()
+        self.map_bar = MapBar(model=self.seplan_model, map_=self.map_)
 
         # get the dashboard tile
         self.area_tile = area_tile
@@ -76,29 +41,19 @@ class MapTile(sw.Tile):
         self.area_dashboard = None
         self.theme_dashboard = None
 
-        # create the tile
-        super().__init__(
-            id_="map_widget",
-            title=cm.map.title,
-            inputs=[mkd, self.load_shape, self.m, self.name_dialog],
-            alert=sw.Alert(),
-            btn=v.Layout(children=[self.map_btn, self.compute_dashboard]),
-        )
+        self.children = [title, description, self.alert, self.map_bar, self.map_]
 
-        # decorate the function
-        self._compute = su.loading_button(self.alert, self.map_btn, debug=True)(
-            self._compute
-        )
-        self._dashboard = su.loading_button(
-            self.alert, self.compute_dashboard, debug=True
-        )(self._dashboard)
+        # # decorate the function
+        # self._compute = su.loading_button(self.alert, self.map_btn, debug=True)(
+        #     self._compute
+        # )
+        # self._dashboard = su.loading_button(
+        #     self.alert, self.compute_dashboard, debug=True
+        # )(self._dashboard)
 
-        # add js behaviour
-        self.compute_dashboard.on_event("click", self._dashboard)
-        self.m.dc.on_draw(self._handle_draw)
-        self.map_btn.on_event("click", self._compute)
-        self.load_shape.btn.on_event("click", self._load_shapes)
-        self.name_dialog.observe(self.save_draw, "value")
+        # # add js behaviour
+        # self.compute_dashboard.on_event("click", self._dashboard)
+        # self.map_btn.on_event("click", self._compute)
 
     def _load_shapes(self, widget, event, data):
         # get the data from the selected file
@@ -129,12 +84,6 @@ class MapTile(sw.Tile):
         self.m.add_layer(layer)
 
         return
-
-    def _add_geom(self, geo_json, name):
-        geo_json["properties"]["name"] = name
-        self.draw_features["features"].append(geo_json)
-
-        return self
 
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map."""
@@ -259,72 +208,3 @@ class MapTile(sw.Tile):
         self.area_tile.set_summary(self.area_dashboard)
 
         return self
-
-    def _handle_draw(self, target, action, geo_json):
-        """handle the draw on map event."""
-        # polygonize circles
-        if "radius" in geo_json["properties"]["style"]:
-            geo_json = self.polygonize(geo_json)
-
-        if action == "created":  # no edit as you don't know which one to change
-            # open the naming dialog (the popup will do the saving instead of this function)
-            self.name_dialog.update_aoi(
-                geo_json, len(self.draw_features["features"]) + 1
-            )
-
-        elif action == "deleted":
-            for feat in self.draw_features["features"]:
-                if feat["geometry"] == geo_json["geometry"]:
-                    self.draw_features["features"].remove(feat)
-
-        return self
-
-    def save_draw(self, change):
-        """save the geojson after the click on the button with it's custom name."""
-        if change["new"] is True:
-            return self
-
-        self._add_geom(self.name_dialog.feature, self.name_dialog.w_name.v_model)
-
-        return self
-
-    def _display_name(self, feature, **kwargs):
-        """update the AOI in the html viewver widget."""
-        # if the feature is a aoi it has no name so I display only the sub AOI name
-        # it will be solved with: https://github.com/12rambau/sepal_ui/issues/390
-        name = (
-            feature["properties"]["name"]
-            if "name" in feature["properties"]
-            else "Main AOI"
-        )
-        self.html.children = [name]
-
-        return self
-
-    @staticmethod
-    def polygonize(geo_json):
-        """Transform a ipyleaflet circle (a point with a radius) into a GeoJson multipolygon.
-
-        Params:
-            geo_json (json): the circle geojson
-
-        Return:
-            (json): the polygonised circle
-        """
-        # get the input
-        radius = geo_json["properties"]["style"]["radius"]
-        coordinates = geo_json["geometry"]["coordinates"]
-
-        # create shapely point
-        circle = (
-            gpd.GeoSeries([sg.Point(coordinates)], crs=4326)
-            .to_crs(3857)
-            .buffer(radius)
-            .to_crs(4326)
-        )
-
-        # insert it in the geo_json
-        json = geo_json
-        json["geometry"] = circle[0].__geo_interface__
-
-        return json
