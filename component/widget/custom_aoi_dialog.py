@@ -18,16 +18,20 @@ class CustomAoiDialog(sw.Dialog):
 
         # init the dialog
         super().__init__(
-            persistent=True, value=False, max_width="700px", children=[card]
+            persistent=True, v_model=False, max_width="700px", children=[card]
         )
 
         # add js behavior
         self.btn.on_event("click", self._on_click)
 
+    def open_dialog(self, *_):
+        """Open dialog."""
+        self.v_model = True
+
     def _on_click(self, widget, data, event):
         # close the dialog
         # it will trigger the saving
-        self.value = False
+        self.v_model = False
 
         return self
 
@@ -35,9 +39,9 @@ class CustomAoiDialog(sw.Dialog):
         """read the aoi and give an default name."""
         # update
         self.feature = geo_json
-        self.w_name.v_model = f"sub AOI {index}"
+        self.w_name.v_model = f"Sub AOI {index}"
 
         # show
-        self.value = True
+        self.open_dialog()
 
         return self
