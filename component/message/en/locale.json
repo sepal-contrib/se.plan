@@ -59,16 +59,6 @@
 			"name": "Recipe name"
 		}
 	},
-	"dial": {
-		"cancel": "Cancel",
-		"save": "Save",
-		"no_layer": "No layer",
-		"disc": "You need to select a layer before making modifications",
-		"layer": "Layer",
-		"unit": "Unit",
-		"default_title": "Layer Name",
-		"no_unit": "no_unit"
-	},
 	"dashboard": {
 		"region": {
 			"title": "Summary of restoration suitability by region",
@@ -111,16 +101,6 @@
 				}
 			}
 		}
-	},
-	"export": {
-		"title": "Export map",
-		"scale": "Resolution (m)",
-		"radio": {
-			"label": "Select export method",
-			"gee": "As a GEE asset",
-			"sepal": "As a sepal file"
-		},
-		"apply": "Apply"
 	},
 	"aoi": {
 		"not_lmic": "The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information"

@@ -7,11 +7,6 @@
             "1": "Examine the restoration suitability map and identify some areas that seem promising for more detailed restoration planning. Once you have identified these areas, you can draw a boundary around them and obtain summary statistics on their estimated benefits, costs, and risks (i.e., constraints). This information can help you assess tradeoffs and set restoration priorities for regions of interest.",
             "2": "Restoration suitability is a function of benefits and costs. It is the ratio of the weighted sum of benefits, scaled from 1 to 5, divided by costs. Costs include both opportunity and implementation costs. This indicator allows you to compare the restoration suitability of different sites and determine which ones offer higher returns on investment."
         },
-        "dialog": {
-            "title": "Sub AOI name",
-            "label": "Set name",
-            "btn": "Validate"
-        },
         "shapes": {
             "btn": "Load shapes",
             "file": "Select file",
@@ -19,6 +14,32 @@
         },
         "legend": {
             "title": "restoration suitability index"
+        },
+        "toolbar" : {
+            "tooltip" : {
+                "draw" : "Draw a new sub area of interest (make drawing tools available)",
+                "download" : "Download current map",
+                "load" : "Load existing sub area of interest shapes"
+            }
+        },
+        "dialog" : {
+            "export": {
+                "title": "Export map",
+                "scale": "Resolution (m)",
+                "radio": {
+                    "label": "Select export method",
+                    "gee": "As a GEE asset",
+                    "sepal": "As a SEPAL file"
+                },
+                "export": "Export",
+                "cancel": "Cancel"
+            },
+            "drawing": {
+                "title": "Sub AOI name",
+                "label": "Set name",
+                "btn": "Save",
+                "cancel": "Cancel"
+            }
         }
     }
 }

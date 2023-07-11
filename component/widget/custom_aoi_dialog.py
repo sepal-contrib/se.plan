@@ -9,11 +9,12 @@ class CustomAoiDialog(sw.Dialog):
 
     def __init__(self):
         # create the widgets
-        self.w_name = sw.TextField(label=cm.map.dialog.label, v_model=None)
-        self.btn = sw.Btn(cm.map.dialog.btn, "mdi-check")
-        title = sw.CardTitle(children=[cm.map.dialog.title])
+        self.w_name = sw.TextField(label=cm.map.dialog.drawing.label, v_model=None)
+        self.btn = sw.Btn(cm.map.dialog.drawing.btn, "mdi-check", small=True)
+        title = sw.CardTitle(children=[cm.map.dialog.drawing.title])
         text = sw.CardText(children=[self.w_name])
-        action = sw.CardActions(children=[self.btn])
+        btn_cancel = sw.Btn(cm.map.dialog.drawing.cancel, small=True)
+        action = sw.CardActions(children=[self.btn, btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 
         # init the dialog
@@ -22,6 +23,7 @@ class CustomAoiDialog(sw.Dialog):
         )
 
         # add js behavior
+        btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
         self.btn.on_event("click", self._on_click)
 
     def open_dialog(self, *_):

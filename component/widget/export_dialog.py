@@ -30,21 +30,22 @@ class ExportMapDialog(sw.Dialog):
 
         # create the useful widgets
         # align on the landsat images
-        w_scale_lbl = sw.Html(tag="h4", children=[cm.export.scale])
+        w_scale_lbl = sw.Html(tag="h4", children=[cm.map.dialog.export.scale])
         self.w_scale = sw.Slider(
             v_model=1000, min=10, max=2000, thumb_label="always", step=10
         )
 
-        w_method_lbl = sw.Html(tag="h4", children=[cm.export.radio.label])
-        sepal = sw.Radio(label=cm.export.radio.sepal, value="sepal")
-        gee = sw.Radio(label=cm.export.radio.gee, value="gee")
+        w_method_lbl = sw.Html(tag="h4", children=[cm.map.dialog.export.radio.label])
+        sepal = sw.Radio(label=cm.map.dialog.export.radio.sepal, value="sepal")
+        gee = sw.Radio(label=cm.map.dialog.export.radio.gee, value="gee")
         self.w_method = sw.RadioGroup(v_model="gee", row=True, children=[sepal, gee])
 
         # add alert and btn component for the loading_button
         self.alert = sw.Alert()
-        self.btn = sw.Btn(cm.export.apply, small=True)
+        self.btn = sw.Btn(cm.map.dialog.export.export, small=True)
+        self.btn_cancel = sw.Btn(cm.map.dialog.export.cancel, small=True)
 
-        title = sw.CardTitle(children=[cm.export.title])
+        title = sw.CardTitle(children=[cm.map.dialog.export.title])
 
         text = sw.CardText(
             children=[
@@ -55,7 +56,13 @@ class ExportMapDialog(sw.Dialog):
                 self.alert,
             ]
         )
-        actions = sw.CardActions(children=[sw.Spacer(), self.btn])
+        actions = sw.CardActions(
+            children=[
+                sw.Spacer(),
+                self.btn,
+                self.btn_cancel,
+            ]
+        )
 
         self.children = [sw.Card(children=[title, text, actions])]
 
@@ -63,6 +70,7 @@ class ExportMapDialog(sw.Dialog):
 
         # add js behaviour
         self.btn.on_event("click", self._apply)
+        self.btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
 
     def open_dialog(self, *_):
         """Open dialog."""

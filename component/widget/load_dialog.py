@@ -17,6 +17,7 @@ class LoadDialog(sw.Dialog):
         self.btn = sw.Btn(
             cm.map.shapes.btn, icon="mdi-download", class_="ml-2", small=True
         )
+        btn_cancel = sw.Btn(cm.map.dialog.drawing.cancel, small=True)
 
         # and the vector selector
         self.w_vector = CustomVector(label=cm.map.shapes.file)
@@ -27,9 +28,11 @@ class LoadDialog(sw.Dialog):
         # generate the panels
         title = sw.CardTitle(children=[cm.map.shapes.title])
         text = sw.CardText(children=[self.w_vector, self.alert])
-        actions = sw.CardActions(children=[sw.Spacer(), self.btn])
+        actions = sw.CardActions(children=[sw.Spacer(), self.btn, btn_cancel])
 
         self.children = [sw.Card(children=[title, text, actions])]
+
+        btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
 
     def open_dialog(self, *_):
         """Open dialog."""
