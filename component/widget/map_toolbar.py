@@ -1,6 +1,6 @@
-import ipyvuetify as v
 import sepal_ui.scripts.decorator as sd
 import sepal_ui.sepalwidgets as sw
+from traitlets import Bool
 
 from component import widget as cw
 from component.message import cm
@@ -8,15 +8,18 @@ from component.scripts.seplan import Seplan
 from component.widget.map import SeplanMap
 
 
-class MapBar(v.Toolbar):
+class MapBar(sw.Toolbar):
+    aoi_tools = Bool(False).tag(sync=True)
+
     def __init__(self, model: Seplan, map_: SeplanMap, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
+        self.attributes = {"id": "map_toolbar"}
         self.model = model
         self.map_ = map_
 
         # Dialogs
-        self.save_geom_dialog = cw.CustomAoiDialog()
+        self.save_geom_dialog = cw.CustomAoiDialog(self.map_)
         self.download_map_dialog = cw.ExportMapDialog()
         self.load_shape_dialog = cw.LoadDialog()
 
@@ -30,19 +33,19 @@ class MapBar(v.Toolbar):
             gliph="mdi-draw",
             icon=True,
             color="primary",
-        ).set_tooltip(cm.map.toolbar.tooltip.draw, bottom=True, max_width="200px")
+        ).set_tooltip(cm.map.toolbar.tooltip.draw, right=True, max_width="200px")
 
         self.btn_download = sw.Btn(
             gliph="mdi-download",
             icon=True,
             color="primary",
-        ).set_tooltip(cm.map.toolbar.tooltip.download, bottom=True, max_width="200px")
+        ).set_tooltip(cm.map.toolbar.tooltip.download, right=True, max_width="200px")
 
         self.btn_load = sw.Btn(
             gliph="mdi-upload",
             icon=True,
             color="primary",
-        ).set_tooltip(cm.map.toolbar.tooltip.load, bottom=True, max_width="200px")
+        ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
 
         self.children = [
             # Main buttons
@@ -65,7 +68,14 @@ class MapBar(v.Toolbar):
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
+
         self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
+        self.btn_draw.on_event("click", self.on_draw)
+
+    def on_draw(self, *_):
+        """Show or hide drawing control on the map."""
+        self.map_.dc.show() if not self.aoi_tools else self.map_.dc.hide()
+        self.aoi_tools = not self.aoi_tools
 
     @sd.switch("loading", on_widgets=["dialog"])
     def open_new_dialog(self, *args) -> None:

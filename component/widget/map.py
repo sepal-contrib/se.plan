@@ -13,6 +13,7 @@ class SeplanMap(sm.SepalMap):
     EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
 
     def __init__(self, *args, **kwargs):
+        self.attributes = {"id": "map"}
         self.dc = True
         self.vinspector = True
 

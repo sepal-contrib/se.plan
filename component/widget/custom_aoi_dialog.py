@@ -7,7 +7,9 @@ class CustomAoiDialog(sw.Dialog):
     feature = None
     "the geo_json feature selected by th user"
 
-    def __init__(self):
+    def __init__(self, map_):
+        self.map_ = map_
+
         # create the widgets
         self.w_name = sw.TextField(label=cm.map.dialog.drawing.label, v_model=None)
         self.btn = sw.Btn(cm.map.dialog.drawing.btn, "mdi-check", small=True)
