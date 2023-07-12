@@ -42,7 +42,6 @@ class SeplanMap(sm.SepalMap):
         self.add_layer(carto)
 
         self.dc.on_draw(self._handle_draw)
-        # self.name_dialog.observe(self.save_draw, "value")
 
     def _add_geom(self, geo_json, name):
         geo_json["properties"]["name"] = name
@@ -59,25 +58,8 @@ class SeplanMap(sm.SepalMap):
 
         return self
 
-    def _display_name(self, feature, **kwargs):
-        """update the AOI in the html viewver widget."""
-        # if the feature is a aoi it has no name so I display only the sub AOI name
-        # it will be solved with: https://github.com/12rambau/sepal_ui/issues/390
-        name = (
-            feature["properties"]["name"]
-            if "name" in feature["properties"]
-            else "Main AOI"
-        )
-        self.html.children = [name]
-
-        return self
-
     def _handle_draw(self, target, action, geo_json):
         """handle the draw on map event."""
-        # polygonize circles
-        if "radius" in geo_json["properties"]["style"]:
-            geo_json = self.polygonize(geo_json)
-
         if action == "created":  # no edit as you don't know which one to change
             # open the naming dialog (the popup will do the saving instead of this function)
             self.name_dialog.update_aoi(
@@ -88,5 +70,18 @@ class SeplanMap(sm.SepalMap):
             for feat in self.draw_features["features"]:
                 if feat["geometry"] == geo_json["geometry"]:
                     self.draw_features["features"].remove(feat)
+
+        return self
+
+    def _display_name(self, feature, **kwargs):
+        """update the AOI in the html viewver widget."""
+        # if the feature is a aoi it has no name so I display only the sub AOI name
+        # it will be solved with: https://github.com/12rambau/sepal_ui/issues/390
+        name = (
+            feature["properties"]["name"]
+            if "name" in feature["properties"]
+            else "Main AOI"
+        )
+        self.html.children = [name]
 
         return self
