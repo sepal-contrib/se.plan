@@ -36,6 +36,11 @@ table_headers = {
     },
 }
 
+custom_geom_table_headers = {
+    "action": cm.custom_geom.header.action,
+    "name": cm.custom_geom.header.name,
+}
+
 
 def _crit(*args):
     """Return a dict of the criteria caracteristic.

@@ -41,5 +41,11 @@
                 "cancel": "Cancel"
             }
         }
+    },
+    "custom_geom" : {
+        "header" : {
+            "action" : "Action",
+            "name" : "Name"
+        }
     }
 }

@@ -1,5 +1,6 @@
-import sepal_ui.scripts.decorator as sd
+import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
+from sepal_ui import color
 from traitlets import Bool
 
 from component import widget as cw
@@ -21,7 +22,7 @@ class MapBar(sw.Toolbar):
         # Dialogs
         self.save_geom_dialog = cw.CustomAoiDialog(self.map_)
         self.download_map_dialog = cw.ExportMapDialog()
-        self.load_shape_dialog = cw.LoadDialog()
+        self.load_shape_dialog = cw.LoadDialog(self.map_)
 
         # Main buttons
         self.btn_create_map = sw.Btn(cm.compute.btn, class_="ma-2")
@@ -29,7 +30,7 @@ class MapBar(sw.Toolbar):
             cm.map.compute_dashboard, class_="ma-2", disabled=True
         )
         # Auxiliar buttons
-        self.btn_draw = sw.Btn(
+        self.btn_draw = DrawMenu(
             gliph="mdi-draw",
             icon=True,
             color="primary",
@@ -63,21 +64,77 @@ class MapBar(sw.Toolbar):
             self.load_shape_dialog,
         ]
 
-        # self.load_shape_dialog.btn.on_event("click", self._load_shapes)
-
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
 
         self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
-        self.btn_draw.on_event("click", self.on_draw)
 
-    def on_draw(self, *_):
+        self.btn_draw.on_event("new_button", self.on_draw)
+        self.btn_draw.on_event("show_button", self.on_draw)
+
+    def on_draw(self, widget, event, data):
         """Show or hide drawing control on the map."""
-        self.map_.dc.show() if not self.aoi_tools else self.map_.dc.hide()
-        self.aoi_tools = not self.aoi_tools
+        if widget.attributes["id"] == "new_button":
+            self.map_.dc.show() if not self.aoi_tools else self.map_.dc.hide()
+            self.aoi_tools = not self.aoi_tools
 
-    @sd.switch("loading", on_widgets=["dialog"])
-    def open_new_dialog(self, *args) -> None:
-        """open the new benefit dialog."""
-        self.dialog.open_new()
+        elif widget.attributes["id"] == "show_button":
+            self.map_.dc.hide()
+            self.save_geom_dialog.open_dialog()
+
+
+class DrawMenu(sw.Menu):
+    def __init__(self, *args, **kwargs):
+        self.offset_x = True
+        self.v_model = (False,)
+
+        super().__init__(*args, **kwargs)
+
+        trash_btn = v.Btn(
+            v_on="menuData.on",
+            small=True,
+            children=[
+                v.Icon(children=["mdi-draw"], small=True),
+                v.Icon(children=["fa fa-caret-down"], small=True, right=True),
+            ],
+        )
+
+        self.v_slots = [
+            {
+                "name": "activator",
+                "variable": "menuData",
+                "children": trash_btn,
+            }
+        ]
+
+        self.items = [
+            v.ListItem(
+                attributes={"id": title},
+                children=[
+                    v.ListItemTitle(children=[title]),
+                ],
+            )
+            for title in ["new_button", "show_button"]
+        ]
+
+        self.children = [
+            v.List(dense=True, children=self.items),
+        ]
+
+        self.observe(self.activate, "v_model")
+
+    def on_event(self, name, event):
+        """Define an event based on the item name."""
+        for item in self.items:
+            if item.attributes["id"] == name:
+                item.on_event("click", event)
+
+    def activate(self, *args) -> None:
+        """Change the background color of the btn with respect to the status."""
+        # grey is contrasted enough for both light and dark theme
+        # could be customized further if requested
+        bg_color = "gray" if self.v_model is True else color.bg
+        self.v_slots[0]["children"].style_ = f"background: {bg_color};"
+
+        return

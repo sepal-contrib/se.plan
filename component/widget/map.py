@@ -2,15 +2,22 @@ from copy import deepcopy
 
 import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
-from ipyleaflet import WidgetControl, basemap_to_tiles, basemaps
+from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
+from matplotlib import pyplot as plt
+from matplotlib.colors import to_hex
 from sepal_ui import mapping as sm
+from traitlets import Dict, Int
 
 from component import parameter as cp
 from component.message import cm
 
 
 class SeplanMap(sm.SepalMap):
-    EMPTY_FEATURES = {"type": "FeatureCollection", "features": []}
+    custom_layers = Dict({"type": "FeatureCollection", "features": []}).tag(sync=True)
+    "dict: custom geometries drawn by the user"
+
+    new_geom = Int(0).tag(sync=True)
+    """int: either a new geometry has been drawn on the map"""
 
     def __init__(self, *args, **kwargs):
         self.attributes = {"id": "map"}
@@ -21,7 +28,6 @@ class SeplanMap(sm.SepalMap):
 
         self.dc.hide()
         self.add_basemap("SATELLITE")
-        self.draw_features = deepcopy(self.EMPTY_FEATURES)
 
         # create the map
         self.add(sm.FullScreenControl(self, position="topright"))
@@ -42,36 +48,74 @@ class SeplanMap(sm.SepalMap):
         self.add_layer(carto)
 
         self.dc.on_draw(self._handle_draw)
+        self.observe(self.on_custom_layers, "custom_layers")
 
-    def _add_geom(self, geo_json, name):
-        geo_json["properties"]["name"] = name
-        self.draw_features["features"].append(geo_json)
+    def on_custom_layers(self, *_):
+        """Add custom layers to the map."""
+        geojson_layers = [layer for layer in self.layers if isinstance(layer, GeoJSON)]
+        # Check if there are new geometries in the custom_layers
+        # If there are new geometries that are not in the map, add them
 
-        return self
+        colors = [
+            to_hex(plt.cm.tab10(i)) for i in range(len(self.custom_layers["features"]))
+        ]
 
-    def save_draw(self, change):
-        """save the geojson after the click on the button with it's custom name."""
-        if change["new"] is True:
-            return self
+        # Add layers to the map
+        for i, feat in enumerate(self.custom_layers["features"]):
+            if feat["properties"]["name"] not in [lyr.name for lyr in geojson_layers]:
+                # Add the layer to the map
+                style = {**cp.aoi_style, "color": colors[i], "fillColor": colors[i]}
+                hover_style = {**style, "fillOpacity": 0.4, "weight": 2}
+                layer = GeoJSON(
+                    data=feat,
+                    style=style,
+                    hover_style=hover_style,
+                    name=feat["properties"]["name"],
+                )
+                layer.on_hover(self._display_name)
 
-        self._add_geom(self.name_dialog.feature, self.name_dialog.w_name.v_model)
+                # Add the layer to the map_layers list
+                self.add(layer)
 
-        return self
+        # Remove layers from the map
+        for layer in geojson_layers:
+            if layer.name not in [
+                feat["properties"]["name"] for feat in self.custom_layers["features"]
+            ]:
+                self.remove_layer(layer)
+
+    def remove_custom_layer(self, layer_id):
+        """Remove custom layer from the custom_layers dict."""
+        # Create a copy of the current custom_layers dict
+        current_feats = deepcopy(self.custom_layers)
+
+        # Search the layer_id in the custom_layers dict
+        for feat in current_feats["features"]:
+            if feat["properties"]["id"] == layer_id:
+                current_feats["features"].remove(feat)
+
+                # Trigger the change in the custom_layers dict
+                self.custom_layers = current_feats
 
     def _handle_draw(self, target, action, geo_json):
         """handle the draw on map event."""
-        if action == "created":  # no edit as you don't know which one to change
-            # open the naming dialog (the popup will do the saving instead of this function)
-            self.name_dialog.update_aoi(
-                geo_json, len(self.draw_features["features"]) + 1
-            )
+        # polygonize circles
+        if "radius" in geo_json["properties"]["style"]:
+            geo_json = self.to_json()
+
+        if action == "created":
+            # save_geom_dialog will be listening to this trait
+            print("new geom")
+            self.new_geom += 1
 
         elif action == "deleted":
-            for feat in self.draw_features["features"]:
+            current_feats = deepcopy(self.custom_layers)
+            for feat in current_feats["features"]:
                 if feat["geometry"] == geo_json["geometry"]:
-                    self.draw_features["features"].remove(feat)
+                    current_feats["features"].remove(feat)
 
-        return self
+                    # Trigger the change in the custom_layers dict
+                    self.custom_layers = current_feats
 
     def _display_name(self, feature, **kwargs):
         """update the AOI in the html viewver widget."""

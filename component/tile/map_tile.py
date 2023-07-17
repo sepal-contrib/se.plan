@@ -1,9 +1,5 @@
-import json
 from copy import deepcopy
 
-from ipyleaflet import GeoJSON
-from matplotlib import pyplot as plt
-from matplotlib.colors import to_hex
 from sepal_ui import color as sc
 from sepal_ui import sepalwidgets as sw
 
@@ -55,36 +51,6 @@ class MapTile(sw.Layout):
         # self.compute_dashboard.on_event("click", self._dashboard)
         # self.map_btn.on_event("click", self._compute)
 
-    def _load_shapes(self, widget, event, data):
-        # get the data from the selected file
-        gdf, column = self.load_shape.read_data()
-
-        gdf = gdf.filter(items=[column, "geometry"])
-
-        # add them to the map
-        for i, row in gdf.iterrows():
-            # transform the data into a feature
-            feat = {
-                "type": "Feature",
-                "properties": {"style": {}},
-                "geometry": row.geometry.__geo_interface__,
-            }
-            self._add_geom(feat, row[column])
-
-        # display a tmp geometry before validation
-        data = json.loads(gdf.to_json())
-        style = {
-            **cp.aoi_style,
-            "color": sc.info,
-            "fillColor": sc.info,
-            "opacity": 0.5,
-            "weight": 2,
-        }
-        layer = GeoJSON(data=data, style=style, name="tmp")
-        self.m.add_layer(layer)
-
-        return
-
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map."""
         # remove the previous sub aoi from the map
@@ -130,50 +96,6 @@ class MapTile(sw.Layout):
 
         # enable the dashboard computation
         self.compute_dashboard.disabled = False
-
-        return self
-
-    def _save_features(self):
-        """save the features as layers on the map."""
-        # remove any sub aoi layer
-        l_2_keep = ["restoration layer", self.aoi_model.name]
-        [
-            self.m.remove_layer(lyr, none_ok=True)
-            for lyr in self.m.layers
-            if lyr.name not in l_2_keep
-        ]
-
-        # save the drawn features
-        draw_features = self.draw_features
-
-        # remove the shapes from the dc
-        # as a side effect the draw_features member will be emptied
-        self.m.dc.clear()
-
-        # reset the draw_features
-        # I'm sure the the AOI folder exists because the recipe was already saved there
-        self.draw_features = draw_features
-        features_file = (
-            cp.result_dir
-            / self.aoi_model.name
-            / f"features_{self.question_model.recipe_name}.geojson"
-        )
-        with features_file.open("w") as f:
-            json.dump(draw_features, f)
-
-        # set up the colors using the tab10 matplotlib colormap
-        self.colors = [
-            to_hex(plt.cm.tab10(i)) for i in range(len(self.draw_features["features"]))
-        ]
-
-        # create a layer for each aoi
-        for feat, color in zip(self.draw_features["features"], self.colors):
-            name = feat["properties"]["name"]
-            style = {**cp.aoi_style, "color": color, "fillColor": color}
-            hover_style = {**style, "fillOpacity": 0.4, "weight": 2}
-            layer = GeoJSON(data=feat, style=style, hover_style=hover_style, name=name)
-            layer.on_hover(self._display_name)
-            self.m.add_layer(layer)
 
         return self
 

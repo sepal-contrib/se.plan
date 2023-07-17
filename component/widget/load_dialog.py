@@ -1,17 +1,24 @@
+import json
+
 import geopandas as gpd
+from ipyleaflet import GeoJSON
+from sepal_ui import color as sc
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
+from component import parameter as cp
 from component.message import cm
 
 
 class LoadDialog(sw.Dialog):
-    def __init__(self):
+    def __init__(self, map_):
         self.class_ = "mb-5 mt-2"
         self.v_model = False
         self.max_width = "700px"
 
         super().__init__()
+
+        self.map_ = map_
 
         # add a btn to click
         self.btn = sw.Btn(
@@ -34,6 +41,8 @@ class LoadDialog(sw.Dialog):
 
         btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
 
+        self.btn.on_event("click", self._load_shapes)
+
     def open_dialog(self, *_):
         """Open dialog."""
         self.v_model = True
@@ -53,6 +62,36 @@ class LoadDialog(sw.Dialog):
         gdf = gdf if value is None else gdf[gdf[column] == value]
 
         return gdf, column
+
+    def _load_shapes(self, widget, event, data):
+        # get the data from the selected file
+        gdf, column = self.load_shape.read_data()
+
+        gdf = gdf.filter(items=[column, "geometry"])
+
+        # add them to the map
+        for i, row in gdf.iterrows():
+            # transform the data into a feature
+            feat = {
+                "type": "Feature",
+                "properties": {"style": {}},
+                "geometry": row.geometry.__geo_interface__,
+            }
+            self._add_geom(feat, row[column])
+
+        # display a tmp geometry before validation
+        data = json.loads(gdf.to_json())
+        style = {
+            **cp.aoi_style,
+            "color": sc.info,
+            "fillColor": sc.info,
+            "opacity": 0.5,
+            "weight": 2,
+        }
+        layer = GeoJSON(data=data, style=style, name="tmp")
+        self.map_.add_layer(layer)
+
+        return
 
 
 class CustomVector(sw.VectorField):
