@@ -3,7 +3,6 @@ from sepal_ui.scripts import utils as su
 
 from component import parameter as cp
 from component import scripts as cs
-from component.message import cm
 from component.scripts.seplan import Seplan
 from component.widget.map import SeplanMap
 from component.widget.map_toolbar import MapToolbar
@@ -17,10 +16,6 @@ class MapTile(sw.Layout):
         super().__init__()
 
         self.seplan_model = seplan_model
-
-        title = sw.Html(tag="h2", children=[cm.map.title])
-        description = sw.Markdown("  \n".join(cm.map.txt))
-
         self.colors = []
         self.alert = sw.Alert()
         self.map_ = SeplanMap()
@@ -36,8 +31,6 @@ class MapTile(sw.Layout):
         self.theme_dashboard = None
 
         self.children = [
-            title,
-            description,
             self.alert,
             self.map_toolbar,
             self.map_,

@@ -23,6 +23,7 @@ class MapToolbar(sw.Toolbar):
         self.save_geom_dialog = cw.CustomAoiDialog(self.map_)
         self.download_map_dialog = cw.ExportMapDialog()
         self.load_shape_dialog = cw.LoadDialog(self.map_)
+        self.info_dialog = MapInfoDialog()
 
         # Main buttons
         self.btn_compute = sw.Btn(cm.compute.btn, class_="ma-2")
@@ -48,11 +49,18 @@ class MapToolbar(sw.Toolbar):
             color="primary",
         ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
 
+        self.btn_info = sw.Btn(
+            gliph="fa-regular fa-circle-question",
+            icon=True,
+            color="primary",
+        ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
+
         self.children = [
             # Main buttons
             self.btn_draw.with_tooltip,
             self.btn_load.with_tooltip,
             self.btn_download.with_tooltip,
+            self.btn_info.with_tooltip,
             sw.Spacer(),
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
@@ -62,6 +70,7 @@ class MapToolbar(sw.Toolbar):
             self.save_geom_dialog,
             self.download_map_dialog,
             self.load_shape_dialog,
+            self.info_dialog,
         ]
 
         self.btn_download.on_event(
@@ -70,6 +79,8 @@ class MapToolbar(sw.Toolbar):
 
         self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
 
+        self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
+
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)
 
@@ -77,7 +88,6 @@ class MapToolbar(sw.Toolbar):
         """Show or hide drawing control on the map."""
         if widget.attributes["id"] == "new":
             if not self.aoi_tools:
-                print(widget)
                 widget.style_ = f"background-color: {color.menu};"
                 self.map_.dc.show()
             else:
@@ -138,3 +148,39 @@ class DrawMenu(sw.Menu):
         for item in self.items:
             if item.attributes["id"] == item_name:
                 item.on_event("click", event)
+
+
+class MapInfoDialog(sw.Dialog):
+    def __init__(self) -> None:
+        self.v_model = False
+        self.max_width = "700px"
+
+        super().__init__()
+
+        description = sw.Markdown("  \n".join(cm.map.txt))
+        btn_close = sw.Btn(
+            "Close",
+            color="primary",
+            small=True,
+            class_="ml-2",
+        )
+
+        self.children = [
+            v.Card(
+                children=[
+                    sw.CardTitle(children=[cm.map.title]),
+                    sw.CardText(children=[description]),
+                    sw.CardActions(children=[sw.Spacer(), btn_close]),
+                ],
+            ),
+        ]
+
+        btn_close.on_event("click", self.close_dialog)
+
+    def close_dialog(self, widget, event, data):
+        """Close the dialog."""
+        self.v_model = False
+
+    def open_dialog(self):
+        """Open the dialog."""
+        self.v_model = True

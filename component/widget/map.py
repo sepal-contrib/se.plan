@@ -105,7 +105,6 @@ class SeplanMap(sm.SepalMap):
 
         if action == "created":
             # save_geom_dialog will be listening to this trait
-            print("new geom")
             self.new_geom += 1
 
         elif action == "deleted":

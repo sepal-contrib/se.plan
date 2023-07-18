@@ -19,7 +19,8 @@
             "tooltip" : {
                 "draw" : "Draw a new sub area of interest (make drawing tools available)",
                 "download" : "Download current map",
-                "load" : "Load existing sub area of interest shapes"
+                "load" : "Load existing sub area of interest shapes",
+                "info" : "Show map information"
             },
             "draw_menu" : {
                 "new" : "Draw geometry",
