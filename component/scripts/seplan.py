@@ -10,16 +10,16 @@ from component import model as cmod
 class Seplan:
     # -- model parameters -----------------------
     aoi_model: AoiModel
-    cost_model: cmod.CostModel
     benefit_model: cmod.BenefitModel
     constraint_model: cmod.ConstraintModel
+    cost_model: cmod.CostModel
 
     def __init__(
         self,
         aoi_model: AoiModel,
         benefit_model: cmod.BenefitModel,
+        constraint_model: cmod.ConstraintModel,
         cost_model: cmod.CostModel,
-        constraint_model=cmod.ConstraintModel,
     ):
         """A class to compute the different indices of seplan.
 
@@ -83,17 +83,32 @@ class Seplan:
         aoi = self.aoi_model.feature_collection
 
         # create the mask from the constraints
-        mask_image = ee.Image(0)
+        valid_data = ee.Image(0)
         for i, asset in enumerate(self.constraint_model.assets):
-            min_, max_ = self.constraint_model.values[i]
+            # differentiate between different data types.
+
+            data_type = self.constraint_model.data_type[i]
+            values = self.constraint_model.values[i]
             image = ee.Image(asset).select(0).unmask()
-            local_mask = image.gt(max_).Or(image.lt(min_))
-            mask_image = mask_image.add(local_mask)
 
-        # set any pixel with a sum of 0 to 0 (i.e. masked at least once)
-        mask_image = mask_image.gt(0).Not()
+            if data_type == "binary":
+                # maskout images with model value
+                valid_values = image.eq(values[0]).Not().selfMask()
 
-        index = _percentile(self.get_benefit_cost_index().mask(mask_image), aoi)
+            elif data_type == "categorical":
+                valid_values = ee.List(values)
+                new_vals = ee.List.repeat(1, valid_values.size())
+                valid_values = image.remap(valid_values, new_vals, 0).selfMask()
+
+            elif data_type == "continuous":
+                min_, max_ = values
+                valid_values = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
+
+            valid_data = valid_data.add(valid_values)
+
+        valid_data = valid_data.gt(0).selfMask()
+
+        index = _percentile(self.get_benefit_cost_index().mask(valid_data), aoi)
 
         return index.clip(aoi) if clip is True else index
 
