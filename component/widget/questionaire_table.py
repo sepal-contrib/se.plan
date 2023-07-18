@@ -74,8 +74,7 @@ class Table(sw.Layout):
 
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""
-        # We don't want to recreate all the elements of the table each time since
-        # that's so expensive (specially the get_limits method)
+        # We don't want to recreate all the elements of the table each time. That's too expensive (specially the get_limits method)
 
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids

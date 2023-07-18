@@ -1,14 +1,12 @@
-from copy import deepcopy
-
-from sepal_ui import color as sc
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts import utils as su
 
 from component import parameter as cp
 from component import scripts as cs
 from component.message import cm
 from component.scripts.seplan import Seplan
 from component.widget.map import SeplanMap
-from component.widget.map_toolbar import MapBar
+from component.widget.map_toolbar import MapToolbar
 
 
 class MapTile(sw.Layout):
@@ -26,7 +24,7 @@ class MapTile(sw.Layout):
         self.colors = []
         self.alert = sw.Alert()
         self.map_ = SeplanMap()
-        self.map_bar = MapBar(model=self.seplan_model, map_=self.map_)
+        self.map_toolbar = MapToolbar(model=self.seplan_model, map_=self.map_)
 
         # get the dashboard tile
         self.area_tile = area_tile
@@ -37,67 +35,45 @@ class MapTile(sw.Layout):
         self.area_dashboard = None
         self.theme_dashboard = None
 
-        self.children = [title, description, self.alert, self.map_bar, self.map_]
+        self.children = [
+            title,
+            description,
+            self.alert,
+            self.map_toolbar,
+            self.map_,
+        ]
 
-        # # decorate the function
-        # self._compute = su.loading_button(self.alert, self.map_btn, debug=True)(
-        #     self._compute
-        # )
-        # self._dashboard = su.loading_button(
-        #     self.alert, self.compute_dashboard, debug=True
-        # )(self._dashboard)
+        # decorate compute indicator and dashboard
+        self._compute = su.loading_button(
+            self.alert, self.map_toolbar.btn_compute, debug=True
+        )(self._compute)
+
+        self._dashboard = su.loading_button(
+            self.alert, self.map_toolbar.btn_dashboard, debug=True
+        )(self._dashboard)
 
         # # add js behaviour
-        # self.compute_dashboard.on_event("click", self._dashboard)
-        # self.map_btn.on_event("click", self._compute)
+        self.map_toolbar.btn_compute.on_event("click", self._compute)
+        self.map_toolbar.btn_dashboard.on_event("click", self._dashboard)
 
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map."""
-        # remove the previous sub aoi from the map
-        self.m.remove_all()
-        self.m.dc.clear()
-        self.draw_features = deepcopy(self.EMPTY_FEATURES)
-
-        # add the AOI geometry
-        # using the color code of the dashboard
-        style = {
-            **cp.aoi_style,
-            "fillOpacity": 0,
-            "color": sc.primary,
-            "fillColor": sc.primary,
-        }
-        aoi_layer = self.aoi_model.get_ipygeojson()
-        aoi_layer.name = f"{self.aoi_model.name}"
-        aoi_layer.style = style
-        aoi_layer.hover_style = {**style, "weight": 2}
-        aoi_layer.on_hover(self._display_name)
-        self.m.add_layer(aoi_layer)
-
-        # create a layer and a dashboard
-        self.wlc_outputs = cs.wlc(
-            self.layer_model.layer_list,
-            self.question_model.constraints,
-            self.question_model.priorities,
-            self.aoi_model.feature_collection,
+        benefit_index = (
+            self.seplan_model.get_benefit_index(clip=True).multiply(4).add(1)
+        )
+        benefit_cost_index = (
+            self.seplan_model.get_benefit_cost_index(clip=True).multiply(4).add(1)
+        )
+        constraint_index = (
+            self.seplan_model.get_constraint_index(clip=True).multiply(4).add(1)
         )
 
-        # display the layer in the map
-        cs.display_layer(self.wlc_outputs[0], self.aoi_model, self.m)
-
-        self.save.set_data(
-            self.wlc_outputs[0],
-            self.aoi_model.feature_collection.geometry(),
-            self.question_model.recipe_name,
-            self.aoi_model.name,
-        )
-
-        # add the possiblity to draw on the map and release the compute dashboard btn
-        self.m.show_dc()
+        self.map_.add_ee_layer(benefit_index, cp.final_viz, "benefit index")
+        self.map_.add_ee_layer(benefit_cost_index, cp.final_viz, "benefit_cost index")
+        self.map_.add_ee_layer(constraint_index, cp.final_viz, "constraint_index")
 
         # enable the dashboard computation
-        self.compute_dashboard.disabled = False
-
-        return self
+        self.map_toolbar.btn_dashboard.disabled = False
 
     def _dashboard(self, widget, data, event):
         # handle the drawing features, affect them with a color an display them on the map as layers

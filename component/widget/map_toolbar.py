@@ -9,7 +9,7 @@ from component.scripts.seplan import Seplan
 from component.widget.map import SeplanMap
 
 
-class MapBar(sw.Toolbar):
+class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
     def __init__(self, model: Seplan, map_: SeplanMap, *args, **kwargs) -> None:
@@ -25,7 +25,7 @@ class MapBar(sw.Toolbar):
         self.load_shape_dialog = cw.LoadDialog(self.map_)
 
         # Main buttons
-        self.btn_create_map = sw.Btn(cm.compute.btn, class_="ma-2")
+        self.btn_compute = sw.Btn(cm.compute.btn, class_="ma-2")
         self.btn_dashboard = sw.Btn(
             cm.map.compute_dashboard, class_="ma-2", disabled=True
         )
@@ -55,7 +55,7 @@ class MapBar(sw.Toolbar):
             self.btn_download.with_tooltip,
             sw.Spacer(),
             sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_create_map,
+            self.btn_compute,
             self.btn_dashboard,
             # Auxiliar buttons
             # Dialogs - not visible on the toolbar
