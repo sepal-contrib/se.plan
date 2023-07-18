@@ -20,6 +20,10 @@
                 "draw" : "Draw a new sub area of interest (make drawing tools available)",
                 "download" : "Download current map",
                 "load" : "Load existing sub area of interest shapes"
+            },
+            "draw_menu" : {
+                "new" : "Draw geometry",
+                "show" : "Show map geometries"
             }
         },
         "dialog" : {
@@ -35,10 +39,13 @@
                 "cancel": "Cancel"
             },
             "drawing": {
-                "title": "Sub AOI name",
+                "title": "Custom geometries",
                 "label": "Set name",
-                "btn": "Save",
-                "cancel": "Cancel"
+                "btn": "Add",
+                "cancel": "Cancel",
+                "table" : {
+                    "no_geometries" : "There are not custom geometries on the map."
+                }
             }
         }
     },

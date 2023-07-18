@@ -22,10 +22,20 @@ class CustomAoiDialog(sw.Dialog):
         title = sw.CardTitle(children=[cm.map.dialog.drawing.title])
         # Create table to show the custom geometries
         table = CustomGeometriesTable(self.map_)
-        self.w_name = sw.TextField(label=cm.map.dialog.drawing.label, v_model=None)
-        text = sw.CardText(children=[table, self.w_name])
+        self.w_name = sw.TextField(
+            label=cm.map.dialog.drawing.label, v_model=None, class_="mr-2"
+        )
+
+        self.save_input = sw.Flex(
+            class_="d-flex align-center",
+            children=[
+                self.w_name,
+                self.btn,
+            ],
+        )
+        text = sw.CardText(children=[table, self.save_input])
         btn_cancel = sw.Btn(cm.map.dialog.drawing.cancel, small=True)
-        action = sw.CardActions(children=[self.btn, btn_cancel])
+        action = sw.CardActions(children=[sw.Spacer(), btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 
         # init the dialog
@@ -64,8 +74,11 @@ class CustomAoiDialog(sw.Dialog):
         # Close the dialog
         self.v_model = False
 
-    def open_dialog(self, *_):
-        """Open dialog."""
+    def open_dialog(self, new_geom, *_):
+        """Open dialog in two different ways."""
+        # hide save element and only show table
+        self.save_input.show() if new_geom else self.save_input.hide()
+
         self.v_model = True
 
     def on_new_geom(self, *_):
@@ -76,13 +89,14 @@ class CustomAoiDialog(sw.Dialog):
         self.w_name.v_model = f"Sub AOI {index}"
 
         # show
-        self.open_dialog()
+        self.open_dialog(new_geom=True)
 
 
 class CustomGeometriesTable(sw.Layout):
     def __init__(self, map_: SeplanMap) -> None:
         self.class_ = "d-block"
         self.attributes = {"id": "custom_geometries_table"}
+        self.no_items = cm.map.dialog.drawing.table.no_geometries
 
         # create the table
         super().__init__()
@@ -98,7 +112,7 @@ class CustomGeometriesTable(sw.Layout):
             ],
         )
 
-        self.tbody = sw.Html(tag="tbody", children=[])
+        self.tbody = sw.Html(attributes={"id": "tbody"}, tag="tbody", children=[])
         self.set_rows()
 
         # create the table
@@ -110,7 +124,9 @@ class CustomGeometriesTable(sw.Layout):
             ],
         )
 
-        self.children = [self.table]
+        self.children = [
+            self.table,
+        ]
 
         # add js behavior
         self.map_.observe(self.set_rows, "custom_layers")
@@ -135,7 +151,12 @@ class CustomGeometriesTable(sw.Layout):
         if new_ids:
             for new_id in new_ids:
                 row = CustomGeometryRow(self.map_, new_id)
-                self.tbody.children = [*self.tbody.children, row]
+                # drop no items if it's in the table
+
+                new_items = [
+                    chld for chld in self.tbody.children if chld != self.no_items
+                ] + [row]
+                self.tbody.children = new_items
 
         elif old_ids:
             for old_id in old_ids:
@@ -143,12 +164,13 @@ class CustomGeometriesTable(sw.Layout):
                     0
                 ]
                 self.tbody.children = [
-                    row for row in self.tbody.children if row != row_to_remove
+                    row
+                    for row in self.tbody.children
+                    if row not in [row_to_remove, self.no_items]
                 ]
 
-        elif not (new_ids or old_ids):
-            # TODO: I think is better to hide the table if there are no custom geometries
-            self.tbody.children = ["There are not custom geometries."]
+        if not self.tbody.children:
+            self.tbody.children = [self.no_items]
 
 
 class CustomGeometryRow(sw.Html):

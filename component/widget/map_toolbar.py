@@ -70,18 +70,24 @@ class MapBar(sw.Toolbar):
 
         self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
 
-        self.btn_draw.on_event("new_button", self.on_draw)
-        self.btn_draw.on_event("show_button", self.on_draw)
+        self.btn_draw.on_event("new", self.on_draw)
+        self.btn_draw.on_event("show", self.on_draw)
 
     def on_draw(self, widget, event, data):
         """Show or hide drawing control on the map."""
-        if widget.attributes["id"] == "new_button":
-            self.map_.dc.show() if not self.aoi_tools else self.map_.dc.hide()
+        if widget.attributes["id"] == "new":
+            if not self.aoi_tools:
+                print(widget)
+                widget.style_ = f"background-color: {color.menu};"
+                self.map_.dc.show()
+            else:
+                widget.style_ = f"background-color: {color.main};"
+                self.map_.dc.hide()
+
             self.aoi_tools = not self.aoi_tools
 
-        elif widget.attributes["id"] == "show_button":
-            self.map_.dc.hide()
-            self.save_geom_dialog.open_dialog()
+        elif widget.attributes["id"] == "show":
+            self.save_geom_dialog.open_dialog(new_geom=False)
 
 
 class DrawMenu(sw.Menu):
@@ -91,9 +97,9 @@ class DrawMenu(sw.Menu):
 
         super().__init__(*args, **kwargs)
 
-        trash_btn = v.Btn(
+        btn_draw = v.Btn(
             v_on="menuData.on",
-            small=True,
+            # small=True,
             children=[
                 v.Icon(children=["mdi-draw"], small=True),
                 v.Icon(children=["fa fa-caret-down"], small=True, right=True),
@@ -104,37 +110,31 @@ class DrawMenu(sw.Menu):
             {
                 "name": "activator",
                 "variable": "menuData",
-                "children": trash_btn,
+                "children": btn_draw,
             }
         ]
 
         self.items = [
             v.ListItem(
                 attributes={"id": title},
+                style_=f"background-color: {color.main};",
                 children=[
-                    v.ListItemTitle(children=[title]),
+                    v.ListItemTitle(children=[cm.map.toolbar.draw_menu[title]]),
                 ],
             )
-            for title in ["new_button", "show_button"]
+            for title in ["new", "show"]
         ]
 
         self.children = [
-            v.List(dense=True, children=self.items),
+            v.List(
+                style_=f"background-color: {color.main};",
+                dense=True,
+                children=self.items,
+            ),
         ]
 
-        self.observe(self.activate, "v_model")
-
-    def on_event(self, name, event):
+    def on_event(self, item_name, event):
         """Define an event based on the item name."""
         for item in self.items:
-            if item.attributes["id"] == name:
+            if item.attributes["id"] == item_name:
                 item.on_event("click", event)
-
-    def activate(self, *args) -> None:
-        """Change the background color of the btn with respect to the status."""
-        # grey is contrasted enough for both light and dark theme
-        # could be customized further if requested
-        bg_color = "gray" if self.v_model is True else color.bg
-        self.v_slots[0]["children"].style_ = f"background: {bg_color};"
-
-        return
