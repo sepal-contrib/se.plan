@@ -15,14 +15,14 @@ class QuestionnaireTile(sw.Tile):
         id_ = "questionnaire_widget"
 
         # TODO: Change for real one once we tested this
-        aoi_model = AoiModel(admin="959")
-        constraint_model = ConstraintModel()
-        benefit_model = BenefitModel()
-        cost_model = CostModel()
+        self.aoi_model = AoiModel(admin="959")
+        self.constraint_model = ConstraintModel()
+        self.benefit_model = BenefitModel()
+        self.cost_model = CostModel()
 
-        benefit_table = Table(model=benefit_model)
-        constraint_table = Table(model=constraint_model, aoi_model=aoi_model)
-        cost_table = Table(model=cost_model)
+        benefit_table = Table(model=self.benefit_model)
+        constraint_table = Table(model=self.constraint_model, aoi_model=self.aoi_model)
+        cost_table = Table(model=self.cost_model)
 
         tabs = Tabs(
             titles=[cm[theme].tab_title for theme in cp.themes],
