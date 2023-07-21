@@ -23,7 +23,6 @@ class BenefitRow(sw.Html):
         # get the model as a member
         self.model = model
         self.dialog = dialog
-
         idx = model.get_index(id=layer_id)
 
         # extract information from the model
@@ -62,6 +61,14 @@ class BenefitRow(sw.Html):
         self.delete_btn.on_event("click", self.on_delete)
         self.edit_btn.on_event("click", self.on_edit)
 
+    def update_value(self):
+        """Update the value of the model."""
+        # check which checkbox is checked and get its value
+        checked = [check for check in self.check_list if check.v_model]
+        self.weight = checked[0].attributes["data-val"]
+
+        self.model.update_value(self.layer_id, self.weight)
+
     def on_check_change(self, change):
         # if checkbox is unique and change == false recheck
         if change["new"] is False:
@@ -79,7 +86,7 @@ class BenefitRow(sw.Html):
                 if check != change["owner"]:
                     check.v_model = False
 
-        return
+        self.update_value()
 
     def on_delete(self, widget, data, event):
         """remove the line from the model and trigger table update."""

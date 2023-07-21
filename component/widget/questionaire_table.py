@@ -106,9 +106,11 @@ class Table(sw.Layout):
                 ]
                 row_to_edit.update_view()
 
+        # This will be triggered the first time and every time update is modified
+        # without a real change.
         elif not (new_ids or old_ids or edited_id):
             rows = [
-                self.Row(self.model, i, self.dialog, aoi_model=self.aoi_model)
-                for i, _ in enumerate(self.model.names)
+                self.Row(self.model, layer_id, self.dialog, aoi_model=self.aoi_model)
+                for layer_id in self.model.ids
             ]
             self.tbody.children = rows

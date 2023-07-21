@@ -77,6 +77,11 @@ class BenefitModel(model.Model):
 
         self.updated += 1
 
+    def update_value(self, id: str, value: list) -> None:
+        """Update the value of a specific benefit."""
+        idx = self.get_index(id)
+        self.weights[idx] = value
+
     def get_index(self, id: str) -> int:
         """get the index of the searched layer id."""
         return next(i for i, v in enumerate(self.ids) if v == id)
