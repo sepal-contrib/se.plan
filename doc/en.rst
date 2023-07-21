@@ -38,7 +38,7 @@ Methodology
 Selection of planning area
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`usage`.
+**se.plan** offers users multiple ways to select their planning area, which **se.plan** labels as *Area Of Interest* (AOI) as described in the :ref:`seplan-usage`.
 
 Restoration benefits
 ^^^^^^^^^^^^^^^^^^^^
@@ -223,7 +223,7 @@ Once the selection is finished, the selected constraints will be displayed as sm
 .. image:: https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/doc/img/chips.png
     :alt: constraints chips
 
-Every selected constraints is corresponding to a layer provided by **se.plan** listed in :ref:`appendix_f`. These layers can be customized in this panel to use national data or to provide information on areas that are not covered by the tool default layers. You do not need to add constraints if there isn’t any. In this case, default values will be used and you can simply proceed to the next steps.
+Every selected constraints is corresponding to a layer provided by **se.plan** listed in :ref:`seplan-appendix-f`. These layers can be customized in this panel to use national data or to provide information on areas that are not covered by the tool default layers. You do not need to add constraints if there isn’t any. In this case, default values will be used and you can simply proceed to the next steps.
 
 .. note::
 
@@ -444,7 +444,7 @@ The constraints are displayed in percentages. Each value represents the percenta
 
     THe dashboard is also exported in .csv format to be easily interpreted in any spreadsheet software. It is stored at the same place as the recipe in :code:`module_results/se.plan/`.
 
-.. appendix_a:
+.. _seplan-appendix-a:
 
 Primary data sources
 --------------------
@@ -812,7 +812,7 @@ Where :math:`w_1`, :math:`w_2`, :math:`w_3`, and :math:`w_4` are the user rating
 
 	Benefit\_cost\_ratio = Restoration\_value\_index / Restoration\_cost.
 
-The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`appendix_e`. As a final step, **se.plan** converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the *restoration suitability index* on the map and dashboard.
+The benefit-cost ratio in **se.plan** is approximate in several ways. In particular, **se.plan** does not value potential restoration benefits in monetary terms, and it does not calculate the discounted sum of benefits over a multi-year time period that extends into the future. Its cost estimates account for the future to a greater degree, however; see :ref:`seplan-appendix-e`. As a final step, **se.plan** converts the benefit-cost ratio across all sites in the user’s area of interest to a scale from 1 (low) to 5 (high). It reports this value as the *restoration suitability index* on the map and dashboard.
 
 As noted above, **se.plan** includes two indicators for benefits :math:`B_1` (biodiversity conservation) and :math:`B_3` (local livelihoods). For :math:`B_1`, the two indicators are the *biodiversity intactness index* and *number of endangered species*. Denote these two indicators by :math:`B_1a` and :math:`B_1b`. **se.plan** converts each of these indicators to a 1-5 scale and then calculates the overall biodiversity benefit, :math:`B_1`, as their simple average:
 
