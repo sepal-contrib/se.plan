@@ -383,7 +383,7 @@ They can also be directly drawn on the map. There are three buttons under the cl
 
 .. note::
 
-    The user still have the possiblity to remove some geometry by clicking on the :icon:`fas fa-trash-alt` button on the map but editing is not possible.
+    The user still have the possiblity to remove some geometry by clicking on the :icon:`fa-solid fa-trash-can` button on the map but editing is not possible.
 
 .. danger::
 
