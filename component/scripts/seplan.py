@@ -2,21 +2,21 @@
 from typing import List
 
 import ee
-from sepal_ui.aoi import AoiModel
 
 from component import model as cmod
+from component.model.aoi_model import SeplanAoi
 
 
 class Seplan:
     # -- model parameters -----------------------
-    aoi_model: AoiModel
+    aoi_model: SeplanAoi
     benefit_model: cmod.BenefitModel
     constraint_model: cmod.ConstraintModel
     cost_model: cmod.CostModel
 
     def __init__(
         self,
-        aoi_model: AoiModel,
+        aoi_model: SeplanAoi,
         benefit_model: cmod.BenefitModel,
         constraint_model: cmod.ConstraintModel,
         cost_model: cmod.CostModel,
