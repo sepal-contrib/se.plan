@@ -2,7 +2,7 @@
 from sepal_ui import model
 from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.scripts import utils as su
-from traitlets import Any, Dict, Unicode
+from traitlets import Any, Dict, Unicode, link, observe
 
 
 class SeplanAoi(model.Model):
@@ -12,19 +12,19 @@ class SeplanAoi(model.Model):
     custom_layers = Dict().tag(sync=True)
     """dict: custom geometries drawn by the user. It's linked automatically with the map_.custom_layers"""
 
-    aoi_name = Unicode("").tag(sync=True)
+    name = Unicode("").tag(sync=True)
     """str: given name from aoi.model to the aoi"""
 
     def __init__(self, aoi_model: AoiModel):
-        self.aoi_model = aoi_model
+        self.aoi_model = aoi_model if aoi_model else AoiModel(admin="959")
 
         # As the feature colleciton from model is not a trait, we need to
-        # observe something that changes when model is updated, that's the name
-        self.aoi_model.observe(self.on_aoi_change, "name")
+        # link something that changes when model is updated, that's the name
+        link((self.aoi_model, "name"), (self, "name"))
 
-    def _on_aoi_change(self, change):
+    @observe("name")
+    def on_aoi_change(self, change):
         """Update the feature_collection when the aoi_model.name is updated."""
-        self.aoi_name = change["new"]
         self.feature_collection = self.aoi_model.feature_collection
 
     def get_ee_features(self) -> dict:
@@ -34,4 +34,4 @@ class SeplanAoi(model.Model):
             for feat in self.custom_layers["features"]
         }
 
-        return {self.aoi_name: self.feature_collection, **custom_feats}
+        return {self.name: self.feature_collection, **custom_feats}
