@@ -40,21 +40,37 @@ class Seplan:
         images = [
             _percentile(ee.Image(i).unmask(), aoi) for i in self.benefit_model.assets
         ]
-
+        # Create an empty dictionary with the themes as keys
         default = {"image": ee.Image(0), "weight": 0, "nb": 0}
         theme_images = {k: default.copy() for k in set(self.benefit_model.themes)}
+
         for idx, image in enumerate(images):
+            #  Get the theme of the image by the index of the asset
             theme_image = theme_images[self.benefit_model.themes[idx]]
             theme_image["image"] = theme_image["image"].add(image)
             theme_image["weight"] += self.benefit_model.weights[idx]
             theme_image["nb"] += 1
 
         for v in theme_images.values():
+            # For those themes with multiple images, we get the simple average
+            # in both the image and the weight
+            v["image"] = v["image"].divide(v["nb"])
             v["weight"] = round(v["weight"] / v["nb"], 5)
+
+        total_weight = sum([v["weight"] for v in theme_images.values()])
 
         index = ee.Image(0)
         for v in theme_images.values():
-            index = index.add(v["image"].divide(ee.Image(v["weight"])))
+            # Get the weighted image by multiplying the image by the weight
+            weighted_theme = v["image"].multiply(
+                ee.Image(v["weight"]).divide(total_weight)
+            )
+
+            # Add the weighted image to the index
+            index = index.add(weighted_theme)
+
+        # TODO: I'm not really sure why do we need to calculate the _percentile here
+        # but it's ok for now
         index = _percentile(index, aoi)
 
         return index.clip(aoi) if clip is True else index
@@ -81,7 +97,12 @@ class Seplan:
 
     def get_constraint_index(self, clip: bool = False) -> ee.Image:
         aoi = self.aoi_model.feature_collection
+        constraint_mask = self.get_constraint_mask()
+        index = _percentile(self.get_benefit_cost_index().mask(constraint_mask), aoi)
 
+        return index.clip(aoi) if clip is True else index
+
+    def get_constraint_mask(self) -> ee.Image:
         # create the mask from the constraints
         valid_data = ee.Image(0)
         for i, asset in enumerate(self.constraint_model.assets):
@@ -106,11 +127,7 @@ class Seplan:
 
             valid_data = valid_data.add(valid_values)
 
-        valid_data = valid_data.gt(0).selfMask()
-
-        index = _percentile(self.get_benefit_cost_index().mask(valid_data), aoi)
-
-        return index.clip(aoi) if clip is True else index
+        return valid_data.gt(0).selfMask()
 
 
 def _percentile(
