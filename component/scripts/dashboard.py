@@ -1,56 +1,64 @@
-import json
+from typing import Dict, List
 
 import ee
-from sepal_ui.scripts import utils as su
+
+from component.scripts.seplan import Seplan, reduce_constraints
 
 
-def _quintile(image, geometry, scale=100):
-    """Computes standard quintiles of an image based on an aoi. returns feature collection with quintiles as propeties."""
-    quintile_collection = image.reduceRegion(
-        geometry=geometry,
-        reducer=ee.Reducer.percentile(
-            percentiles=[20, 40, 60, 80],
-            outputNames=["low", "lowmed", "highmed", "high"],
-        ),
-        tileScale=2,
-        scale=scale,
-        maxPixels=1e13,
+def get_summary_statistics(seplan_model: Seplan) -> List[Dict]:
+    """Returns summaries for the dashboard."""
+    # Get all inputs from the model
+
+    ee_features = seplan_model.aoi_model.get_ee_features()
+
+    # get list of benefits and names. Tihs is used to get statistics.
+    benefit_list = seplan_model.get_benefits_list()
+
+    # List of masked out constraints and names
+    constraint_list = seplan_model.get_masked_constraints_list()
+
+    # Get an unique masked area
+    mask_out_areas = reduce_constraints(
+        [constraint for constraint, _ in constraint_list]
     )
 
-    return quintile_collection
+    # List of normalized costs and names
+    cost_list = seplan_model.get_costs_list()
+
+    # Get the restoration suitability index
+    wlc_out = seplan_model.get_constraint_index()
+
+    return [
+        ee.Dictionary(
+            {
+                aoi_name: {
+                    "suitability": get_image_stats(wlc_out, mask_out_areas, geom),
+                    "benefit": [
+                        get_image_mean(image, geom, mask_out_areas, name)
+                        for image, name in benefit_list
+                    ],
+                    "cost": (
+                        [
+                            get_image_sum(image, geom, mask_out_areas, name)
+                            for image, name in cost_list
+                        ]
+                    ),
+                    "constraint": [
+                        get_image_percent_cover_pixelarea(image, geom, name)
+                        for image, name in constraint_list
+                    ],
+                }
+            }
+        ).getInfo()
+        for aoi_name, geom in ee_features.items()
+    ]
 
 
-def get_areas(image, geometry, scale=100):
-    image = image.rename("image").round()
-    pixelArea = ee.Image.pixelArea().divide(10000)
-    reducer = ee.Reducer.sum().group(1, "image")
-
-    areas = (
-        pixelArea.addBands(image)
-        .reduceRegion(reducer=reducer, geometry=geometry, scale=100, maxPixels=1e12)
-        .get("groups")
-    )
-
-    areas_list = ee.List(areas).map(lambda i: ee.Dictionary(i).get("sum"))
-
-    total = areas_list.reduce(ee.Reducer.sum())
-
-    image.reduceRegion(
-        reducer=ee.Reducer.sum(),
-        geometry=geometry,
-        scale=100,
-        maxPixels=1e13,
-    )
-
-    return areas, total
-
-
-def get_image_stats(image, name, mask, geom, scale=100):
+def get_image_stats(image, mask, geom):
     """Computes the summary areas of suitability image based on region and masked land in HA.
 
     Args:
         image (eeimage): restoration suitability values 1 to 5
-        name (string): name of the area of interest
         mask (eeimage): mask of unsuitable land
         geom (eegeomerty): an earth engine geometry
         scale (int, optional): scale to reduce area by. Defaults to 100.
@@ -58,27 +66,29 @@ def get_image_stats(image, name, mask, geom, scale=100):
     Returns:
         eedictionary : a dictionary of suitability with the name of the region of intrest, list of values for each category, and total area.
     """
-    image = image.where(mask.eq(0), 6)
+    image = image.where(mask.unmask(0).eq(0), 6)
 
-    list_values, total = get_areas(image, geom)
+    image = image.rename("image").round()
 
-    out_dict = ee.Dictionary(
-        {"suitability": {name: {"values": list_values, "total": total}}}
+    areas = (
+        ee.Image.pixelArea()
+        .divide(10000)
+        .addBands(image)
+        .reduceRegion(
+            reducer=ee.Reducer.sum().group(1, "image"),
+            geometry=geom,
+            scale=100,
+            maxPixels=1e12,
+        )
+        .get("groups")
     )
+
+    areas_list = ee.List(areas).map(lambda i: ee.Dictionary(i).get("sum"))
+    total = areas_list.reduce(ee.Reducer.sum())
+
+    out_dict = ee.Dictionary({"suitability": {"values": areas, "total": total}})
 
     return out_dict
-
-
-def get_aoi_count(aoi, name):
-    count_aoi = (
-        ee.Image.constant(1)
-        .rename(name)
-        .reduceRegion(
-            reducer=ee.Reducer.count(), geometry=aoi, scale=100, maxPixels=1e13
-        )
-    )
-
-    return count_aoi
 
 
 def get_image_percent_cover_pixelarea(image, aoi, name):
@@ -111,40 +121,7 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
     return ee.Dictionary({name: value})
 
 
-def get_image_percent_cover(image, aoi, name):
-    """Computes the percent coverage of a constraint in relation to the total aoi.
-
-    returns dict name:{value:[],total:[]}.
-    """
-    count_img = (
-        image.Not()
-        .selfMask()
-        .reduceRegion(
-            reducer=ee.Reducer.count(),
-            geometry=aoi,
-            scale=100,
-            maxPixels=1e13,
-        )
-    )
-
-    total_img = image.reduceRegion(
-        reducer=ee.Reducer.count(),
-        geometry=aoi,
-        scale=100,
-        maxPixels=1e13,
-    )
-
-    total_val = ee.Number(total_img.values().get(0))
-    count_val = ee.Number(count_img.values().get(0))
-
-    percent = count_val.divide(total_val).multiply(100)
-
-    value = ee.Dictionary({"values": [percent], "total": [total_val]})
-
-    return ee.Dictionary({name: value})
-
-
-def get_image_mean(image, aoi, name, mask):
+def get_image_mean(image, aoi, mask, name):
     """Computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}."""
     mean_img = image.updateMask(mask).reduceRegion(
         reducer=ee.Reducer.mean(),
@@ -162,10 +139,11 @@ def get_image_mean(image, aoi, name, mask):
 
     value = ee.Dictionary({"values": mean_img.values(), "total": total_img.values()})
 
+    # return ee.Dictionary({image.get("name").getInfo(): value})
     return ee.Dictionary({name: value})
 
 
-def get_image_sum(image, aoi, name, mask):
+def get_image_sum(image, aoi, mask, name):
     """Computes the sum of image values not masked by constraints in relation to the total aoi.
 
     returns dict name:{value:[],total:[]}.
@@ -186,85 +164,14 @@ def get_image_sum(image, aoi, name, mask):
 
     value = ee.Dictionary({"values": sum_img.values(), "total": total_img.values()})
 
+    # return ee.Dictionary({image.get("name").getInfo(): value})
     return ee.Dictionary({name: value})
-
-
-def get_benefits(
-    layer_list: list, geom: ee.Geometry, constraint_mask: ee.Image
-) -> ee.Dictionary:
-    all_benefits_layers = [i for i in layer_list if i["theme"] == "benefit"]
-
-    def fn_all_benefit(i):
-        return i.update({"eeimage": ee.Image(i["layer"]).unmask()})
-
-    list(map(fn_all_benefit, all_benefits_layers))
-
-    def fn_benefits(i):
-        return get_image_mean(i["eeimage"], geom, i["id"], constraint_mask)
-
-    return ee.Dictionary({"benefit": list(map(fn_benefits, all_benefits_layers))})
-
-
-def get_costs(
-    costs: list, geom: ee.Geometry, constraint_mask: ee.Image
-) -> ee.Dictionary:
-    def fn_costs(i):
-        return get_image_sum(i["eeimage"], geom, i["id"], constraint_mask)
-
-    return ee.Dictionary({"cost": list(map(fn_costs, costs))})
-
-
-def get_constraints(
-    constraints: list, geom: ee.Geometry, constraint_mask: ee.Image
-) -> ee.Dictionary:
-    def fn_constraint(i):
-        return get_image_percent_cover_pixelarea(i["eeimage"], geom, i["id"])
-
-    return ee.Dictionary({"constraint": list(map(fn_constraint, constraints))})
-
-
-def make_mask_constraints(constraints: list) -> ee.Image:
-    return ee.ImageCollection(
-        list(map(lambda i: ee.Image(i["eeimage"]).rename("c").byte(), constraints))
-    ).min()
-
-
-def get_summary_statistics(wlc_outputs, name, geom, layer_list, client_side):
-    """Returns summarys for the dashboard."""
-    # unpack restoration suitability results
-    wlc, benefits, constraints, costs = wlc_outputs
-
-    # maske constraints mask to restrict summary to proper areas
-    constraint_mask = make_mask_constraints(constraints)
-
-    # restoration potential stats
-    wlc_summary = get_image_stats(wlc, name, constraint_mask, geom)
-
-    # benefits
-    benefits_out = get_benefits(layer_list, geom, constraint_mask)
-
-    # costs
-    costs_out = get_costs(costs, geom, constraint_mask)
-
-    # constraints
-    constraints_out = get_constraints(constraints, geom, constraint_mask)
-
-    # combine the result
-    result = (
-        wlc_summary.combine(benefits_out).combine(costs_out).combine(constraints_out)
-    )
-
-    if client_side:
-        result = ee.String.encodeJSON(result).getInfo()
-
-    return result
 
 
 def get_area_dashboard(stats):
     tmp = {}
-    for i in stats:
-        suitability_i = json.loads(i)
-        tmp.update(suitability_i["suitability"])
+    for aoi_data in stats:
+        tmp.update(list(aoi_data.values())[0]["suitability"])
 
     return tmp
 
@@ -280,16 +187,15 @@ def get_theme_dashboard(stats):
     """
     tmp_dict = {}
 
-    for aoi in stats:
-        # read information as they are stored as a string
-        features = json.loads(aoi)
-
+    for aoi_data in stats:
         # remove suitability from the start
-        features = {k: v for k, v in features.items() if k != "suitability"}
+        features = {
+            k: v for k, v in list(aoi_data.values())[0].items() if k != "suitability"
+        }
 
         for theme, layers in features.items():
             # add the theme to the keys if necessary (during the first loop)
-            theme in tmp_dict or tmp_dict.update({theme: {}})
+            tmp_dict.setdefault(theme, {})
 
             # first loop to sum all the values related to the same layer (e.g. land_cover)
             # each layer is tored in a dict: {lid: {"value": xx, "total": cc}}
@@ -315,19 +221,12 @@ def get_theme_dashboard(stats):
     return tmp_dict
 
 
-def get_stats(wlc_outputs, layer_model, aoi_model, features, names):
-    # create the final featureCollection
-    # the first one is the aoi and the rest are sub areas
-    ee_aoi_list = [aoi_model.feature_collection]
-    for feat in features["features"]:
-        ee_aoi_list.append(su.geojson_to_ee(feat))
-
+def get_stats(ee_features, wlc_outputs, layer_model):
+    """Returns the dashboard data for the area and theme dashboards."""
     # create the stats dictionnary
     stats = [
-        get_summary_statistics(
-            wlc_outputs, names[i], geom, layer_model.layer_list, True
-        )
-        for i, geom in enumerate(ee_aoi_list)
+        get_summary_statistics(wlc_outputs, name, geom, layer_model.layer_list, True)
+        for name, geom in enumerate(ee_features)
     ]
 
     area_dashboard = get_area_dashboard(stats)
