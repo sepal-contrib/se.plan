@@ -34,15 +34,19 @@ class Seplan:
     def get_benefit_index(self, clip: bool = False) -> ee.Image:
         """Build the index exclusively on the benefits weighted approach."""
         aoi = self.aoi_model.feature_collection
-        benefit_list = self.get_benefits_list()
 
-        index = self.get_weighted_benefits(
-            self.benefit_model.themes, benefit_list, self.benefit_model.weights
+        normalize_benefits = [
+            quintiles(image, aoi, name) for image, name in self.get_benefits_list()
+        ]
+
+        # normalize_benefits = [
+        #     quintiles(image, aoi, self.benefit_model.ids[idx])
+        #     for idx, image in enumerate(self.get_benefits_list())
+        # ]
+
+        index = get_weighted_average(
+            self.benefit_model.themes, normalize_benefits, self.benefit_model.weights
         )
-
-        # TODO: I'm not really sure why do we need to calculate the _percentile here
-        # but it's ok for now
-        index = _percentile(index, aoi)
 
         return index.clip(aoi) if clip is True else index
 
@@ -58,7 +62,9 @@ class Seplan:
         norm_cost = ee.Image(0)
         for v in images:
             norm_cost = norm_cost.add(v)
-        norm_cost = _min_max(norm_cost, aoi)
+
+        # TODO: check if this is the best way to normalize
+        # norm_cost = _min_max(norm_cost, aoi)
 
         # create the benefits cost ratio
         index = self.get_benefit_index().divide(norm_cost)
@@ -67,31 +73,50 @@ class Seplan:
         return index.clip(aoi) if clip is True else index
 
     def get_constraint_index(self, clip: bool = False) -> ee.Image:
+        """Get suitability index masked with constraints."""
         aoi = self.aoi_model.feature_collection
 
-        constraint_mask_list = self.get_constraint_mask_list()
-        constraint_mask = (
-            ee.ImageCollection(constraint_mask_list)
-            .reduce(ee.Reducer.sum())
-            .gt(0)
-            .selfMask()
+        # Get only the constraints and skip the names
+        masked_constraint_list = [
+            constraint for constraint, _ in self.get_masked_constraints_list()
+        ]
+        mask_out_areas = reduce_constraints(masked_constraint_list)
+
+        index = (
+            self.get_benefit_cost_index()
+            .mask(mask_out_areas)
+            .unmask(0)
+            .multiply(4)
+            .add(1)
         )
-        index = _percentile(self.get_benefit_cost_index().mask(constraint_mask), aoi)
 
         return index.clip(aoi) if clip is True else index
 
     def get_benefits_list(self) -> List[ee.Image]:
-        """Returns a list of normalized benefits."""
+        """Returns a list of named ee_image benefits based on user input a."""
+        # return [
+        #     ee.Image(asset).unmask(0).set({"name": self.benefit_model.ids[i]})
+        #     for i, asset in enumerate(self.benefit_model.assets)
+        # ]
+
         return [
-            _percentile(ee.Image(i).unmask(), self.aoi_model.feature_collection)
-            for i in self.benefit_model.assets
+            [ee.Image(asset).unmask(0), self.benefit_model.ids[i]]
+            for i, asset in enumerate(self.benefit_model.assets)
         ]
 
     def get_costs_list(self) -> List[ee.Image]:
-        """Returns a list of normalized costs."""
-        return [ee.Image(image).unmask() for image in self.cost_model.assets]
+        """Returns a list of named ee.Images from the costs input by user."""
+        # return [
+        #     ee.Image(asset).unmask(0).set({"name": self.cost_model.ids[i]})
+        #     for i, asset in enumerate(self.cost_model.assets)
+        # ]
 
-    def get_constraints_list(self, single=False) -> List[ee.Image]:
+        return [
+            [ee.Image(asset).unmask(0), self.cost_model.ids[i]]
+            for i, asset in enumerate(self.cost_model.assets)
+        ]
+
+    def get_masked_constraints_list(self) -> List[ee.Image]:
         """Returns constraint mask for the aoi, if single is True, returns a list of masks for each constraint."""
         # create the mask from the constraints
         valid_data = []
@@ -115,7 +140,9 @@ class Seplan:
                 min_, max_ = values
                 valid_values = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
 
-            valid_data.append(valid_values)
+            # set the name of the image as a property of the image
+            # valid_values.set({"name": self.constraint_model.ids[i]})
+            valid_data.append([valid_values, self.constraint_model.ids[i]])
 
         return valid_data
 
@@ -155,7 +182,9 @@ def _min_max(
     return ee_image.unitScale(low, high).float()
 
 
-def get_weighted_average(themes, images, weights) -> ee.Image:
+def get_weighted_average(
+    themes: List[str], images: List[ee.Image], weights: List[float]
+) -> ee.Image:
     """Creates a weighted average of images based on their weights."""
     # Create an empty dictionary with the themes as keys
     default = {"image": ee.Image(0), "weight": 0, "nb": 0}
@@ -187,15 +216,15 @@ def get_weighted_average(themes, images, weights) -> ee.Image:
     return weighted_image
 
 
-def get_quintiles(ee_image: ee.Image, ee_aoi) -> ee.Image:
-    scale = ee_image.projection().nominalScale().multiply(2)
+def quintiles(ee_image: ee.Image, ee_aoi, name) -> ee.Image:
+    ee_image.projection().nominalScale().multiply(2)
 
     band_name = ee.String(ee_image.bandNames().get(0))
     quintiles_dict = ee_image.reduceRegion(
         reducer=ee.Reducer.percentile(percentiles=[20, 40, 60, 80]),
         geometry=ee_aoi,
         tileScale=2,
-        scale=scale,
+        scale=100,
         maxPixels=1e13,
     )
 
@@ -215,4 +244,14 @@ def get_quintiles(ee_image: ee.Image, ee_aoi) -> ee.Image:
         .where(ee_image.gt(lowmed).And(ee_image.lte(highmed)), 3)
         .where(ee_image.gt(highmed).And(ee_image.lte(high)), 4)
         .where(ee_image.gt(high), 5)
+    )
+
+
+def reduce_constraints(masked_constraint_list: List[ee.Image]) -> ee.Image:
+    """Reduce constraints list and returns one single mask."""
+    return (
+        ee.ImageCollection(masked_constraint_list)
+        .reduce(ee.Reducer.sum())
+        .gt(0)
+        .selfMask()
     )
