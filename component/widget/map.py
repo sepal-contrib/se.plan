@@ -6,10 +6,11 @@ from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from sepal_ui import mapping as sm
-from traitlets import Dict, Int
+from traitlets import Dict, Int, directional_link
 
 from component import parameter as cp
 from component.message import cm
+from component.model.aoi_model import SeplanAoi
 
 
 class SeplanMap(sm.SepalMap):
@@ -19,7 +20,9 @@ class SeplanMap(sm.SepalMap):
     new_geom = Int(0).tag(sync=True)
     """int: either a new geometry has been drawn on the map"""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, seplan_aoi: SeplanAoi, *args, **kwargs):
+        self.aoi_model = seplan_aoi
+
         self.attributes = {"id": "map"}
         self.dc = True
         self.vinspector = True
@@ -49,6 +52,8 @@ class SeplanMap(sm.SepalMap):
 
         self.dc.on_draw(self._handle_draw)
         self.observe(self.on_custom_layers, "custom_layers")
+
+        directional_link((self, "custom_layers"), (seplan_aoi, "custom_layers"))
 
     def on_custom_layers(self, *_):
         """Add custom layers to the map."""

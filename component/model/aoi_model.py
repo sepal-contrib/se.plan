@@ -9,14 +9,18 @@ class SeplanAoi(model.Model):
     feature_collection = Any().tag(sync=True)
     """ee.FeatureCollection: feature collection representation of the aoi"""
 
-    custom_layers = Dict().tag(sync=True)
+    custom_layers = Dict({"type": "FeatureCollection", "features": []}).tag(sync=True)
     """dict: custom geometries drawn by the user. It's linked automatically with the map_.custom_layers"""
 
     name = Unicode("").tag(sync=True)
     """str: given name from aoi.model to the aoi"""
 
     def __init__(self, aoi_model: AoiModel):
-        self.aoi_model = aoi_model if aoi_model else AoiModel(admin="959")
+        # test_countries:
+        # Multiple polygon country: 220
+        # Small department: 959 (risaralda)
+        # Medium department: 935 (Antioquia)
+        self.aoi_model = aoi_model if aoi_model else AoiModel(admin="935")
 
         # As the feature colleciton from model is not a trait, we need to
         # link something that changes when model is updated, that's the name
