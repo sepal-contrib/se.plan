@@ -15,15 +15,14 @@ class SeplanAoi(model.Model):
     name = Unicode("").tag(sync=True)
     """str: given name from aoi.model to the aoi"""
 
-    def __init__(self, aoi_model: AoiModel):
+    def __init__(self):
         # test_countries:
         # Multiple polygon country: 220
         # Small department: 959 (risaralda)
         # Medium department: 935 (Antioquia)
-        self.aoi_model = aoi_model if aoi_model else AoiModel(admin="935")
+        self.aoi_model = AoiModel(admin="935")
 
-        # As the feature colleciton from model is not a trait, we need to
-        # link something that changes when model is updated, that's the name
+        # As the feature colleciton from model is not a trait, we need to link something that changes when model is updated, that's the name
         link((self.aoi_model, "name"), (self, "name"))
 
     @observe("name")
@@ -49,3 +48,9 @@ class SeplanAoi(model.Model):
         }
 
         return {**primary_aoi, **custom_aois}
+
+    def load_data(self):
+        pass
+
+    def save_data(self):
+        pass
