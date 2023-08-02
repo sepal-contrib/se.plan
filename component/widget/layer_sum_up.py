@@ -1,7 +1,6 @@
 import pandas as pd
 from ipywidgets import Output
 from matplotlib import pyplot as plt
-from sepal_ui import color as scolor
 from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
@@ -21,9 +20,10 @@ def human_format(num, round_to=2):
 
 
 class LayerFull(sw.Layout):
-    def __init__(self, layer_id, values, aoi_names, colors):
+    def __init__(self, layer_id, values, names_colors):
         # add one extra color for the AOI
-        colors = [c for c in reversed([scolor.primary] + colors)]
+
+        aoi_names, colors = zip(*names_colors)
 
         # get the layer labels from the translator object
         t_layer = getattr(cm.layers, layer_id)
@@ -85,9 +85,9 @@ class LayerFull(sw.Layout):
 
 
 class LayerPercentage(sw.Layout):
-    def __init__(self, layer_id, pcts, colors):
+    def __init__(self, layer_id, pcts, names_colors):
         # add one extra color for the AOI
-        colors = [scolor.primary] + colors
+        colors = [color for _, color in names_colors]
 
         # get the layer labels from the translator object
         t_layer = getattr(cm.layers, layer_id)

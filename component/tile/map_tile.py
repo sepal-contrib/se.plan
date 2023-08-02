@@ -2,14 +2,22 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
 from component import parameter as cp
-from component import scripts as cs
+from component.model.aoi_model import SeplanAoi
 from component.scripts.seplan import Seplan
+from component.scripts.statistics import get_summary_statistics
+from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
 from component.widget.map import SeplanMap
 from component.widget.map_toolbar import MapToolbar
 
 
 class MapTile(sw.Layout):
-    def __init__(self, seplan_model: Seplan, area_tile, theme_tile):
+    def __init__(
+        self,
+        seplan_model: Seplan,
+        seplan_aoi: SeplanAoi,
+        overall_dash: OverallDashboard = None,
+        theme_dash: ThemeDashboard = None,
+    ):
         self.attributes = {"_metadata": "map_widget"}
         self.class_ = "d-block"
 
@@ -18,12 +26,12 @@ class MapTile(sw.Layout):
         self.seplan_model = seplan_model
         self.colors = []
         self.alert = sw.Alert()
-        self.map_ = SeplanMap()
+        self.map_ = SeplanMap(seplan_aoi)
         self.map_toolbar = MapToolbar(model=self.seplan_model, map_=self.map_)
 
         # get the dashboard tile
-        self.area_tile = area_tile
-        self.theme_tile = theme_tile
+        self.overall_dash = overall_dash
+        self.theme_dash = theme_dash
 
         # init the final layers
         self.wlc_outputs = None
@@ -51,15 +59,11 @@ class MapTile(sw.Layout):
 
     def _compute(self, widget, data, event):
         """compute the restoration plan and display the map."""
-        benefit_index = (
-            self.seplan_model.get_benefit_index(clip=True).multiply(4).add(1)
-        )
+        benefit_index = self.seplan_model.get_benefit_index(clip=True)
         benefit_cost_index = (
             self.seplan_model.get_benefit_cost_index(clip=True).multiply(4).add(1)
         )
-        constraint_index = (
-            self.seplan_model.get_constraint_index(clip=True).multiply(4).add(1)
-        )
+        constraint_index = self.seplan_model.get_constraint_index(clip=True)
 
         self.map_.add_ee_layer(benefit_index, cp.final_viz, "benefit index")
         self.map_.add_ee_layer(benefit_cost_index, cp.final_viz, "benefit_cost index")
@@ -68,34 +72,18 @@ class MapTile(sw.Layout):
         # enable the dashboard computation
         self.map_toolbar.btn_dashboard.disabled = False
 
-    def _dashboard(self, widget, data, event):
-        # handle the drawing features, affect them with a color an display them on the map as layers
-        self._save_features()
-
-        # create a name list
-        names = [self.aoi_model.name] + [
-            feat["properties"]["name"] for feat in self.draw_features["features"]
-        ]
-
-        # retreive the area and theme json result
-        self.area_dashboard, self.theme_dashboard = cs.get_stats(
-            self.wlc_outputs,
-            self.layer_model,
-            self.aoi_model,
-            self.draw_features,
-            names,
-        )
-
-        # save the dashboard as a csv
-        cs.export_as_csv(
-            self.area_dashboard,
-            self.theme_dashboard,
-            self.aoi_model.name,
-            self.question_model.recipe_name,
-        )
+    def _dashboard(self, *_):
+        """compute the restoration plan and display the map."""
+        summary_stats = get_summary_statistics(self.seplan_model)
 
         # set the content of the panels
-        self.theme_tile.dev_set_summary(self.theme_dashboard, names, self.colors)
-        self.area_tile.set_summary(self.area_dashboard)
+        self.overall_dash.set_summary(summary_stats)
+        self.theme_dash.set_summary(summary_stats)
 
-        return self
+        # # save the dashboard as a csv
+        # cs.export_as_csv(
+        #     self.area_dashboard,
+        #     self.theme_dashboard,
+        #     self.aoi_model.name,
+        #     self.question_model.recipe_name,
+        # )

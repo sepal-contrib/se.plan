@@ -1,14 +1,17 @@
+from typing import Dict, List
+
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 
 from component import widget as cw
 from component.message import cm
+from component.scripts.statistics import parse_theme_stats
 
 ID = "dashboard_widget"
 "the dashboard tiles share id"
 
 
-class DashThemeTile(sw.Tile):
+class ThemeDashboard(sw.Tile):
     def __init__(self):
         sw.Markdown(cm.dashboard.theme.txt)
 
@@ -19,25 +22,34 @@ class DashThemeTile(sw.Tile):
         # create the tile
         super().__init__(id_=ID, title=cm.dashboard.theme.title, alert=alert)
 
-    def dev_set_summary(self, json_themes_values, aoi_names, colors):
+    def set_summary(self, summary_stats):
+        # Extract the aoii names and color from summary_stats
+        names_colors = []
+        for aoi_data in summary_stats:
+            aoi_name = next(iter(aoi_data))
+            color = aoi_data[aoi_name]["color"]
+            names_colors.append((aoi_name, color))
+
+        themes_values = parse_theme_stats(summary_stats)
+
         # init the layer list
         ben_layer, const_layer, cost_layer = [], [], []
 
         # reorder the aois with the main one in first
-        aoi_names = aoi_names[::-1]
+        # TODO: check this reorder
+        names_colors = names_colors[::-1]
 
         # filter the names of the aois  from the json_theme values
-        json_themes_values.pop("names", None)
 
-        for theme, layers in json_themes_values.items():
+        for theme, layers in themes_values.items():
             for name, values in layers.items():
                 values = values["values"]
                 if theme == "benefit":
-                    ben_layer.append(cw.LayerFull(name, values, aoi_names, colors))
+                    ben_layer.append(cw.LayerFull(name, values, names_colors))
                 elif theme == "cost":
-                    cost_layer.append(cw.LayerFull(name, values, aoi_names, colors))
+                    cost_layer.append(cw.LayerFull(name, values, names_colors))
                 elif theme == "constraint":
-                    const_layer.append(cw.LayerPercentage(name, values, colors))
+                    const_layer.append(cw.LayerPercentage(name, values, names_colors))
                 else:
                     continue  # Aois names are also stored in the dictionary
 
@@ -71,15 +83,16 @@ class DashThemeTile(sw.Tile):
         return self
 
 
-class DashRegionTile(sw.Tile):
+class OverallDashboard(sw.Tile):
     def __init__(self):
         super().__init__(id_=ID, title=cm.dashboard.region.title)
 
-    def set_summary(self, json_feature_values):
+    def set_summary(self, summary_stats: List[Dict]):
         feats = []
-        for feat in json_feature_values:
-            raw = json_feature_values[feat]["values"]
-            feats.append(cw.AreaSumUp(feat, self.format_values(raw)))
+        for aoi_data in summary_stats:
+            aoi_name = next(iter(aoi_data))
+            values = aoi_data[next(iter(aoi_data))]["suitability"]["values"]
+            feats.append(cw.AreaSumUp(aoi_name, self.format_values(values)))
 
         self.set_content(feats)
 
