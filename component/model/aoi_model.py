@@ -1,5 +1,5 @@
 """SE.PLAN model to store the data related with areas of interest."""
-from sepal_ui import model
+from sepal_ui import color, model
 from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.scripts import utils as su
 from traitlets import Any, Dict, Unicode, link, observe
@@ -31,11 +31,21 @@ class SeplanAoi(model.Model):
         """Update the feature_collection when the aoi_model.name is updated."""
         self.feature_collection = self.aoi_model.feature_collection
 
-    def get_ee_features(self) -> dict:
-        """Creates a dictionary of current AOI layers, where name is the key."""
-        custom_feats = {
-            feat["properties"]["name"]: su.geojson_to_ee(feat)
+    def get_ee_features(self) -> Dict:
+        """Returns a dictionary of current AOI layers, where name is the key."""
+        primary_aoi = {
+            self.name: {
+                "ee_feature": self.feature_collection,
+                "color": color.primary,
+            }
+        }
+
+        custom_aois = {
+            feat["properties"]["name"]: {
+                "ee_feature": su.geojson_to_ee(feat),
+                "color": feat["properties"]["style"]["color"],
+            }
             for feat in self.custom_layers["features"]
         }
 
-        return {self.name: self.feature_collection, **custom_feats}
+        return {**primary_aoi, **custom_aois}

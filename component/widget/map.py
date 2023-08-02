@@ -3,8 +3,6 @@ from copy import deepcopy
 import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
-from matplotlib import pyplot as plt
-from matplotlib.colors import to_hex
 from sepal_ui import mapping as sm
 from traitlets import Dict, Int, directional_link
 
@@ -53,28 +51,25 @@ class SeplanMap(sm.SepalMap):
         self.dc.on_draw(self._handle_draw)
         self.observe(self.on_custom_layers, "custom_layers")
 
-        directional_link((self, "custom_layers"), (seplan_aoi, "custom_layers"))
+        directional_link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
 
     def on_custom_layers(self, *_):
-        """Add custom layers to the map."""
+        """Event triggered when there are new custom layers (created by user).
+
+        Create GeoJSON layers and add them to the map if they're not.
+
+        """
         geojson_layers = [layer for layer in self.layers if isinstance(layer, GeoJSON)]
         # Check if there are new geometries in the custom_layers
         # If there are new geometries that are not in the map, add them
 
-        colors = [
-            to_hex(plt.cm.tab10(i)) for i in range(len(self.custom_layers["features"]))
-        ]
-
         # Add layers to the map
-        for i, feat in enumerate(self.custom_layers["features"]):
+        for feat in self.custom_layers["features"]:
             if feat["properties"]["name"] not in [lyr.name for lyr in geojson_layers]:
                 # Add the layer to the map
-                style = {**cp.aoi_style, "color": colors[i], "fillColor": colors[i]}
-                hover_style = {**style, "fillOpacity": 0.4, "weight": 2}
                 layer = GeoJSON(
                     data=feat,
-                    style=style,
-                    hover_style=hover_style,
+                    hover_style=feat["properties"]["hover_style"],
                     name=feat["properties"]["name"],
                 )
                 layer.on_hover(self._display_name)

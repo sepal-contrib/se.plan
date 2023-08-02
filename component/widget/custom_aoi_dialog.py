@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from matplotlib import pyplot as plt
+from matplotlib.colors import to_hex
 from sepal_ui import sepalwidgets as sw
 
 import component.parameter as cp
@@ -51,11 +53,22 @@ class CustomAoiDialog(sw.Dialog):
 
     def on_save_geom(self, *_):
         """Updates map_.custom_layers with the new geometry."""
-        # Get all the geometries in the map_.dc
+        # Get all the fc in the map_.dc, there should be only one
         features = self.map_.dc.to_json()["features"]
         for feature in features:
+            style = {
+                **cp.aoi_style,
+                "color": to_hex(plt.cm.tab10(self.map_.new_geom)),
+                "fillColor": to_hex(plt.cm.tab10(self.map_.new_geom)),
+            }
             feature["properties"]["id"] = self.map_.new_geom
             feature["properties"]["name"] = self.w_name.v_model
+            feature["properties"]["style"] = style
+            feature["properties"]["hover_style"] = {
+                **style,
+                "fillOpacity": 0.4,
+                "weight": 2,
+            }
 
         current_feats = deepcopy(self.map_.custom_layers)
         current_feats["features"] += features
@@ -68,7 +81,6 @@ class CustomAoiDialog(sw.Dialog):
 
     def on_cancel(self, *_):
         """Remove all the geometries from the map_.dc."""
-        # Remove all the geometries from the map_.dc
         self.map_.dc.clear()
 
         # Close the dialog
@@ -188,7 +200,8 @@ class CustomGeometryRow(sw.Html):
             if layer["properties"]["id"] == layer_id:
                 name = layer["properties"]["name"]
 
-        self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
+        # self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
+        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
 
         td_list = [
             sw.Html(tag="td", children=[self.delete_btn]),
