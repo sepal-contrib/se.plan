@@ -32,25 +32,28 @@ def get_summary_statistics(seplan_model: Seplan) -> List[Dict]:
         ee.Dictionary(
             {
                 aoi_name: {
-                    "suitability": get_image_stats(wlc_out, mask_out_areas, geom),
+                    "suitability": get_image_stats(
+                        wlc_out, mask_out_areas, data["ee_feature"]
+                    ),
                     "benefit": [
-                        get_image_mean(image, geom, mask_out_areas, name)
+                        get_image_mean(image, data["ee_feature"], mask_out_areas, name)
                         for image, name in benefit_list
                     ],
-                    "cost": (
-                        [
-                            get_image_sum(image, geom, mask_out_areas, name)
-                            for image, name in cost_list
-                        ]
-                    ),
+                    "cost": [
+                        get_image_sum(image, data["ee_feature"], mask_out_areas, name)
+                        for image, name in cost_list
+                    ],
                     "constraint": [
-                        get_image_percent_cover_pixelarea(image, geom, name)
+                        get_image_percent_cover_pixelarea(
+                            image, data["ee_feature"], name
+                        )
                         for image, name in constraint_list
                     ],
+                    "color": data["color"],
                 }
             }
         ).getInfo()
-        for aoi_name, geom in ee_features.items()
+        for aoi_name, data in ee_features.items()
     ]
 
 
@@ -87,7 +90,7 @@ def get_image_stats(image, mask, geom):
     areas_list = ee.List(areas).map(lambda i: ee.Dictionary(i).get("sum"))
     total = areas_list.reduce(ee.Reducer.sum())
 
-    out_dict = ee.Dictionary({"suitability": {"values": areas, "total": total}})
+    out_dict = ee.Dictionary({"values": areas, "total": total})
 
     return out_dict
 
@@ -174,7 +177,7 @@ def get_image_sum(image, aoi, mask, name):
     return ee.Dictionary({name: value})
 
 
-def parse_theme_stats(stats):
+def parse_theme_stats(stats: List[Dict]):
     """Prepares the dashboard export for plotting on the theme area of the dashboard by appending values for each layer and AOI into a single dictionary.
 
     Args:
@@ -188,7 +191,9 @@ def parse_theme_stats(stats):
     for aoi_data in stats:
         # remove suitability from the start
         features = {
-            k: v for k, v in list(aoi_data.values())[0].items() if k != "suitability"
+            k: v
+            for k, v in list(aoi_data.values())[0].items()
+            if k not in ["suitability", "color"]
         }
 
         for theme, layers in features.items():

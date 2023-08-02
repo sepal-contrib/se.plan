@@ -127,10 +127,10 @@ class Seplan:
         return valid_data
 
 
-def reduce_constraints(named_constraint_list: List[Tuple[ee.Image, str]]) -> ee.Image:
+def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> ee.Image:
     """Reduce constraints list and returns one single mask."""
     return (
-        ee.ImageCollection([constraint for constraint, _ in named_constraint_list])
+        ee.ImageCollection([constraint for constraint, _ in masked_constraints_list])
         .reduce(ee.Reducer.sum())
         .gt(0)
         .selfMask()
@@ -210,7 +210,7 @@ def get_weighted_average(
 
 
 def quintiles(
-    ee_image: ee.Image, ee_aoi: Union[ee.FeatureColleciton, ee.Geometry]
+    ee_image: ee.Image, ee_aoi: Union[ee.FeatureCollection, ee.Geometry]
 ) -> ee.Image:
     """Return a normalized quintile image of the input image over the aoi."""
     # ee_image.projection().nominalScale().multiply(2)
