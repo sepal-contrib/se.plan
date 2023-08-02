@@ -6,9 +6,11 @@ from component.scripts.seplan import Seplan, reduce_constraints
 
 
 def get_summary_statistics(seplan_model: Seplan) -> List[Dict]:
-    """Returns summaries for the dashboard."""
-    # Get all inputs from the model
+    """Returns summary statistics using seplan inputs.
 
+    The statistics will be later parsed to be displayed in the dashboard.
+    """
+    # Get all inputs from the model
     ee_features = seplan_model.aoi_model.get_ee_features()
 
     # get list of benefits and names. Tihs is used to get statistics.
@@ -17,10 +19,8 @@ def get_summary_statistics(seplan_model: Seplan) -> List[Dict]:
     # List of masked out constraints and names
     constraint_list = seplan_model.get_masked_constraints_list()
 
-    # Get an unique masked area
-    mask_out_areas = reduce_constraints(
-        [constraint for constraint, _ in constraint_list]
-    )
+    # Extract only the image from the constraint list and reduce to single mask
+    mask_out_areas = reduce_constraints(constraint_list)
 
     # List of normalized costs and names
     cost_list = seplan_model.get_costs_list()
@@ -66,6 +66,7 @@ def get_image_stats(image, mask, geom):
     Returns:
         eedictionary : a dictionary of suitability with the name of the region of intrest, list of values for each category, and total area.
     """
+    # set masked areas as 6
     image = image.where(mask.unmask(0).eq(0), 6)
 
     image = image.rename("image").round()
@@ -93,12 +94,17 @@ def get_image_stats(image, mask, geom):
 
 def get_image_percent_cover_pixelarea(image, aoi, name):
     image = image.rename("image")
-    pixelArea = ee.Image.pixelArea().divide(10000)
-    reducer = ee.Reducer.sum().group(1, "image")
 
     areas = (
-        pixelArea.addBands(image)
-        .reduceRegion(reducer=reducer, geometry=aoi, scale=100, maxPixels=1e12)
+        ee.Image.pixelArea()
+        .divide(10000)
+        .addBands(image)
+        .reduceRegion(
+            reducer=ee.Reducer.sum().group(1, "image"),
+            geometry=aoi,
+            scale=100,
+            maxPixels=1e12,
+        )
         .get("groups")
     )
     areas = ee.List(areas)
@@ -168,15 +174,7 @@ def get_image_sum(image, aoi, mask, name):
     return ee.Dictionary({name: value})
 
 
-def get_area_dashboard(stats):
-    tmp = {}
-    for aoi_data in stats:
-        tmp.update(list(aoi_data.values())[0]["suitability"])
-
-    return tmp
-
-
-def get_theme_dashboard(stats):
+def parse_theme_stats(stats):
     """Prepares the dashboard export for plotting on the theme area of the dashboard by appending values for each layer and AOI into a single dictionary.
 
     Args:
@@ -219,88 +217,3 @@ def get_theme_dashboard(stats):
                 )
 
     return tmp_dict
-
-
-def get_stats(ee_features, wlc_outputs, layer_model):
-    """Returns the dashboard data for the area and theme dashboards."""
-    # create the stats dictionnary
-    stats = [
-        get_summary_statistics(wlc_outputs, name, geom, layer_model.layer_list, True)
-        for name, geom in enumerate(ee_features)
-    ]
-
-    area_dashboard = get_area_dashboard(stats)
-    theme_dashboard = get_theme_dashboard(stats)
-
-    return area_dashboard, theme_dashboard
-
-
-def dictionaryToFeatures(
-    results: ee.List, category: str, type_feat: str
-) -> ee.FeatureCollection:
-    results = ee.List(results)
-
-    def parseResults(result):
-        result = ee.Dictionary(result)
-        result_key = result.keys().get(0)
-        main_dict = ee.Dictionary(result.get(result_key))
-        tmp_dict = {
-            "category": category,
-            "type": type_feat,
-            "name": result_key,
-            "total": ee.List(main_dict.get("total")).get(0),
-            "value": ee.List(main_dict.get("values")).get(0),
-        }
-        return ee.Feature(ee.Geometry.Point([0, 0])).setMulti(tmp_dict)
-
-    features = results.map(parseResults)
-
-    return ee.FeatureCollection(features)
-
-
-def suitibilityToFeatures(suitability: ee.Dictionary) -> ee.FeatureCollection:
-    suitability = ee.Dictionary(suitability)
-    suit_key = suitability.keys().get(0)
-    main_dict = ee.Dictionary(suitability.get(suit_key))
-    tmp_dict = {
-        "category": "suitability",
-        "type": "area",
-        "name": suit_key,
-        "total": main_dict.get("total"),
-        "value": main_dict.get("total"),
-    }
-
-    area_total = ee.Feature(ee.Geometry.Point([0, 0])).setMulti(tmp_dict)
-
-    map_values = main_dict.get("values")
-
-    def parse_results(result):
-        result = ee.Dictionary(result)
-        sub_dict = {
-            "category": "suitability",
-            "type": "area",
-            "name": result.get("image"),
-            "value": result.get("sum"),
-        }
-        return ee.Feature(ee.Geometry.Point([0, 0])).setMulti(sub_dict)
-
-    map_feats = ee.List(map_values).map(parse_results)
-    return ee.FeatureCollection(map_feats.add(area_total))
-
-
-def dashboard_data_to_fc(dashboard_data: ee.Dictionary) -> ee.FeatureCollection:
-    benefits = dashboard_data.get("benefit")
-    constraints = dashboard_data.get("constraint")
-    costs = dashboard_data.get("cost")
-    suitability = dashboard_data.get("suitability")
-
-    suitibilityFeatures = suitibilityToFeatures(suitability)
-    benefitFeatures = dictionaryToFeatures(benefits, "benefit", "mean")
-    constraintFeatures = dictionaryToFeatures(constraints, "constraint", "area")
-    costFeatures = dictionaryToFeatures(costs, "cost", "sum")
-
-    fin = ee.FeatureCollection(
-        [suitibilityFeatures, benefitFeatures, constraintFeatures, costFeatures]
-    ).flatten()
-
-    return fin

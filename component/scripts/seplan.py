@@ -1,5 +1,5 @@
 """All tools to build the suitability index."""
-from typing import List
+from typing import List, Tuple, Union
 
 import ee
 
@@ -35,14 +35,10 @@ class Seplan:
         """Build the index exclusively on the benefits weighted approach."""
         aoi = self.aoi_model.feature_collection
 
+        # decompose benefit list to get only the image
         normalize_benefits = [
-            quintiles(image, aoi, name) for image, name in self.get_benefits_list()
+            quintiles(image, aoi) for image, _ in self.get_benefits_list()
         ]
-
-        # normalize_benefits = [
-        #     quintiles(image, aoi, self.benefit_model.ids[idx])
-        #     for idx, image in enumerate(self.get_benefits_list())
-        # ]
 
         index = get_weighted_average(
             self.benefit_model.themes, normalize_benefits, self.benefit_model.weights
@@ -75,12 +71,7 @@ class Seplan:
     def get_constraint_index(self, clip: bool = False) -> ee.Image:
         """Get suitability index masked with constraints."""
         aoi = self.aoi_model.feature_collection
-
-        # Get only the constraints and skip the names
-        masked_constraint_list = [
-            constraint for constraint, _ in self.get_masked_constraints_list()
-        ]
-        mask_out_areas = reduce_constraints(masked_constraint_list)
+        mask_out_areas = reduce_constraints(self.get_masked_constraints_list())
 
         index = (
             self.get_benefit_cost_index()
@@ -92,32 +83,22 @@ class Seplan:
 
         return index.clip(aoi) if clip is True else index
 
-    def get_benefits_list(self) -> List[ee.Image]:
-        """Returns a list of named ee_image benefits based on user input a."""
-        # return [
-        #     ee.Image(asset).unmask(0).set({"name": self.benefit_model.ids[i]})
-        #     for i, asset in enumerate(self.benefit_model.assets)
-        # ]
-
+    def get_benefits_list(self) -> List[Tuple[ee.Image, str]]:
+        """Returns a list of named ee_image benefits from user input."""
         return [
             [ee.Image(asset).unmask(0), self.benefit_model.ids[i]]
             for i, asset in enumerate(self.benefit_model.assets)
         ]
 
-    def get_costs_list(self) -> List[ee.Image]:
-        """Returns a list of named ee.Images from the costs input by user."""
-        # return [
-        #     ee.Image(asset).unmask(0).set({"name": self.cost_model.ids[i]})
-        #     for i, asset in enumerate(self.cost_model.assets)
-        # ]
-
+    def get_costs_list(self) -> List[Tuple[ee.Image, str]]:
+        """Returns a list of named costs ee.Images from user input."""
         return [
             [ee.Image(asset).unmask(0), self.cost_model.ids[i]]
             for i, asset in enumerate(self.cost_model.assets)
         ]
 
-    def get_masked_constraints_list(self) -> List[ee.Image]:
-        """Returns constraint mask for the aoi, if single is True, returns a list of masks for each constraint."""
+    def get_masked_constraints_list(self) -> List[Tuple[ee.Image, str]]:
+        """Returns a list of named constraints masks from user input."""
         # create the mask from the constraints
         valid_data = []
         for i, asset in enumerate(self.constraint_model.assets):
@@ -129,29 +110,38 @@ class Seplan:
 
             if data_type == "binary":
                 # maskout images with model value
-                valid_values = image.eq(values[0]).Not().selfMask()
+                valid_image = image.eq(values[0]).Not().selfMask()
 
             elif data_type == "categorical":
-                valid_values = ee.List(values)
-                new_vals = ee.List.repeat(1, valid_values.size())
-                valid_values = image.remap(valid_values, new_vals, 0).selfMask()
+                valid_image = ee.List(values)
+                new_vals = ee.List.repeat(1, valid_image.size())
+                valid_image = image.remap(valid_image, new_vals, 0).selfMask()
 
             elif data_type == "continuous":
                 min_, max_ = values
-                valid_values = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
+                valid_image = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
 
             # set the name of the image as a property of the image
-            # valid_values.set({"name": self.constraint_model.ids[i]})
-            valid_data.append([valid_values, self.constraint_model.ids[i]])
+            valid_data.append([valid_image, self.constraint_model.ids[i]])
 
         return valid_data
+
+
+def reduce_constraints(named_constraint_list: List[Tuple[ee.Image, str]]) -> ee.Image:
+    """Reduce constraints list and returns one single mask."""
+    return (
+        ee.ImageCollection([constraint for constraint, _ in named_constraint_list])
+        .reduce(ee.Reducer.sum())
+        .gt(0)
+        .selfMask()
+    )
 
 
 def _percentile(
     ee_image: ee.Image,
     aoi: ee.FeatureCollection,
     scale: int = 10000,
-    percentile: List[int] = [3, 97],
+    percentile: Tuple[int, int] = [3, 97],
 ) -> ee.Image:
     """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
@@ -185,7 +175,10 @@ def _min_max(
 def get_weighted_average(
     themes: List[str], images: List[ee.Image], weights: List[float]
 ) -> ee.Image:
-    """Creates a weighted average of images based on their weights."""
+    """Creates a weighted average of images based on a list of weights.
+
+    Note that images and weights must be in the same order.
+    """
     # Create an empty dictionary with the themes as keys
     default = {"image": ee.Image(0), "weight": 0, "nb": 0}
     theme_images = {k: default.copy() for k in set(themes)}
@@ -216,8 +209,11 @@ def get_weighted_average(
     return weighted_image
 
 
-def quintiles(ee_image: ee.Image, ee_aoi, name) -> ee.Image:
-    ee_image.projection().nominalScale().multiply(2)
+def quintiles(
+    ee_image: ee.Image, ee_aoi: Union[ee.FeatureColleciton, ee.Geometry]
+) -> ee.Image:
+    """Return a normalized quintile image of the input image over the aoi."""
+    # ee_image.projection().nominalScale().multiply(2)
 
     band_name = ee.String(ee_image.bandNames().get(0))
     quintiles_dict = ee_image.reduceRegion(
@@ -244,14 +240,4 @@ def quintiles(ee_image: ee.Image, ee_aoi, name) -> ee.Image:
         .where(ee_image.gt(lowmed).And(ee_image.lte(highmed)), 3)
         .where(ee_image.gt(highmed).And(ee_image.lte(high)), 4)
         .where(ee_image.gt(high), 5)
-    )
-
-
-def reduce_constraints(masked_constraint_list: List[ee.Image]) -> ee.Image:
-    """Reduce constraints list and returns one single mask."""
-    return (
-        ee.ImageCollection(masked_constraint_list)
-        .reduce(ee.Reducer.sum())
-        .gt(0)
-        .selfMask()
     )
