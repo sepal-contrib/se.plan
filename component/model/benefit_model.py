@@ -1,12 +1,12 @@
 import pandas as pd
-from sepal_ui import model
-from traitlets import Int, List
+from traitlets import List
 
 from component import parameter as cp
 from component.message import cm
+from component.model.questionnaire_model import QuestionnaireModel
 
 
-class BenefitModel(model.Model):
+class BenefitModel(QuestionnaireModel):
     names = List([]).tag(sync=True)
     ids = List([]).tag(sync=True)
     themes = List([]).tag(sync=True)
@@ -14,9 +14,6 @@ class BenefitModel(model.Model):
     descs = List([]).tag(sync=True)
     weights = List([]).tag(sync=True)
     units = List([]).tag(sync=True)
-
-    updated = Int(0).tag(sync=True)
-    validated = Int(0).tag(sync=True)
 
     def __init__(self):
         # get the default benefit from the csv file
@@ -81,7 +78,3 @@ class BenefitModel(model.Model):
         """Update the value of a specific benefit."""
         idx = self.get_index(id)
         self.weights[idx] = value
-
-    def get_index(self, id: str) -> int:
-        """get the index of the searched layer id."""
-        return next(i for i, v in enumerate(self.ids) if v == id)

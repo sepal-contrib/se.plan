@@ -14,6 +14,8 @@ from .constraint_table import ConstraintRow
 from .cost_dialog import CostDialog
 from .cost_table import CostRow
 
+__all__ = ["Table"]
+
 
 class Table(sw.Layout):
     def __init__(

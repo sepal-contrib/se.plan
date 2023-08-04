@@ -1,28 +1,28 @@
 import sepal_ui.sepalwidgets as sw
-from sepal_ui.aoi.aoi_model import AoiModel
 
 import component.parameter as cp
 from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel
+from component.model.recipe import Recipe
 from component.widget.custom_widgets import Tabs
 from component.widget.questionaire_table import Table
 
 
 class QuestionnaireTile(sw.Tile):
-    def __init__(self):
+    def __init__(self, recipe: Recipe):
         # name the tile
         title = cm.questionnaire_title
         id_ = "questionnaire_widget"
 
-        # TODO: Change for real one once we tested this
-        self.aoi_model = AoiModel(admin="959")
         self.constraint_model = ConstraintModel()
         self.benefit_model = BenefitModel()
         self.cost_model = CostModel()
 
-        benefit_table = Table(model=self.benefit_model)
-        constraint_table = Table(model=self.constraint_model, aoi_model=self.aoi_model)
-        cost_table = Table(model=self.cost_model)
+        benefit_table = Table(model=recipe.benefit_model)
+        constraint_table = Table(
+            model=recipe.constraint_model, aoi_model=recipe.seplan_aoi.aoi_model
+        )
+        cost_table = Table(model=recipe.cost_model)
 
         tabs = Tabs(
             titles=[cm[theme].tab_title for theme in cp.themes],
@@ -32,7 +32,4 @@ class QuestionnaireTile(sw.Tile):
             centered=True,
         )
 
-        # TODO: Create save and load buttons to save and load the questionnaire (recipe)
-
-        # build the tile
         super().__init__(id_, title, inputs=[tabs])

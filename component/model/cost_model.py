@@ -1,27 +1,22 @@
 import pandas as pd
-from sepal_ui import model
-from traitlets import Int, List
+from traitlets import List
 
 from component import parameter as cp
 from component.message import cm
+from component.model.questionnaire_model import QuestionnaireModel
 
 
-class CostModel(model.Model):
-
+class CostModel(QuestionnaireModel):
     names = List([]).tag(sync=True)
     ids = List([]).tag(sync=True)
     assets = List([]).tag(sync=True)
     descs = List([]).tag(sync=True)
     units = List([]).tag(sync=True)
 
-    updated = Int(0).tag(sync=True)
-    validated = Int(0).tag(sync=True)
-
     _unit = "$/ha"
     "All cost layer must use the same unit if not aggregation will not be possible"
 
     def __init__(self):
-
         # get the default costs from the csv file
         _costs = pd.read_csv(cp.layer_list).fillna("")
         _costs = _costs[_costs.theme == "cost"]
@@ -68,7 +63,3 @@ class CostModel(model.Model):
         self.units[idx] = self._unit
 
         self.updated += 1
-
-    def get_index(self, id: str) -> int:
-        """get the index of the searched layer id."""
-        return next(i for i, v in enumerate(self.ids) if v == id)

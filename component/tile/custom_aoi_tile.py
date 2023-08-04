@@ -1,50 +1,52 @@
 import ee
-import ipyvuetify as v
 import pandas as pd
-from sepal_ui import aoi
-from sepal_ui import sepalwidgets as sw
-from sepal_ui.message import ms
+import sepal_ui.sepalwidgets as sw
+from ipyleaflet import WidgetControl
+from sepal_ui.aoi.aoi_view import AoiView
+from sepal_ui.mapping import SepalMap
 
-from component import parameter as cp
+import component.parameter as cp
 from component.message import cm
-from component.widget.custom_map import CustomMap
+from component.model.recipe import Recipe
 
 ee.Initialize()
 
 
-class CustomAoiTile(aoi.AoiTile):
+class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(self, methods="ALL", gee=True, **kwargs):
-        # create the map
-        self.map = CustomMap(dc=True, gee=gee)
-        self.map.dc.hide()
+    def __init__(self, recipe: Recipe):
+        self.recipe = recipe
+        self.class_ = "d-block"
+        self._metadata = {"mount_id": "aoi_tile"}
 
-        # create the view
-        # the view include the model
-        self.view = aoi.AoiView(methods=methods, map_=self.map, gee=gee, **kwargs)
-        self.view.elevation = 0
+        super().__init__()
 
-        # organise them in a layout
-        layout = v.Layout(
-            row=True,
-            xs12=True,
-            children=[
-                v.Flex(xs12=True, md6=True, class_="pa-5", children=[self.view]),
-                v.Flex(xs12=True, md6=True, class_="pa-1", children=[self.map]),
-            ],
+        self.map_ = SepalMap(gee=True)
+        self.map_.dc.hide()
+        self.map_.layout.height = "750px"
+        self.map_.min_zoom = 2
+
+        # Build the aoi view with our custom aoi_model
+        self.view = AoiView(
+            model=self.recipe.seplan_aoi.aoi_model,
+            map_=self.map_,
+            methods=["-POINTS"],
         )
 
-        # create the tile
-        sw.Tile.__init__(
-            self, id_="aoi_tile", title=ms.aoi_sel.title, inputs=[layout], **kwargs
+        aoi_control = WidgetControl(
+            widget=self.view, position="topleft", transparent_bg=True
         )
+
+        self.map_.add(aoi_control)
+        self.children = [self.map_]
 
         # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
 
-    def _check_lmic(self, change):
+    def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""
+        # TODO: check this method
         # check over the lmic country number
         if self.view.model.admin:
             code = self.view.model.admin

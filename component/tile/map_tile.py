@@ -2,8 +2,7 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
 from component import parameter as cp
-from component.model.aoi_model import SeplanAoi
-from component.scripts.seplan import Seplan
+from component.model.recipe import Recipe
 from component.scripts.statistics import get_summary_statistics
 from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
 from component.widget.map import SeplanMap
@@ -13,8 +12,7 @@ from component.widget.map_toolbar import MapToolbar
 class MapTile(sw.Layout):
     def __init__(
         self,
-        seplan_model: Seplan,
-        seplan_aoi: SeplanAoi,
+        recipe: Recipe,
         overall_dash: OverallDashboard = None,
         theme_dash: ThemeDashboard = None,
     ):
@@ -23,10 +21,10 @@ class MapTile(sw.Layout):
 
         super().__init__()
 
-        self.seplan_model = seplan_model
+        self.seplan_model = recipe.seplan
         self.colors = []
         self.alert = sw.Alert()
-        self.map_ = SeplanMap(seplan_aoi)
+        self.map_ = SeplanMap(recipe.seplan_aoi)
         self.map_toolbar = MapToolbar(model=self.seplan_model, map_=self.map_)
 
         # get the dashboard tile
