@@ -5,10 +5,32 @@ from sepal_ui import sepalwidgets as sw
 
 from component import widget as cw
 from component.message import cm
+from component.model.recipe import Recipe
 from component.scripts.statistics import parse_theme_stats
 
 ID = "dashboard_widget"
 "the dashboard tiles share id"
+
+
+class DashboardTile(sw.Layout):
+    def __init__(self):
+        self.attributes = {"_metadata": "dashboard_tile"}
+        self.class_ = "d-block"
+
+        super().__init__()
+
+    def build(self, recipe: Recipe):
+        recipe.set_state("dashboard", "building")
+
+        # init the dashboard
+        self.overall_dash = OverallDashboard()
+        self.theme_dash = ThemeDashboard()
+        self.children = [
+            self.overall_dash,
+            self.theme_dash,
+        ]
+
+        recipe.set_state("dashboard", "done")
 
 
 class ThemeDashboard(sw.Tile):
@@ -56,19 +78,19 @@ class ThemeDashboard(sw.Tile):
         ben = v.Html(tag="h2", children=[cm.theme.benefit.capitalize()])
         ben_txt = sw.Markdown("  \n".join(cm.dashboard.theme.benefit.description))
         ben_header = v.ExpansionPanelHeader(children=[ben])
-        ben_content = v.ExpansionPanelContent(children=[ben_txt] + ben_layer)
+        ben_content = v.ExpansionPanelContent(children=[ben_txt, *ben_layer])
         ben_panel = v.ExpansionPanel(children=[ben_header, ben_content])
 
         cost = v.Html(tag="h2", children=[cm.theme.cost.capitalize()])
         cost_txt = sw.Markdown("  \n".join(cm.dashboard.theme.cost.description))
         cost_header = v.ExpansionPanelHeader(children=[cost])
-        cost_content = v.ExpansionPanelContent(children=[cost_txt] + cost_layer)
+        cost_content = v.ExpansionPanelContent(children=[cost_txt, *cost_layer])
         cost_panel = v.ExpansionPanel(children=[cost_header, cost_content])
 
         const = v.Html(tag="h2", children=[cm.theme.constraint.capitalize()])
         const_txt = sw.Markdown("  \n".join(cm.dashboard.theme.constraint.description))
         const_header = v.ExpansionPanelHeader(children=[const])
-        const_content = v.ExpansionPanelContent(children=[const_txt] + const_layer)
+        const_content = v.ExpansionPanelContent(children=[const_txt, *const_layer])
         const_panel = v.ExpansionPanel(children=[const_header, const_content])
 
         # create an expansion panel to store everything

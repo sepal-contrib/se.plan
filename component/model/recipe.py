@@ -1,26 +1,39 @@
 import json
 from pathlib import Path
+from typing import Literal
 
 import ee
 from sepal_ui.scripts import utils
+from traitlets import Dict, HasTraits
 
 import component.parameter as cp
 from component import model as cmod
 from component.model.aoi_model import SeplanAoi
+from component.scripts import validation
 from component.scripts.seplan import Seplan
 
 ee.Initialize()
 
 
-class Recipe:
+class Recipe(HasTraits):
+    # Set types
     aoi_model: SeplanAoi
     benefit_model: cmod.BenefitModel
     constraint_model: cmod.ConstraintModel
     cost_model: cmod.CostModel
 
-    recipe_hash = "####### - sepal_ui_v_2 - ########"
+    # Define traits
+    build_state = Dict(
+        {
+            "aoi": "waiting",
+            "questionnaire": "waiting",
+            "map": "waiting",
+            "dashboard": "waiting",
+        }
+    ).tag(sync=True)
 
-    def __init__(self):
+    def load_model(self):
+        print("loading model")
         self.seplan_aoi = SeplanAoi()
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
@@ -35,17 +48,7 @@ class Recipe:
         path = Path(path)
 
         # open the file and load the models
-        with path.open() as f:
-            data = json.loads(f.read())
-
-        # TODO: check if the data is valid and raise errors if so
-
-        # Check the data starts with the recipe hash and raise an error if not
-        if data["recipe_hash"] != self.recipe_hash:
-            raise ValueError("The recipe hash is not valid")
-
-        # Check there's the right number of models inside the file
-        # Check the models have all the right parameters
+        data = validation.validate_recipe(path)
 
         # load the aoi_model
         self.seplan_aoi.import_data(data["aoi"])
@@ -72,3 +75,13 @@ class Recipe:
             }
 
             json.dump(data, f)
+
+    def set_state(
+        self,
+        component: Literal["aoi", "questionnaire", "map", "dashboard"],
+        value: Literal["building", "done", "waiting"],
+    ):
+        """Set the done status of a component to True or False."""
+        tmp_state = self.build_state.copy()
+        tmp_state[component] = value
+        self.build_state = tmp_state

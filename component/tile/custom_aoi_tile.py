@@ -15,12 +15,15 @@ ee.Initialize()
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(self, recipe: Recipe):
-        self.recipe = recipe
+    def __init__(self):
         self.class_ = "d-block"
         self._metadata = {"mount_id": "aoi_tile"}
 
         super().__init__()
+
+    def build(self, recipe: Recipe):
+        """Build the custom aoi tile."""
+        recipe.set_state("aoi", "building")
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
@@ -29,7 +32,7 @@ class AoiTile(sw.Layout):
 
         # Build the aoi view with our custom aoi_model
         self.view = AoiView(
-            model=self.recipe.seplan_aoi.aoi_model,
+            model=recipe.seplan_aoi.aoi_model,
             map_=self.map_,
             methods=["-POINTS"],
         )
@@ -43,6 +46,8 @@ class AoiTile(sw.Layout):
 
         # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
+
+        recipe.set_state("aoi", "done")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""

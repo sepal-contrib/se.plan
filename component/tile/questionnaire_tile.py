@@ -2,26 +2,29 @@ import sepal_ui.sepalwidgets as sw
 
 import component.parameter as cp
 from component.message import cm
-from component.model import BenefitModel, ConstraintModel, CostModel
 from component.model.recipe import Recipe
 from component.widget.custom_widgets import Tabs
 from component.widget.questionaire_table import Table
 
 
-class QuestionnaireTile(sw.Tile):
-    def __init__(self, recipe: Recipe):
+class QuestionnaireTile(sw.Layout):
+    def __init__(self):
         # name the tile
-        title = cm.questionnaire_title
-        id_ = "questionnaire_widget"
+        self.title = cm.questionnaire_title
+        self.id_ = "questionnaire_widget"
 
-        self.constraint_model = ConstraintModel()
-        self.benefit_model = BenefitModel()
-        self.cost_model = CostModel()
+        super().__init__()
+
+    def build(self, recipe: Recipe):
+        """Build the questionnaire tile."""
+        recipe.set_state("questionnaire", "building")
 
         benefit_table = Table(model=recipe.benefit_model)
+
         constraint_table = Table(
             model=recipe.constraint_model, aoi_model=recipe.seplan_aoi.aoi_model
         )
+
         cost_table = Table(model=recipe.cost_model)
 
         tabs = Tabs(
@@ -32,4 +35,6 @@ class QuestionnaireTile(sw.Tile):
             centered=True,
         )
 
-        super().__init__(id_, title, inputs=[tabs])
+        self.set_children([tabs], position="last")
+
+        recipe.set_state("questionnaire", "done")

@@ -10,16 +10,19 @@ from component.widget.map_toolbar import MapToolbar
 
 
 class MapTile(sw.Layout):
-    def __init__(
+    def __init__(self):
+        self.attributes = {"_metadata": "map_tile"}
+        self.class_ = "d-block"
+
+        super().__init__()
+
+    def build(
         self,
         recipe: Recipe,
         overall_dash: OverallDashboard = None,
         theme_dash: ThemeDashboard = None,
     ):
-        self.attributes = {"_metadata": "map_widget"}
-        self.class_ = "d-block"
-
-        super().__init__()
+        recipe.set_state("map", "building")
 
         self.seplan_model = recipe.seplan
         self.colors = []
@@ -55,8 +58,10 @@ class MapTile(sw.Layout):
         self.map_toolbar.btn_compute.on_event("click", self._compute)
         self.map_toolbar.btn_dashboard.on_event("click", self._dashboard)
 
+        recipe.set_state("map", "done")
+
     def _compute(self, widget, data, event):
-        """compute the restoration plan and display the map."""
+        """Compute the restoration plan and display the map."""
         benefit_index = self.seplan_model.get_benefit_index(clip=True)
         benefit_cost_index = (
             self.seplan_model.get_benefit_cost_index(clip=True).multiply(4).add(1)
@@ -71,7 +76,7 @@ class MapTile(sw.Layout):
         self.map_toolbar.btn_dashboard.disabled = False
 
     def _dashboard(self, *_):
-        """compute the restoration plan and display the map."""
+        """Compute the restoration plan and display the map."""
         summary_stats = get_summary_statistics(self.seplan_model)
 
         # set the content of the panels
