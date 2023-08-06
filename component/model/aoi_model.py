@@ -12,7 +12,7 @@ class SeplanAoi(model.Model):
     custom_layers = Dict({"type": "FeatureCollection", "features": []}).tag(sync=True)
     """dict: custom geometries drawn by the user. It's linked automatically with the map_.custom_layers"""
 
-    name = Unicode("").tag(sync=True)
+    name = Unicode("", allow_none=True).tag(sync=True)
     """str: given name from aoi.model to the aoi"""
 
     def __init__(self):
