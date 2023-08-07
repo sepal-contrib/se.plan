@@ -3,16 +3,18 @@ from datetime import datetime
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
-from traitlets import Int
+from traitlets import Int, Unicode, directional_link
 
+import component.parameter as cp
 from component.message import cm
 from component.model import Recipe
+from component.scripts import validation
 from component.tile.custom_aoi_tile import AoiTile
 from component.tile.dashboard_tile import DashboardTile
 from component.tile.map_tile import MapTile
-from component.tile.questionnaire_tile import QuestionnaireTile
 
 # Import types
+from component.tile.questionnaire_tile import QuestionnaireTile
 from component.widget.alert_state import AlertState
 
 _content = {
@@ -120,6 +122,9 @@ class RecipeView(sw.Container):
     from_scratch = Int(0).tag(sync=True)
     """A trait to control once there is a new recipe loaded. It will be listed by RecipeTile and will build the different tiles."""
 
+    recipe_path = Unicode(None, allow_none=True).tag(sync=True)
+    """Validated path to the recipe file, it will come from the load dialog."""
+
     def __init__(self):
         self.attributes = {"_metadata": "recipe_tile"}
 
@@ -130,6 +135,8 @@ class RecipeView(sw.Container):
         card_new = CardNew()
         card_load = CardLoad()
         card_save = CardSave()
+
+        self.load_dialog = LoadDialog(self.recipe)
 
         self.children = [
             sw.Row(
@@ -142,12 +149,17 @@ class RecipeView(sw.Container):
                 ],
             ),
             sw.Row(justify="center", children=[card_new, card_load, card_save]),
-            sw.Row(children=[self.alert]),
+            self.alert,
+            self.load_dialog,
         ]
 
+        directional_link((self.load_dialog, "recipe_path"), (self, "recipe_path"))
+
         card_new.on_event("click", self.new_event)
-        card_load.on_event("click", self.load_event)
+        card_load.on_event("click", lambda *args: self.load_dialog.show())
         card_save.on_event("click", self.save_event)
+
+        self.load_dialog.btn_load.on_event("click", self.load_event)
 
     def update_messages(self, change):
         """Update custom alert messages based on the UI build state.
@@ -162,7 +174,18 @@ class RecipeView(sw.Container):
 
     def new_event(self, *_):
         """Creates a new recipe from scratch."""
-        # opens new_recipe_dialog
+        # consider first when theres is not a recipe loaded
+        if self.from_scratch == 0:
+            self.recipe = Recipe()
+            self.recipe.load_model()
+            self.recipe.observe(self.update_messages, "build_state")
+            self.from_scratch += 1
+
+        # if there is a recipe already loaded, we have to ask the user if he wants to save it
+        # and then reset the recipe to start from scratch.
+
+        self.recipe.reset()
+
         # Let the user know that there might be some unsaved changes
         # let the user select a name
         # reset or create new values?
@@ -171,24 +194,20 @@ class RecipeView(sw.Container):
         # We have to make this name fully available to the other components...
         # Perhaps we can display the name always in the menu bar?
 
-        self.recipe = Recipe()
-        self.recipe.load_model()
-        self.recipe.observe(self.update_messages, "build_state")
-        self.from_scratch += 1
-
         # only set the questionnaires if there's not already a recipe.
         # it is less expensive to reset the recipe than to create a new one.
 
-    def load_event(self, *_):
-        """Opens recipe loader dialog."""
+    def load_event(self, *args):
+        """Load the recipe and close the dialog."""
+        if not self.load_dialog.recipe_path:
+            return
 
-        # open load_recipe_dialog
-        # let the user search trough the sepal files the recipes in the result folder.
-        # All files containing .json should be listed
-        # Once the value has changed, validate the recipe, do some tests to be sure
-        # all the fields were stored correctly and are there.
-        # if not, user cannot load the recipe and an error message should be displayed,
-        # user cannot close the window by clicking "load", just cancel.
+        if not self.recipe:
+            self.recipe = Recipe()
+            self.recipe.load_model()
+            self.recipe.observe(self.update_messages, "build_state")
+
+        self.recipe.load(self.load_dialog.recipe_path)
 
     def save_event(self, *_):
         """Saves the current state of the recipe."""
@@ -201,128 +220,69 @@ class RecipeView(sw.Container):
 
 
 class LoadDialog(v.Dialog):
-    """Dialog to save a recipe as json file the content of a ClassTable data table.
+    """Dialog to load a recipe from a file."""
 
-    Args:
-        table (ClassTable): Table linked with dialog
-        out_path (str): Folder path to store table content
+    recipe_path = Unicode(None, allow_none=True).tag(sync=True)
 
-    Attributes:
-        reload (Int): a traitlet to inform the rest of the app that saving is complete
-        table (ClassTable): Table linked with dialog
-        out_path (str): Folder path to store table content
-        w_file_name (v.TextField): the filename to use in out_path
-        save (sw.Btn): save btn to launch the saving of the table data in the out_path using the filename provided in the widget
-        cancel (sw.Btn): btn to close the dialog and do nothing
-        alert (sw.Alert): an alert to display evolution of the saving process (errors)
-    """
+    def __init__(self, recipe: Recipe):
+        self.recipe = recipe
+        self.recipe_path = None
 
-    reload = Int().tag(sync=True)
-
-    def __init__(self, table, out_path, **kwargs):
-        # gather the table and saving params
-        self.table = table
-        self.out_path = out_path
+        super().__init__()
 
         # set some default parameters
         self.max_width = 500
         self.v_model = False
+        self.persistent = True
 
-        # create the widget
-        super().__init__(**kwargs)
-
-        # build widgets
         # Create input file widget wrapped in a layout
-        self.input_impact = sw.FileInput(
-            # ".json", folder=cp.directory.TRANSITION_DIR, root=dir_.RESULTS_DIR
+        self.w_input_recipe = sw.FileInput(
+            ".json", folder=cp.result_dir, root=cp.result_dir
         )
 
-        self.save = sw.Btn(cm.rec.table.save_dialog.btn.save.name)
-        save = sw.Tooltip(
-            self.save,
-            cm.rec.table.save_dialog.btn.save.tooltip,
-            bottom=True,
-            class_="pr-2",
+        self.btn_load = sw.Btn(cm.recipe.load.dialog.load)
+        self.btn_cancel = sw.Btn(
+            cm.recipe.load.dialog.cancel, outlined=True, class_="ml-2"
         )
-
-        self.cancel = sw.Btn(
-            cm.rec.table.save_dialog.btn.cancel.name, outlined=True, class_="ml-2"
-        )
-        cancel = sw.Tooltip(
-            self.cancel, cm.rec.table.save_dialog.btn.cancel.tooltip, bottom=True
-        )
-
-        self.alert = sw.Alert(children=["Choose a name for the output"]).show()
 
         # assemlble the layout
         self.children = [
             v.Card(
                 class_="pa-4",
                 children=[
-                    v.CardTitle(children=[cm.rec.table.save_dialog.title]),
-                    self.w_file_name,
-                    self.alert,
-                    save,
-                    cancel,
+                    sw.CardTitle(children=[cm.recipe.load.dialog.title]),
+                    sw.CardText(children=[self.w_input_recipe]),
+                    self.btn_load,
+                    self.btn_cancel,
                 ],
             )
         ]
 
         # Create events
-        self.save.on_event("click", self._save)
-        self.cancel.on_event("click", self._cancel)
-        self.w_file_name.on_event("blur", self._normalize_name)
-        self.w_file_name.observe(self._store_info, "v_model")
+        self.btn_cancel.on_event("click", self.cancel)
+        self.w_input_recipe.observe(self.validate_input, "v_model")
 
-    def _store_info(self, change):
-        """Display where will be the file written."""
-        new_val = change["new"]
-        out_file = self.out_path / f"{su.normalize_str(new_val)}.csv"
+    @su.switch("loading", on_widgets=["btn_load"])
+    def validate_input(self, change):
+        """Validate the recipe file."""
+        # Get TextField from w_file_name widget
+        text_field_msg = change["owner"].children[-1]
 
-        msg = f"Your file will be saved as: {out_file}"
+        # Reset any previous error messages
+        text_field_msg.error_messages = []
 
-        if not new_val:
-            msg = "Choose a name for the output"
-
-        self.alert.add_msg(msg)
+        # Validate the recipe file and show errors if there are
+        self.recipe_path = validation.validate_recipe(change["new"], text_field_msg)
 
     def show(self):
         """Display the dialog and write down the text in the alert."""
+        self.valid = False
         self.v_model = True
-        self.w_file_name.v_model = ""
 
-        # the message is display after the show so that it's not cut by the display
-        self.alert.add_msg(cm.rec.table.save_dialog.info.format(self.out_path))
-
-        return self
-
-    def _normalize_name(self, widget, event, data):
-        """Replace the name with it's normalized version."""
-        # normalized the name
-        widget.v_model = su.normalize_str(widget.v_model)
-
-        return
-
-    def _save(self, widget, event, data):
-        """Write current table on a text file."""
-        # set the file name
-        out_file = self.out_path / su.normalize_str(self.w_file_name.v_model)
-
-        # write each line values but not the id
-        lines = [list(item.values())[1:] for item in self.table.items]
-        txt = [",".join(str(e) for e in ln) + "\n" for ln in lines]
-        out_file.with_suffix(".csv").write_text("".join(txt))
-
-        # Every time a file is saved, we update the current widget state
-        # so it can be observed by other objects.
-        self.reload += 1
-
-        self.v_model = False
-
-        return
-
-    def _cancel(self, widget, event, data):
-        """Hide the widget and do nothing."""
+    def cancel(self, *args):
+        """Hide the widget and reset the selected file."""
+        self.w_input_recipe.reset()
+        self.recipe_path = None
         self.v_model = False
 
         return
@@ -352,39 +312,9 @@ class RecipeTile(sw.Layout):
     def render(self, *args):
         """Render all the different tiles.
 
-        This element is intended to be used only once.
+        This element is intended to be used only once, when the app has to start.
         """
-        print("rendering recipe")
-
         self.aoi_tile.build(self.recipe_view.recipe)
-        print("here")
         self.questionnaire_tile.build(self.recipe_view.recipe)
         self.map_tile.build(self.recipe_view.recipe)
         self.dashboard_tile.build(self.recipe_view.recipe)
-
-    # @su.loading_button(debug=True)
-    # def _validate_data(self, widget, event, data):
-    #     """validate the data and release the computation btn."""
-    #     # watch the inputs
-    #     self.layers_recipe.digest_layers(self.layer_model, self.question_model)
-    #     self.layers_recipe.show()
-
-    #     # save the inputs in a json
-    #     cs.save_recipe(
-    #         self.layer_model, self.aoi_model, self.question_model, self.w_name.v_model
-    #     )
-
-    #     return self
-
-    # def load_recipe(self, widget, event, data, path=None):
-    #     """load the recipe file into the different io, then update the display of the table."""
-    #     # check if path is set, if not use the one frome file select
-    #     path = path or self.file_select.v_model
-
-    #     cs.load_recipe(self.aoi_tile, self.questionnaire_tile, path)
-    #     self.w_name.v_model = Path(path).stem
-
-    #     # automatically validate them
-    #     self.btn.fire_event("click", None)
-
-    #     return self

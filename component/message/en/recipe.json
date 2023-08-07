@@ -4,7 +4,13 @@
         "load": {
             "title" :"Load",
             "hint" : "Load an existing recipe",
-            "desc" : "Load a recipe created from a previous session"
+            "desc" : "Load a recipe created from a previous session",
+            "dialog" : {
+                "title" : "Load a recipe",
+                "desc" : "Select a recipe to load",
+                "cancel" : "Cancel",
+                "load" : "Load"
+            }
         },
         "new": {
             "title" :"New",
