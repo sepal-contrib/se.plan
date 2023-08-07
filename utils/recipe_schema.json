@@ -1,0 +1,113 @@
+{
+  "type": "object",
+  "properties": {
+    "signature": {
+      "const": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75"
+    },
+    "aoi": {
+      "type": "object",
+      "properties": {
+        "primary": {
+          "type": "object",
+          "properties": {
+            "admin": { "type": "string" },
+            "asset_name": { "type": ["string", "null"] },
+            "method": { "type": "string" },
+            "name": { "type": "string" },
+            "asset_json": { "type": ["string", "null"] },
+            "vector_json": { "type": ["string", "null"] },
+            "point_json": { "type": ["string", "null"] },
+            "geo_json": { "type": ["string", "null"] }
+          },
+          "required": [
+            "admin",
+            "asset_name",
+            "method",
+            "name",
+            "asset_json",
+            "vector_json",
+            "point_json",
+            "geo_json"
+          ]
+        },
+        "custom": {
+          "type": "object",
+          "properties": {
+            "type": { "const": "FeatureCollection" },
+            "features": { "type": "array" }
+          },
+          "required": ["type", "features"]
+        }
+      },
+      "required": ["primary", "custom"]
+    },
+    "benefits": {
+      "type": "object",
+      "properties": {
+        "updated": { "type": "number" },
+        "names": { "type": "array" },
+        "ids": { "type": "array" },
+        "themes": { "type": "array" },
+        "assets": { "type": "array" },
+        "descs": { "type": "array" },
+        "weights": {
+          "type": "array",
+          "items": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 5
+          }
+        },
+        "units": { "type": "array" }
+      },
+      "required": [
+        "updated",
+        "names",
+        "ids",
+        "themes",
+        "assets",
+        "descs",
+        "weights",
+        "units"
+      ]
+    },
+    "constraints": {
+      "type": "object",
+      "properties": {
+        "updated": { "type": "number" },
+        "themes": { "type": "array" },
+        "names": { "type": "array" },
+        "ids": { "type": "array" },
+        "assets": { "type": "array" },
+        "descs": { "type": "array" },
+        "units": { "type": "array" },
+        "values": { "type": "array" },
+        "data_type": { "type": "array" }
+      },
+      "required": [
+        "updated",
+        "themes",
+        "names",
+        "ids",
+        "assets",
+        "descs",
+        "units",
+        "values",
+        "data_type"
+      ]
+    },
+    "costs": {
+      "type": "object",
+      "properties": {
+        "updated": { "type": "number" },
+        "names": { "type": "array" },
+        "ids": { "type": "array" },
+        "assets": { "type": "array" },
+        "descs": { "type": "array" },
+        "units": { "type": "array" }
+      },
+      "required": ["updated", "names", "ids", "assets", "descs", "units"]
+    }
+  },
+  "required": ["signature", "aoi", "benefits", "constraints", "costs"]
+}
