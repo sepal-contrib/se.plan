@@ -56,4 +56,4 @@ class SeplanAoi(model.Model):
 
     def export_data(self):
         """Save the data from each of the AOIs."""
-        return {"primary": self.aoi_model.save_data(), "custom": self.custom_layers}
+        return {"primary": self.aoi_model.export_data(), "custom": self.custom_layers}
