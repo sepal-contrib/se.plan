@@ -1,12 +1,12 @@
 import json
 from pathlib import Path
-from typing import Literal
 
 import ee
-from traitlets import Dict, HasTraits
+from sepal_ui.scripts.warning import SepalWarning
 
 import component.parameter as cp
 from component import model as cmod
+from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.scripts import validation
 from component.scripts.seplan import Seplan
@@ -14,22 +14,15 @@ from component.scripts.seplan import Seplan
 ee.Initialize()
 
 
-class Recipe(HasTraits):
+class Recipe:
     # Set types
     aoi_model: SeplanAoi
     benefit_model: cmod.BenefitModel
     constraint_model: cmod.ConstraintModel
     cost_model: cmod.CostModel
 
-    # Define traits
-    build_state = Dict(
-        {
-            "aoi": "waiting",
-            "questionnaire": "waiting",
-            "map": "waiting",
-            "dashboard": "waiting",
-        }
-    ).tag(sync=True)
+    def __init__(self):
+        self.seplan_aoi = None
 
     def load_model(self):
         """Define all the models required by the module."""
@@ -55,10 +48,35 @@ class Recipe(HasTraits):
         self.constraint_model.import_data(data["constraints"])
         self.cost_model.import_data(data["costs"])
 
-    def save(self, recipe_name: str):
+    def save(self, full_recipe_path: str):
         """Save the recipe in a json file with a timestamp."""
-        # get the result folder
+        # Raise a sepal_ui.warning if there is no loaded models
+        if not self.seplan:
+            raise SepalWarning(cm.recipe.error.no_seplan)
 
+        with Path(full_recipe_path).open("w") as f:
+            data = {
+                "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
+                "aoi": self.seplan_aoi.export_data(),
+                "benefits": self.benefit_model.export_data(),
+                "constraints": self.constraint_model.export_data(),
+                "costs": self.cost_model.export_data(),
+            }
+
+            json.dump(data, f, indent=4)
+
+        return full_recipe_path
+
+    def reset(self):
+        """Reset the recipe to its default values."""
+        # We can either load a default known recipe, or trigger a reset of all the models
+
+        # It will be better to reset the models
+
+        # TODO: Create a default method to reset the models
+
+    def get_recipe_path(self, recipe_name: str):
+        """generate full recipe path."""
         res_dir = cp.result_dir / self.seplan_aoi.aoi_model.name
         res_dir.mkdir(exist_ok=True)
 
@@ -69,33 +87,4 @@ class Recipe(HasTraits):
             recipe_path = recipe_path.with_suffix(".json")
 
         # create the json file
-        json_file = res_dir / f"{str(recipe_path)}"
-
-        with json_file.open("w") as f:
-            data = {
-                "signature": cp.recipe_signature,
-                "data": {
-                    "aoi": self.seplan_aoi.export_data(),
-                    "benefits": self.benefit_model.export_data(),
-                    "constraints": self.constraint_model.export_data(),
-                    "costs": self.cost_model.export_data(),
-                },
-            }
-
-            json.dump(data, f, indent=4)
-
-    def reset(self):
-        """Reset the recipe to its default values."""
-        # We can either load a default known recipe, or trigger a reset of all the models
-
-        self.load(cp.default_recipe)
-
-    def set_state(
-        self,
-        component: Literal["aoi", "questionnaire", "map", "dashboard"],
-        value: Literal["building", "done", "waiting"],
-    ):
-        """Set the done status of a component to True or False."""
-        tmp_state = self.build_state.copy()
-        tmp_state[component] = value
-        self.build_state = tmp_state
+        return str(res_dir / recipe_path)
