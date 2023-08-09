@@ -130,6 +130,7 @@ class ConstraintRow(sw.Html):
                 reducer=reducer,
                 geometry=geom,
                 scale=ee_image.projection().nominalScale().multiply(2),
+                maxPixels=1e13,
             )
         )
 
