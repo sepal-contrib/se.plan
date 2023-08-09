@@ -43,32 +43,6 @@
 			"no_aoi": "Select an aoi first"
 		}
 	},
-	"cost": {
-		"title": "Costs",
-		"table": {
-			"action": "action",
-			"cost": "cost",
-			"description": "description"
-		}
-	},
-	"custom": {
-		"recipe": {
-			"title": "Load an existing recipe",
-			"apply": "Apply the selected recipe",
-			"file": "Select recipe file",
-			"name": "Recipe name"
-		}
-	},
-	"dial": {
-		"cancel": "Cancel",
-		"save": "Save",
-		"no_layer": "No layer",
-		"disc": "You need to select a layer before making modifications",
-		"layer": "Layer",
-		"unit": "Unit",
-		"default_title": "Layer Name",
-		"no_unit": "no_unit"
-	},
 	"dashboard": {
 		"region": {
 			"title": "Summary of restoration suitability by region",
@@ -111,31 +85,6 @@
 				}
 			}
 		}
-	},
-	"benefits": {
-		"title": "Restoration benefits",
-		"table": {
-			"action": "action",
-			"theme": "benefit",
-			"indicator": "indicator",
-			"labels": {
-				"0": "no importance",
-				"1": "low importance",
-				"2": "neutral",
-				"3": "important",
-				"4": "very important"
-			}
-		}
-	},
-	"export": {
-		"title": "Export map",
-		"scale": "Resolution (m)",
-		"radio": {
-			"label": "Select export method",
-			"gee": "As a GEE asset",
-			"sepal": "As a sepal file"
-		},
-		"apply": "Apply"
 	},
 	"aoi": {
 		"not_lmic": "The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information"

@@ -117,14 +117,6 @@
             "detail": "Implementation cost in se.plan refers to expenses associated with active forest restoration on former agricultural land: preparing a site for tree regeneration, and then artificially regenerating the site by sowing seeds or planting seedlings. A higher implementation cost tends to make FR less feasible, although FR can be feasible on land with a high implementation cost if land opportunity cost is low and FR generates large benefits.\nImplementation cost is expressed in US dollars per hectare. It varies by country and, for countries with sufficient data, by first-level administrative subdivision (e.g., state or province). The cost reported by the tool is the average for the country or subdivision. The actual cost at different locations within the country or subdivision could be higher or lower than the reported average estimate. In addition, compared to the estimates reported by the tool, se.plan team estimates that implementation cost is, on average, 45% higher if the restoration site is a forest that has been heavily damaged (for example, by fire, windthrow, or pest outbreak) and 66% lower if passive restoration, which relies on natural tree regeneration, is feasible. The tool contains a variable that predicts the likely success of natural regeneration."
         }
     },
-    "constraint": {
-        "category": {
-            "land_use": "Land use constraints",
-            "bio": "Biophysical constraints",
-            "socio_eco": "Socio-economic constraints",
-            "forest": "Forest change"
-        }
-    },
     "theme": {
         "cost": "cost",
         "benefit": "priorities",
@@ -139,6 +131,14 @@
         "bii": "Biodiversity conservation",
         "bio": "Biophysical",
         "forest": "Forest change",
-        "money": "Monetary"
-    }
+        "money": "Monetary",
+        "custom": "Custom"
+    },
+    "data_type" : {
+        "label" : "Data type",
+        "categorical" : "Categorical",
+        "continuous" : "Continuous",
+        "binary" : "Binary"
+    },
+    "default_asset_header" : "Default asset"
 }

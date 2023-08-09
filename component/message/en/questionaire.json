@@ -1,0 +1,82 @@
+{
+    "questionnaire_title" : "Questionnaire identifying restoration priorities & constraints",
+    "benefit" : {
+        "tab_title": "Restoration benefits",
+        "dialog": {
+            "title": "Benefits",
+            "validate": "Validate",
+            "cancel": "Cancel",
+            "theme": "Benefit",
+            "name": "Name",
+            "desc": "Description",
+            "unit": "Unit",
+            "missing_data": "Some data are missing, please fill all of them before submitting the form"
+        },
+        "table": {
+            "header": {
+                "action": "Action",
+                "theme": "Benefit",
+                "indicator": "Indicator",
+                "no_importance": "No importance",
+                "low_importance": "Low importance",
+                "neutral": "Neutral",
+                "important": "Important",
+                "very_important": "Very important"
+            }
+        }
+    },
+    "constraint": {
+        "tab_title": "Constraints",
+        "category": {
+            "land_use": "Land use constraints",
+            "bio": "Biophysical constraints",
+            "socio_eco": "Socio-economic constraints",
+            "forest": "Forest change"
+        },
+        "dialog": {
+            "title": "Constraint",
+            "theme": "Theme",
+            "name": "Name",
+            "desc": "Description",
+            "unit": "Unit",
+            "validate": "Validate",
+            "cancel": "Cancel",
+            "missing_data": "Some data are missing, please fill all of them before submitting the form"
+        },
+        "table": {
+            "header": {
+                "action": "Action",
+                "name": "Name",
+                "parameter": "Parameters"
+            }
+        },
+        "widget" : {
+            "binary" : {
+                "label" : "Value to mask out:",
+                "mask_0" : "Values on the map with 0 will be excluded from the analysis.",
+                "mask_1" : "Values on the map with 1 will be excluded from the analysis."
+            },
+            "categorical" : {
+                "label" : "Values to include"
+            }
+        }
+    },
+    "cost" :{
+        "tab_title": "Costs",
+        "dialog": {
+            "title": "Cost",
+            "name": "Name",
+            "desc": "Description",
+            "unit": "Unit",
+            "validate": "Validate",
+            "cancel": "Cancel",
+            "missing_data": "Data are missing"
+        },
+        "table": {
+            "header": {
+                "action": "Action",
+                "indicator": "Indicator"
+            }
+        }
+    }
+}

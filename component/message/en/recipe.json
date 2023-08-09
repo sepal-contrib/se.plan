@@ -1,0 +1,50 @@
+{
+    "recipe": {
+        "title": "Load an existing recipe",
+        "load": {
+            "title" :"Load",
+            "hint" : "Load an existing recipe",
+            "desc" : "Load a recipe created from a previous session",
+            "dialog" : {
+                "title" : "Load a recipe",
+                "desc" : "Select a recipe to load",
+                "cancel" : "Cancel",
+                "load" : "Load"
+            }
+        },
+        "new": {
+            "title" :"New",
+            "desc" : "Create a new recipe for this session.",
+            "name" : "Recipe name",
+            "hint" : "Set a name for the new recipe"
+        },
+        "save": {
+            "title" :"Save",
+            "hint" : "Save the current recipe",
+            "desc" : "Save any changes done on during this session"
+        },
+        "states" : {
+            "aoi" : {
+                "building" : "Setting up AOI...",
+                "done" : "AOI successfull loaded.",
+                "waiting" : "Waiting for AOI..."
+            },
+            "questionnaire" : {
+                "building" : "Setting up questionnaire...",
+                "done" : "Questionnaire successfull loaded.",
+                "waiting" : "Waiting for questionnaire..."
+            },
+            "map" : {
+                "building" : "Setting up map...",
+                "done" : "Map successfull loaded.",
+                "waiting" : "Waiting for map..."
+            },
+            "dashboard" : {
+                "building" : "Setting up dashboard...",
+                "done" : "Dashboard successfull loaded",
+                "waiting" : "Waiting for dashboard..."
+            }
+        }
+
+    }
+}

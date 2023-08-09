@@ -3,9 +3,7 @@ from pathlib import Path
 
 import ee
 import rasterio as rio
-from ipyleaflet import WidgetControl
 from matplotlib.colors import to_rgba
-from sepal_ui import mapping as sm
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import gee
 from sepal_ui.scripts import utils as su
@@ -17,8 +15,13 @@ from component.message import cm
 ee.Initialize()
 
 
-class ExportMap(WidgetControl):
+class ExportMapDialog(sw.Dialog):
     def __init__(self, **kwargs):
+        self.v_model = False
+        self.max_width = "700px"
+        # init the dialog
+        super().__init__(**kwargs)
+
         # init the downloadable informations
         self.geometry = None
         self.dataset = None
@@ -27,22 +30,23 @@ class ExportMap(WidgetControl):
 
         # create the useful widgets
         # align on the landsat images
-        w_scale_lbl = sw.Html(tag="h4", children=[cm.export.scale])
+        w_scale_lbl = sw.Html(tag="h4", children=[cm.map.dialog.export.scale])
         self.w_scale = sw.Slider(
             v_model=1000, min=10, max=2000, thumb_label="always", step=10
         )
 
-        w_method_lbl = sw.Html(tag="h4", children=[cm.export.radio.label])
-        sepal = sw.Radio(label=cm.export.radio.sepal, value="sepal")
-        gee = sw.Radio(label=cm.export.radio.gee, value="gee")
+        w_method_lbl = sw.Html(tag="h4", children=[cm.map.dialog.export.radio.label])
+        sepal = sw.Radio(label=cm.map.dialog.export.radio.sepal, value="sepal")
+        gee = sw.Radio(label=cm.map.dialog.export.radio.gee, value="gee")
         self.w_method = sw.RadioGroup(v_model="gee", row=True, children=[sepal, gee])
 
         # add alert and btn component for the loading_button
         self.alert = sw.Alert()
-        self.btn = sw.Btn(cm.export.apply, small=True)
-        title = sw.Html(tag="h3", children=[cm.export.title], class_="pl-1")
-        close_btn = sw.Icon(children=["fas fa-times"], small=True)
-        sw.CardTitle(children=[title, sw.Spacer(), close_btn])
+        self.btn = sw.Btn(cm.map.dialog.export.export, small=True)
+        self.btn_cancel = sw.Btn(cm.map.dialog.export.cancel, small=True)
+
+        title = sw.CardTitle(children=[cm.map.dialog.export.title])
+
         text = sw.CardText(
             children=[
                 w_scale_lbl,
@@ -52,31 +56,25 @@ class ExportMap(WidgetControl):
                 self.alert,
             ]
         )
-        action = sw.CardActions(children=[self.btn])
-        export_data = sw.Card(children=[title, text, action], class_="pt-1")
-        self.download_btn = sm.MapBtn("mdi-cloud-download", v_on="menu.on")
-        slot = {"name": "activator", "variable": "menu", "children": self.download_btn}
-
-        # create the menu
-        menu = sw.Menu(
-            v_model=False,
-            value=False,
-            close_on_content_click=False,
-            # nudge_width=200,
-            offset_x=True,
-            children=[export_data],
-            v_slots=[slot],
-            top="bottom" in kwargs["position"],
-            bottom="top" in kwargs["position"],
-            left="right" in kwargs["position"],
-            right="left" in kwargs["position"],
+        actions = sw.CardActions(
+            children=[
+                sw.Spacer(),
+                self.btn,
+                self.btn_cancel,
+            ]
         )
 
-        super().__init__(widget=menu, **kwargs)
+        self.children = [sw.Card(children=[title, text, actions])]
+
+        super().__init__()
 
         # add js behaviour
         self.btn.on_event("click", self._apply)
-        close_btn.on_event("click", lambda *_: setattr(self.menu, "v_model", False))
+        self.btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
+
+    def open_dialog(self, *_):
+        """Open dialog."""
+        self.v_model = True
 
     def set_data(self, dataset, geometry, name, aoi_name):
         """set the dataset and the geometry to allow the download."""
