@@ -4,7 +4,7 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
 from sepal_ui import mapping as sm
-from traitlets import Dict, Int, directional_link
+from traitlets import Dict, Int, link
 
 from component import parameter as cp
 from component.message import cm
@@ -51,7 +51,8 @@ class SeplanMap(sm.SepalMap):
         self.dc.on_draw(self._handle_draw)
         self.observe(self.on_custom_layers, "custom_layers")
 
-        directional_link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
+        # It has to be two way, so we can load the data by just updating the model
+        link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
 
     def on_custom_layers(self, *_):
         """Event triggered when there are new custom layers (created by user).
