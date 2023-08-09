@@ -5,6 +5,7 @@ from component import parameter as cp
 from component.model.recipe import Recipe
 from component.scripts.statistics import get_summary_statistics
 from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
+from component.widget.alert_state import AlertState
 from component.widget.map import SeplanMap
 from component.widget.map_toolbar import MapToolbar
 
@@ -19,10 +20,11 @@ class MapTile(sw.Layout):
     def build(
         self,
         recipe: Recipe,
+        alert: AlertState,
         overall_dash: OverallDashboard = None,
         theme_dash: ThemeDashboard = None,
     ):
-        recipe.set_state("map", "building")
+        alert.set_state("map", "building")
 
         self.seplan_model = recipe.seplan
         self.colors = []
@@ -58,7 +60,7 @@ class MapTile(sw.Layout):
         self.map_toolbar.btn_compute.on_event("click", self._compute)
         self.map_toolbar.btn_dashboard.on_event("click", self._dashboard)
 
-        recipe.set_state("map", "done")
+        alert.set_state("map", "done")
 
     def _compute(self, widget, data, event):
         """Compute the restoration plan and display the map."""

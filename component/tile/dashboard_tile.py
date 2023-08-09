@@ -7,6 +7,7 @@ from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
 from component.scripts.statistics import parse_theme_stats
+from component.widget.alert_state import AlertState
 
 ID = "dashboard_widget"
 "the dashboard tiles share id"
@@ -19,8 +20,8 @@ class DashboardTile(sw.Layout):
 
         super().__init__()
 
-    def build(self, recipe: Recipe):
-        recipe.set_state("dashboard", "building")
+    def build(self, recipe: Recipe, alert: AlertState):
+        alert.set_state("dashboard", "building")
 
         # init the dashboard
         self.overall_dash = OverallDashboard()
@@ -30,7 +31,7 @@ class DashboardTile(sw.Layout):
             self.theme_dash,
         ]
 
-        recipe.set_state("dashboard", "done")
+        alert.set_state("dashboard", "done")
 
 
 class ThemeDashboard(sw.Tile):

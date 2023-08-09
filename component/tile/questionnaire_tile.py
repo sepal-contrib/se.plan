@@ -3,6 +3,7 @@ import sepal_ui.sepalwidgets as sw
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
+from component.widget.alert_state import AlertState
 from component.widget.custom_widgets import Tabs
 from component.widget.questionaire_table import Table
 
@@ -15,9 +16,9 @@ class QuestionnaireTile(sw.Layout):
 
         super().__init__()
 
-    def build(self, recipe: Recipe):
+    def build(self, recipe: Recipe, alert: AlertState):
         """Build the questionnaire tile."""
-        recipe.set_state("questionnaire", "building")
+        alert.set_state("questionnaire", "building")
 
         benefit_table = Table(model=recipe.benefit_model)
 
@@ -37,4 +38,4 @@ class QuestionnaireTile(sw.Layout):
 
         self.set_children([tabs], position="last")
 
-        recipe.set_state("questionnaire", "done")
+        alert.set_state("questionnaire", "done")

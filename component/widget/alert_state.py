@@ -3,12 +3,24 @@
 from typing import Literal
 
 import sepal_ui.sepalwidgets as sw
+from traitlets import Dict, observe
 
 from component.message import cm
 
 
 class AlertState(sw.Alert):
     """Custom alert component to inform the user the state of the building process."""
+
+    # Define traits
+    build_state = Dict(
+        {
+            "aoi": "waiting",
+            "questionnaire": "waiting",
+            "map": "waiting",
+            "dashboard": "waiting",
+            "load": "waiting",
+        }
+    ).tag(sync=True)
 
     def update_state(self, component_id, state) -> None:
         """Mutate and set new message by replacing."""
@@ -23,6 +35,28 @@ class AlertState(sw.Alert):
             self.append_msg(message_component)
 
         message_component.set_state(state)
+
+    @observe("build_state")
+    def update_messages(self, change):
+        """Update custom alert messages based on the UI build state.
+
+        This method is called every time the build_state of the recipe changes,
+        and it changes everytime the build state ("building", "done", "error")
+        of one of the components changes.
+
+        """
+        for component_id, state in change["new"].items():
+            self.update_state(component_id, state)
+
+    def set_state(
+        self,
+        component: Literal["aoi", "questionnaire", "map", "dashboard", "load"],
+        value: Literal["building", "done", "waiting"],
+    ):
+        """Set the done status of a component to True or False."""
+        tmp_state = self.build_state.copy()
+        tmp_state[component] = value
+        self.build_state = tmp_state
 
 
 class TaskMsg(sw.Flex):
