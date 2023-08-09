@@ -49,9 +49,9 @@ class SeplanAoi(model.Model):
 
         return {**primary_aoi, **custom_aois}
 
-    def load_data(self, data: dict):
+    def import_data(self, data: dict):
         """Set the data for each of the AOIs."""
-        self.aoi_model.load_data(data["primary"])
+        self.aoi_model.import_data(data["primary"])
         self.custom_layers = data["custom"]
 
     def export_data(self):

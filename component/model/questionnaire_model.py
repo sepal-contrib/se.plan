@@ -8,8 +8,8 @@ class QuestionnaireModel(model.Model):
     updated = Int(0).tag(sync=True)
 
     def import_data(self, data: dict):
-        """Set the data for each of the model traits and trigger the update."""
-        self.import_data(data)
+        """Set the data for each of the model traits and triggers the update of the view."""
+        super().import_data(data)
         self.updated += 1
 
     def get_index(self, id: str) -> int:
