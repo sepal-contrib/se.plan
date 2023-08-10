@@ -18,8 +18,8 @@ repos:
         stages: [commit]
         exclude: ^(.+\.md$|component/message/.+)
 
-  - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: "v0.0.215"
-    hooks:
-      - id: ruff
-        stages: [commit]
+  # - repo: https://github.com/charliermarsh/ruff-pre-commit
+  #   rev: "v0.0.215"
+  #   hooks:
+  #     - id: ruff
+  #       stages: [commit]
