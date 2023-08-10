@@ -3,7 +3,7 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from traitlets import Bool, link
 
-from component import new_model as cmod
+from component import model as cmod
 from component import parameter as cp
 from component.message import cm
 

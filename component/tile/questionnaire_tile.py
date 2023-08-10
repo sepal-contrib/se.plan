@@ -11,14 +11,14 @@ from component.widget.questionaire_table import Table
 class QuestionnaireTile(sw.Layout):
     def __init__(self):
         # name the tile
-        self.title = cm.questionnaire_title
-        self.id_ = "questionnaire_widget"
+        self._metadata = {"mount_id": "questionnaire_tile"}
+        self.class_ = "d-block"
 
         super().__init__()
 
     def build(self, recipe: Recipe, alert: AlertState):
         """Build the questionnaire tile."""
-        alert.set_state("questionnaire", "building")
+        alert.set_state("new", "questionnaire", "building")
 
         benefit_table = Table(model=recipe.benefit_model)
 
@@ -38,4 +38,4 @@ class QuestionnaireTile(sw.Layout):
 
         self.set_children([tabs], position="last")
 
-        alert.set_state("questionnaire", "done")
+        alert.set_state("new", "questionnaire", "done")

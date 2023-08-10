@@ -15,13 +15,13 @@ ID = "dashboard_widget"
 
 class DashboardTile(sw.Layout):
     def __init__(self):
-        self.attributes = {"_metadata": "dashboard_tile"}
+        self._metadata = {"mount_id": "dashboard_tile"}
         self.class_ = "d-block"
 
         super().__init__()
 
     def build(self, recipe: Recipe, alert: AlertState):
-        alert.set_state("dashboard", "building")
+        alert.set_state("new", "dashboard", "building")
 
         # init the dashboard
         self.overall_dash = OverallDashboard()
@@ -31,7 +31,7 @@ class DashboardTile(sw.Layout):
             self.theme_dash,
         ]
 
-        alert.set_state("dashboard", "done")
+        alert.set_state("new", "dashboard", "done")
 
 
 class ThemeDashboard(sw.Tile):

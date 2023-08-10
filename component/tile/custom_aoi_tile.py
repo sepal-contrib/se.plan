@@ -24,7 +24,7 @@ class AoiTile(sw.Layout):
 
     def build(self, recipe: Recipe, alert: AlertState):
         """Build the custom aoi tile."""
-        alert.set_state("aoi", "building")
+        alert.set_state("new", "aoi", "building")
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
@@ -48,7 +48,7 @@ class AoiTile(sw.Layout):
         # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
 
-        alert.set_state("aoi", "done")
+        alert.set_state("new", "aoi", "done")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""
