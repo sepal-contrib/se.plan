@@ -23,7 +23,7 @@ class QuestionnaireTile(sw.Layout):
         benefit_table = Table(model=recipe.benefit_model)
 
         constraint_table = Table(
-            model=recipe.constraint_model, aoi_model=recipe.seplan_aoi.aoi_model
+            model=recipe.constraint_model, aoi_model=recipe.seplan_aoi
         )
 
         cost_table = Table(model=recipe.cost_model)

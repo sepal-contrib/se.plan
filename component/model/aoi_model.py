@@ -20,7 +20,7 @@ class SeplanAoi(model.Model):
         # Multiple polygon country: 220
         # Small department: 959 (risaralda)
         # Medium department: 935 (Antioquia)
-        self.aoi_model = AoiModel(admin="935")
+        self.aoi_model = AoiModel()
 
         # As the feature colleciton from model is not a trait, we need to link something that changes when model is updated, that's the name
         link((self.aoi_model, "name"), (self, "name"))

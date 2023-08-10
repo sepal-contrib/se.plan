@@ -78,5 +78,10 @@
                 "indicator": "Indicator"
             }
         }
+    },
+    "questionnaire": {
+        "error" : {
+            "mandatory_layer" : "This layer is mandatory and cannot be removed"
+        }
     }
 }
