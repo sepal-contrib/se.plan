@@ -1,11 +1,12 @@
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
-from traitlets import Int, Unicode, directional_link, link
+from traitlets import Int, Unicode, directional_link
 
 import component.parameter as cp
 from component.message import cm
@@ -17,7 +18,7 @@ from component.tile.map_tile import MapTile
 
 # Import types
 from component.tile.questionnaire_tile import QuestionnaireTile
-from component.widget.alert_state import AlertState
+from component.widget.alert_state import AlertDialog, AlertState
 
 _content = {
     "new": ["mdi-newspaper-plus", cm.recipe.new.title, cm.recipe.new.desc],
@@ -27,32 +28,46 @@ _content = {
 
 
 class CardAction(sw.Card):
+    """Base class for the cards with an action button."""
+
     def __init__(self, content):
         super().__init__()
         self.hover = True
         self.max_width = 344
         self.min_width = 344
         self.btn = sw.Btn(
-            msg=content[1], gliph=content[0], outlined=True, color="white"
+            msg=content[1], gliph=content[0], outlined=True, color="primary"
         )
         self.children = [
-            sw.CardActions(children=[self.btn]),
+            sw.CardActions(children=[sw.Spacer(), self.btn]),
         ]
 
 
-class CardNew(CardAction):
-    recipe_name = Unicode(None, allow_none=True).tag(sync=True)
-    "str: given name of the recipe, captured by w_recipe_name"
+class CardLoad(CardAction):
+    """Card to load a recipe. It will open a dialog to select a recipe file."""
 
     def __init__(self):
-        content = _content["new"]
+        content = _content["load"]
         super().__init__(content)
+        children = [
+            sw.CardTitle(children=[content[1]]),
+            sw.CardSubtitle(children=[content[2]]),
+        ]
+        self.set_children(children, "first")
 
-        self.recipe_name = self.get_default_name()
 
-        w_recipe_name = sw.TextField(
+class CardNewSave(CardAction):
+    """Card to create a new recipe or save the current one."""
+
+    recipe_name = Unicode("", allow_none=True).tag(sync=True)
+    "str: given name of the recipe, captured by w_recipe_name"
+
+    def __init__(self, type_: Literal["new", "save"]):
+        content = _content[type_]
+        super().__init__(content)
+        self.w_recipe_name = sw.TextField(
             label=cm.recipe.new.name,
-            v_model=self.recipe_name,
+            v_model="",
             hint=cm.recipe.new.hint,
             persistent_hint=True,
             class_="mt-5",
@@ -61,12 +76,16 @@ class CardNew(CardAction):
 
         children = [
             sw.CardTitle(children=[content[1]]),
-            sw.CardSubtitle(children=[content[2], w_recipe_name]),
+            sw.CardSubtitle(children=[content[2], self.w_recipe_name]),
         ]
 
         self.set_children(children, "first")
 
-        w_recipe_name.on_event("blur", self._normalize_name)
+        self.w_recipe_name.on_event("blur", self._normalize_name)
+        self.observe(self._on_change, "recipe_name")
+
+        if type_ == "new":
+            self.recipe_name = self.get_default_name()
 
     def get_default_name(self):
         """Define a default name for the recipe name the recipe with the date."""
@@ -80,42 +99,10 @@ class CardNew(CardAction):
             widget.v_model = name
             self.recipe_name = name
 
-
-class CardLoad(CardAction):
-    def __init__(self):
-        content = _content["load"]
-        super().__init__(content)
-        children = [
-            sw.CardTitle(children=[content[1]]),
-            sw.CardSubtitle(children=[content[2]]),
-        ]
-        self.set_children(children, "first")
-
-
-class CardSave(CardAction):
-    recipe_name = Unicode("", allow_none=True).tag(sync=True)
-    "str: given name of the recipe, captured by w_recipe_name"
-
-    def __init__(self):
-        content = _content["save"]
-        super().__init__(content)
-        w_recipe_name = sw.TextField(
-            label=cm.recipe.new.name,
-            v_model="",
-            hint=cm.recipe.new.hint,
-            persistent_hint=True,
-            class_="mt-5",
-            suffix=".json",
-        )
-
-        children = [
-            sw.CardTitle(children=[content[1]]),
-            sw.CardSubtitle(children=[content[2], w_recipe_name]),
-        ]
-
-        self.set_children(children, "first")
-
-        link((self, "recipe_name"), (w_recipe_name, "v_model"))
+    def _on_change(self, change):
+        """Update the recipe name in the recipe object."""
+        if change["new"]:
+            self.w_recipe_name.v_model = change["new"]
 
 
 class RecipeView(sw.Container):
@@ -133,15 +120,18 @@ class RecipeView(sw.Container):
 
         super().__init__()
         self.recipe = Recipe()
-        self.alert = AlertState().show()
+        self.alert = AlertState()
+        self.alert_dialog = AlertDialog(self.alert)
 
-        self.card_new = CardNew()
+        self.card_new = CardNewSave(type_="new")
         self.card_load = CardLoad()
-        self.card_save = CardSave()
+        self.card_save = CardNewSave(type_="save")
 
         self.load_dialog = LoadDialog(self.recipe)
 
         self.children = [
+            self.alert_dialog,
+            self.load_dialog,
             sw.Row(
                 justify="center",
                 children=[
@@ -159,8 +149,6 @@ class RecipeView(sw.Container):
                     sw.Col(xs12=True, sm4=True, children=[self.card_save]),
                 ],
             ),
-            self.alert,
-            self.load_dialog,
         ]
 
         directional_link(
@@ -257,14 +245,14 @@ class RecipeView(sw.Container):
         if not self.recipe.seplan_aoi:
             self.new_recipe()
 
-        self.alert.set_state("load", "waiting")
+        self.alert.set_state("load", "all", "waiting")
 
         self.recipe.load(recipe_path=self.load_dialog.load_recipe_path)
 
         # Assign the recipe path to the current session path
         self.recipe_session_path = self.load_dialog.load_recipe_path
 
-        self.alert.set_state("load", "done")
+        self.alert.set_state("load", "all", "done")
 
     def save_event(self, *_):
         """Saves the current state of the recipe."""
@@ -285,11 +273,15 @@ class RecipeView(sw.Container):
         # If there's already a recipe_session_path and/or not recipe name changed.
         # just save the recipe in the same folder but with the same/different name
         else:
-            recipe_path = Path(self.recipe_session_path).with_name(
-                self.card_save.recipe_name
+            recipe_path = (
+                Path(self.recipe_session_path)
+                .with_name(self.card_save.recipe_name)
+                .with_suffix(".json")
             )
 
         self.recipe.save(recipe_path)
+
+        self.alert.set_state("save", "all", "done")
 
 
 class LoadDialog(v.Dialog):
@@ -375,6 +367,9 @@ class RecipeTile(sw.Layout):
         map_tile: MapTile,
         dashboard_tile: DashboardTile,
     ):
+        self._metadata = {"mount_id": "recipe_tile"}
+        self.class_ = "d-block pa-2"
+
         super().__init__()
 
         self.recipe_view = RecipeView()
