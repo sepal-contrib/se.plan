@@ -1,5 +1,5 @@
-from sepal_ui import mapping as sm
 import ee
+from sepal_ui import mapping as sm
 
 
 def get_layer(
