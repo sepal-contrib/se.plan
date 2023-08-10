@@ -1,9 +1,10 @@
 import ee
-import numpy as np
 from sepal_ui import sepalwidgets as sw
-from sepal_ui.aoi import AoiModel
 from sepal_ui.scripts import decorator as sd
 
+import component.parameter.gui_params as cp
+from component.message import cm
+from component.model.aoi_model import SeplanAoi
 from component.model.constraint_model import ConstraintModel
 from component.widget import custom_widgets as cw
 
@@ -12,12 +13,16 @@ from .constraint_widget import ConstraintWidget
 
 
 class ConstraintRow(sw.Html):
+    aoi_model: SeplanAoi
+    """Custom seplan aoi model, it contains a wrapper to notify when the AOI has changed"""
+
     def __init__(
         self,
         model: ConstraintModel,
         layer_id: str,
         dialog: ConstraintDialog,
-        aoi_model: AoiModel,
+        aoi_model: SeplanAoi,
+        alert: sw.Alert,
     ) -> None:
         # get the models as a member
 
@@ -29,6 +34,7 @@ class ConstraintRow(sw.Html):
         self.model = model
         self.dialog = dialog
         self.aoi_model = aoi_model
+        self.alert = alert
 
         idx = model.get_index(id=layer_id)
 
@@ -72,8 +78,12 @@ class ConstraintRow(sw.Html):
         self.w_maskout.observe(self.update_value, "v_model")
         self.aoi_model.observe(self.get_limits, "updated")
 
+    @sd.catch_errors()
     def on_delete(self, widget, data, event):
         """Remove the line from the model and trigger table update."""
+        if widget.attributes["data-layer"] in cp.mandatory_layers["constraints"]:
+            raise Exception(cm.questionnaire.error.mandatory_layer)
+
         self.model.remove_constraint(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])
@@ -99,8 +109,13 @@ class ConstraintRow(sw.Html):
     @sd.need_ee
     def get_limits(self, *args) -> None:
         """Get the min and max value of the asset in the aoi."""
+        # if there's no AOI we'll assume we are in the default constraint
+        # and we will return the default value
         if not self.aoi_model.feature_collection:
-            values = (np.iinfo(np.int8).max, np.iinfo(np.int8).min)
+            # TODO: consider here add
+            self.w_maskout.v_model = [0]
+            self.update_value(None)
+            return
 
         print(self.data_type)
 
