@@ -2,12 +2,12 @@
 	"app": {
 		"title": "se.plan",
 		"drawer": {
+			"about": "About",
+			"recipe": "Recipe",
 			"aoi": "Area of interest selection",
 			"question": "Questionnaire",
-			"dashboard": "Restoration dashboard",
 			"map": "Results map",
-			"about": "About",
-			"recipe": "Recipe"
+			"dashboard": "Restoration dashboard"
 		},
 		"about": "utils/ABOUT_en.md",
 		"banner": "The se.plan application is now exporting the dashboard in .csv format. You will find it in the same folder as the recipe."

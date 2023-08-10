@@ -2,9 +2,9 @@
     "recipe": {
         "title": "Load an existing recipe",
         "load": {
-            "title" :"Load",
+            "title" :"Load recipe",
             "hint" : "Load an existing recipe",
-            "desc" : "Load a recipe created from a previous session",
+            "desc" : "Load a recipe created from a previous session.",
             "dialog" : {
                 "title" : "Load a recipe",
                 "desc" : "Select a recipe to load",
@@ -13,37 +13,56 @@
             }
         },
         "new": {
-            "title" :"New",
+            "title" :"New recipe",
             "desc" : "Create a new recipe for this session.",
             "name" : "Recipe name",
             "hint" : "Set a name for the new recipe"
         },
         "save": {
-            "title" :"Save",
+            "title" :"Save recipe",
             "hint" : "Save the current recipe",
             "desc" : "Save any changes done on during this session"
         },
         "states" : {
-            "aoi" : {
-                "building" : "Setting up AOI...",
-                "done" : "AOI successfull loaded.",
-                "waiting" : "Waiting for AOI..."
+            "new" : {
+                "aoi" : {
+                    "building" : "Setting up AOI...",
+                    "done" : "AOI successfull loaded.",
+                    "waiting" : "Waiting for AOI..."
+                },
+                "questionnaire" : {
+                    "building" : "Setting up questionnaire...",
+                    "done" : "Questionnaire successfull loaded.",
+                    "waiting" : "Waiting for questionnaire..."
+                },
+                "map" : {
+                    "building" : "Setting up map...",
+                    "done" : "Map successfull loaded.",
+                    "waiting" : "Waiting for map..."
+                },
+                "dashboard" : {
+                    "building" : "Setting up dashboard...",
+                    "done" : "Dashboard successfull loaded",
+                    "waiting" : "Waiting for dashboard..."
+                }
             },
-            "questionnaire" : {
-                "building" : "Setting up questionnaire...",
-                "done" : "Questionnaire successfull loaded.",
-                "waiting" : "Waiting for questionnaire..."
+            "load" : {
+                "all" : {
+                    "waiting" : "Waiting for recipe...",
+                    "done" : "Recipe successfully loaded."
+                }
             },
-            "map" : {
-                "building" : "Setting up map...",
-                "done" : "Map successfull loaded.",
-                "waiting" : "Waiting for map..."
-            },
-            "dashboard" : {
-                "building" : "Setting up dashboard...",
-                "done" : "Dashboard successfull loaded",
-                "waiting" : "Waiting for dashboard..."
+            "save" : {
+                "all" : {
+                    "waiting" : "Waiting for recipe...",
+                    "done" : "Recipe successfully saved."
+                }
             }
+
+        },
+        "error" : {
+            "no_seplan" : "There is no nothing to save, please create and existing recipe or load an existing one.",
+            "no_name" : "Please set a name for the recipe."
         }
 
     }
