@@ -12,7 +12,7 @@ from component.widget.map_toolbar import MapToolbar
 
 class MapTile(sw.Layout):
     def __init__(self):
-        self.attributes = {"_metadata": "map_tile"}
+        self._metadata = {"mount_id": "map_tile"}
         self.class_ = "d-block"
 
         super().__init__()
@@ -24,7 +24,7 @@ class MapTile(sw.Layout):
         overall_dash: OverallDashboard = None,
         theme_dash: ThemeDashboard = None,
     ):
-        alert.set_state("map", "building")
+        alert.set_state("new", "map", "building")
 
         self.seplan_model = recipe.seplan
         self.colors = []
@@ -60,7 +60,7 @@ class MapTile(sw.Layout):
         self.map_toolbar.btn_compute.on_event("click", self._compute)
         self.map_toolbar.btn_dashboard.on_event("click", self._dashboard)
 
-        alert.set_state("map", "done")
+        alert.set_state("new", "map", "done")
 
     def _compute(self, widget, data, event):
         """Compute the restoration plan and display the map."""
