@@ -17,7 +17,7 @@
             "asset_json": { "type": ["string", "null"] },
             "vector_json": { "type": ["string", "null"] },
             "point_json": { "type": ["string", "null"] },
-            "geo_json": { "type": ["string", "null"] }
+            "geo_json": { "type": ["object", "null"] }
           },
           "required": [
             "admin",
