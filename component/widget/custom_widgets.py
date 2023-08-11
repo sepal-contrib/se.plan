@@ -4,7 +4,9 @@ import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from traitlets import Int, link
 
+from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel
+from component.scripts.seplan import Seplan
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -57,8 +59,34 @@ class ToolBar(sw.Toolbar):
 
     @sd.switch("loading", on_widgets=["dialog"])
     def open_new_dialog(self, *args) -> None:
-        """open the new benefit dialog."""
+        """Open the new benefit dialog."""
         self.dialog.open_new()
+
+
+class DashToolBar(sw.Toolbar):
+    def __init__(self, model: Seplan) -> None:
+        super().__init__()
+
+        self.model = model
+
+        self.btn_download = sw.Btn(
+            gliph="mdi-download",
+            icon=True,
+            color="primary",
+        ).set_tooltip(
+            cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
+        )
+
+        self.btn_dashboard = sw.Btn(
+            cm.dashboard.toolbar.btn.compute.title, class_="ma-2"
+        )
+
+        self.children = [
+            self.btn_download.with_tooltip,
+            sw.Spacer(),
+            sw.Divider(vertical=True, class_="mr-2"),
+            self.btn_dashboard,
+        ]
 
 
 class Tabs(sw.Card):
