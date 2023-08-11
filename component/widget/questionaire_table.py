@@ -6,7 +6,7 @@ import component.parameter as cp
 from component.model import BenefitModel, ConstraintModel, CostModel
 from component.model.aoi_model import SeplanAoi
 from component.widget import custom_widgets as cw
-from component.widget.alert_state import Alert, AlertDialog
+from component.widget.alert_state import Alert
 
 from .benefit_dialog import BenefitDialog
 from .benefit_row import BenefitRow
@@ -26,12 +26,12 @@ class Table(sw.Layout):
     def __init__(
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
+        alert: Alert,
         aoi_model: Optional[SeplanAoi] = None,
     ) -> None:
         self.model = model
+        self.alert = alert
         self.aoi_model = aoi_model
-        self.alert = Alert()
-        alert_dialog = AlertDialog(self.alert)
 
         if isinstance(model, BenefitModel):
             type_ = "benefit"
@@ -48,7 +48,7 @@ class Table(sw.Layout):
             self.Row = CostRow
             self.dialog = CostDialog(model=model)
 
-        self.toolbar = cw.ToolBar(model, self.dialog)
+        self.toolbar = cw.ToolBar(model, self.dialog, self.aoi_model, self.alert)
 
         # create the table
         super().__init__()
@@ -76,10 +76,14 @@ class Table(sw.Layout):
             ],
         )
 
-        self.children = [alert_dialog, self.dialog, self.toolbar, self.table]
+        self.children = [self.dialog, self.toolbar, self.table]
 
         # set rows everytime the feature collection is updated on aoitile
-        self.model.observe(self.set_rows, "feature_collection")
+        self.model.observe(self.set_rows, "updated")
+
+        # This will only happen with the constraints table
+        if self.aoi_model:
+            self.aoi_model.observe(self.set_rows, "feature_collection")
 
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""

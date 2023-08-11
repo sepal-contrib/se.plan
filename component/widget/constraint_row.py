@@ -7,6 +7,7 @@ from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.model.constraint_model import ConstraintModel
 from component.widget import custom_widgets as cw
+from component.widget.alert_state import Alert
 
 from .constraint_dialog import ConstraintDialog
 from .constraint_widget import ConstraintWidget
@@ -22,7 +23,7 @@ class ConstraintRow(sw.Html):
         layer_id: str,
         dialog: ConstraintDialog,
         aoi_model: SeplanAoi,
-        alert: sw.Alert,
+        alert: Alert,
     ) -> None:
         # get the models as a member
 
@@ -51,8 +52,8 @@ class ConstraintRow(sw.Html):
     def update_view(self):
         """Create the view of the widget based on the model."""
         # create the crud interface
-        self.edit_btn = cw.TableIcon("fa-solid fa-pencil", self.layer_id)
-        self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
+        self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
+        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
         self.edit_btn.class_list.add("mr-2")
 
         # create Maskout widget
@@ -79,9 +80,9 @@ class ConstraintRow(sw.Html):
         self.aoi_model.observe(self.get_limits, "updated")
 
     @sd.catch_errors()
-    def on_delete(self, widget, data, event):
+    def on_delete(self, widget, *_):
         """Remove the line from the model and trigger table update."""
-        if widget.attributes["data-layer"] in cp.mandatory_layers["constraints"]:
+        if widget.attributes["data-layer"] in cp.mandatory_layers["constraint"]:
             raise Exception(cm.questionnaire.error.mandatory_layer)
 
         self.model.remove_constraint(widget.attributes["data-layer"])

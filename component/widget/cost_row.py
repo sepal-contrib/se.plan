@@ -3,8 +3,10 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 
 from component import parameter as cp
+from component.message import cm
 from component.model import CostModel
 from component.widget import custom_widgets as cw
+from component.widget.alert_state import Alert
 from component.widget.cost_dialog import CostDialog
 
 
@@ -12,7 +14,12 @@ class CostRow(sw.Html):
     _DEFAULT_LAYERS = pd.read_csv(cp.layer_list).layer_id
 
     def __init__(
-        self, model: CostModel, layer_id: str, dialog: CostDialog, **kwargs
+        self,
+        model: CostModel,
+        layer_id: str,
+        dialog: CostDialog,
+        alert: Alert,
+        **kwargs
     ) -> None:
         self.tag = "tr"
         self.attributes = {"layer_id": layer_id}
@@ -22,6 +29,7 @@ class CostRow(sw.Html):
         # get the model as a member
         self.model = model
         self.dialog = dialog
+        self.alert = alert
 
         idx = model.get_index(id=layer_id)
 
@@ -34,8 +42,8 @@ class CostRow(sw.Html):
     def update_view(self):
         """Create the view of the widget based on the model."""
         # create the crud interface
-        self.edit_btn = cw.TableIcon("fa-solid fa-pencil", self.layer_id)
-        self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
+        self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
+        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
         self.edit_btn.class_list.add("mr-2")
 
         td_list = [
@@ -49,8 +57,12 @@ class CostRow(sw.Html):
         self.delete_btn.on_event("click", self.on_delete)
         self.edit_btn.on_event("click", self.on_edit)
 
-    def on_delete(self, widget, data, event):
+    @sd.catch_errors()
+    def on_delete(self, widget, *_):
         """remove the line from the model and trigger table update."""
+        if widget.attributes["data-layer"] in cp.mandatory_layers["cost"]:
+            raise Exception(cm.questionnaire.error.mandatory_layer)
+
         self.model.remove_cost(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])

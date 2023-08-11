@@ -3,9 +3,11 @@ import sepal_ui.sepalwidgets as sw
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
-from component.widget.alert_state import AlertState
+from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.custom_widgets import Tabs
 from component.widget.questionaire_table import Table
+
+sw.DrawerItem
 
 
 class QuestionnaireTile(sw.Layout):
@@ -16,17 +18,20 @@ class QuestionnaireTile(sw.Layout):
 
         super().__init__()
 
-    def build(self, recipe: Recipe, alert: AlertState):
+    def build(self, recipe: Recipe, build_alert: AlertState):
         """Build the questionnaire tile."""
-        alert.set_state("new", "questionnaire", "building")
+        build_alert.set_state("new", "questionnaire", "building")
 
-        benefit_table = Table(model=recipe.benefit_model)
+        self.alert = Alert()
+        alert_dialog = AlertDialog(self.alert)
+
+        benefit_table = Table(model=recipe.benefit_model, alert=self.alert)
 
         constraint_table = Table(
-            model=recipe.constraint_model, aoi_model=recipe.seplan_aoi
+            model=recipe.constraint_model, aoi_model=recipe.seplan_aoi, alert=self.alert
         )
 
-        cost_table = Table(model=recipe.cost_model)
+        cost_table = Table(model=recipe.cost_model, alert=self.alert)
 
         tabs = Tabs(
             titles=[cm[theme].tab_title for theme in cp.themes],
@@ -36,6 +41,6 @@ class QuestionnaireTile(sw.Layout):
             centered=True,
         )
 
-        self.set_children([tabs], position="last")
+        self.set_children([alert_dialog] + [tabs], position="last")
 
-        alert.set_state("new", "questionnaire", "done")
+        build_alert.set_state("new", "questionnaire", "done")

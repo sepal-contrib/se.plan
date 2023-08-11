@@ -43,7 +43,7 @@ custom_geom_table_headers = {
 
 mandatory_layers = {
     "benefit": [],
-    "constraints": ["treecover_with_potential"],
+    "constraint": ["treecover_with_potential"],
     "cost": ["opportunity_cost", "implementation_cost"],
 }
 
