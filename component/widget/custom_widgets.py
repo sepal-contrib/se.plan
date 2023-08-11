@@ -2,11 +2,10 @@ from typing import Union
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
-from traitlets import Int, link
+from traitlets import Int, link, observe
 
 from component.message import cm
-from component.model import BenefitModel, ConstraintModel, CostModel
-from component.model.aoi_model import SeplanAoi
+from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert
 
@@ -132,3 +131,24 @@ class Tabs(sw.Card):
         link((self.tabs[0], "v_model"), (self.content[0], "v_model"))
 
         super().__init__(**kwargs)
+
+
+class CustomDrawerItem(sw.DrawerItem):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.viz = False
+
+    @observe("alert")
+    def add_notif(self, change: dict) -> None:
+        """Add a notification alert to drawer."""
+        if change["new"]:
+            self.viz = True
+            if self.alert_badge not in self.children:
+                new_children = self.children[:]
+                new_children.append(self.alert_badge)
+                self.children = new_children
+        else:
+            self.viz = False
+            self.remove_notif()
+
+        return
