@@ -22,9 +22,9 @@ class AoiTile(sw.Layout):
 
         super().__init__()
 
-    def build(self, recipe: Recipe, alert: AlertState):
+    def build(self, recipe: Recipe, build_alert: AlertState):
         """Build the custom aoi tile."""
-        alert.set_state("new", "aoi", "building")
+        build_alert.set_state("new", "aoi", "building")
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
@@ -36,6 +36,9 @@ class AoiTile(sw.Layout):
             model=recipe.seplan_aoi.aoi_model,
             map_=self.map_,
             methods=["-POINTS"],
+            class_="d-block pa-2 py-4",
+            min_width="462px",
+            max_width="462px",
         )
 
         aoi_control = WidgetControl(
@@ -48,7 +51,7 @@ class AoiTile(sw.Layout):
         # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
 
-        alert.set_state("new", "aoi", "done")
+        build_alert.set_state("new", "aoi", "done")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""

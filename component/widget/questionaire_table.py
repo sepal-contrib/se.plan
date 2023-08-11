@@ -1,29 +1,36 @@
 from typing import Optional, Union
 
 from sepal_ui import sepalwidgets as sw
-from sepal_ui.aoi import AoiModel
 
 import component.parameter as cp
 from component.model import BenefitModel, ConstraintModel, CostModel
+from component.model.aoi_model import SeplanAoi
 from component.widget import custom_widgets as cw
+from component.widget.alert_state import Alert
 
 from .benefit_dialog import BenefitDialog
-from .benefit_table import BenefitRow
+from .benefit_row import BenefitRow
 from .constraint_dialog import ConstraintDialog
-from .constraint_table import ConstraintRow
+from .constraint_row import ConstraintRow
 from .cost_dialog import CostDialog
-from .cost_table import CostRow
+from .cost_row import CostRow
 
 __all__ = ["Table"]
 
 
 class Table(sw.Layout):
+    aoi_model: Optional[SeplanAoi]
+    """seplan custom aoi model. It is optional because this table is shared by the three 
+    different themes we only need it in constraints."""
+
     def __init__(
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
-        aoi_model: Optional[AoiModel] = None,
+        alert: Alert,
+        aoi_model: Optional[SeplanAoi] = None,
     ) -> None:
         self.model = model
+        self.alert = alert
         self.aoi_model = aoi_model
 
         if isinstance(model, BenefitModel):
@@ -41,7 +48,7 @@ class Table(sw.Layout):
             self.Row = CostRow
             self.dialog = CostDialog(model=model)
 
-        self.toolbar = cw.ToolBar(model, self.dialog)
+        self.toolbar = cw.ToolBar(model, self.dialog, self.aoi_model, self.alert)
 
         # create the table
         super().__init__()
@@ -71,8 +78,12 @@ class Table(sw.Layout):
 
         self.children = [self.dialog, self.toolbar, self.table]
 
-        # add js behavior
+        # set rows everytime the feature collection is updated on aoitile
         self.model.observe(self.set_rows, "updated")
+
+        # This will only happen with the constraints table
+        if self.aoi_model:
+            self.aoi_model.observe(self.set_rows, "feature_collection")
 
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""
@@ -86,13 +97,18 @@ class Table(sw.Layout):
         edited_id = (
             self.dialog.w_id.v_model if self.dialog.w_id.v_model in view_ids else False
         )
+        # Add new rows from the model
         if new_ids:
             for new_id in new_ids:
                 row = self.Row(
-                    self.model, new_id, self.dialog, aoi_model=self.aoi_model
+                    self.model,
+                    new_id,
+                    self.dialog,
+                    aoi_model=self.aoi_model,
+                    alert=self.alert,
                 )
                 self.tbody.children = [*self.tbody.children, row]
-
+        # Remove rows
         elif old_ids:
             for old_id in old_ids:
                 row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
@@ -112,7 +128,13 @@ class Table(sw.Layout):
         # without a real change.
         elif not (new_ids or old_ids or edited_id):
             rows = [
-                self.Row(self.model, layer_id, self.dialog, aoi_model=self.aoi_model)
+                self.Row(
+                    self.model,
+                    layer_id,
+                    self.dialog,
+                    aoi_model=self.aoi_model,
+                    alert=self.alert,
+                )
                 for layer_id in self.model.ids
             ]
             self.tbody.children = rows

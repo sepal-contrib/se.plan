@@ -6,6 +6,7 @@ from component import parameter as cp
 from component.message import cm
 from component.model.benefit_model import BenefitModel
 from component.widget import custom_widgets as cw
+from component.widget.alert_state import Alert
 from component.widget.benefit_dialog import BenefitDialog
 
 
@@ -13,16 +14,21 @@ class BenefitRow(sw.Html):
     _DEFAULT_THEMES = pd.read_csv(cp.layer_list).layer_id
 
     def __init__(
-        self, model: BenefitModel, layer_id: str, dialog: BenefitDialog, **kwargs
+        self,
+        model: BenefitModel,
+        layer_id: str,
+        dialog: BenefitDialog,
+        alert: Alert,
+        **kwargs
     ) -> None:
         self.tag = "tr"
         self.attributes = {"layer_id": layer_id}
-
         super().__init__()
 
         # get the model as a member
         self.model = model
         self.dialog = dialog
+        self.alert = alert
         idx = model.get_index(id=layer_id)
 
         # extract information from the model
@@ -36,8 +42,8 @@ class BenefitRow(sw.Html):
     def update_view(self):
         """Create the view of the widget based on the model."""
         # create the crud interface
-        self.edit_btn = cw.TableIcon("fa-solid fa-pencil", self.layer_id)
-        self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
+        self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
+        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
         self.edit_btn.class_list.add("mr-2")
 
         # create the checkbox_list
@@ -88,8 +94,16 @@ class BenefitRow(sw.Html):
 
         self.update_value()
 
-    def on_delete(self, widget, data, event):
+    @sd.catch_errors()
+    def on_delete(self, widget, *_):
         """remove the line from the model and trigger table update."""
+        if widget.attributes["data-layer"] in cp.mandatory_layers["benefit"]:
+            raise Exception(cm.questionnaire.error.mandatory_layer)
+
+        # You cannot delete the last layer
+        if len(self.model.ids) == 1:
+            raise Exception(cm.questionnaire.error.last_layer)
+
         self.model.remove_benefit(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])

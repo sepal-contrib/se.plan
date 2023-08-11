@@ -41,6 +41,12 @@ custom_geom_table_headers = {
     "name": cm.custom_geom.header.name,
 }
 
+mandatory_layers = {
+    "benefit": [],
+    "constraint": ["treecover_with_potential"],
+    "cost": ["opportunity_cost", "implementation_cost"],
+}
+
 
 def _crit(*args):
     """Return a dict of the criteria caracteristic.

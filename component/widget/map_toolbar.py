@@ -27,9 +27,6 @@ class MapToolbar(sw.Toolbar):
 
         # Main buttons
         self.btn_compute = sw.Btn(cm.compute.btn, class_="ma-2")
-        self.btn_dashboard = sw.Btn(
-            cm.map.compute_dashboard, class_="ma-2", disabled=True
-        )
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
             gliph="mdi-draw",
@@ -64,7 +61,6 @@ class MapToolbar(sw.Toolbar):
             sw.Spacer(),
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
-            self.btn_dashboard,
             # Auxiliar buttons
             # Dialogs - not visible on the toolbar
             self.save_geom_dialog,

@@ -3,8 +3,9 @@
         "title": "Load an existing recipe",
         "load": {
             "title" :"Load recipe",
-            "hint" : "Load an existing recipe",
             "desc" : "Load a recipe created from a previous session.",
+            "btn" : "Load",
+            "hint" : "Load an existing recipe",
             "dialog" : {
                 "title" : "Load a recipe",
                 "desc" : "Select a recipe to load",
@@ -15,47 +16,50 @@
         "new": {
             "title" :"New recipe",
             "desc" : "Create a new recipe for this session.",
-            "name" : "Recipe name",
+            "btn" : "New",
+            "text_field_label" : "Recipe name",
             "hint" : "Set a name for the new recipe"
         },
         "save": {
             "title" :"Save recipe",
+            "btn" : "Save",
+            "text_field_label" : "Recipe name",
             "hint" : "Save the current recipe",
             "desc" : "Save any changes done on during this session"
         },
         "states" : {
             "new" : {
                 "aoi" : {
-                    "building" : "Setting up AOI...",
-                    "done" : "AOI successfull loaded.",
+                    "building" : "Setting up AOI tile...",
+                    "done" : "AOI tile was successfully loaded.",
                     "waiting" : "Waiting for AOI..."
                 },
                 "questionnaire" : {
-                    "building" : "Setting up questionnaire...",
-                    "done" : "Questionnaire successfull loaded.",
+                    "building" : "Setting up questionnaire tile...",
+                    "done" : "Questionnaire tile was successfully loaded.",
                     "waiting" : "Waiting for questionnaire..."
                 },
                 "map" : {
-                    "building" : "Setting up map...",
-                    "done" : "Map successfull loaded.",
+                    "building" : "Setting up map tile...",
+                    "done" : "Map tile was successfully loaded.",
                     "waiting" : "Waiting for map..."
                 },
                 "dashboard" : {
-                    "building" : "Setting up dashboard...",
-                    "done" : "Dashboard successfull loaded",
+                    "building" : "Setting up dashboard tile...",
+                    "done" : "Dashboard tile was successfully loaded",
                     "waiting" : "Waiting for dashboard..."
                 }
             },
             "load" : {
                 "all" : {
                     "waiting" : "Waiting for recipe...",
-                    "done" : "Recipe successfully loaded."
+                    "done" : "Recipe data was successfully imported."
                 }
             },
             "save" : {
                 "all" : {
                     "waiting" : "Waiting for recipe...",
-                    "done" : "Recipe successfully saved."
+                    "done" : "Recipe data was successfully saved."
                 }
             }
 

@@ -77,7 +77,7 @@ class Recipe:
 
     def get_recipe_path(self, recipe_name: str):
         """generate full recipe path."""
-        res_dir = cp.result_dir / self.seplan_aoi.aoi_model.name
+        res_dir = cp.result_dir / "recipes"
         res_dir.mkdir(exist_ok=True)
 
         recipe_path = Path(recipe_name)
