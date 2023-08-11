@@ -6,7 +6,9 @@ from traitlets import Int, link
 
 from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel
+from component.model.aoi_model import SeplanAoi
 from component.scripts.seplan import Seplan
+from component.widget.alert_state import Alert
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -31,11 +33,15 @@ class ToolBar(sw.Toolbar):
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
         dialog: Union[ConstraintDialog, CostDialog, BenefitDialog],
+        seplan_aoi: SeplanAoi,
+        alert: Alert,
     ) -> None:
         super().__init__()
 
         self.model = model
         self.dialog = dialog
+        self.alert = alert
+        self.seplan_aoi = seplan_aoi
 
         if isinstance(model, BenefitModel):
             name = "benefit"
@@ -44,9 +50,7 @@ class ToolBar(sw.Toolbar):
         elif isinstance(model, CostModel):
             name = "cost"
 
-        self.w_new = sw.Btn(
-            f"New {name}", "fa-solid fa-plus", small=True, type_="success"
-        )
+        self.w_new = sw.Btn(f"New {name}", "mdi-plus", small=True, type_="success")
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
@@ -57,9 +61,16 @@ class ToolBar(sw.Toolbar):
             self.w_new,
         ]
 
-    @sd.switch("loading", on_widgets=["dialog"])
+    @sd.catch_errors()
     def open_new_dialog(self, *args) -> None:
-        """Open the new benefit dialog."""
+        """open the new benefit dialog."""
+        # Avoid opening if there is not a valid AOI when adding a constraint
+        if (
+            isinstance(self.model, ConstraintModel)
+            and not self.seplan_aoi.feature_collection
+        ):
+            raise Exception(cm.questionnaire.error.no_aoi)
+
         self.dialog.open_new()
 
 

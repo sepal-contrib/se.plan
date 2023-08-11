@@ -4,6 +4,7 @@ from typing import List, Tuple, Union
 import ee
 
 from component import model as cmod
+from component.message import cm
 from component.model.aoi_model import SeplanAoi
 
 
@@ -34,6 +35,9 @@ class Seplan:
     def get_benefit_index(self, clip: bool = False) -> ee.Image:
         """Build the index exclusively on the benefits weighted approach."""
         aoi = self.aoi_model.feature_collection
+
+        if not aoi:
+            raise ValueError(cm.map.error.no_aoi)
 
         # decompose benefit list to get only the image
         normalize_benefits = [
