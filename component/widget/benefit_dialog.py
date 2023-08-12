@@ -6,6 +6,8 @@ from traitlets import Bool, link
 from component import parameter as cp
 from component.message import cm
 from component.model.benefit_model import BenefitModel
+from component.scripts.ui_helpers import set_default_asset
+from component.widget.alert_state import Alert
 
 
 class BenefitDialog(sw.Dialog):
@@ -16,12 +18,16 @@ class BenefitDialog(sw.Dialog):
 
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: BenefitModel):
+    def __init__(
+        self,
+        model: BenefitModel,
+        alert: Alert,
+    ):
         # save the model as a member
         self.model = model
 
         # create an alert to display informations to the user
-        self.w_alert = sw.Alert()
+        self.w_alert = alert
 
         # create the title
         w_title = sw.CardTitle(children=[cm.benefit.dialog.title])
@@ -40,7 +46,7 @@ class BenefitDialog(sw.Dialog):
         )
         self.w_name = sw.Combobox(label=cm.benefit.dialog.name, items=[], v_model=None)
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect()
+        self.w_asset = sw.AssetSelect(types=["IMAGE"])
         self.w_desc = sw.Textarea(label=cm.benefit.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(label=cm.benefit.dialog.unit, v_model=None)
         w_content = sw.CardText(
@@ -51,7 +57,6 @@ class BenefitDialog(sw.Dialog):
                 self.w_asset,
                 self.w_desc,
                 self.w_unit,
-                self.w_alert,
             ]
         )
 
@@ -86,6 +91,23 @@ class BenefitDialog(sw.Dialog):
         self.w_cancel.on_event("click", self.cancel)
         self.w_theme.observe(self.theme_change, "v_model")
         self.w_name.observe(self.name_change, "v_model")
+        self.w_asset.observe(self.on_asset_change, "v_model")
+
+    def on_asset_change(self, change) -> None:
+        """Set the default data type depending on the asset."""
+        # check if the asset is in the default list of layers
+
+        if change["new"] in self._BENEFITS.gee_asset.tolist():
+            self.set_readonly(True)
+        else:
+            self.set_readonly(False)
+
+    def set_readonly(self, value) -> None:
+        """Set all the widgets to read only."""
+        self.w_desc.readonly = value
+        self.w_desc.disabled = value
+        self.w_unit.readonly = value
+        self.w_unit.disabled = value
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
@@ -116,9 +138,9 @@ class BenefitDialog(sw.Dialog):
             "unit": self.w_unit.v_model,
         }
         if self.w_id.v_model in self.model.ids:
-            self.model.update_benefit(**kwargs)
+            self.model.update(**kwargs)
         else:
-            self.model.add_benefit(**kwargs)
+            self.model.add(**kwargs)
 
         # close the dialog
         self.value = False
@@ -162,7 +184,11 @@ class BenefitDialog(sw.Dialog):
 
         # fill the different widgets
         self.w_id.v_model = layer_id
+
+        # Set the default asset
         self.w_asset.v_model = benefit.gee_asset
+        self.w_asset.items = set_default_asset(self.w_asset.items, benefit.gee_asset)
+
         self.w_desc.v_model = cm.layers[layer_id].detail
         self.w_unit.v_model = benefit.unit
 
@@ -176,3 +202,7 @@ class BenefitDialog(sw.Dialog):
         self.w_asset.v_model = asset
         self.w_desc.v_model = desc
         self.w_unit.v_model = unit
+
+        if asset == "":
+            if {"header": cm.default_asset_header} in self.w_asset.items:
+                self.w_asset.items = self.w_asset.items[2:][:]
