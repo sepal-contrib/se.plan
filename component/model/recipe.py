@@ -24,15 +24,17 @@ class Recipe:
     def __init__(self):
         self.seplan_aoi = None
 
-    def load_model(self):
+    def load_model(self, **delete_aoi):
         """Define all the models required by the module."""
-        self.seplan_aoi = SeplanAoi()
+        self.seplan_aoi = SeplanAoi(**delete_aoi)
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
         self.seplan = Seplan(
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )
+
+        return self
 
     def load(self, recipe_path: str):
         """Load the recipe element in the different element of the app."""
