@@ -15,12 +15,12 @@ class SeplanAoi(model.Model):
     name = Unicode("", allow_none=True).tag(sync=True)
     """str: given name from aoi.model to the aoi"""
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         # test_countries:
         # Multiple polygon country: 220
         # Small department: 959 (risaralda)
         # Medium department: 935 (Antioquia)
-        self.aoi_model = AoiModel()
+        self.aoi_model = AoiModel(**kwargs)
 
         # As the feature colleciton from model is not a trait, we need to link something that changes when model is updated, that's the name
         link((self.aoi_model, "name"), (self, "name"))
