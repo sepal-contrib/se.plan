@@ -6,6 +6,8 @@ from traitlets import Bool, link
 from component import model as cmod
 from component import parameter as cp
 from component.message import cm
+from component.scripts.ui_helpers import set_default_asset
+from component.widget.alert_state import Alert
 
 
 class CostDialog(sw.Dialog):
@@ -16,12 +18,12 @@ class CostDialog(sw.Dialog):
 
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: cmod.CostModel):
+    def __init__(self, model: cmod.CostModel, alert: Alert):
         # save the model as a member
         self.model = model
 
         # create an alert to display informations to the user
-        self.w_alert = sw.Alert()
+        self.w_alert = alert
 
         # create the title
         w_title = sw.CardTitle(children=[cm.cost.dialog.title])
@@ -31,7 +33,7 @@ class CostDialog(sw.Dialog):
         default_layers = self._COSTS.layer_id.unique().tolist()
         self.w_name.items = [cm.layers[ly].name for ly in default_layers]
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect()
+        self.w_asset = sw.AssetSelect(types=["IMAGE"])
         self.w_desc = sw.Textarea(label=cm.cost.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
             label=cm.cost.dialog.unit,
@@ -47,7 +49,6 @@ class CostDialog(sw.Dialog):
                 self.w_asset,
                 self.w_desc,
                 self.w_unit,
-                self.w_alert,
             ]
         )
 
@@ -81,6 +82,23 @@ class CostDialog(sw.Dialog):
         self.w_validate.on_event("click", self.validate)
         self.w_cancel.on_event("click", self.cancel)
         self.w_name.observe(self.name_change, "v_model")
+        self.w_asset.observe(self.on_asset_change, "v_model")
+
+    def on_asset_change(self, change) -> None:
+        """Set the default data type depending on the asset."""
+        # check if the asset is in the default list of layers
+
+        if change["new"] in self._COSTS.gee_asset.tolist():
+            self.set_readonly(True)
+        else:
+            self.set_readonly(False)
+
+    def set_readonly(self, value) -> None:
+        """Set all the widgets to read only."""
+        self.w_desc.readonly = value
+        self.w_desc.disabled = value
+        self.w_unit.readonly = value
+        self.w_unit.disabled = value
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
@@ -96,7 +114,7 @@ class CostDialog(sw.Dialog):
         # if layer has no layer_id, it needs to be created using the number stored
         # in the object
         if not self.w_id.v_model:
-            self.w_id.v_model = f"custom_benefit_{self.count}"
+            self.w_id.v_model = f"custom_cost_{self.count}"
             self.count += 1
 
         # decide either it's an update or a new one
@@ -107,9 +125,9 @@ class CostDialog(sw.Dialog):
             "desc": self.w_desc.v_model,
         }
         if self.w_id.v_model in self.model.ids:
-            self.model.update_cost(**kwargs)
+            self.model.update(**kwargs)
         else:
-            self.model.add_cost(**kwargs)
+            self.model.add(**kwargs)
 
         # close the dialog
         self.value = False
@@ -146,7 +164,11 @@ class CostDialog(sw.Dialog):
 
         # fill the different widgets
         self.w_id.v_model = layer_id
+
+        # Set the default asset
         self.w_asset.v_model = cost.gee_asset
+        self.w_asset.items = set_default_asset(self.w_asset.items, cost.gee_asset)
+
         self.w_desc.v_model = cm.layers[layer_id].detail
 
     def fill(self, name: str, id: str, asset: str, desc: str) -> None:
@@ -155,3 +177,7 @@ class CostDialog(sw.Dialog):
         self.w_id.v_model = id
         self.w_asset.v_model = asset
         self.w_desc.v_model = desc
+
+        if asset == "":
+            if {"header": cm.default_asset_header} in self.w_asset.items:
+                self.w_asset.items = self.w_asset.items[2:][:]
