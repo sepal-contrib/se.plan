@@ -94,7 +94,7 @@ class BenefitRow(sw.Html):
 
         self.update_value()
 
-    @sd.catch_errors()
+    @sd.catch_errors(debug=True)
     def on_delete(self, widget, *_):
         """remove the line from the model and trigger table update."""
         if widget.attributes["data-layer"] in cp.mandatory_layers["benefit"]:
@@ -104,7 +104,7 @@ class BenefitRow(sw.Html):
         if len(self.model.ids) == 1:
             raise Exception(cm.questionnaire.error.last_layer)
 
-        self.model.remove_benefit(widget.attributes["data-layer"])
+        self.model.remove(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])
     def on_edit(self, widget, data, event):

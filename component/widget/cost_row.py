@@ -57,13 +57,13 @@ class CostRow(sw.Html):
         self.delete_btn.on_event("click", self.on_delete)
         self.edit_btn.on_event("click", self.on_edit)
 
-    @sd.catch_errors()
+    @sd.catch_errors(debug=True)
     def on_delete(self, widget, *_):
         """remove the line from the model and trigger table update."""
         if widget.attributes["data-layer"] in cp.mandatory_layers["cost"]:
             raise Exception(cm.questionnaire.error.mandatory_layer)
 
-        self.model.remove_cost(widget.attributes["data-layer"])
+        self.model.remove(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])
     def on_edit(self, widget, data, event):
