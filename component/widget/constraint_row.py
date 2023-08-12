@@ -79,19 +79,20 @@ class ConstraintRow(sw.Html):
         self.w_maskout.observe(self.update_value, "v_model")
         self.aoi_model.observe(self.get_limits, "updated")
 
-    @sd.catch_errors()
+    @sd.catch_errors(debug=True)
     def on_delete(self, widget, *_):
         """Remove the line from the model and trigger table update."""
         if widget.attributes["data-layer"] in cp.mandatory_layers["constraint"]:
             raise Exception(cm.questionnaire.error.mandatory_layer)
 
-        self.model.remove_constraint(widget.attributes["data-layer"])
+        self.model.remove(widget.attributes["data-layer"])
 
     @sd.switch("loading", on_widgets=["dialog"])
     def on_edit(self, widget, data, event):
         """Open the dialog and load data contained in the model."""
         idx = self.model.get_index(widget.attributes["data-layer"])
 
+        self.dialog.value = True
         self.dialog.fill(
             theme=self.model.themes[idx],
             name=self.model.names[idx],
@@ -101,7 +102,6 @@ class ConstraintRow(sw.Html):
             unit=self.model.units[idx],
             data_type=self.model.data_type[idx],
         )
-        self.dialog.value = True
 
     def update_value(self, widget, *args):
         """Update the value of the model."""
