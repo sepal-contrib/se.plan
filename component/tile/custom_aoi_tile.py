@@ -2,13 +2,13 @@ import ee
 import pandas as pd
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
-from sepal_ui.aoi.aoi_view import AoiView
 from sepal_ui.mapping import SepalMap
 
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.alert_state import AlertState
+from component.widget.custom_aoi_view import SeplanAoiView
 
 ee.Initialize()
 
@@ -32,14 +32,7 @@ class AoiTile(sw.Layout):
         self.map_.min_zoom = 2
 
         # Build the aoi view with our custom aoi_model
-        self.view = AoiView(
-            model=recipe.seplan_aoi.aoi_model,
-            map_=self.map_,
-            methods=["-POINTS"],
-            class_="d-block pa-2 py-4",
-            min_width="462px",
-            max_width="462px",
-        )
+        self.view = SeplanAoiView(model=recipe.seplan_aoi, map_=self.map_)
 
         aoi_control = WidgetControl(
             widget=self.view, position="topleft", transparent_bg=True
