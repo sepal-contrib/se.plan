@@ -31,8 +31,15 @@ class BenefitModel(QuestionnaireModel):
 
         super().__init__()
 
-    def remove_benefit(self, id: str) -> None:
-        """Remove a benefit using its name."""
+    def remove(self, id: str, update=True) -> None:
+        """Remove a constraint using its name.
+
+        Args:
+            id (str): the id of the constraint to remove
+            update (bool, optional): trigger the update. Defaults to True.
+                I dont' want to update the whole table if one asset failed
+                to be added.
+        """
         idx = self.get_index(id)
 
         del self.names[idx]
@@ -43,9 +50,10 @@ class BenefitModel(QuestionnaireModel):
         del self.weights[idx]
         del self.units[idx]
 
-        self.updated += 1
+        if update:
+            self.updated += 1
 
-    def add_benefit(
+    def add(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:
         """add a benefit and trigger the update."""
@@ -59,7 +67,7 @@ class BenefitModel(QuestionnaireModel):
 
         self.updated += 1
 
-    def update_benefit(
+    def update(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
     ) -> None:
         """update an existing benefit metadata and trigger the update."""
@@ -78,3 +86,16 @@ class BenefitModel(QuestionnaireModel):
         """Update the value of a specific benefit."""
         idx = self.get_index(id)
         self.weights[idx] = value
+
+    def reset(self):
+        """Reset the model to its default values."""
+        self.names = []
+        self.ids = []
+        self.themes = []
+        self.assets = []
+        self.descs = []
+        self.weights = []
+        self.units = []
+
+        self.__init__()
+        self.updated += 1

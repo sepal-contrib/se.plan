@@ -1,4 +1,4 @@
-"""Custom alert component to inform the user the state of the building process."""
+"""Custom alert component to inform the user the state of the building process after selecting a new or loading an existing recipe."""
 
 
 from typing import Literal
@@ -25,7 +25,14 @@ default_state = {
 }
 
 
-class AlertState(sw.Alert):
+class Alert(sw.Alert):
+    def __init__(self) -> None:
+        """Set some default values."""
+        self.style_ = "margin: 0 !important;"
+        super().__init__()
+
+
+class AlertState(Alert):
     """Custom alert component to inform the user the state of the building process."""
 
     # Define traits
@@ -34,11 +41,6 @@ class AlertState(sw.Alert):
     load = Dict(default_state["load"]).tag(sync=True)
 
     save = Dict(default_state["save"]).tag(sync=True)
-
-    def __init__(self) -> None:
-        """Set some default values."""
-        self.style_ = "margin: 0 !important;"
-        super().__init__()
 
     def reset(self):
         """reset traits and reset alert."""
@@ -69,7 +71,6 @@ class AlertState(sw.Alert):
 
         """
         for component_id, state in change["new"].items():
-            print(change["name"], component_id, state)
             self.update_state(change["name"], component_id, state)
 
     def set_state(

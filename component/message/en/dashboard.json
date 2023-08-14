@@ -1,0 +1,53 @@
+{
+    "dashboard": {
+        "toolbar": {
+            "btn": {
+                "download": {"title": "Download", "tooltip": "Save dashboard statistics as .csv"},
+                "compute": {
+                    "title": "Compute dashboard"
+                }
+            }
+        },
+        "region": {
+            "title": "Summary of restoration suitability by region",
+            "detail": "Details",
+            "potentials": {
+                "0": "Very low",
+                "1": "Low",
+                "2": "Medium",
+                "3": "High",
+                "4": "Very High",
+                "5": "Unsuitable land"
+            },
+            "names": {
+                "0": "restoration potential",
+                "1": "surface (ha)",
+                "2": "ratio over total surface (%)"
+            }
+        },
+        "theme": {
+            "title": "Area of interest - summary by subthemes",
+            "txt": "To help disentangle the potential impacts of restoration at each candidate site, we report the individual benefits, costs, and risks (i.e., constraints) in finer detail below.",
+            "disclaimer": "The dashboard needs to be computed first.",
+            "benefit": {
+                "description": {
+                    "0": "For each assessed benefit, the mean value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
+                    "1": "For any of these thematic layers, if you have used your own data in the model, make sure that you provided the correct information."
+                },
+                "details": "details"
+            },
+            "cost": {
+                "description": {
+                    "0": "The tool includes data on two types of costs: opportunity costs, and implementation costs. Please refer to our manual for more information.",
+                    "1": "For each cost, the sum value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
+                    "2": "Note: Information on the variability of natural regeneration success is included in the 'Constraints' category."
+                }
+            },
+            "constraint": {
+                "description": {
+                    "0": "Results indicate the percentage of the total area of the region of interest that is subject to each particular constraint (i.e., is excluded from restoration)."
+                }
+            }
+        }
+    }
+}

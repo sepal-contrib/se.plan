@@ -30,8 +30,15 @@ class CostModel(QuestionnaireModel):
 
         super().__init__()
 
-    def remove_cost(self, id: str) -> None:
-        """Remove a cost using its id."""
+    def remove(self, id: str, update=True) -> None:
+        """Remove a constraint using its name.
+
+        Args:
+            id (str): the id of the constraint to remove
+            update (bool, optional): trigger the update. Defaults to True.
+                I dont' want to update the whole table if one asset failed
+                to be added.
+        """
         idx = self.get_index(id)
 
         del self.names[idx]
@@ -40,9 +47,10 @@ class CostModel(QuestionnaireModel):
         del self.descs[idx]
         del self.units[idx]
 
-        self.updated += 1
+        if update:
+            self.updated += 1
 
-    def add_cost(self, name: str, id: str, asset: str, desc: str) -> None:
+    def add(self, name: str, id: str, asset: str, desc: str) -> None:
         """add a cost and trigger the update."""
         self.names.append(name)
         self.ids.append(id)
@@ -52,7 +60,7 @@ class CostModel(QuestionnaireModel):
 
         self.updated += 1
 
-    def update_cost(self, name: str, id: str, asset: str, desc: str) -> None:
+    def update(self, name: str, id: str, asset: str, desc: str) -> None:
         """update an existing cost metadata and trigger the update."""
         idx = self.get_index(id)
 
@@ -61,5 +69,17 @@ class CostModel(QuestionnaireModel):
         self.assets[idx] = asset
         self.descs[idx] = desc
         self.units[idx] = self._unit
+
+        self.updated += 1
+
+    def reset(self):
+        """Reset the model to its default values."""
+        self.names = []
+        self.ids = []
+        self.assets = []
+        self.descs = []
+        self.units = []
+
+        self.__init__()
 
         self.updated += 1

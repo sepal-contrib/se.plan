@@ -2,13 +2,13 @@ import ee
 import pandas as pd
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
-from sepal_ui.aoi.aoi_view import AoiView
 from sepal_ui.mapping import SepalMap
 
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.alert_state import AlertState
+from component.widget.custom_aoi_view import SeplanAoiView
 
 ee.Initialize()
 
@@ -22,9 +22,9 @@ class AoiTile(sw.Layout):
 
         super().__init__()
 
-    def build(self, recipe: Recipe, alert: AlertState):
+    def build(self, recipe: Recipe, build_alert: AlertState):
         """Build the custom aoi tile."""
-        alert.set_state("new", "aoi", "building")
+        build_alert.set_state("new", "aoi", "building")
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
@@ -32,11 +32,7 @@ class AoiTile(sw.Layout):
         self.map_.min_zoom = 2
 
         # Build the aoi view with our custom aoi_model
-        self.view = AoiView(
-            model=recipe.seplan_aoi.aoi_model,
-            map_=self.map_,
-            methods=["-POINTS"],
-        )
+        self.view = SeplanAoiView(model=recipe.seplan_aoi, map_=self.map_)
 
         aoi_control = WidgetControl(
             widget=self.view, position="topleft", transparent_bg=True
@@ -48,7 +44,7 @@ class AoiTile(sw.Layout):
         # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
 
-        alert.set_state("new", "aoi", "done")
+        build_alert.set_state("new", "aoi", "done")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""

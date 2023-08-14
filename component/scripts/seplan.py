@@ -4,6 +4,7 @@ from typing import List, Tuple, Union
 import ee
 
 from component import model as cmod
+from component.message import cm
 from component.model.aoi_model import SeplanAoi
 
 
@@ -34,6 +35,9 @@ class Seplan:
     def get_benefit_index(self, clip: bool = False) -> ee.Image:
         """Build the index exclusively on the benefits weighted approach."""
         aoi = self.aoi_model.feature_collection
+
+        if not aoi:
+            raise ValueError(cm.map.error.no_aoi)
 
         # decompose benefit list to get only the image
         normalize_benefits = [
@@ -100,7 +104,7 @@ class Seplan:
     def get_masked_constraints_list(self) -> List[Tuple[ee.Image, str]]:
         """Returns a list of named constraints masks from user input."""
         # create the mask from the constraints
-        valid_data = []
+        masked_data = []
         for i, asset in enumerate(self.constraint_model.assets):
             # differentiate between different data types.
 
@@ -109,22 +113,22 @@ class Seplan:
             image = ee.Image(asset).select(0).unmask()
 
             if data_type == "binary":
-                # maskout images with model value
-                valid_image = image.eq(values[0]).Not().selfMask()
+                # mask out image values that are equal to user's input
+                masked_img = image.eq(values[0]).Not().selfMask()
 
             elif data_type == "categorical":
-                valid_image = ee.List(values)
-                new_vals = ee.List.repeat(1, valid_image.size())
-                valid_image = image.remap(valid_image, new_vals, 0).selfMask()
+                to_mask_values = ee.List(values)
+                mask_value = ee.List.repeat(0, to_mask_values.size())
+                masked_img = image.remap(to_mask_values, mask_value, 1).selfMask()
 
             elif data_type == "continuous":
                 min_, max_ = values
-                valid_image = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
+                masked_img = image.gt(max_).Or(image.lt(min_)).selfMask()
 
             # set the name of the image as a property of the image
-            valid_data.append([valid_image, self.constraint_model.ids[i]])
+            masked_data.append([masked_img, self.constraint_model.ids[i]])
 
-        return valid_data
+        return masked_data
 
 
 def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> ee.Image:

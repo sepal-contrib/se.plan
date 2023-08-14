@@ -2,12 +2,14 @@ from typing import Dict, List
 
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts import utils as su
 
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
-from component.scripts.statistics import parse_theme_stats
-from component.widget.alert_state import AlertState
+from component.scripts.statistics import get_summary_statistics, parse_theme_stats
+from component.widget.alert_state import Alert, AlertDialog, AlertState
+from component.widget.custom_widgets import DashToolBar
 
 ID = "dashboard_widget"
 "the dashboard tiles share id"
@@ -20,18 +22,51 @@ class DashboardTile(sw.Layout):
 
         super().__init__()
 
-    def build(self, recipe: Recipe, alert: AlertState):
-        alert.set_state("new", "dashboard", "building")
+    def build(self, recipe: Recipe, build_alert: AlertState):
+        """Build the dashboard tile."""
+        build_alert.set_state("new", "dashboard", "building")
+        self.recipe = recipe
+
+        dash_toolbar = DashToolBar(recipe.seplan)
+
+        self.alert = Alert()
+        # wrap the alert in a dialog
+        alert_dialog = AlertDialog(self.alert)
 
         # init the dashboard
         self.overall_dash = OverallDashboard()
         self.theme_dash = ThemeDashboard()
         self.children = [
+            dash_toolbar,
             self.overall_dash,
             self.theme_dash,
+            # Dialogs
+            alert_dialog,
         ]
 
-        alert.set_state("new", "dashboard", "done")
+        self._dashboard = su.loading_button(
+            self.alert, dash_toolbar.btn_dashboard, debug=True
+        )(self._dashboard)
+
+        dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
+
+        build_alert.set_state("new", "dashboard", "done")
+
+    def _dashboard(self, *_):
+        """Compute the restoration plan and display the map."""
+        summary_stats = get_summary_statistics(self.recipe.seplan)
+
+        # set the content of the panels
+        self.overall_dash.set_summary(summary_stats)
+        self.theme_dash.set_summary(summary_stats)
+
+        # # save the dashboard as a csv
+        # cs.export_as_csv(
+        #     self.area_dashboard,
+        #     self.theme_dashboard,
+        #     self.aoi_model.name,
+        #     self.question_model.recipe_name,
+        # )
 
 
 class ThemeDashboard(sw.Tile):

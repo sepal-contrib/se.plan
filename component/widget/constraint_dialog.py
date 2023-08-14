@@ -6,6 +6,8 @@ from traitlets import Bool, link
 import component.model as cmod
 from component import parameter as cp
 from component.message import cm
+from component.scripts.ui_helpers import set_default_asset
+from component.widget.alert_state import Alert
 
 
 class ConstraintDialog(sw.Dialog):
@@ -15,12 +17,12 @@ class ConstraintDialog(sw.Dialog):
     count = 0
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: cmod.ConstraintModel):
+    def __init__(self, model: cmod.ConstraintModel, alert: Alert):
         # save the model as a member
         self.model = model
 
         # create an alert to display informations to the user
-        self.w_alert = sw.Alert()
+        self.w_alert = alert
 
         # create the title
         w_title = sw.CardTitle(children=[cm.constraint.dialog.title])
@@ -41,7 +43,7 @@ class ConstraintDialog(sw.Dialog):
             label=cm.constraint.dialog.name, items=[], v_model=None
         )
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect()
+        self.w_asset = sw.AssetSelect(types=["IMAGE"])
         self.w_desc = sw.Textarea(label=cm.constraint.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
             label=cm.constraint.dialog.unit, v_model=None, class_="mr-2"
@@ -63,7 +65,6 @@ class ConstraintDialog(sw.Dialog):
                 self.w_asset,
                 sw.Flex(class_="d-flex", children=[self.w_unit, self.w_data_type]),
                 self.w_desc,
-                self.w_alert,
             ]
         )
 
@@ -109,12 +110,18 @@ class ConstraintDialog(sw.Dialog):
                 self._CONSTRAINTS.gee_asset == change["new"]
             ].data_type.values[0]
 
-            # keep readonly
-            self.w_data_type.readonly = True
-            self.w_data_type.disabled = True
+            self.set_readonly(True)
         else:
-            self.w_data_type.readonly = False
-            self.w_data_type.disabled = False
+            self.set_readonly(False)
+
+    def set_readonly(self, value) -> None:
+        """Set all the widgets to read only."""
+        self.w_desc.readonly = value
+        self.w_desc.disabled = value
+        self.w_unit.readonly = value
+        self.w_unit.disabled = value
+        self.w_data_type.readonly = value
+        self.w_data_type.disabled = value
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
@@ -133,7 +140,7 @@ class ConstraintDialog(sw.Dialog):
         # if layer has no layer_id, it needs to be created using the number stored
         # in the object
         if not self.w_id.v_model:
-            self.w_id.v_model = f"custom_benefit_{self.count}"
+            self.w_id.v_model = f"custom_constraint_{self.count}"
             self.count += 1
 
         # decide either it's an update or a new one
@@ -147,9 +154,9 @@ class ConstraintDialog(sw.Dialog):
             "data_type": self.w_data_type.v_model,
         }
         if self.w_id.v_model in self.model.ids:
-            self.model.update_constraint(**kwargs)
+            self.model.update(**kwargs)
         else:
-            self.model.add_constraint(**kwargs)
+            self.model.add(**kwargs)
 
         # close the dialog
         self.value = False
@@ -190,20 +197,18 @@ class ConstraintDialog(sw.Dialog):
         layer_id = next(
             k for k, ly in cm.layers.items() if ly.name == self.w_name.v_model
         )
-        # TODO: why this is called constraints?
-        benefit = self._CONSTRAINTS[self._CONSTRAINTS.layer_id == layer_id].iloc[0]
+
+        constraint = self._CONSTRAINTS[self._CONSTRAINTS.layer_id == layer_id].iloc[0]
 
         # fill the different widgets
         self.w_id.v_model = layer_id
-        self.w_asset.v_model = benefit.gee_asset
-        # add the asset as default value so it won't be lost if the user change it,, do this manually otherewise it will take sometime
-        header = {"header": cm.default_asset_header}
-        default_asset_item = [header, benefit.gee_asset]
-        if header not in self.w_asset.items:
-            self.w_asset.items = default_asset_item + self.w_asset.items
+
+        # Set the default asset
+        self.w_asset.v_model = constraint.gee_asset
+        self.w_asset.items = set_default_asset(self.w_asset.items, constraint.gee_asset)
 
         self.w_desc.v_model = cm.layers[layer_id].detail
-        self.w_unit.v_model = benefit.unit
+        self.w_unit.v_model = constraint.unit
 
     def fill(
         self,
@@ -223,3 +228,7 @@ class ConstraintDialog(sw.Dialog):
         self.w_desc.v_model = desc
         self.w_unit.v_model = unit
         self.w_data_type.v_model = data_type
+
+        if asset == "":
+            if {"header": cm.default_asset_header} in self.w_asset.items:
+                self.w_asset.items = self.w_asset.items[2:][:]

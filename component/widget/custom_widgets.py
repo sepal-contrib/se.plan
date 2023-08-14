@@ -2,9 +2,12 @@ from typing import Union
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
-from traitlets import Int, link
+from traitlets import Int, link, observe
 
-from component.model import BenefitModel, ConstraintModel, CostModel
+from component.message import cm
+from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
+from component.scripts.seplan import Seplan
+from component.widget.alert_state import Alert
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -29,11 +32,15 @@ class ToolBar(sw.Toolbar):
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
         dialog: Union[ConstraintDialog, CostDialog, BenefitDialog],
+        seplan_aoi: SeplanAoi,
+        alert: Alert,
     ) -> None:
         super().__init__()
 
         self.model = model
         self.dialog = dialog
+        self.alert = alert
+        self.seplan_aoi = seplan_aoi
 
         if isinstance(model, BenefitModel):
             name = "benefit"
@@ -42,9 +49,7 @@ class ToolBar(sw.Toolbar):
         elif isinstance(model, CostModel):
             name = "cost"
 
-        self.w_new = sw.Btn(
-            f"New {name}", "fa-solid fa-plus", small=True, type_="success"
-        )
+        self.w_new = sw.Btn(f"New {name}", "mdi-plus", small=True, type_="success")
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
@@ -55,10 +60,43 @@ class ToolBar(sw.Toolbar):
             self.w_new,
         ]
 
-    @sd.switch("loading", on_widgets=["dialog"])
+    @sd.catch_errors(debug=True)
     def open_new_dialog(self, *args) -> None:
         """open the new benefit dialog."""
+        # Avoid opening if there is not a valid AOI when adding a constraint
+        if (
+            isinstance(self.model, ConstraintModel)
+            and not self.seplan_aoi.feature_collection
+        ):
+            raise Exception(cm.questionnaire.error.no_aoi)
+
         self.dialog.open_new()
+
+
+class DashToolBar(sw.Toolbar):
+    def __init__(self, model: Seplan) -> None:
+        super().__init__()
+
+        self.model = model
+
+        self.btn_download = sw.Btn(
+            gliph="mdi-download",
+            icon=True,
+            color="primary",
+        ).set_tooltip(
+            cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
+        )
+
+        self.btn_dashboard = sw.Btn(
+            cm.dashboard.toolbar.btn.compute.title, class_="ma-2"
+        )
+
+        self.children = [
+            self.btn_download.with_tooltip,
+            sw.Spacer(),
+            sw.Divider(vertical=True, class_="mr-2"),
+            self.btn_dashboard,
+        ]
 
 
 class Tabs(sw.Card):
@@ -93,3 +131,24 @@ class Tabs(sw.Card):
         link((self.tabs[0], "v_model"), (self.content[0], "v_model"))
 
         super().__init__(**kwargs)
+
+
+class CustomDrawerItem(sw.DrawerItem):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
+        self.viz = False
+
+    @observe("alert")
+    def add_notif(self, change: dict) -> None:
+        """Add a notification alert to drawer."""
+        if change["new"]:
+            self.viz = True
+            if self.alert_badge not in self.children:
+                new_children = self.children[:]
+                new_children.append(self.alert_badge)
+                self.children = new_children
+        else:
+            self.viz = False
+            self.remove_notif()
+
+        return

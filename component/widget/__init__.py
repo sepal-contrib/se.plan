@@ -4,6 +4,4 @@ from .custom_map import *
 from .edit_dialog import *
 from .export_dialog import *
 from .layer_sum_up import *
-from .layers_recipe import *
 from .load_dialog import *
-from .recipe_field import *

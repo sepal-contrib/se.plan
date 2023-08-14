@@ -24,15 +24,17 @@ class Recipe:
     def __init__(self):
         self.seplan_aoi = None
 
-    def load_model(self):
+    def load_model(self, **delete_aoi):
         """Define all the models required by the module."""
-        self.seplan_aoi = SeplanAoi()
+        self.seplan_aoi = SeplanAoi(**delete_aoi)
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
         self.seplan = Seplan(
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )
+
+        return self
 
     def load(self, recipe_path: str):
         """Load the recipe element in the different element of the app."""
@@ -69,15 +71,16 @@ class Recipe:
 
     def reset(self):
         """Reset the recipe to its default values."""
-        # We can either load a default known recipe, or trigger a reset of all the models
-
-        # It will be better to reset the models
-
-        # TODO: Create a default method to reset the models
+        # Each of the models will return to its default values and
+        # they'll update their respective views by themselves
+        self.seplan_aoi.reset()
+        self.benefit_model.reset()
+        self.constraint_model.reset()
+        self.cost_model.reset()
 
     def get_recipe_path(self, recipe_name: str):
         """generate full recipe path."""
-        res_dir = cp.result_dir / self.seplan_aoi.aoi_model.name
+        res_dir = cp.result_dir / "recipes"
         res_dir.mkdir(exist_ok=True)
 
         recipe_path = Path(recipe_name)

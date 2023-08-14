@@ -33,8 +33,15 @@ class ConstraintModel(QuestionnaireModel):
 
         super().__init__()
 
-    def remove_constraint(self, id: str) -> None:
-        """Remove a constraint using its name."""
+    def remove(self, id: str, update=True) -> None:
+        """Remove a constraint using its name.
+
+        Args:
+            id (str): the id of the constraint to remove
+            update (bool, optional): trigger the update. Defaults to True.
+                I dont' want to update the whole table if one asset failed
+                to be added.
+        """
         idx = self.get_index(id)
 
         del self.names[idx]
@@ -46,9 +53,10 @@ class ConstraintModel(QuestionnaireModel):
         del self.values[idx]
         del self.data_type[idx]
 
-        self.updated += 1
+        if update:
+            self.updated += 1
 
-    def add_constraint(
+    def add(
         self,
         theme: str,
         name: str,
@@ -70,7 +78,7 @@ class ConstraintModel(QuestionnaireModel):
 
         self.updated += 1
 
-    def update_constraint(
+    def update(
         self,
         theme: str,
         name: str,
@@ -97,3 +105,17 @@ class ConstraintModel(QuestionnaireModel):
         """Update the value of a specific constraint."""
         idx = self.get_index(id)
         self.values[idx] = value
+
+    def reset(self):
+        """Reset the model to its default values."""
+        self.names = []
+        self.ids = []
+        self.themes = []
+        self.assets = []
+        self.descs = []
+        self.units = []
+        self.values = []
+        self.data_type = []
+
+        self.__init__()
+        self.updated += 1

@@ -11,6 +11,7 @@ from traitlets import Int, Unicode, directional_link
 import component.parameter as cp
 from component.message import cm
 from component.model import Recipe
+from component.model.app_model import AppModel
 from component.scripts import validation
 from component.tile.custom_aoi_tile import AoiTile
 from component.tile.dashboard_tile import DashboardTile
@@ -21,9 +22,24 @@ from component.tile.questionnaire_tile import QuestionnaireTile
 from component.widget.alert_state import AlertDialog, AlertState
 
 _content = {
-    "new": ["mdi-newspaper-plus", cm.recipe.new.title, cm.recipe.new.desc],
-    "load": ["mdi-upload", cm.recipe.load.title, cm.recipe.load.desc],
-    "save": ["mdi-content-save", cm.recipe.save.title, cm.recipe.save.desc],
+    "new": {
+        "icon": "mdi-note-text",
+        "btn": cm.recipe.new.btn,
+        "desc": cm.recipe.new.desc,
+        "title": cm.recipe.new.title,
+    },
+    "load": {
+        "icon": "mdi-upload",
+        "btn": cm.recipe.load.btn,
+        "desc": cm.recipe.load.desc,
+        "title": cm.recipe.load.title,
+    },
+    "save": {
+        "icon": "mdi-content-save",
+        "btn": cm.recipe.save.btn,
+        "desc": cm.recipe.save.desc,
+        "title": cm.recipe.save.title,
+    },
 }
 
 
@@ -36,7 +52,7 @@ class CardAction(sw.Card):
         self.max_width = 344
         self.min_width = 344
         self.btn = sw.Btn(
-            msg=content[1], gliph=content[0], outlined=True, color="primary"
+            msg=content["btn"], gliph=content["icon"], outlined=True, color="menu"
         )
         self.children = [
             sw.CardActions(children=[sw.Spacer(), self.btn]),
@@ -50,8 +66,8 @@ class CardLoad(CardAction):
         content = _content["load"]
         super().__init__(content)
         children = [
-            sw.CardTitle(children=[content[1]]),
-            sw.CardSubtitle(children=[content[2]]),
+            sw.CardTitle(children=[content["title"]]),
+            sw.CardSubtitle(children=[content["desc"]]),
         ]
         self.set_children(children, "first")
 
@@ -66,7 +82,7 @@ class CardNewSave(CardAction):
         content = _content[type_]
         super().__init__(content)
         self.w_recipe_name = sw.TextField(
-            label=cm.recipe.new.name,
+            label=cm.recipe.new.text_field_label,
             v_model="",
             hint=cm.recipe.new.hint,
             persistent_hint=True,
@@ -75,8 +91,8 @@ class CardNewSave(CardAction):
         )
 
         children = [
-            sw.CardTitle(children=[content[1]]),
-            sw.CardSubtitle(children=[content[2], self.w_recipe_name]),
+            sw.CardTitle(children=[content["title"]]),
+            sw.CardSubtitle(children=[content["desc"], self.w_recipe_name]),
         ]
 
         self.set_children(children, "first")
@@ -186,7 +202,6 @@ class RecipeView(sw.Container):
     def new_recipe(self):
         """Initialize a new recipe."""
         self.recipe.load_model()
-        # TODO: uncomment when finish my tests
         self.create_view += 1
 
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
@@ -200,12 +215,11 @@ class RecipeView(sw.Container):
 
         # consider first when theres is not a recipe loaded
         if not self.recipe.seplan_aoi:
+            print("no seplan")
             self.new_recipe()
-
-        # if there is a recipe already loaded, we have to ask the user if he wants to save it
-        # and then reset the recipe to start from scratch.
-
-        self.recipe.reset()
+        else:
+            print("reseting")
+            self.recipe.reset()
 
         # update current session path
         self.recipe_session_path = self.recipe.get_recipe_path(
@@ -214,19 +228,8 @@ class RecipeView(sw.Container):
 
         self.recipe.save(self.recipe_session_path)
 
-        # Let the user know that there might be some unsaved changes
-        # let the user select a name
-        # reset or create new values?
-        # I have to reset, because the other components were already created with
-        # the default recipe
-        # We have to make this name fully available to the other components...
-        # Perhaps we can display the name always in the menu bar?
-
-        # only set the questionnaires if there's not already a recipe.
-        # it is less expensive to reset the recipe than to create a new one.
-
-    # @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
-    # @switch("loading", on_widgets=["card_load"])
+    @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
+    @switch("loading", on_widgets=["card_load"])
     def load_event(self, *_):
         """Load the recipe and close the dialog.
 
@@ -362,6 +365,7 @@ class LoadDialog(v.Dialog):
 class RecipeTile(sw.Layout):
     def __init__(
         self,
+        app_model: AppModel,
         aoi_tile: AoiTile,
         questionnaire_tile: QuestionnaireTile,
         map_tile: MapTile,
@@ -372,6 +376,7 @@ class RecipeTile(sw.Layout):
 
         super().__init__()
 
+        self.app_model = app_model
         self.recipe_view = RecipeView()
 
         self.aoi_tile = aoi_tile
@@ -391,3 +396,5 @@ class RecipeTile(sw.Layout):
         self.questionnaire_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
         self.map_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
         self.dashboard_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+
+        self.app_model.ready = True
