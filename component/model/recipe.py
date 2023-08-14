@@ -23,6 +23,10 @@ class Recipe:
 
     def __init__(self):
         self.seplan_aoi = None
+        self.benefit_model = None
+        self.constraint_model = None
+        self.cost_model = None
+        self.seplan = None
 
     def load_model(self, **delete_aoi):
         """Define all the models required by the module."""
