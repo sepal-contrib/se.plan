@@ -392,9 +392,17 @@ class RecipeTile(sw.Layout):
 
         This element is intended to be used only once, when the app has to start.
         """
-        self.aoi_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-        self.questionnaire_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-        self.map_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-        self.dashboard_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+        try:
+            self.aoi_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+            self.questionnaire_tile.build(
+                self.recipe_view.recipe, self.recipe_view.alert
+            )
+            self.map_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+            self.dashboard_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+        except Exception as e:
+            # If something fails, I want to return the recipe to its original state
+            self.recipe_view.recipe.__init__()
+            raise e
 
+        # This trait will let know the app drawers that the app is ready to be used
         self.app_model.ready = True

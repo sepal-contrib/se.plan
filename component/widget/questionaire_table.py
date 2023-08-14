@@ -100,7 +100,7 @@ class Table(sw.Layout):
         )
         # Add new rows from the model
         if new_ids:
-            print(f"new ID {self.type}")
+            print("new ID")
             for new_id in new_ids:
                 try:
                     row = self.Row(
