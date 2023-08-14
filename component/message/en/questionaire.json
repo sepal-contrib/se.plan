@@ -57,7 +57,7 @@
                 "mask_1" : "Values on the map with 1 will be excluded from the analysis."
             },
             "categorical" : {
-                "label" : "Values to include"
+                "label" : "Values to exclude"
             }
         }
     },
