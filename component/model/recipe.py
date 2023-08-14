@@ -71,11 +71,12 @@ class Recipe:
 
     def reset(self):
         """Reset the recipe to its default values."""
-        # We can either load a default known recipe, or trigger a reset of all the models
-
-        # It will be better to reset the models
-
-        # TODO: Create a default method to reset the models
+        # Each of the models will return to its default values and
+        # they'll update their respective views by themselves
+        self.seplan_aoi.reset()
+        self.benefit_model.reset()
+        self.constraint_model.reset()
+        self.cost_model.reset()
 
     def get_recipe_path(self, recipe_name: str):
         """generate full recipe path."""

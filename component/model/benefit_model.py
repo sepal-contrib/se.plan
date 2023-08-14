@@ -86,3 +86,16 @@ class BenefitModel(QuestionnaireModel):
         """Update the value of a specific benefit."""
         idx = self.get_index(id)
         self.weights[idx] = value
+
+    def reset(self):
+        """Reset the model to its default values."""
+        self.names = []
+        self.ids = []
+        self.themes = []
+        self.assets = []
+        self.descs = []
+        self.weights = []
+        self.units = []
+
+        self.__init__()
+        self.updated += 1

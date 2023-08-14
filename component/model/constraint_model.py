@@ -105,3 +105,17 @@ class ConstraintModel(QuestionnaireModel):
         """Update the value of a specific constraint."""
         idx = self.get_index(id)
         self.values[idx] = value
+
+    def reset(self):
+        """Reset the model to its default values."""
+        self.names = []
+        self.ids = []
+        self.themes = []
+        self.assets = []
+        self.descs = []
+        self.units = []
+        self.values = []
+        self.data_type = []
+
+        self.__init__()
+        self.updated += 1

@@ -71,3 +71,15 @@ class CostModel(QuestionnaireModel):
         self.units[idx] = self._unit
 
         self.updated += 1
+
+    def reset(self):
+        """Reset the model to its default values."""
+        self.names = []
+        self.ids = []
+        self.assets = []
+        self.descs = []
+        self.units = []
+
+        self.__init__()
+
+        self.updated += 1
