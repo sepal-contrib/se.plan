@@ -136,7 +136,7 @@ def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> e
     return (
         ee.ImageCollection([constraint for constraint, _ in masked_constraints_list])
         .reduce(ee.Reducer.sum())
-        .gt(1)
+        .gt(0)
         .selfMask()
     )
 

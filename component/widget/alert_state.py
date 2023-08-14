@@ -71,7 +71,6 @@ class AlertState(Alert):
 
         """
         for component_id, state in change["new"].items():
-            print(change["name"], component_id, state)
             self.update_state(change["name"], component_id, state)
 
     def set_state(

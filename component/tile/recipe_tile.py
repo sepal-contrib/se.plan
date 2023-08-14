@@ -202,7 +202,6 @@ class RecipeView(sw.Container):
     def new_recipe(self):
         """Initialize a new recipe."""
         self.recipe.load_model()
-        # TODO: uncomment when finish my tests
         self.create_view += 1
 
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
@@ -216,12 +215,11 @@ class RecipeView(sw.Container):
 
         # consider first when theres is not a recipe loaded
         if not self.recipe.seplan_aoi:
+            print("no seplan")
             self.new_recipe()
-
-        # if there is a recipe already loaded, we have to ask the user if he wants to save it
-        # and then reset the recipe to start from scratch.
-
-        self.recipe.reset()
+        else:
+            print("reseting")
+            self.recipe.reset()
 
         # update current session path
         self.recipe_session_path = self.recipe.get_recipe_path(
@@ -230,19 +228,8 @@ class RecipeView(sw.Container):
 
         self.recipe.save(self.recipe_session_path)
 
-        # Let the user know that there might be some unsaved changes
-        # let the user select a name
-        # reset or create new values?
-        # I have to reset, because the other components were already created with
-        # the default recipe
-        # We have to make this name fully available to the other components...
-        # Perhaps we can display the name always in the menu bar?
-
-        # only set the questionnaires if there's not already a recipe.
-        # it is less expensive to reset the recipe than to create a new one.
-
-    # @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
-    # @switch("loading", on_widgets=["card_load"])
+    @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
+    @switch("loading", on_widgets=["card_load"])
     def load_event(self, *_):
         """Load the recipe and close the dialog.
 

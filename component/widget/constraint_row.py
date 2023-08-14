@@ -165,7 +165,6 @@ class ConstraintRow(sw.Html):
             self.w_maskout.items = values
 
         elif self.data_type == "continuous":
-            print(values)
             # There's no way to set min, max as float,
             values = [int(val) for val in values]
             self.w_maskout.widget.max_ = values[0]

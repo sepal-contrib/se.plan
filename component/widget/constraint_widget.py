@@ -1,5 +1,3 @@
-# ruff: noqa: E722
-
 from typing import Literal
 
 # from sepal_ui import mapping as sm
@@ -20,13 +18,11 @@ class CustomNumber(Any):
         if "." in str(value):
             try:
                 return round(float(value), 4)
-            except:
-                print("float")
+            except ValueError:
                 return 0
         try:
             return int(value)
-        except:
-            print("int")
+        except ValueError:
             return 0
 
 
@@ -102,10 +98,16 @@ class ConstraintWidget(sw.Layout):
                 "v_model",
             )
 
+            # the widget standard value has to be a list, but
+            def if_empty_list(value):
+                if value == []:
+                    return 0
+                return value[0]
+
             link(
                 (self.widget, "v_model"),
                 (self, "v_model"),
-                transform=[lambda x: [x], lambda x: x[0]],
+                transform=[lambda x: [x], if_empty_list],
             )
 
         elif self.data_type == "categorical":
@@ -190,16 +192,14 @@ class CustomSlider(sw.Layout):
         self.observe(self.set_slider, "v_model")
 
     def set_slider(self, change):
-        """Set slider v_model based on self.v_model"""
-
+        """Set slider v_model based on self.v_model."""
         if not change["new"]:
             return
 
         self.slider.v_model = change["new"]
 
     def set_v_model(self, change):
-        """Set v_model based on the w_min and w_min widgets"""
-
+        """Set v_model based on the w_min and w_min widgets."""
         if change["new"] in ["", None]:
             return
 
