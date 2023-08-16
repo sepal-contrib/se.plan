@@ -10,8 +10,8 @@ from traitlets import Int, Unicode, directional_link
 
 import component.parameter as cp
 from component.message import cm
-from component.model import Recipe
 from component.model.app_model import AppModel
+from component.model.recipe import Recipe
 from component.scripts import validation
 from component.tile.custom_aoi_tile import AoiTile
 from component.tile.dashboard_tile import DashboardTile
@@ -49,7 +49,6 @@ class CardAction(sw.Card):
     def __init__(self, content):
         super().__init__()
         self.hover = True
-        self.max_width = 344
         self.min_width = 344
         self.btn = sw.Btn(
             msg=content["btn"], gliph=content["icon"], outlined=True, color="menu"
@@ -160,9 +159,9 @@ class RecipeView(sw.Container):
             sw.Row(
                 justify="center",
                 children=[
-                    sw.Col(xs12=True, sm4=True, children=[self.card_new]),
-                    sw.Col(xs12=True, sm4=True, children=[self.card_load]),
-                    sw.Col(xs12=True, sm4=True, children=[self.card_save]),
+                    sw.Col(sm12=True, md4=True, children=[self.card_new]),
+                    sw.Col(sm12=True, md4=True, children=[self.card_load]),
+                    sw.Col(sm12=True, md4=True, children=[self.card_save]),
                 ],
             ),
         ]

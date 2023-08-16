@@ -58,7 +58,7 @@ class AoiModel(AoiModel):
         vector = self.default_vector
         asset = self.default_asset
 
-        # delete all the traits but the updated one (to avoid triggering the event)
+        # delete all the traits but the 'updated' one (to avoid triggering the event)
         [setattr(self, attr, None) for attr in self.trait_names() if attr != "updated"]
 
         # reset the outputs
@@ -92,14 +92,14 @@ class SeplanAoi(model.Model):
 
         self.aoi_model.observe(self.on_aoi_change, "updated")
 
-    def on_aoi_change(self, change):
+    def on_aoi_change(self, _):
         """Update the feature_collection when the aoi_model.name is updated."""
         self.feature_collection = self.aoi_model.feature_collection
 
     def get_ee_features(self) -> Dict:
         """Returns a dictionary of current AOI layers, where name is the key."""
         primary_aoi = {
-            self.name: {
+            self.aoi_model.name: {
                 "ee_feature": self.feature_collection,
                 "color": color.primary,
             }

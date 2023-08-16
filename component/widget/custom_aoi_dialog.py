@@ -146,7 +146,7 @@ class CustomGeometriesTable(sw.Layout):
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time since
-        # that's so expensive (specially the get_limits method)
+        # that's so expensive (specially the set_limits method)
 
         view_layers = [
             row.layer_id
