@@ -32,7 +32,7 @@ class Seplan:
         self.benefit_model = benefit_model
         self.constraint_model = constraint_model
 
-    def get_benefit_index(self, clip: bool = False) -> ee.Image:
+    def get_benefit_index(self, clip: bool = True) -> ee.Image:
         """Build the index exclusively on the benefits weighted approach."""
         aoi = self.aoi_model.feature_collection
 
@@ -50,7 +50,7 @@ class Seplan:
 
         return index.clip(aoi) if clip is True else index
 
-    def get_benefit_cost_index(self, clip: bool = False) -> ee.Image:
+    def get_benefit_cost_index(self, clip: bool = True) -> ee.Image:
         """Build the benefit/cost ratio."""
         # This is 'benefit/cost ratio'
 
@@ -67,22 +67,22 @@ class Seplan:
         # norm_cost = _min_max(norm_cost, aoi)
 
         # create the benefits cost ratio
-        index = self.get_benefit_index().divide(norm_cost)
+        index = self.get_benefit_index(clip=clip).divide(norm_cost)
         index = _percentile(index, aoi)
 
         return index.clip(aoi) if clip is True else index
 
-    def get_constraint_index(self, clip: bool = False) -> ee.Image:
+    def get_constraint_index(self, clip: bool = True) -> ee.Image:
         """Get suitability index masked with constraints."""
         aoi = self.aoi_model.feature_collection
         mask_out_areas = reduce_constraints(self.get_masked_constraints_list())
 
         index = (
-            self.get_benefit_cost_index()
-            .mask(mask_out_areas)
-            .unmask(0)
+            self.get_benefit_cost_index(clip=clip)
             .multiply(4)
             .add(1)
+            .mask(mask_out_areas)
+            .unmask(0)
         )
 
         return index.clip(aoi) if clip is True else index
@@ -123,20 +123,23 @@ class Seplan:
 
             elif data_type == "continuous":
                 min_, max_ = values
-                masked_img = image.gt(max_).Or(image.lt(min_)).selfMask()
+                masked_img = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
 
             # set the name of the image as a property of the image
-            masked_data.append([masked_img, self.constraint_model.ids[i]])
+            masked_data.append(
+                [masked_img.rename("mask"), self.constraint_model.ids[i]]
+            )
 
         return masked_data
 
 
 def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> ee.Image:
     """Reduce constraints list and returns one single mask."""
+    constraints = [constraint for constraint, _ in masked_constraints_list]
     return (
-        ee.ImageCollection([constraint for constraint, _ in masked_constraints_list])
+        ee.ImageCollection(constraints)
         .reduce(ee.Reducer.sum())
-        .gt(0)
+        .gte(len(constraints))
         .selfMask()
     )
 
