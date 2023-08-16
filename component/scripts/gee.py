@@ -1,3 +1,5 @@
+from typing import Literal, Union
+
 import ee
 from sepal_ui import mapping as sm
 
@@ -16,3 +18,53 @@ def get_layer(
         visible=visible,
         max_zoom=24,
     )
+
+
+def get_limits(
+    asset: str,
+    data_type: Literal["binary", "continuous", "categorical"],
+    aoi: Union[ee.FeatureCollection, ee.Geometry],
+    factor: int = 2,
+) -> list:
+    """Computes limits or histogram keys for the given Earth Engine image based on the specified data type.
+
+    Args:
+        asset (str): Google Earth Engine asset ID.
+        data_type (str): Either 'binary', 'continuous', or any other type indicating the type of data processing.
+        aoi (ee.Geometry): Area of interest.
+        band_index (int, optional): Band index to select from the image. Defaults to 0.
+        factor (int, optional): Factor to multiply the nominal scale of the image. Defaults to 2 (i.e. 2x the nominal scale
+
+    Returns:
+        list: A list containing either min-max values or histogram keys depending on the data_type.
+    """
+    if data_type in ["binary", "continuous"]:
+        reducer = ee.Reducer.minMax()
+
+        def get_value(reduction):
+            return list(reduction.getInfo().values())
+
+    else:
+        reducer = ee.Reducer.frequencyHistogram()
+
+        def get_value(reduction):
+            return (
+                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0)))
+                .keys()
+                .getInfo()
+            )
+
+    ee_image = ee.Image(asset).select(0)
+
+    values = get_value(
+        ee_image.reduceRegion(
+            reducer=reducer,
+            geometry=aoi,
+            scale=ee_image.projection().nominalScale().multiply(factor),
+            maxPixels=1e13,
+        )
+    )
+    # depending on the scale, values from the histogram can be floats, we'll
+    # convert them to integers... sometimes we'll show more values than the
+    # asset really has
+    return sorted(set(int(float(val)) for val in values))
