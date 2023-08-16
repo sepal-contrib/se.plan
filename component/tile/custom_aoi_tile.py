@@ -28,7 +28,6 @@ class AoiTile(sw.Layout):
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
-        self.map_.layout.height = "750px"
         self.map_.min_zoom = 2
 
         # Build the aoi view with our custom aoi_model
