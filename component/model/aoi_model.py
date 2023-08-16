@@ -99,7 +99,7 @@ class SeplanAoi(model.Model):
     def get_ee_features(self) -> Dict:
         """Returns a dictionary of current AOI layers, where name is the key."""
         primary_aoi = {
-            self.name: {
+            self.aoi_model.name: {
                 "ee_feature": self.feature_collection,
                 "color": color.primary,
             }

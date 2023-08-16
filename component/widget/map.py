@@ -76,7 +76,7 @@ class SeplanMap(sm.SepalMap):
                 layer.on_hover(self._display_name)
 
                 # Add the layer to the map_layers list
-                self.add(layer)
+                self.add_layer(layer)
 
         # Remove layers from the map
         for layer in geojson_layers:

@@ -51,7 +51,15 @@ class MapTile(sw.Layout):
 
         build_alert.set_state("new", "map", "done")
 
-    def _compute(self, widget, data, event):
+        self.recipe.seplan_aoi.aoi_model.observe(self._update_aoi, "updated")
+
+    def _update_aoi(self, *_):
+        """Update the map when the aoi is updated."""
+        aoi = self.recipe.seplan_aoi.feature_collection
+        if aoi:
+            self.map_.add_ee_layer(self.recipe.seplan_aoi.feature_collection, {}, "aoi")
+
+    def _compute(self, *_):
         """Compute the restoration plan and display the map."""
         benefit_index = self.recipe.seplan.get_benefit_index(clip=True)
         benefit_cost_index = (
@@ -62,6 +70,3 @@ class MapTile(sw.Layout):
         self.map_.add_ee_layer(benefit_index, cp.final_viz, "benefit index")
         self.map_.add_ee_layer(benefit_cost_index, cp.final_viz, "benefit_cost index")
         self.map_.add_ee_layer(constraint_index, cp.final_viz, "constraint_index")
-
-        # enable the dashboard computation
-        self.map_toolbar.btn_dashboard.disabled = False
