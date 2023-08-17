@@ -145,8 +145,8 @@ class ConstraintRow(sw.Html):
         elif self.data_type == "continuous":
             # There's no way to set min, max as float,
             values = [int(val) for val in values]
-            self.w_maskout.widget.max_ = values[0]
-            self.w_maskout.widget.min_ = values[-1]
+            self.w_maskout.widget.max_ = values[-1]
+            self.w_maskout.widget.min_ = values[0]
 
             # when the widget is created for the first time the v_model will be empty,
             # in that case we'll overwrite it with the calculated values.
@@ -159,5 +159,5 @@ class ConstraintRow(sw.Html):
             else:
                 self.w_maskout.widget.step = 1
 
-        print("limitss:", self.w_maskout.v_model)
+        print("lims:", self.w_maskout.v_model)
         self.update_value()

@@ -6,9 +6,8 @@ from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
 from sepal_ui import mapping as sm
 from traitlets import Dict, Int, link
 
-from component import parameter as cp
-from component.message import cm
 from component.model.aoi_model import SeplanAoi
+from component.widget.custom_widgets import Legend
 
 
 class SeplanMap(sm.SepalMap):
@@ -32,9 +31,7 @@ class SeplanMap(sm.SepalMap):
 
         # create the map
         self.add(sm.FullScreenControl(self, position="topright"))
-        self.add_colorbar(
-            colors=cp.red_to_green, vmin=1, vmax=5, layer_name=cm.map.legend.title
-        )
+        self.add(Legend())
 
         # create a window to display AOI information
         self.html = sw.Html(tag="h3", style_="margin:0em 2em 0em 2em;")
