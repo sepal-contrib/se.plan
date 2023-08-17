@@ -6,11 +6,13 @@ import component.scripts.gee as gee
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.model.constraint_model import ConstraintModel
+from component.scripts.seplan import mask_image
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
 
 from .constraint_dialog import ConstraintDialog
 from .constraint_widget import ConstraintWidget
+from .preview_map_dialog import PreviewMapDialog
 
 
 class ConstraintRow(sw.Html):
@@ -24,6 +26,7 @@ class ConstraintRow(sw.Html):
         dialog: ConstraintDialog,
         aoi_model: SeplanAoi,
         alert: Alert,
+        map_dialog: PreviewMapDialog,
     ) -> None:
         # get the models as a member
 
@@ -34,6 +37,7 @@ class ConstraintRow(sw.Html):
 
         self.model = model
         self.dialog = dialog
+        self.map_dialog = map_dialog
         self.aoi_model = aoi_model
         self.aoi = None
         self.alert = alert
@@ -56,8 +60,14 @@ class ConstraintRow(sw.Html):
 
         self.delete_btn.on_event("click", self.on_delete)
         self.edit_btn.on_event("click", self.on_edit)
+        self.show_map_btm.on_event("click", self.on_show_map)
 
         self.update_view()
+
+    def on_show_map(self, *_):
+        """Show the layer on the map."""
+        masked_layer = mask_image(self.asset, self.data_type, self.value)
+        self.map_dialog.show_layer(masked_layer)
 
     def update_view(self):
         """Create the view of the widget based on the model."""
