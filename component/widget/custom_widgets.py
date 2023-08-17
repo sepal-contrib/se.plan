@@ -2,7 +2,6 @@ from typing import Union
 
 import ipyleaflet as ipl
 import sepal_ui.sepalwidgets as sw
-from IPython.display import HTML, display
 from sepal_ui.scripts import decorator as sd
 from traitlets import Int, link, observe
 
@@ -161,10 +160,50 @@ def Legend() -> ipl.WidgetControl:
 
     Colors of the table will come from a css simple file located in fronted.
     """
+    style = sw.Html(
+        tag="style",
+        children=[
+            """
+            .legend {
+                height: 25px;
+                background-color: #353535;
+                background-image:
+                    linear-gradient(
+                    to right, 
+                    #353535,
+                    #353535 16.66%,
+                    #edf8fb 16.66%,
+                    #66c2a4,
+                    #006d2c
+                    );
+            }
+
+            .td_title {
+                text-align:center !important;
+                font-size: 14px !important;
+                height: auto !important;
+            }
+
+            .td_legend {
+                padding: 0px !important;
+                height: auto !important;
+            }
+
+            .td_label {
+                width: 16.66%;
+                font-size: 12px !important;
+                line-height: 18px !important;
+                text-align:center !important;
+                height: auto !important;
+            }
+            """
+        ],
+    )
+
     title = sw.Html(
         tag="td",
+        class_="td_title",
         attributes={"colspan": 6},
-        style_="text-align:center; font-size: 14px;",
         children=[sw.Html(tag="div", children="Restoration suitability index")],
     )
 
@@ -185,46 +224,15 @@ def Legend() -> ipl.WidgetControl:
     }
 
     legend_label = [
-        sw.Html(
-            tag="td", style_="text-align:center;", class_="td_label", children=[name]
-        )
+        sw.Html(tag="td", class_="td_label", children=[name])
         for name in legend_names.values()
     ]
-
-    display(
-        HTML(
-            """
-            <style>
-            .legend {
-                height: 25px;
-                background-color: #353535;
-                background-image:
-                    linear-gradient(
-                    to right, 
-                    #353535,
-                    #353535 16.66%,
-                    #edf8fb 16.66%,
-                    #66c2a4,
-                    #006d2c
-                    );
-            }
-            .td_label {
-                width: 16.66%;
-                font-size: 12px;
-                line-height: 18px,
-            }
-            .td_legend {
-                padding: 0px !important;
-            }
-            </style>
-            """
-        )
-    )
 
     legend = sw.SimpleTable(
         style_="width:450px; background-color: transparent;",
         class_="pa-0 ma-0",
         children=[
+            style,
             sw.Html(tag="tr", children=[title]),
             sw.Html(tag="tr", children=[legend_bar]),
             sw.Html(tag="tr", children=legend_label),
