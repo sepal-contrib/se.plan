@@ -20,6 +20,7 @@ from component.tile.map_tile import MapTile
 # Import types
 from component.tile.questionnaire_tile import QuestionnaireTile
 from component.widget.alert_state import AlertDialog, AlertState
+from component.widget.base_dialog import BaseDialog
 
 _content = {
     "new": {
@@ -286,7 +287,7 @@ class RecipeView(sw.Container):
         self.alert.set_state("save", "all", "done")
 
 
-class LoadDialog(v.Dialog):
+class LoadDialog(BaseDialog):
     """Dialog to load a recipe from a file."""
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
@@ -296,11 +297,6 @@ class LoadDialog(v.Dialog):
         self.load_recipe_path = None
 
         super().__init__()
-
-        # set some default parameters
-        self.max_width = 750
-        self.v_model = False
-        self.persistent = True
 
         # Create input file widget wrapped in a layout
         self.w_input_recipe = sw.FileInput(
@@ -350,13 +346,13 @@ class LoadDialog(v.Dialog):
         self.text_field_msg.error_messages = []
         self.w_input_recipe.reset()
         self.valid = False
-        self.v_model = True
+        self.open()
 
     def cancel(self, *args):
         """Hide the widget and reset the selected file."""
         self.w_input_recipe.reset()
         self.load_recipe_path = None
-        self.v_model = False
+        self.close()
 
         return
 

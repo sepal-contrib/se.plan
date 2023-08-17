@@ -8,9 +8,10 @@ from component import parameter as cp
 from component.message import cm
 from component.scripts.ui_helpers import set_default_asset
 from component.widget.alert_state import Alert
+from component.widget.base_dialog import BaseDialog
 
 
-class CostDialog(sw.Dialog):
+class CostDialog(BaseDialog):
     _COSTS = pd.read_csv(cp.layer_list)
     _COSTS = _COSTS[_COSTS.theme == "cost"]
 
@@ -19,6 +20,7 @@ class CostDialog(sw.Dialog):
     loading = Bool(False).tag(sync=True)
 
     def __init__(self, model: cmod.CostModel, alert: Alert):
+        super().__init__()
         # save the model as a member
         self.model = model
 
@@ -66,12 +68,7 @@ class CostDialog(sw.Dialog):
         card = sw.Card(children=[w_title, w_content, w_actions])
         link((self, "loading"), (card, "loading"))
 
-        super().__init__(
-            persistent=True,
-            value=False,
-            max_width="700px",
-            children=[card],
-        )
+        self.children = [card]
 
         # decorate the validate method with self buttons
         self.validate = sd.loading_button(alert=self.w_alert, button=self.w_validate)(
@@ -80,7 +77,7 @@ class CostDialog(sw.Dialog):
 
         # add JS behaviour
         self.w_validate.on_event("click", self.validate)
-        self.w_cancel.on_event("click", self.cancel)
+        self.w_cancel.on_event("click", self.close)
         self.w_name.observe(self.name_change, "v_model")
         self.w_asset.observe(self.on_asset_change, "v_model")
 
@@ -130,7 +127,7 @@ class CostDialog(sw.Dialog):
             self.model.add(**kwargs)
 
         # close the dialog
-        self.value = False
+        self.close()
 
     def open_new(self, *args) -> None:
         """open new dialog with default values."""
@@ -141,11 +138,7 @@ class CostDialog(sw.Dialog):
         self.fill(*[None] * 4)
 
         # open the dialog
-        self.value = True
-
-    def cancel(self, *args) -> None:
-        """close and do nothing."""
-        self.value = False
+        self.open()
 
     def name_change(self, *args) -> None:
         """if the selected layer is from the combo box items, select all the default informations."""

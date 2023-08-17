@@ -7,15 +7,17 @@ from sepal_ui import sepalwidgets as sw
 import component.parameter as cp
 from component.message import cm
 from component.widget import custom_widgets as cw
+from component.widget.base_dialog import BaseDialog
 
 from .map import SeplanMap
 
 
-class CustomAoiDialog(sw.Dialog):
+class CustomAoiDialog(BaseDialog):
     feature = None
     "the geo_json feature selected by th user"
 
     def __init__(self, map_):
+        super().__init__()
         self.attributes = {"id": "custom_aoi_dialog"}
         self.map_ = map_
 
@@ -40,10 +42,7 @@ class CustomAoiDialog(sw.Dialog):
         action = sw.CardActions(children=[sw.Spacer(), btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 
-        # init the dialog
-        super().__init__(
-            persistent=True, v_model=False, max_width="700px", children=[card]
-        )
+        self.children = [card]
 
         # add js behavior
         btn_cancel.on_event("click", self.on_cancel)
@@ -84,14 +83,14 @@ class CustomAoiDialog(sw.Dialog):
         self.map_.dc.clear()
 
         # Close the dialog
-        self.v_model = False
+        self.close()
 
-    def open_dialog(self, new_geom, *_):
+    def open(self, new_geom: bool, *_):
         """Open dialog in two different ways."""
         # hide save element and only show table
         self.save_input.show() if new_geom else self.save_input.hide()
 
-        self.v_model = True
+        super().open()
 
     def on_new_geom(self, *_):
         """Read the aoi and give an default name."""
@@ -100,8 +99,7 @@ class CustomAoiDialog(sw.Dialog):
 
         self.w_name.v_model = f"Sub AOI {index}"
 
-        # show
-        self.open_dialog(new_geom=True)
+        self.open(new_geom=True)
 
 
 class CustomGeometriesTable(sw.Layout):

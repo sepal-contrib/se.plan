@@ -8,9 +8,10 @@ from component.message import cm
 from component.model.benefit_model import BenefitModel
 from component.scripts.ui_helpers import set_default_asset
 from component.widget.alert_state import Alert
+from component.widget.base_dialog import BaseDialog
 
 
-class BenefitDialog(sw.Dialog):
+class BenefitDialog(BaseDialog):
     _BENEFITS = pd.read_csv(cp.layer_list)
     _BENEFITS = _BENEFITS[_BENEFITS.theme == "benefit"]
 
@@ -74,12 +75,9 @@ class BenefitDialog(sw.Dialog):
         card = sw.Card(children=[w_title, w_content, w_actions])
         link((self, "loading"), (card, "loading"))
 
-        super().__init__(
-            persistent=True,
-            value=False,
-            max_width="700px",
-            children=[card],
-        )
+        self.children = [card]
+
+        super().__init__()
 
         # decorate the validate method with self buttons
         self.validate = sd.loading_button(alert=self.w_alert, button=self.w_validate)(
@@ -88,7 +86,7 @@ class BenefitDialog(sw.Dialog):
 
         # add JS behaviour
         self.w_validate.on_event("click", self.validate)
-        self.w_cancel.on_event("click", self.cancel)
+        self.w_cancel.on_event("click", self.close)
         self.w_theme.observe(self.theme_change, "v_model")
         self.w_name.observe(self.name_change, "v_model")
         self.w_asset.observe(self.on_asset_change, "v_model")
@@ -143,7 +141,7 @@ class BenefitDialog(sw.Dialog):
             self.model.add(**kwargs)
 
         # close the dialog
-        self.value = False
+        self.close()
 
     def open_new(self, *args) -> None:
         """open new dialog with default values."""
@@ -153,12 +151,7 @@ class BenefitDialog(sw.Dialog):
         # reset the fields, 6 means the number of widgets to reset
         self.fill(*[None] * 6)
 
-        # open the dialog
-        self.value = True
-
-    def cancel(self, *args) -> None:
-        """close and do nothing."""
-        self.value = False
+        self.open()
 
     def theme_change(self, *args) -> None:
         """edit the list of default theme."""
