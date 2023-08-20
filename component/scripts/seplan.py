@@ -121,6 +121,11 @@ class Seplan:
         return masked_data
 
 
+def asset_to_image(asset_id: str) -> ee.Image:
+    """Convert an asset to an image."""
+    return ee.Image(asset_id).select(0).selfMask()
+
+
 def mask_image(
     asset_id: str,
     data_type: Literal["binary", "categorical", "continuous"],
