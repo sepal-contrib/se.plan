@@ -15,6 +15,7 @@ from .constraint_dialog import ConstraintDialog
 from .constraint_row import ConstraintRow
 from .cost_dialog import CostDialog
 from .cost_row import CostRow
+from .preview_map_dialog import PreviewMapDialog
 
 __all__ = ["Table"]
 
@@ -28,7 +29,7 @@ class Table(sw.Layout):
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
         alert: Alert,
-        aoi_model: Optional[SeplanAoi] = None,
+        aoi_model: SeplanAoi,
     ) -> None:
         self.model = model
         self.alert = alert
@@ -48,7 +49,9 @@ class Table(sw.Layout):
             type_ = "cost"
             self.Row = CostRow
             self.dialog = CostDialog(model=model, alert=self.alert)
+
         self.toolbar = cw.ToolBar(model, self.dialog, self.aoi_model, self.alert)
+        self.preview_map = PreviewMapDialog()
 
         # create the table
         super().__init__()
@@ -76,7 +79,7 @@ class Table(sw.Layout):
             ],
         )
 
-        self.children = [self.dialog, self.toolbar, self.table]
+        self.children = [self.dialog, self.preview_map, self.toolbar, self.table]
 
         # set rows everytime the feature collection is updated on aoitile
         self.model.observe(self.set_rows, "updated")
@@ -89,7 +92,7 @@ class Table(sw.Layout):
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time. That's too expensive (specially the set_limits method)
-
+        print("setting rows")
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
 
@@ -100,7 +103,7 @@ class Table(sw.Layout):
         )
         # Add new rows from the model
         if new_ids:
-            print("new ID")
+            print("new IDs")
             for new_id in new_ids:
                 try:
                     row = self.Row(
@@ -109,6 +112,7 @@ class Table(sw.Layout):
                         self.dialog,
                         aoi_model=self.aoi_model,
                         alert=self.alert,
+                        preview_map=self.preview_map,
                     )
                 except Exception as e:
                     # remove the asset from the model if it fails
@@ -145,6 +149,7 @@ class Table(sw.Layout):
                     self.dialog,
                     aoi_model=self.aoi_model,
                     alert=self.alert,
+                    preview_map=self.preview_map,
                 )
                 for layer_id in self.model.ids
             ]

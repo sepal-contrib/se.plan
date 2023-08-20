@@ -70,9 +70,11 @@ class MapToolbar(sw.Toolbar):
             self.info_dialog,
         ]
 
-        self.btn_download.on_event("click", lambda *_: self.download_map_dialog.open())
-        self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open())
-        self.btn_info.on_event("click", lambda *_: self.info_dialog.open())
+        self.btn_download.on_event(
+            "click", lambda *_: self.download_map_dialog.open_dialog()
+        )
+        self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
+        self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
 
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)
@@ -90,7 +92,7 @@ class MapToolbar(sw.Toolbar):
             self.aoi_tools = not self.aoi_tools
 
         elif widget.attributes["id"] == "show":
-            self.save_geom_dialog.open(new_geom=False)
+            self.save_geom_dialog.open_dialog(new_geom=False)
 
 
 class DrawMenu(sw.Menu):
@@ -166,4 +168,4 @@ class MapInfoDialog(BaseDialog):
         ]
 
         btn_close.on_event("click", self.close)
-        self.open()
+        self.open_dialog()

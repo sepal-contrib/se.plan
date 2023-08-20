@@ -25,13 +25,17 @@ class QuestionnaireTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        benefit_table = Table(model=recipe.benefit_model, alert=self.alert)
-
-        constraint_table = Table(
-            model=recipe.constraint_model, aoi_model=recipe.seplan_aoi, alert=self.alert
+        benefit_table = Table(
+            model=recipe.benefit_model, alert=self.alert, aoi_model=recipe.seplan_aoi
         )
 
-        cost_table = Table(model=recipe.cost_model, alert=self.alert)
+        constraint_table = Table(
+            model=recipe.constraint_model, alert=self.alert, aoi_model=recipe.seplan_aoi
+        )
+
+        cost_table = Table(
+            model=recipe.cost_model, alert=self.alert, aoi_model=recipe.seplan_aoi
+        )
 
         tabs = Tabs(
             titles=[cm[theme].tab_title for theme in cp.themes],

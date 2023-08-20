@@ -4,10 +4,14 @@ from sepal_ui.scripts import decorator as sd
 
 from component import parameter as cp
 from component.message import cm
+from component.model.aoi_model import SeplanAoi
 from component.model.benefit_model import BenefitModel
+from component.scripts.seplan import asset_to_image
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
 from component.widget.benefit_dialog import BenefitDialog
+
+from .preview_map_dialog import PreviewMapDialog
 
 
 class BenefitRow(sw.Html):
@@ -18,8 +22,9 @@ class BenefitRow(sw.Html):
         model: BenefitModel,
         layer_id: str,
         dialog: BenefitDialog,
+        aoi_model: SeplanAoi,
         alert: Alert,
-        **kwargs
+        preview_map: PreviewMapDialog,
     ) -> None:
         self.tag = "tr"
         self.attributes = {"layer_id": layer_id}
@@ -28,24 +33,38 @@ class BenefitRow(sw.Html):
         # get the model as a member
         self.model = model
         self.dialog = dialog
+        self.preview_map = preview_map
+        self.aoi_model = aoi_model
         self.alert = alert
         idx = model.get_index(id=layer_id)
 
         # extract information from the model
         self.name = self.model.names[idx]
+        self.asset = self.model.assets[idx]
         self.layer_id = self.model.ids[idx]
         self.theme = self.model.themes[idx]
         self.weight = self.model.weights[idx]
 
-        self.update_view()
-
-    def update_view(self):
-        """Create the view of the widget based on the model."""
         # create the crud interface
         self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
         self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
+        self.show_map_btn = cw.TableIcon("mdi-map", self.layer_id)
         self.edit_btn.class_list.add("mr-2")
+        self.delete_btn.class_list.add("mr-2")
 
+        self.delete_btn.on_event("click", self.on_delete)
+        self.edit_btn.on_event("click", self.on_edit)
+        self.show_map_btn.on_event("click", self.on_show_map)
+
+        self.update_view()
+
+    def on_show_map(self, *_):
+        """Mask constraint with map values and add it to the map."""
+        ee_image = asset_to_image(self.asset).clip(self.aoi_model.feature_collection)
+        self.preview_map.show_layer(ee_image, "benefit", self.name)
+
+    def update_view(self):
+        """Create the view of the widget based on the model."""
         # create the checkbox_list
         self.check_list = []
         for i in range(5):
@@ -54,7 +73,9 @@ class BenefitRow(sw.Html):
             self.check_list.append(check)
 
         td_list = [
-            sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
+            sw.Html(
+                tag="td", children=[self.edit_btn, self.delete_btn, self.show_map_btn]
+            ),
             sw.Html(tag="td", children=[cm.subtheme[self.theme]]),
             sw.Html(tag="td", children=[self.name]),
             *[sw.Html(tag="td", children=[e]) for e in self.check_list],
@@ -64,8 +85,6 @@ class BenefitRow(sw.Html):
 
         # add js behaviour
         [e.observe(self.on_check_change, "v_model") for e in self.check_list]
-        self.delete_btn.on_event("click", self.on_delete)
-        self.edit_btn.on_event("click", self.on_edit)
 
     def update_value(self):
         """Update the value of the model."""

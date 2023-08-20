@@ -3,40 +3,70 @@ from typing import Literal
 
 import ee
 import sepal_ui.sepalwidgets as sw
-from ipyleaflet import Map
+from sepal_ui.mapping import SepalMap
 
-from component.message import cm
 from component.widget.base_dialog import BaseDialog
+from component.widget.custom_widgets import Legend
 
 
 class PreviewMapDialog(BaseDialog):
     def __init__(self):
-        self.map_ = Map()
-        self.btn_close = sw.Btn(cm.questionnaire.map, class_="mr-2")
+        super().__init__(max_width="950px", min_width="950px")
+        self.map_ = SepalMap()
+
+        self.title = sw.CardTitle()
+        self.btn_close = sw.Btn("Close", class_="mr-2")
 
         self.children = [
-            sw.CardText(
+            sw.Card(
                 children=[
-                    self.map_,
-                ]
-            ),
-            sw.CardActions(children=[sw.Spacer(), self.btn_close]),
+                    self.title,
+                    sw.CardText(
+                        children=[
+                            self.map_,
+                        ]
+                    ),
+                    sw.CardActions(children=[sw.Spacer(), self.btn_close]),
+                ],
+            )
         ]
 
-    def add_layer(
-        self, layer: ee.Image, type_: Literal["benefit", "constraint", "cost"]
+        self.btn_close.on_event("click", self.close_dialog)
+
+    def show_layer(
+        self,
+        layer: ee.Image,
+        type_: Literal["benefit", "constraint", "cost"],
+        name: str,
+        aoi: ee.FeatureCollection,
     ) -> None:
         """Adds given layer to the map and opens the dialog."""
-        self.map_.addLayer(layer, {}, "layer")
+        self.map_.remove_layer("layer", none_ok=True)
+        print(layer.name)
+        self.open_dialog()
+        self.title.children = [name]
+        self.map_.zoom_ee_object(layer)
+        self.map_.addLayer(layer.clip(aoi), {}, "layer")
         self.set_legend(type_)
-        self.open()
+
+    def set_legend(self, type_: Literal["benefit", "constraint", "cost"]):
+        """Set legend based on type of layer."""
+        return
+
+        legend = Legend(type_)
+        self.map_.add_control(legend, position="bottomright")
 
     def add_weighted_benefit(self, layer: ee.Image):
         """Adds given layer to the map and opens the dialog."""
         self.map_.addLayer(layer, {}, "weighted_benefit")
-        self.open()
+        self.open_dialog()
 
-    def add_costs(self, layer: ee.Image):
+    def add_normalized_costs(self, layer: ee.Image):
         """Adds normalized cost layer."""
         self.map_.addLayer(layer, {}, "costs")
-        self.open()
+        self.open_dialog()
+
+    def add_mask(self, layer: ee.Image):
+        """Adds mask layer."""
+        self.map_.addLayer(layer, {}, "mask")
+        self.open_dialog()
