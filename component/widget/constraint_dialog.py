@@ -157,7 +157,7 @@ class ConstraintDialog(BaseDialog):
             self.model.add(**kwargs)
 
         # close the dialog
-        self.close()
+        self.close_dialog()
 
     def open_new(self, *args) -> None:
         """open new dialog with default values."""
@@ -167,7 +167,7 @@ class ConstraintDialog(BaseDialog):
         self.fill(*[None] * 7)
 
         # open the dialog
-        super().open()
+        super().open_dialog()
 
     def theme_change(self, *args) -> None:
         """edit the list of default theme."""

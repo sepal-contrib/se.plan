@@ -9,10 +9,10 @@ class BaseDialog(sw.Dialog):
 
         super().__init__(*args, **kwargs)
 
-    def open(self, *_):
+    def open_dialog(self, *_):
         """Open dialog."""
         self.v_model = True
 
-    def close(self, *_):
+    def close_dialog(self, *_):
         """Close dialog."""
         self.v_model = False

@@ -346,13 +346,13 @@ class LoadDialog(BaseDialog):
         self.text_field_msg.error_messages = []
         self.w_input_recipe.reset()
         self.valid = False
-        self.open()
+        self.open_dialog()
 
     def cancel(self, *args):
         """Hide the widget and reset the selected file."""
         self.w_input_recipe.reset()
         self.load_recipe_path = None
-        self.close()
+        self.close_dialog()
 
         return
 

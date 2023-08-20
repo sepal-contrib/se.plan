@@ -141,7 +141,7 @@ class BenefitDialog(BaseDialog):
             self.model.add(**kwargs)
 
         # close the dialog
-        self.close()
+        self.close_dialog()
 
     def open_new(self, *args) -> None:
         """open new dialog with default values."""
@@ -151,7 +151,7 @@ class BenefitDialog(BaseDialog):
         # reset the fields, 6 means the number of widgets to reset
         self.fill(*[None] * 6)
 
-        self.open()
+        self.open_dialog()
 
     def theme_change(self, *args) -> None:
         """edit the list of default theme."""

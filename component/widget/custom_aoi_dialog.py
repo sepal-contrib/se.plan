@@ -83,14 +83,14 @@ class CustomAoiDialog(BaseDialog):
         self.map_.dc.clear()
 
         # Close the dialog
-        self.close()
+        self.close_dialog()
 
-    def open(self, new_geom: bool, *_):
+    def open_dialog(self, new_geom: bool, *_):
         """Open dialog in two different ways."""
         # hide save element and only show table
         self.save_input.show() if new_geom else self.save_input.hide()
 
-        super().open()
+        super().open_dialog()
 
     def on_new_geom(self, *_):
         """Read the aoi and give an default name."""
@@ -99,7 +99,7 @@ class CustomAoiDialog(BaseDialog):
 
         self.w_name.v_model = f"Sub AOI {index}"
 
-        self.open(new_geom=True)
+        self.open_dialog(new_geom=True)
 
 
 class CustomGeometriesTable(sw.Layout):

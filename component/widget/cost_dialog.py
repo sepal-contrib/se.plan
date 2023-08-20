@@ -127,7 +127,7 @@ class CostDialog(BaseDialog):
             self.model.add(**kwargs)
 
         # close the dialog
-        self.close()
+        self.close_dialog()
 
     def open_new(self, *args) -> None:
         """open new dialog with default values."""
@@ -138,7 +138,7 @@ class CostDialog(BaseDialog):
         self.fill(*[None] * 4)
 
         # open the dialog
-        self.open()
+        self.open_dialog()
 
     def name_change(self, *args) -> None:
         """if the selected layer is from the combo box items, select all the default informations."""
