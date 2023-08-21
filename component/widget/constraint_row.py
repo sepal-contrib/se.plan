@@ -31,6 +31,7 @@ class ConstraintRow(sw.Html):
         # get the models as a member
 
         self.tag = "tr"
+        self.layer_id = layer_id
         self.attributes = {"layer_id": layer_id}
 
         super().__init__()
@@ -42,15 +43,7 @@ class ConstraintRow(sw.Html):
         self.aoi = None
         self.alert = alert
 
-        idx = model.get_index(id=layer_id)
-
-        # extract information from the model
-        self.name = self.model.names[idx]
-        self.unit = self.model.units[idx]
-        self.layer_id = self.model.ids[idx]
-        self.value = self.model.values[idx]
-        self.data_type = self.model.data_type[idx]
-        self.asset = self.model.assets[idx]
+        self.get_model_data()
 
         # View
 
@@ -67,14 +60,19 @@ class ConstraintRow(sw.Html):
 
         self.update_view()
 
+    def get_model_data(self):
+        """Get and set the data of the given layer_id to the row."""
+        idx = self.model.get_index(self.layer_id)
+
+        self.name = self.model.names[idx]
+        self.unit = self.model.units[idx]
+        self.value = self.model.values[idx]
+        self.data_type = self.model.data_type[idx]
+        self.asset = self.model.assets[idx]
+
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
-        idx = self.model.get_index(self.layer_id)
-        asset = self.model.assets[idx]
-        data_type = self.model.data_type[idx]
-        value = self.model.values[idx]
-
-        masked_layer = mask_image(asset, data_type, value)
+        masked_layer = mask_image(self.asset, self.data_type, self.value)
 
         self.preview_map.show_layer(
             masked_layer, "constraint", self.name, self.aoi_model.feature_collection
@@ -82,8 +80,6 @@ class ConstraintRow(sw.Html):
 
     def update_view(self):
         """Create the view of the widget based on the model."""
-        # create the crud interface
-
         # create Maskout widget
         self.w_maskout = ConstraintWidget(
             data_type=self.data_type,
@@ -121,7 +117,7 @@ class ConstraintRow(sw.Html):
         """Open the dialog and load data contained in the model."""
         idx = self.model.get_index(widget.attributes["data-layer"])
 
-        self.dialog.value = True
+        self.dialog.open_dialog()
         self.dialog.fill(
             theme=self.model.themes[idx],
             name=self.model.names[idx],
@@ -135,6 +131,8 @@ class ConstraintRow(sw.Html):
     def update_value(self, *_):
         """Update the value of the model."""
         self.model.update_value(self.layer_id, self.w_maskout.v_model)
+
+        self.get_model_data()
 
     @sd.need_ee
     def set_limits(self, *_) -> None:
@@ -183,4 +181,5 @@ class ConstraintRow(sw.Html):
                 self.w_maskout.widget.step = 1
 
         print("lims:", self.w_maskout.v_model)
+
         self.update_value()

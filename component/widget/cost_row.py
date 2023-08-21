@@ -28,6 +28,7 @@ class CostRow(sw.Html):
     ) -> None:
         self.tag = "tr"
         self.attributes = {"layer_id": layer_id}
+        self.layer_id = layer_id
 
         super().__init__()
 
@@ -38,12 +39,9 @@ class CostRow(sw.Html):
         self.aoi_model = aoi_model
         self.alert = alert
 
-        idx = model.get_index(id=layer_id)
+        self.get_model_data()
 
         # extract information from the model
-        self.name = self.model.names[idx]
-        self.asset = self.model.assets[idx]
-        self.layer_id = self.model.ids[idx]
 
         self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
         self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
@@ -58,14 +56,23 @@ class CostRow(sw.Html):
 
         self.update_view()
 
+    def get_model_data(self):
+        """Get and set the data of the given layer_id to the row."""
+        idx = self.model.get_index(self.layer_id)
+
+        self.name = self.model.names[idx]
+        self.asset = self.model.assets[idx]
+
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
-        ee_image = asset_to_image(self.asset).clip(self.aoi_model.feature_collection)
-        self.preview_map.show_layer(ee_image, "benefit", self.name)
+        ee_image = asset_to_image(self.asset)
+        self.preview_map.show_layer(
+            ee_image, "benefit", self.name, self.aoi_model.feature_collection
+        )
 
     def update_view(self):
         """Create the view of the widget based on the model."""
-        # create the crud interface
+        self.get_model_data()
 
         td_list = [
             sw.Html(
@@ -75,8 +82,6 @@ class CostRow(sw.Html):
         ]
 
         super().__init__(tag="tr", children=td_list)
-
-        # add js behaviour
 
     @sd.catch_errors(debug=True)
     def on_delete(self, widget, *_):
@@ -98,4 +103,4 @@ class CostRow(sw.Html):
             desc=self.model.descs[idx],
         )
 
-        self.dialog.value = True
+        self.dialog.open_dialog()
