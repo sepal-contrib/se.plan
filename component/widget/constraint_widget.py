@@ -2,6 +2,7 @@ from typing import Literal
 
 # from sepal_ui import mapping as sm
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.frontend.styles import get_theme
 from traitlets import Any, Int, List, directional_link, link, observe
 
 from component.message import cm
@@ -69,6 +70,10 @@ class ConstraintWidget(sw.Layout):
         self.attributes = {"data-layer": layer_id, "id": f"{layer_id}_widget"}
         self.v_model = []
 
+        self.message = sw.Html(
+            tag="div", children=[""], class_=f"v-messages theme--{get_theme()} my-2"
+        )
+
         super().__init__()
 
         if self.data_type == "continuous":
@@ -82,20 +87,11 @@ class ConstraintWidget(sw.Layout):
                 label=cm.constraint.widget.binary.label,
                 v_model=0,
                 small=True,
-                messages=[cm.constraint.widget.binary.mask_0],
                 children=[
                     sw.Radio(label="0", v_model=0),
                     sw.Radio(label="1", v_model=1),
                 ],
-            )
-
-            self.widget.observe(
-                lambda change: setattr(
-                    self.widget,
-                    "messages",
-                    [cm.constraint.widget.binary[f"mask_{change['new']}"]],
-                ),
-                "v_model",
+                hide_details=True,
             )
 
             # the widget standard value has to be a list, but
@@ -116,12 +112,37 @@ class ConstraintWidget(sw.Layout):
                 multiple=True,
                 items=[],
                 v_model=None,
+                hide_details=True,
             )
 
             link((self.widget, "v_model"), (self, "v_model"))
 
         self.v_model = v_model
-        self.children = [self.widget]
+
+        self.children = [
+            sw.Flex(class_="d-block", children=[self.widget, self.message])
+        ]
+
+    @observe("v_model")
+    def set_message(self, change):
+        """Set message to the widget based on the data type."""
+        if not change["new"]:
+            return
+
+        if self.data_type == "continuous":
+            self.message.children = [
+                cm.constraint.widget.continuous.hint.format(
+                    change["new"][0], change["new"][1]
+                )
+            ]
+
+        elif self.data_type == "binary":
+            self.message.children = [
+                cm.constraint.widget.binary.hint[f"mask_{change['new'][0]}"]
+            ]
+
+        elif self.data_type == "categorical":
+            self.message.children = [cm.constraint.widget.categorical.hint]
 
     @observe("items")
     def update_items(self, change):
@@ -158,16 +179,15 @@ class CustomSlider(sw.Layout):
 
         super().__init__()
         self.v_model = [0, 1]
-        self.w_min = TextWidget(attributes={"id": "min"})
-        self.w_max = TextWidget(attributes={"id": "max"})
+        self.w_min = TextWidget(attributes={"id": "min"}, hide_details=True)
+        self.w_max = TextWidget(attributes={"id": "max"}, hide_details=True)
         self.slider = sw.RangeSlider(
             v_model=[0, 1],
             xs1=True,
             xs10=True,
             class_="mt-4",
             validate_on_blur=True,
-            track_color="red",
-            track_fill_color="green",
+            hide_details=True,
         )
 
         self.children = [

@@ -53,11 +53,17 @@
         "widget" : {
             "binary" : {
                 "label" : "Value to mask out:",
-                "mask_0" : "Values on the map with 0 will be excluded from the analysis.",
-                "mask_1" : "Values on the map with 1 will be excluded from the analysis."
+                "hint" : {
+                    "mask_0" : "*Values on the map with 0 will be excluded from the analysis.",
+                    "mask_1" : "*Values on the map with 1 will be excluded from the analysis."
+                }
             },
             "categorical" : {
-                "label" : "Values to exclude"
+                "label" : "Values to exclude",
+                "hint" : "*All selected values will be excluded from the analysis."
+            },
+            "continuous" : {
+                "hint" : "*Values between {} and {} will be excluded from the analysis."
             }
         }
     },
