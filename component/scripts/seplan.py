@@ -1,5 +1,5 @@
 """All tools to build the suitability index."""
-from typing import List, Tuple, Union
+from typing import List, Literal, Tuple, Union
 
 import ee
 
@@ -110,38 +110,48 @@ class Seplan:
 
             data_type = self.constraint_model.data_type[i]
             values = self.constraint_model.values[i]
-            image = ee.Image(asset).select(0).unmask()
 
-            if data_type == "binary":
-                # mask out image values that are equal to user's input
-                masked_img = image.eq(values[0]).Not().selfMask()
-
-            elif data_type == "categorical":
-                to_mask_values = ee.List(values)
-                mask_value = ee.List.repeat(0, to_mask_values.size())
-                masked_img = image.remap(to_mask_values, mask_value, 1).selfMask()
-
-            elif data_type == "continuous":
-                min_, max_ = values
-                masked_img = image.gt(max_).Or(image.lt(min_)).Not().selfMask()
+            masked_image = mask_image(asset, data_type, values)
 
             # set the name of the image as a property of the image
             masked_data.append(
-                [masked_img.rename("mask"), self.constraint_model.ids[i]]
+                [masked_image.rename("mask"), self.constraint_model.ids[i]]
             )
 
         return masked_data
 
 
+def asset_to_image(asset_id: str) -> ee.Image:
+    """Convert an asset to an image."""
+    return ee.Image(asset_id).select(0).selfMask()
+
+
+def mask_image(
+    asset_id: str,
+    data_type: Literal["binary", "categorical", "continuous"],
+    maskout_values: list,
+) -> ee.Image:
+    """Mask out an image based on its data type and input values."""
+    image = ee.Image(asset_id).select(0).unmask()
+
+    if data_type == "binary":
+        # mask out image values that are equal to user's input
+        return image.eq(maskout_values[0]).Not().selfMask()
+
+    elif data_type == "categorical":
+        to_mask_values = ee.List(maskout_values)
+        mask_value = ee.List.repeat(0, to_mask_values.size())
+        return image.remap(to_mask_values, mask_value, 1).selfMask()
+
+    elif data_type == "continuous":
+        min_, max_ = maskout_values
+        return image.gt(min_).And(image.lt(max_)).Not().selfMask()
+
+
 def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> ee.Image:
-    """Reduce constraints list and returns one single mask."""
+    """Reduce constraints list and returns one image masked."""
     constraints = [constraint for constraint, _ in masked_constraints_list]
-    return (
-        ee.ImageCollection(constraints)
-        .reduce(ee.Reducer.sum())
-        .gte(len(constraints))
-        .selfMask()
-    )
+    return ee.Image(constraints).mask().reduce(ee.Reducer.min()).gt(0).selfMask()
 
 
 def _percentile(

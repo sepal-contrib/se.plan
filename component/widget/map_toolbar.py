@@ -6,6 +6,7 @@ from traitlets import Bool
 from component import widget as cw
 from component.message import cm
 from component.scripts.seplan import Seplan
+from component.widget.base_dialog import BaseDialog
 from component.widget.map import SeplanMap
 
 
@@ -72,9 +73,7 @@ class MapToolbar(sw.Toolbar):
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
-
         self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
-
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
 
         self.btn_draw.on_event("new", self.on_draw)
@@ -146,11 +145,8 @@ class DrawMenu(sw.Menu):
                 item.on_event("click", event)
 
 
-class MapInfoDialog(sw.Dialog):
+class MapInfoDialog(BaseDialog):
     def __init__(self) -> None:
-        self.v_model = False
-        self.max_width = "700px"
-
         super().__init__()
 
         description = sw.Markdown("  \n".join(cm.map.txt))
@@ -171,12 +167,5 @@ class MapInfoDialog(sw.Dialog):
             ),
         ]
 
-        btn_close.on_event("click", self.close_dialog)
-
-    def close_dialog(self, widget, event, data):
-        """Close the dialog."""
-        self.v_model = False
-
-    def open_dialog(self):
-        """Open the dialog."""
-        self.v_model = True
+        btn_close.on_event("click", self.close)
+        self.open_dialog()

@@ -11,15 +11,13 @@ from sepal_ui.scripts import utils as su
 from component import parameter as cp
 from component import scripts as cs
 from component.message import cm
+from component.widget.base_dialog import BaseDialog
 
 ee.Initialize()
 
 
-class ExportMapDialog(sw.Dialog):
+class ExportMapDialog(BaseDialog):
     def __init__(self, **kwargs):
-        self.v_model = False
-        self.max_width = "700px"
-        # init the dialog
         super().__init__(**kwargs)
 
         # init the downloadable informations
@@ -70,11 +68,7 @@ class ExportMapDialog(sw.Dialog):
 
         # add js behaviour
         self.btn.on_event("click", self._apply)
-        self.btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
-
-    def open_dialog(self, *_):
-        """Open dialog."""
-        self.v_model = True
+        self.btn_cancel.on_event("click", self.close)
 
     def set_data(self, dataset, geometry, name, aoi_name):
         """set the dataset and the geometry to allow the download."""

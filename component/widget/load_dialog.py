@@ -8,15 +8,12 @@ from sepal_ui.scripts import utils as su
 
 from component import parameter as cp
 from component.message import cm
+from component.widget.base_dialog import BaseDialog
 
 
-class LoadDialog(sw.Dialog):
+class LoadDialog(BaseDialog):
     def __init__(self, map_):
-        self.class_ = "mb-5 mt-2"
-        self.v_model = False
-        self.max_width = "700px"
-
-        super().__init__()
+        super().__init__(class_="mb-5 mt-2")
 
         self.map_ = map_
 
@@ -39,13 +36,9 @@ class LoadDialog(sw.Dialog):
 
         self.children = [sw.Card(children=[title, text, actions])]
 
-        btn_cancel.on_event("click", lambda *_: setattr(self, "v_model", False))
+        btn_cancel.on_event("click", self.close)
 
         self.btn.on_event("click", self._load_shapes)
-
-    def open_dialog(self, *_):
-        """Open dialog."""
-        self.v_model = True
 
     @su.loading_button(debug=False)
     def read_data(self):

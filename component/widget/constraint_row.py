@@ -6,11 +6,13 @@ import component.scripts.gee as gee
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.model.constraint_model import ConstraintModel
+from component.scripts.seplan import mask_image
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
 
 from .constraint_dialog import ConstraintDialog
 from .constraint_widget import ConstraintWidget
+from .preview_map_dialog import PreviewMapDialog
 
 
 class ConstraintRow(sw.Html):
@@ -24,6 +26,7 @@ class ConstraintRow(sw.Html):
         dialog: ConstraintDialog,
         aoi_model: SeplanAoi,
         alert: Alert,
+        preview_map: PreviewMapDialog,
     ) -> None:
         # get the models as a member
 
@@ -34,6 +37,7 @@ class ConstraintRow(sw.Html):
 
         self.model = model
         self.dialog = dialog
+        self.preview_map = preview_map
         self.aoi_model = aoi_model
         self.aoi = None
         self.alert = alert
@@ -52,12 +56,29 @@ class ConstraintRow(sw.Html):
 
         self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
         self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
+        self.show_map_btn = cw.TableIcon("mdi-map", self.layer_id)
+
         self.edit_btn.class_list.add("mr-2")
+        self.delete_btn.class_list.add("mr-2")
 
         self.delete_btn.on_event("click", self.on_delete)
         self.edit_btn.on_event("click", self.on_edit)
+        self.show_map_btn.on_event("click", self.on_show_map)
 
         self.update_view()
+
+    def on_show_map(self, *_):
+        """Mask constraint with map values and add it to the map."""
+        idx = self.model.get_index(self.layer_id)
+        asset = self.model.assets[idx]
+        data_type = self.model.data_type[idx]
+        value = self.model.values[idx]
+
+        masked_layer = mask_image(asset, data_type, value)
+
+        self.preview_map.show_layer(
+            masked_layer, "constraint", self.name, self.aoi_model.feature_collection
+        )
 
     def update_view(self):
         """Create the view of the widget based on the model."""
@@ -73,7 +94,9 @@ class ConstraintRow(sw.Html):
         self.set_limits()
 
         td_list = [
-            sw.Html(tag="td", children=[self.edit_btn, self.delete_btn]),
+            sw.Html(
+                tag="td", children=[self.edit_btn, self.delete_btn, self.show_map_btn]
+            ),
             sw.Html(tag="td", children=[self.name + f" ({self.unit})"]),
             sw.Html(tag="td", children=[self.w_maskout]),
         ]
