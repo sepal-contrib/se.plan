@@ -167,5 +167,5 @@ class MapInfoDialog(BaseDialog):
             ),
         ]
 
-        btn_close.on_event("click", self.close)
+        btn_close.on_event("click", self.close_dialog)
         self.open_dialog()
