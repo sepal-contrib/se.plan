@@ -145,18 +145,13 @@ def mask_image(
 
     elif data_type == "continuous":
         min_, max_ = maskout_values
-        return image.gt(max_).Or(image.lt(min_)).Not().selfMask()
+        return image.gt(min_).And(image.lt(max_)).Not().selfMask()
 
 
 def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> ee.Image:
     """Reduce constraints list and returns one image masked."""
     constraints = [constraint for constraint, _ in masked_constraints_list]
-    return (
-        ee.ImageCollection(constraints)
-        .reduce(ee.Reducer.sum())
-        .gte(len(constraints))
-        .selfMask()
-    )
+    return ee.Image(constraints).mask().reduce(ee.Reducer.min()).gt(0).selfMask()
 
 
 def _percentile(
