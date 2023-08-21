@@ -96,7 +96,9 @@ def get_image_stats(image, mask, geom):
 
 
 def get_image_percent_cover_pixelarea(image, aoi, name):
-    image = image.rename("image")
+    """Get the percentage of masked area over the total."""
+    # Be sure the mask is 0
+    image = image.rename("image").unmask(0)
 
     areas = (
         ee.Image.pixelArea()
@@ -157,6 +159,18 @@ def get_image_sum(image, aoi, mask, name):
 
     returns dict name:{value:[],total:[]}.
     """
+    area_ha = (
+        ee.Image.pixelArea()
+        .divide(10000)
+        .reduceRegion(
+            reducer=ee.Reducer.sum(),
+            geometry=aoi,
+            scale=100,
+            maxPixels=1e13,
+        )
+        .get("area")
+    )
+
     sum_img = image.updateMask(mask).reduceRegion(
         reducer=ee.Reducer.sum(),
         geometry=aoi,
@@ -171,7 +185,12 @@ def get_image_sum(image, aoi, mask, name):
         maxPixels=1e13,
     )
 
-    value = ee.Dictionary({"values": sum_img.values(), "total": total_img.values()})
+    value = ee.Dictionary(
+        {
+            "values": [ee.Number(sum_img.values().get(0)).divide(area_ha)],
+            "total": [ee.Number(total_img.values().get(0)).divide(area_ha)],
+        }
+    )
 
     # return ee.Dictionary({image.get("name").getInfo(): value})
     return ee.Dictionary({name: value})
