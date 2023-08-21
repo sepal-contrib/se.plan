@@ -1,10 +1,12 @@
 """Custom dialog to display individual layers from questionnaire tile."""
+from pathlib import Path
 from typing import Literal
 
 import ee
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.mapping import SepalMap
 
+from component import parameter as cp
 from component.widget.base_dialog import BaseDialog
 from component.widget.custom_widgets import Legend
 
@@ -70,3 +72,37 @@ class PreviewMapDialog(BaseDialog):
         """Adds mask layer."""
         self.map_.addLayer(layer, {}, "mask")
         self.open_dialog()
+
+    def display_on_map(self, image, geometry):
+        """Display the image on the map.
+
+        Args:
+            image (str): the asset name of the image
+            geometry (ee.Geometry): the geometry of the AOI
+
+        """
+        # clip image
+        ee_image = ee.Image(image).clip(geometry)
+
+        # get minmax
+        min_max = ee_image.reduceRegion(
+            reducer=ee.Reducer.minMax(), geometry=geometry, scale=250, bestEffort=True
+        )
+        max_, min_ = min_max.getInfo().values()
+
+        min_ = 0 if not min_ else min_
+        max_ = 1 if not max_ else max_
+
+        # update viz_params acordingly
+        viz_params = cp.plt_viz["viridis"]
+        viz_params.update(min=min_, max=max_)
+
+        # create a colorbar
+        self.m.add_colorbar(
+            colors=cp.plt_viz["viridis"]["palette"],
+            vmin=round(min_, 2),
+            vmax=round(max_, 2),
+        )
+
+        # dispaly on map
+        self.m.addLayer(ee_image, viz_params, Path(image).stem)
