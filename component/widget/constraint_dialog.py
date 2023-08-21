@@ -94,7 +94,7 @@ class ConstraintDialog(BaseDialog):
 
         # add JS behaviour
         self.w_validate.on_event("click", self.validate)
-        self.w_cancel.on_event("click", self.close)
+        self.w_cancel.on_event("click", self.close_dialog)
         self.w_theme.observe(self.theme_change, "v_model")
         self.w_name.observe(self.name_change, "v_model")
         self.w_asset.observe(self.on_asset_change, "v_model")

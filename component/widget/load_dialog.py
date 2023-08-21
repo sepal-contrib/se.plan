@@ -36,7 +36,7 @@ class LoadDialog(BaseDialog):
 
         self.children = [sw.Card(children=[title, text, actions])]
 
-        btn_cancel.on_event("click", self.close)
+        btn_cancel.on_event("click", self.close_dialog)
 
         self.btn.on_event("click", self._load_shapes)
 

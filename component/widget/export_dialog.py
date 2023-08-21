@@ -68,7 +68,7 @@ class ExportMapDialog(BaseDialog):
 
         # add js behaviour
         self.btn.on_event("click", self._apply)
-        self.btn_cancel.on_event("click", self.close)
+        self.btn_cancel.on_event("click", self.close_dialog)
 
     def set_data(self, dataset, geometry, name, aoi_name):
         """set the dataset and the geometry to allow the download."""
