@@ -27,6 +27,7 @@ class BenefitRow(sw.Html):
         preview_map: PreviewMapDialog,
     ) -> None:
         self.tag = "tr"
+        self.layer_id = layer_id
         self.attributes = {"layer_id": layer_id}
         super().__init__()
 
@@ -36,14 +37,8 @@ class BenefitRow(sw.Html):
         self.preview_map = preview_map
         self.aoi_model = aoi_model
         self.alert = alert
-        idx = model.get_index(id=layer_id)
 
-        # extract information from the model
-        self.name = self.model.names[idx]
-        self.asset = self.model.assets[idx]
-        self.layer_id = self.model.ids[idx]
-        self.theme = self.model.themes[idx]
-        self.weight = self.model.weights[idx]
+        self.get_model_data()
 
         # create the crud interface
         self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
@@ -58,13 +53,27 @@ class BenefitRow(sw.Html):
 
         self.update_view()
 
+    def get_model_data(self):
+        """Get and set the data of the given layer_id to the row."""
+        idx = self.model.get_index(self.layer_id)
+
+        # extract information from the model
+        self.name = self.model.names[idx]
+        self.asset = self.model.assets[idx]
+        self.theme = self.model.themes[idx]
+        self.weight = self.model.weights[idx]
+
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
-        ee_image = asset_to_image(self.asset).clip(self.aoi_model.feature_collection)
-        self.preview_map.show_layer(ee_image, "benefit", self.name)
+        ee_image = asset_to_image(self.asset)
+        self.preview_map.show_layer(
+            ee_image, "benefit", self.name, self.aoi_model.feature_collection
+        )
 
     def update_view(self):
         """Create the view of the widget based on the model."""
+        self.get_model_data()
+
         # create the checkbox_list
         self.check_list = []
         for i in range(5):
@@ -93,6 +102,8 @@ class BenefitRow(sw.Html):
         self.weight = checked[0].attributes["data-val"]
 
         self.model.update_value(self.layer_id, self.weight)
+
+        self.get_model_data()
 
     def on_check_change(self, change):
         # if checkbox is unique and change == false recheck
@@ -140,4 +151,4 @@ class BenefitRow(sw.Html):
         )
         # clean any previous errors
         self.dialog.w_alert.reset()
-        self.dialog.value = True
+        self.dialog.open_dialog()
