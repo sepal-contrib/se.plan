@@ -9,8 +9,8 @@ final_viz = {
 
 # matplotlib viz_param but in GEE
 # https://code.earthengine.google.com/?scriptPath=users%2Fgena%2Fpackages%3palettes
-plt_viz = {
-    "viridis": {
+map_vis = {
+    "gradient": {
         "min": 0,
         "max": 10,
         "palette": [
@@ -23,7 +23,14 @@ plt_viz = {
             "#FDE725",
         ],
     },
+    "binary": {
+        "min": 0,
+        "max": 1,
+        "palette": ["#440154", "#FDE725"],
+        "names": ["Masked", "Valid"],
+    },
 }
+
 
 # the vizaulization paramters for aoi
 aoi_style = {  # default styling of the layer

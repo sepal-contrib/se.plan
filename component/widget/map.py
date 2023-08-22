@@ -7,7 +7,7 @@ from sepal_ui import mapping as sm
 from traitlets import Dict, Int, link
 
 from component.model.aoi_model import SeplanAoi
-from component.widget.custom_widgets import Legend
+from component.widget.legend import SuitabilityLegend
 
 
 class SeplanMap(sm.SepalMap):
@@ -31,7 +31,7 @@ class SeplanMap(sm.SepalMap):
 
         # create the map
         self.add(sm.FullScreenControl(self, position="topright"))
-        self.add(Legend())
+        self.add(SuitabilityLegend())
 
         # create a window to display AOI information
         self.html = sw.Html(tag="h3", style_="margin:0em 2em 0em 2em;")

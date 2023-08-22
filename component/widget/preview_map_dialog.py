@@ -1,5 +1,4 @@
 """Custom dialog to display individual layers from questionnaire tile."""
-from pathlib import Path
 from typing import Literal
 
 import ee
@@ -8,13 +7,17 @@ from sepal_ui.mapping import SepalMap
 
 from component import parameter as cp
 from component.widget.base_dialog import BaseDialog
-from component.widget.custom_widgets import Legend
+from component.widget.legend import Legend
 
 
 class PreviewMapDialog(BaseDialog):
     def __init__(self):
         super().__init__(max_width="950px", min_width="950px")
+
         self.map_ = SepalMap()
+
+        self.legend = Legend()
+        self.map_.add(self.legend)
 
         self.title = sw.CardTitle()
         self.btn_close = sw.Btn("Close", class_="mr-2")
@@ -43,20 +46,40 @@ class PreviewMapDialog(BaseDialog):
         aoi: ee.FeatureCollection,
     ) -> None:
         """Adds given layer to the map and opens the dialog."""
+        self.map_.centerObject(aoi, zoom_out=3)
         self.map_.remove_layer("layer", none_ok=True)
-        print(layer.name)
+
         self.open_dialog()
         self.title.children = [name]
-        self.map_.zoom_ee_object(layer)
-        self.map_.addLayer(layer.clip(aoi), {}, "layer")
-        self.set_legend(type_)
+        self.map_.addLayer(aoi, {}, "AOI")
 
-    def set_legend(self, type_: Literal["benefit", "constraint", "cost"]):
-        """Set legend based on type of layer."""
-        return
+        legend_type = "gradient" if type_ in ["benefit", "cost"] else "binary"
 
-        legend = Legend(type_)
-        self.map_.add_control(legend, position="bottomright")
+        map_vis = cp.map_vis[legend_type]
+
+        if type_ in ["benefit", "cost"]:
+            min_, max_ = self.get_min_max(layer, aoi)
+            self.legend.update_legend(
+                "gradient",
+                "legend",
+                [min_, max_],
+                map_vis["palette"],
+            )
+            vis_params = map_vis.copy()
+            vis_params.update(min=min_, max=max_)
+
+        elif type_ == "constraint":
+            self.legend.update_legend(
+                "stepped",
+                "legend",
+                map_vis["names"],
+                map_vis["palette"],
+            )
+            vis_params = map_vis.copy()
+            vis_params.update(min=0, max=1)
+            layer = layer.unmask(0)
+
+        self.map_.addLayer(layer.clip(aoi), vis_params, "layer")
 
     def add_weighted_benefit(self, layer: ee.Image):
         """Adds given layer to the map and opens the dialog."""
@@ -73,7 +96,7 @@ class PreviewMapDialog(BaseDialog):
         self.map_.addLayer(layer, {}, "mask")
         self.open_dialog()
 
-    def display_on_map(self, image, geometry):
+    def get_min_max(self, image, geometry):
         """Display the image on the map.
 
         Args:
@@ -82,27 +105,15 @@ class PreviewMapDialog(BaseDialog):
 
         """
         # clip image
-        ee_image = ee.Image(image).clip(geometry)
+        ee_image = image.clip(geometry)
 
         # get minmax
         min_max = ee_image.reduceRegion(
-            reducer=ee.Reducer.minMax(), geometry=geometry, scale=250, bestEffort=True
+            reducer=ee.Reducer.minMax(), geometry=geometry, scale=10000, bestEffort=True
         )
         max_, min_ = min_max.getInfo().values()
 
         min_ = 0 if not min_ else min_
         max_ = 1 if not max_ else max_
 
-        # update viz_params acordingly
-        viz_params = cp.plt_viz["viridis"]
-        viz_params.update(min=min_, max=max_)
-
-        # create a colorbar
-        self.m.add_colorbar(
-            colors=cp.plt_viz["viridis"]["palette"],
-            vmin=round(min_, 2),
-            vmax=round(max_, 2),
-        )
-
-        # dispaly on map
-        self.m.addLayer(ee_image, viz_params, Path(image).stem)
+        return min_, max_

@@ -17,7 +17,7 @@ class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
     def __init__(self):
-        self.class_ = "d-block"
+        self.class_ = "d-block custom_map"
         self._metadata = {"mount_id": "aoi_tile"}
 
         super().__init__()

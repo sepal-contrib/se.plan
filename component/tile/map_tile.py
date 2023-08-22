@@ -11,7 +11,7 @@ from component.widget.map_toolbar import MapToolbar
 class MapTile(sw.Layout):
     def __init__(self):
         self._metadata = {"mount_id": "map_tile"}
-        self.class_ = "d-block"
+        self.class_ = "d-block custom_map"
 
         super().__init__()
 
