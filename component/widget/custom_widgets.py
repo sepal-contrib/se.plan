@@ -2,7 +2,7 @@ from typing import Union
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
-from traitlets import Int, link, observe
+from traitlets import Int, Unicode, link, observe
 
 from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
@@ -136,11 +136,19 @@ class Tabs(sw.Card):
 class CustomDrawerItem(sw.DrawerItem):
     def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
-        self.viz = False
+
+        self.attributes = {"id": kwargs["card"]}
+
+        # Only hide the drawers that are not the main ones
+        if self.attributes["id"] not in (["recipe_tile", "about_tile"]):
+            self.viz = False
 
     @observe("alert")
     def add_notif(self, change: dict) -> None:
         """Add a notification alert to drawer."""
+        if self.attributes["id"] in (["recipe_tile", "about_tile"]):
+            return
+
         if change["new"]:
             self.viz = True
             if self.alert_badge not in self.children:
@@ -152,3 +160,26 @@ class CustomDrawerItem(sw.DrawerItem):
             self.remove_notif()
 
         return
+
+
+class CustomNavDrawer(sw.NavDrawer):
+    active_drawer = Unicode("").tag(sync=True)
+
+    def __init__(self, *args, app_model=None, **kwargs):
+        self.app_model = app_model
+
+        super().__init__(*args, **kwargs)
+
+        link((self, "active_drawer"), (self.app_model, "active_drawer"))
+
+    def _on_item_click(self, change: dict):
+        """Deactivate all the other items when on of the is activated."""
+        if change["new"] is False:
+            return self
+
+        self.active_drawer = change["owner"].attributes["id"]
+
+        # reset all others states
+        [setattr(i, "input_value", False) for i in self.items if i != change["owner"]]
+
+        return self
