@@ -33,7 +33,7 @@ class MapToolbar(sw.Toolbar):
             gliph="mdi-draw",
             icon=True,
             color="primary",
-        ).set_tooltip(cm.map.toolbar.tooltip.draw, right=True, max_width="200px")
+        )
 
         self.btn_download = sw.Btn(
             gliph="mdi-download",
@@ -55,7 +55,7 @@ class MapToolbar(sw.Toolbar):
 
         self.children = [
             # Main buttons
-            self.btn_draw.with_tooltip,
+            self.btn_draw,
             self.btn_load.with_tooltip,
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
@@ -168,4 +168,3 @@ class MapInfoDialog(BaseDialog):
         ]
 
         btn_close.on_event("click", self.close_dialog)
-        self.open_dialog()
