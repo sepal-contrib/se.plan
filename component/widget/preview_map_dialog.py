@@ -3,9 +3,11 @@ from typing import Literal
 
 import ee
 import sepal_ui.sepalwidgets as sw
+from sepal_ui.frontend.resize_trigger import rt
 from sepal_ui.mapping import SepalMap
 
 from component import parameter as cp
+from component.message import cm
 from component.widget.base_dialog import BaseDialog
 from component.widget.legend import Legend
 
@@ -15,14 +17,16 @@ class PreviewMapDialog(BaseDialog):
         super().__init__(max_width="950px", min_width="950px")
 
         self.map_ = SepalMap()
+        self.rt = rt
 
         self.legend = Legend()
         self.map_.add(self.legend)
 
         self.title = sw.CardTitle()
-        self.btn_close = sw.Btn("Close", class_="mr-2")
+        self.btn_close = sw.Btn(cm.questionnaire.map.close, class_="mr-2")
 
         self.children = [
+            self.rt,
             sw.Card(
                 children=[
                     self.title,
@@ -33,10 +37,15 @@ class PreviewMapDialog(BaseDialog):
                     ),
                     sw.CardActions(children=[sw.Spacer(), self.btn_close]),
                 ],
-            )
+            ),
         ]
 
         self.btn_close.on_event("click", self.close_dialog)
+
+    def open_dialog(self):
+        """Opens the dialog and creates a resize event."""
+        super().open_dialog()
+        self.rt.resize()
 
     def show_layer(
         self,
@@ -46,6 +55,9 @@ class PreviewMapDialog(BaseDialog):
         aoi: ee.FeatureCollection,
     ) -> None:
         """Adds given layer to the map and opens the dialog."""
+        if not aoi:
+            raise Exception(cm.questionnaire.error.no_aoi_on_map)
+
         self.map_.centerObject(aoi, zoom_out=3)
         self.map_.remove_layer("layer", none_ok=True)
 
