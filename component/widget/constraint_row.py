@@ -70,6 +70,7 @@ class ConstraintRow(sw.Html):
         self.data_type = self.model.data_type[idx]
         self.asset = self.model.assets[idx]
 
+    @sd.catch_errors(debug=True)
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
         masked_layer = mask_image(self.asset, self.data_type, self.value)

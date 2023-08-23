@@ -63,6 +63,7 @@ class CostRow(sw.Html):
         self.name = self.model.names[idx]
         self.asset = self.model.assets[idx]
 
+    @sd.catch_errors(debug=True)
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
         ee_image = asset_to_image(self.asset)
