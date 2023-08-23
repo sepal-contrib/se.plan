@@ -1,3 +1,4 @@
+import concurrent.futures
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
@@ -121,7 +122,7 @@ class CardNewSave(CardAction):
             self.w_recipe_name.v_model = change["new"]
 
 
-class RecipeView(sw.Container):
+class RecipeView(sw.Card):
     create_view = Int(0).tag(sync=True)
     """A trait to control once there is a new recipe loaded. It will be listed by RecipeTile and will build the different tiles."""
 
@@ -148,22 +149,17 @@ class RecipeView(sw.Container):
         self.children = [
             self.alert_dialog,
             self.load_dialog,
-            sw.Row(
-                justify="center",
+            sw.Container(
                 children=[
-                    sw.Col(
-                        cols=12,
-                        children=[sw.Html(tag="h1", children=["Welcome to SE.Plan"])],
-                    )
-                ],
-            ),
-            sw.Row(
-                justify="center",
-                children=[
-                    sw.Col(sm12=True, md4=True, children=[self.card_new]),
-                    sw.Col(sm12=True, md4=True, children=[self.card_load]),
-                    sw.Col(sm12=True, md4=True, children=[self.card_save]),
-                ],
+                    sw.Row(
+                        justifyContent="center",
+                        children=[
+                            sw.Col(cols="12", sm12=True, children=[self.card_new]),
+                            sw.Col(cols="12", sm12=True, children=[self.card_load]),
+                            sw.Col(cols="12", sm12=True, children=[self.card_save]),
+                        ],
+                    ),
+                ]
             ),
         ]
 
@@ -218,8 +214,9 @@ class RecipeView(sw.Container):
             print("no seplan")
             self.new_recipe()
         else:
-            print("reseting")
+            self.alert.set_state("reset", "all", "building")
             self.recipe.reset()
+            self.alert.set_state("reset", "all", "done")
 
         # update current session path
         self.recipe_session_path = self.recipe.get_recipe_path(
@@ -248,7 +245,7 @@ class RecipeView(sw.Container):
         if not self.recipe.seplan_aoi:
             self.new_recipe()
 
-        self.alert.set_state("load", "all", "waiting")
+        self.alert.set_state("load", "all", "building")
 
         self.recipe.load(recipe_path=self.load_dialog.load_recipe_path)
 
@@ -382,18 +379,56 @@ class RecipeTile(sw.Layout):
         self.children = [self.recipe_view]
         self.recipe_view.observe(self.render, "create_view")
 
+    # def render(self, *_):
+    #     """Render all the different tiles.
+
+    #     This element is intended to be used only once, when the app has to start.
+    #     """
+    #     try:
+    #         self.aoi_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+    #         self.questionnaire_tile.build(
+    #             self.recipe_view.recipe, self.recipe_view.alert
+    #         )
+    #         self.map_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+    #         self.dashboard_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+    #     except Exception as e:
+    #         # If something fails, I want to return the recipe to its original state
+    #         self.recipe_view.recipe.__init__()
+    #         raise e
+
+    #     # This trait will let know the app drawers that the app is ready to be used
+    #     self.app_model.ready = True
+
     def render(self, *_):
         """Render all the different tiles.
 
         This element is intended to be used only once, when the app has to start.
         """
         try:
-            self.aoi_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-            self.questionnaire_tile.build(
-                self.recipe_view.recipe, self.recipe_view.alert
-            )
-            self.map_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-            self.dashboard_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+                futures = [
+                    executor.submit(
+                        self.aoi_tile.build,
+                        self.recipe_view.recipe,
+                        self.recipe_view.alert,
+                    ),
+                    executor.submit(
+                        self.questionnaire_tile.build,
+                        self.recipe_view.recipe,
+                        self.recipe_view.alert,
+                    ),
+                    executor.submit(
+                        self.map_tile.build,
+                        self.recipe_view.recipe,
+                        self.recipe_view.alert,
+                    ),
+                    executor.submit(
+                        self.dashboard_tile.build,
+                        self.recipe_view.recipe,
+                        self.recipe_view.alert,
+                    ),
+                ]
+                concurrent.futures.wait(futures)
         except Exception as e:
             # If something fails, I want to return the recipe to its original state
             self.recipe_view.recipe.__init__()

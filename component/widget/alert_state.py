@@ -5,14 +5,9 @@ from typing import Literal
 
 import sepal_ui.sepalwidgets as sw
 from ipyvuetify import Btn
-from traitlets import Dict, observe
 
 from component.message import cm
 
-Types = Literal["create", "load", "save"]
-Component = Literal["aoi", "questionnaire", "map", "dashboard", "load"]
-
-# Default trait values
 default_state = {
     "new": {
         "aoi": "waiting",
@@ -20,8 +15,24 @@ default_state = {
         "map": "waiting",
         "dashboard": "waiting",
     },
-    "load": {"all": "waiting"},
-    "save": {"all": "waiting"},
+    "load": {
+        "aoi": "waiting",
+        "questionnaire": "waiting",
+        "map": "waiting",
+        "dashboard": "waiting",
+    },
+    "reset": {
+        "aoi": "waiting",
+        "questionnaire": "waiting",
+        "map": "waiting",
+        "dashboard": "waiting",
+    },
+}
+
+icons = {
+    "building": "mdi-wrench",
+    "done": "mdi-checkbox-marked-circle",
+    "waiting": "mdi-clock-alert",
 }
 
 
@@ -35,66 +46,44 @@ class Alert(sw.Alert):
 class AlertState(Alert):
     """Custom alert component to inform the user the state of the building process."""
 
-    # Define traits
-    new = Dict(default_state["new"]).tag(sync=True)
-
-    load = Dict(default_state["load"]).tag(sync=True)
-
-    save = Dict(default_state["save"]).tag(sync=True)
-
-    def reset(self):
-        """reset traits and reset alert."""
-        self.new = default_state["new"]
-        self.load = default_state["load"]
-        self.save = default_state["save"]
-        super().reset()
-
-    def update_state(self, type_, component_id, state) -> None:
-        """Mutate and set new message by replacing."""
-        # Get the corresponding "line_message" component
-        message_component = next(
-            iter(self.get_children(attr="id", value=(type_ + component_id))), None
-        )
-
-        if not message_component:
-            message_component = TaskMsg(type_, component_id)
-            self.append_msg(message_component)
-
-        message_component.set_state(state)
-
-    @observe("new", "load", "save")
-    def update_messages(self, change):
-        """Update custom alert messages based on the UI type [new, load, save] state.
-
-        This method is called every time the traits of the class changes.
-        It will update the message of the corresponding "line_component".
-
-        """
-        for component_id, state in change["new"].items():
-            self.update_state(change["name"], component_id, state)
-
     def set_state(
         self,
-        type_: Types,
-        component,
-        value: Literal["building", "done", "waiting"],
+        type_: Literal["new", "load"],
+        component: Literal["aoi", "questionnaire", "map", "dashboard", "load", "all"],
+        state: Literal["building", "done", "waiting"],
     ):
-        """Set the done status of a component."""
-        state_trait = {
-            "new": self.new,
-            "load": self.load,
-            "save": self.save,
-        }
+        """Set a given state to a component on the given type_ (step)."""
+        if component == "all":
+            # get all the components for this type_
+            message_components = self.get_children(attr="type_", value=type_)
 
-        tmp_state = state_trait[type_].copy()
-        tmp_state[component] = value
+            # if there are not components, create them
+            if not message_components:
+                message_components = [
+                    TaskMsg(type_, component)
+                    for component in default_state[type_].keys()
+                ]
+                [
+                    self.append_msg(message_component)
+                    for message_component in message_components
+                ]
 
-        if type_ == "new":
-            self.new = tmp_state
-        elif type_ == "load":
-            self.load = tmp_state
-        elif type_ == "save":
-            self.save = tmp_state
+            # set the state to all the components
+            [
+                message_component.set_state(state)
+                for message_component in message_components
+            ]
+
+        else:
+            message_component = next(
+                iter(self.get_children(attr="id", value=(type_ + component))), None
+            )
+
+            if not message_component:
+                message_component = TaskMsg(type_, component)
+                self.append_msg(message_component)
+
+            message_component.set_state(state)
 
 
 class TaskMsg(sw.Flex):
@@ -106,7 +95,7 @@ class TaskMsg(sw.Flex):
         super().__init__()
         self.type_ = type_
         self.component_id = component_id
-        self.attributes = {"id": type_ + component_id}
+        self.attributes = {"id": type_ + component_id, "type_": type_}
         self.class_ = "d-flex"
         self.icon = sw.Icon(children=["mdi-circle"], color="info")
 
@@ -114,12 +103,6 @@ class TaskMsg(sw.Flex):
 
     def set_state(self, state: Literal["building", "done", "error"]) -> None:
         """Sets a state (color) to the icon."""
-        icons = {
-            "building": "mdi-wrench",
-            "done": "mdi-checkbox-marked-circle",
-            "waiting": "mdi-clock-alert",
-        }
-
         self.icon.children = [icons[state]]
 
         # Get the corresponding message for this component and state

@@ -27,44 +27,73 @@
             "hint" : "Save the current recipe",
             "desc" : "Save any changes done on during this session"
         },
-        "states" : {
-            "new" : {
-                "aoi" : {
-                    "building" : "Setting up AOI tile...",
-                    "done" : "AOI tile was successfully loaded.",
-                    "waiting" : "Waiting for AOI..."
+        "states": {
+            "new": {
+                "aoi": {
+                    "building": "Setting up the AOI tile...",
+                    "done": "AOI tile loaded successfully.",
+                    "waiting": "Waiting for the AOI tile..."
                 },
-                "questionnaire" : {
-                    "building" : "Setting up questionnaire tile...",
-                    "done" : "Questionnaire tile was successfully loaded.",
-                    "waiting" : "Waiting for questionnaire..."
+                "questionnaire": {
+                    "building": "Setting up the questionnaire tile...",
+                    "done": "Questionnaire tile loaded successfully.",
+                    "waiting": "Waiting for the questionnaire tile..."
                 },
-                "map" : {
-                    "building" : "Setting up map tile...",
-                    "done" : "Map tile was successfully loaded.",
-                    "waiting" : "Waiting for map..."
+                "map": {
+                    "building": "Setting up the map tile...",
+                    "done": "Map tile loaded successfully.",
+                    "waiting": "Waiting for the map tile..."
                 },
-                "dashboard" : {
-                    "building" : "Setting up dashboard tile...",
-                    "done" : "Dashboard tile was successfully loaded",
-                    "waiting" : "Waiting for dashboard..."
+                "dashboard": {
+                    "building": "Setting up the dashboard tile...",
+                    "done": "Dashboard tile loaded successfully.",
+                    "waiting": "Waiting for the dashboard tile..."
                 }
             },
-            "load" : {
-                "all" : {
-                    "waiting" : "Waiting for recipe...",
-                    "done" : "Recipe data was successfully imported."
+            "load": {
+                "aoi": {
+                    "building": "Importing the area of interest...",
+                    "done": "Area of interest loaded successfully."
+                },
+                "questionnaire": {
+                    "building": "Importing layers for benefits, constraints, and costs...",
+                    "done": "Questionnaire layers loaded successfully."
+                },
+                "map": {
+                    "building": "Importing custom geometries to the map...",
+                    "done": "Map geometries loaded successfully."
+                },
+                "dashboard": {
+                    "building": "Importing the dashboard...",
+                    "done": "Dashboard loaded successfully."
                 }
             },
-            "save" : {
-                "all" : {
-                    "waiting" : "Waiting for recipe...",
-                    "done" : "Recipe data was successfully saved."
+            "reset": {
+                "aoi": {
+                    "building": "Resetting AOI tile to default values...",
+                    "done": "AOI tile reset to default values successfully."
+                },
+                "questionnaire": {
+                    "building": "Resetting questionnaire tile to default values...",
+                    "done": "Questionnaire tile reset to default values successfully."
+                },
+                "map": {
+                    "building": "Resetting map tile to default values...",
+                    "done": "Map tile reset to default values successfully."
+                },
+                "dashboard": {
+                    "building": "Resetting dashboard tile to default values...",
+                    "done": "Dashboard tile reset to default values successfully."
+                }
+            },
+            "save": {
+                "all": {
+                    "waiting": "Waiting for the recipe...",
+                    "done": "Recipe data saved successfully."
                 }
             }
-
         },
-        "error" : {
+            "error" : {
             "no_seplan" : "There is no nothing to save, please create and existing recipe or load an existing one.",
             "no_name" : "Please set a name for the recipe."
         }
