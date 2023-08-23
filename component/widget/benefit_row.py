@@ -63,6 +63,7 @@ class BenefitRow(sw.Html):
         self.theme = self.model.themes[idx]
         self.weight = self.model.weights[idx]
 
+    @sd.catch_errors(debug=True)
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
         ee_image = asset_to_image(self.asset)
