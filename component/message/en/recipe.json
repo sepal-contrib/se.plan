@@ -86,12 +86,7 @@
                     "done": "Dashboard tile reset to default values successfully."
                 }
             },
-            "save": {
-                "all": {
-                    "waiting": "Waiting for the recipe...",
-                    "done": "Recipe data saved successfully."
-                }
-            }
+            "save": "Recipe saved successfully as {}."
         },
             "error" : {
             "no_seplan" : "There is no nothing to save, please create and existing recipe or load an existing one.",
