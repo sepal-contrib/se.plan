@@ -67,6 +67,9 @@ class AoiModel(AoiModel):
         # reset the default
         self.set_default(vector, admin, asset)
 
+        # Tell seplan_aoi to update their linked traits (feature collecction)
+        self.updated += 1
+
         return self
 
 
@@ -136,7 +139,7 @@ class SeplanAoi(model.Model):
 
     def reset(self):
         """Reset the aoi_model to its default values."""
-        self.aoi_model.clear_output()
+        self.aoi_model.clear_attributes()
         self.custom_layers = {"type": "FeatureCollection", "features": []}
 
         # I have to do this because I need to have an unique event on reset
