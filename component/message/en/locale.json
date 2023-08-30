@@ -10,6 +10,10 @@
 			"dashboard": "Restoration dashboard"
 		},
 		"about": "utils/ABOUT_en.md",
+		"recipe_state" : {
+			"saved": "saved!",
+			"unsaved": "unsaved..."
+		},
 		"banner": "The se.plan application is now exporting the dashboard in .csv format. You will find it in the same folder as the recipe."
 	},
     "questionnaire": {

@@ -104,6 +104,7 @@ class SeplanMap(sm.SepalMap):
         if action == "created":
             # save_geom_dialog will be listening to this trait
             self.new_geom += 1
+            self.aoi_model.updated += 1
 
         elif action == "deleted":
             current_feats = deepcopy(self.custom_layers)

@@ -49,6 +49,7 @@ class CostModel(QuestionnaireModel):
 
         if update:
             self.updated += 1
+        self.new_changes += 1
 
     def add(self, name: str, id: str, asset: str, desc: str) -> None:
         """add a cost and trigger the update."""
@@ -59,6 +60,7 @@ class CostModel(QuestionnaireModel):
         self.units.append(self._unit)
 
         self.updated += 1
+        self.new_changes += 1
 
     def update(self, name: str, id: str, asset: str, desc: str) -> None:
         """update an existing cost metadata and trigger the update."""
@@ -71,6 +73,7 @@ class CostModel(QuestionnaireModel):
         self.units[idx] = self._unit
 
         self.updated += 1
+        self.new_changes += 1
 
     def reset(self):
         """Reset the model to its default values."""
@@ -83,3 +86,4 @@ class CostModel(QuestionnaireModel):
         self.__init__()
 
         self.updated += 1
+        self.new_changes = 0

@@ -83,6 +83,9 @@ class SeplanAoi(model.Model):
     reset_view = Int(0).tag(sync=True)
     """int: This trait is listened by the custom AOI view, and will reset the view"""
 
+    updated = Int(0).tag(sync=True)
+    """int: this trait will be updated every time the aoi_model is updated"""
+
     def __init__(self, **kwargs):
         # test_countries:
         # Multiple polygon country: 220
@@ -95,6 +98,7 @@ class SeplanAoi(model.Model):
     def on_aoi_change(self, change):
         """Update the feature_collection when the aoi_model.name is updated."""
         self.feature_collection = self.aoi_model.feature_collection
+        self.updated += 1
 
     def get_ee_features(self) -> Dict:
         """Returns a dictionary of current AOI layers, where name is the key."""

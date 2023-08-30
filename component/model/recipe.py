@@ -3,6 +3,7 @@ from pathlib import Path
 
 import ee
 from sepal_ui.scripts.warning import SepalWarning
+from traitlets import HasTraits, Int
 
 import component.parameter as cp
 from component import model as cmod
@@ -14,14 +15,18 @@ from component.scripts.seplan import Seplan
 ee.Initialize()
 
 
-class Recipe:
+class Recipe(HasTraits):
     # Set types
     aoi_model: SeplanAoi
     benefit_model: cmod.BenefitModel
     constraint_model: cmod.ConstraintModel
     cost_model: cmod.CostModel
 
+    new_changes = Int().tag(sync=True)
+    """A counter that is incremented every time any of the app model changes. This trait is linked to the app_model, so we can show messaages on the app_bar"""
+
     def __init__(self):
+        super().__init__()
         self.seplan_aoi = None
         self.benefit_model = None
         self.constraint_model = None
@@ -38,7 +43,20 @@ class Recipe:
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )
 
+        # link the new_changes counter to the models
+        self.seplan_aoi.observe(self.update_changes, "updated")
+        # Icall them "new_changes" because there's another "updated" trait that is
+        # used to trigger the update of the view of these models.
+        self.benefit_model.observe(self.update_changes, "new_changes")
+        self.constraint_model.observe(self.update_changes, "new_changes")
+        self.cost_model.observe(self.update_changes, "new_changes")
+
         return self
+
+    def update_changes(self, change):
+        """Increment the new_changes counter by 1."""
+        print(change)
+        self.new_changes += 1
 
     def load(self, recipe_path: str):
         """Load the recipe element in the different element of the app."""
@@ -53,6 +71,8 @@ class Recipe:
         self.benefit_model.import_data(data["benefits"])
         self.constraint_model.import_data(data["constraints"])
         self.cost_model.import_data(data["costs"])
+
+        self.new_changes = 0
 
     def save(self, full_recipe_path: str):
         """Save the recipe in a json file with a timestamp."""
@@ -71,16 +91,21 @@ class Recipe:
 
             json.dump(data, f, indent=4)
 
+        self.new_changes = 0
+
         return full_recipe_path
 
     def reset(self):
         """Reset the recipe to its default values."""
         # Each of the models will return to its default values and
         # they'll update their respective views by themselves
+
         self.seplan_aoi.reset()
         self.benefit_model.reset()
         self.constraint_model.reset()
         self.cost_model.reset()
+
+        self.new_changes = 0
 
     def get_recipe_path(self, recipe_name: str):
         """generate full recipe path."""

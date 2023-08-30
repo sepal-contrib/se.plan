@@ -55,6 +55,7 @@ class ConstraintModel(QuestionnaireModel):
 
         if update:
             self.updated += 1
+        self.new_changes += 1
 
     def add(
         self,
@@ -77,6 +78,7 @@ class ConstraintModel(QuestionnaireModel):
         self.data_type.append(data_type)
 
         self.updated += 1
+        self.new_changes += 1
 
     def update(
         self,
@@ -100,11 +102,14 @@ class ConstraintModel(QuestionnaireModel):
         self.data_type[idx] = data_type
 
         self.updated += 1
+        self.new_changes += 1
 
     def update_value(self, id: str, value: list) -> None:
         """Update the value of a specific constraint."""
         idx = self.get_index(id)
+
         self.values[idx] = value
+        self.new_changes += 1
 
     def reset(self):
         """Reset the model to its default values."""
@@ -118,4 +123,6 @@ class ConstraintModel(QuestionnaireModel):
         self.data_type = []
 
         self.__init__()
+
         self.updated += 1
+        self.new_changes = 0

@@ -52,6 +52,7 @@ class BenefitModel(QuestionnaireModel):
 
         if update:
             self.updated += 1
+        self.new_changes += 1
 
     def add(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
@@ -66,6 +67,7 @@ class BenefitModel(QuestionnaireModel):
         self.units.append(unit)
 
         self.updated += 1
+        self.new_changes += 1
 
     def update(
         self, theme: str, name: str, id: str, asset: str, desc: str, unit: str
@@ -81,11 +83,14 @@ class BenefitModel(QuestionnaireModel):
         self.units[idx] = unit
 
         self.updated += 1
+        self.new_changes += 1
 
     def update_value(self, id: str, value: list) -> None:
         """Update the value of a specific benefit."""
         idx = self.get_index(id)
+
         self.weights[idx] = value
+        self.new_changes += 1
 
     def reset(self):
         """Reset the model to its default values."""
@@ -98,4 +103,6 @@ class BenefitModel(QuestionnaireModel):
         self.units = []
 
         self.__init__()
+
         self.updated += 1
+        self.new_changes = 0
