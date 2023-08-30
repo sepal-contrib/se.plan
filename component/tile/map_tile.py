@@ -59,7 +59,7 @@ class MapTile(sw.Layout):
 
         build_alert.set_state("new", "map", "done")
 
-        self.recipe.seplan_aoi.aoi_model.observe(self._update_aoi, "updated")
+        self.recipe.seplan_aoi.observe(self._update_aoi, "updated")
 
         # This will open the info dialog when the map_tile drawer is clicked
         if self.app_model:
