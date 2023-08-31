@@ -143,5 +143,5 @@ class SeplanAoi(model.Model):
         self.custom_layers = {"type": "FeatureCollection", "features": []}
 
         # I have to do this because I need to have an unique event on reset
-        # that resets the view as well
+        # that resets the view, We can use this event to reset the map as well...
         self.reset_view += 1

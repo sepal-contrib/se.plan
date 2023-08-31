@@ -51,6 +51,8 @@ class SeplanMap(sm.SepalMap):
         # It has to be two way, so we can load the data by just updating the model
         link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
 
+        self.aoi_model.observe(self.reset, "reset_view")
+
     def on_custom_layers(self, *_):
         """Event triggered when there are new custom layers (created by user).
 
@@ -127,3 +129,7 @@ class SeplanMap(sm.SepalMap):
         self.html.children = [name]
 
         return self
+
+    def reset(self, change):
+        """Reset the map view (remove all the layers)."""
+        self.remove_all()

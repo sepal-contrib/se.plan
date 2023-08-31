@@ -60,6 +60,13 @@ class DashboardTile(sw.Layout):
         self.overall_dash.set_summary(summary_stats)
         self.theme_dash.set_summary(summary_stats)
 
+    def reset(self):
+        """Reset the dashboard to its initial state."""
+        print("resettig the dashboard")
+
+        self.overall_dash.reset()
+        self.theme_dash.reset()
+
         # # save the dashboard as a csv
         # cs.export_as_csv(
         #     self.area_dashboard,
@@ -69,16 +76,15 @@ class DashboardTile(sw.Layout):
         # )
 
 
-class ThemeDashboard(sw.Tile):
+class ThemeDashboard(sw.Card):
     def __init__(self):
-        sw.Markdown(cm.dashboard.theme.txt)
+        super().__init__()
 
-        # TODO for no reason this alert is shared between DashThemeTile and
-        # DashRegionTile. that's a wanted behaviour but I would like to have more control over it
-        alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
+        self.title = sw.CardTitle(children=[cm.dashboard.theme.title])
+        self.content = sw.CardText()
+        self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
 
-        # create the tile
-        super().__init__(id_=ID, title=cm.dashboard.theme.title, alert=alert)
+        self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats):
         # Extract the aoii names and color from summary_stats
@@ -133,17 +139,26 @@ class ThemeDashboard(sw.Tile):
         ep = v.ExpansionPanels(children=[ben_panel, cost_panel, const_panel])
         ep.value = 1
 
-        self.set_content([ep])
+        self.content.children = [ep]
 
         # hide the alert
         self.alert.reset()
 
         return self
 
+    def reset(self):
+        """Reset the dashboard to its initial state."""
+        self.__init__()
 
-class OverallDashboard(sw.Tile):
+
+class OverallDashboard(sw.Card):
     def __init__(self):
-        super().__init__(id_=ID, title=cm.dashboard.region.title)
+        super().__init__()
+        self.title = sw.CardTitle(children=[cm.dashboard.region.title])
+        self.content = sw.CardText()
+        self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
+
+        self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats: List[Dict]):
         feats = []
@@ -152,7 +167,10 @@ class OverallDashboard(sw.Tile):
             values = aoi_data[next(iter(aoi_data))]["suitability"]["values"]
             feats.append(cw.AreaSumUp(aoi_name, self.format_values(values)))
 
-        self.set_content(feats)
+        self.content.children = feats
+
+        # hide the alert
+        self.alert.reset()
 
         return self
 
@@ -163,3 +181,7 @@ class OverallDashboard(sw.Tile):
             out_values.append(index_i)
 
         return out_values
+
+    def reset(self):
+        """Reset the dashboard to its initial state."""
+        self.__init__()
