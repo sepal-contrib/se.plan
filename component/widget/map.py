@@ -132,4 +132,6 @@ class SeplanMap(sm.SepalMap):
 
     def reset(self, change):
         """Reset the map view (remove all the layers)."""
+        self.center = [0, 0]
+        self.zoom = 3
         self.remove_all()

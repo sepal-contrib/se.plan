@@ -91,6 +91,7 @@ class MapTile(sw.Layout):
         )
         constraint_index = self.recipe.seplan.get_constraint_index(clip=True)
 
+        self.map_.centerObject(self.recipe.seplan_aoi.feature_collection, zoom_out=3)
         self.map_.add_ee_layer(benefit_index, cp.final_viz, "benefit index")
         self.map_.add_ee_layer(benefit_cost_index, cp.final_viz, "benefit_cost index")
         self.map_.add_ee_layer(constraint_index, cp.final_viz, "constraint_index")
