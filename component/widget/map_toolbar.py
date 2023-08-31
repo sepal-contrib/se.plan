@@ -41,11 +41,11 @@ class MapToolbar(sw.Toolbar):
             color="primary",
         ).set_tooltip(cm.map.toolbar.tooltip.download, right=True, max_width="200px")
 
-        self.btn_load = sw.Btn(
-            gliph="mdi-upload",
-            icon=True,
-            color="primary",
-        ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
+        # self.btn_load = sw.Btn(
+        #     gliph="mdi-upload",
+        #     icon=True,
+        #     color="primary",
+        # ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
 
         self.btn_info = sw.Btn(
             gliph="fa-regular fa-circle-question",
@@ -56,7 +56,7 @@ class MapToolbar(sw.Toolbar):
         self.children = [
             # Main buttons
             self.btn_draw,
-            self.btn_load.with_tooltip,
+            # self.btn_load.with_tooltip,
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
@@ -73,7 +73,7 @@ class MapToolbar(sw.Toolbar):
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
-        self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
+        # self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
 
         self.btn_draw.on_event("new", self.on_draw)
