@@ -149,6 +149,8 @@ class MapInfoDialog(BaseDialog):
     def __init__(self) -> None:
         super().__init__()
 
+        self.well_read = False
+
         description = sw.Markdown("  \n".join(cm.map.txt))
         btn_close = sw.Btn(
             "Close",
@@ -167,4 +169,9 @@ class MapInfoDialog(BaseDialog):
             ),
         ]
 
-        btn_close.on_event("click", self.close_dialog)
+        btn_close.on_event("click", self.manual_close_dialog)
+
+    def manual_close_dialog(self, *args):
+        """Close the dialog and also update a trait so we can know that user already saw the info."""
+        self.well_read = True
+        self.close_dialog()

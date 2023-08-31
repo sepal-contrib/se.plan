@@ -72,10 +72,16 @@ class MapTile(sw.Layout):
     def open_info_dialog(self, change):
         """Open the info dialog when the map_tile app drawer is clicked."""
         if change["new"] == "map_tile":
+            # I just want to open the dialog once, so I remove the observer
+            # but only when I'm sure the user has read the content and closed the dialog.
+            if self.map_toolbar.info_dialog.well_read:
+                self.app_model.unobserve(self.open_info_dialog, "active_drawer")
+                return
+
             self.map_toolbar.info_dialog.open_dialog()
 
-            # I just want to open the dialog once, so I remove the observer
-            self.app_model.unobserve(self.open_info_dialog, "active_drawer")
+        else:
+            self.map_toolbar.info_dialog.close_dialog()
 
     def _update_aoi(self, *_):
         """Update the map when the aoi is updated."""
