@@ -395,7 +395,7 @@ class RecipeTile(sw.Layout):
         directional_link(
             (self.recipe_view.recipe, "new_changes"), (self.app_model, "new_changes")
         )
-
+        
     def render(self, *_):
         """Render all the different tiles.
 

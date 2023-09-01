@@ -83,6 +83,18 @@ class MapTile(sw.Layout):
         else:
             self.map_toolbar.info_dialog.close_dialog()
 
+        # This will open the info dialog when the map_tile drawer is clicked
+        if self.app_model:
+            self.app_model.observe(self.open_info_dialog, "active_drawer")
+
+    def open_info_dialog(self, change):
+        """Open the info dialog when the map_tile app drawer is clicked."""
+        if change["new"] == "map_tile":
+            self.map_toolbar.info_dialog.open_dialog()
+
+            # I just want to open the dialog once, so I remove the observer
+            self.app_model.unobserve(self.open_info_dialog, "active_drawer")
+
     def _update_aoi(self, *_):
         """Update the map when the aoi is updated."""
         aoi = self.recipe.seplan_aoi.feature_collection
