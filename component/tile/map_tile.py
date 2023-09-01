@@ -36,7 +36,7 @@ class MapTile(sw.Layout):
         alert_dialog = AlertDialog(self.alert)
 
         self.map_ = SeplanMap(recipe.seplan_aoi)
-        self.map_toolbar = MapToolbar(model=self.recipe.seplan, map_=self.map_)
+        self.map_toolbar = MapToolbar(recipe=self.recipe, map_=self.map_)
 
         # init the final layers
         self.wlc_outputs = None

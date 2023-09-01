@@ -5,7 +5,7 @@ from traitlets import Bool
 
 from component import widget as cw
 from component.message import cm
-from component.scripts.seplan import Seplan
+from component.model.recipe import Recipe
 from component.widget.base_dialog import BaseDialog
 from component.widget.map import SeplanMap
 
@@ -13,16 +13,16 @@ from component.widget.map import SeplanMap
 class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
-    def __init__(self, model: Seplan, map_: SeplanMap, *args, **kwargs) -> None:
+    def __init__(self, recipe: Recipe, map_: SeplanMap, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.attributes = {"id": "map_toolbar"}
-        self.model = model
+        self.recipe = recipe
         self.map_ = map_
 
         # Dialogs
         self.save_geom_dialog = cw.CustomAoiDialog(self.map_)
-        self.download_map_dialog = cw.ExportMapDialog()
+        self.download_map_dialog = cw.ExportMapDialog(self.recipe)
         self.load_shape_dialog = cw.LoadDialog(self.map_)
         self.info_dialog = MapInfoDialog()
 

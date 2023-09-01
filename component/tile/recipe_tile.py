@@ -167,6 +167,10 @@ class RecipeView(sw.Card):
             (self.load_dialog, "load_recipe_path"), (self, "load_recipe_path")
         )
 
+        directional_link(
+            (self, "recipe_session_path"), (self.recipe, "recipe_session_path")
+        )
+
         # link the current session path with save_card.recipe_name
         self.observe(self.session_path_handler, "recipe_session_path")
 
