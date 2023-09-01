@@ -1,7 +1,5 @@
-from .questionnaire_tile import *
-from .map_tile import *
-from .compute_tile import *
-from .dashboard_tile import *
+"""Import all components from tiles into this namespace."""
 from .custom_aoi_tile import *
-from .cost_tile import *
-from .dashboard_alert import *
+from .dashboard_tile import *
+from .map_tile import *
+from .questionnaire_tile import *

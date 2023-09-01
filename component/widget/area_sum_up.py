@@ -7,13 +7,11 @@ from component.message import cm
 
 
 class AreaSumUp(v.Layout):
-
     NAMES = cm.dashboard.region.names
     COLORS = cp.gradient(5) + cp.no_data_color
     POTENTIALS = cm.dashboard.region.potentials
 
     def __init__(self, title, surfaces=[0] * 6):
-
         # get the total surface for ratio
         total_surface = sum(surfaces)
 
@@ -23,7 +21,6 @@ class AreaSumUp(v.Layout):
         # create a matplotlib stack horizontal bar chart
         chart = Output()
         with chart:
-
             # create the chart
             fig, ax = plt.subplots(figsize=[50, 2], facecolor=((0, 0, 0, 0)))
 
@@ -51,7 +48,6 @@ class AreaSumUp(v.Layout):
         self.rows = []
         params = zip(self.COLORS, self.POTENTIALS, surfaces, norm_surfaces)
         for clr, ptl, val, norm in params:
-
             tds = [
                 v.Html(tag="td", children=[ptl], style_=f"color: {clr}"),
                 v.Html(tag="td", class_="text-right", children=[f"{float(val):,.1f}"]),

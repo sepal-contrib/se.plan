@@ -1,15 +1,14 @@
-from sepal_ui import color as scolor
-from sepal_ui import sepalwidgets as sw
 import pandas as pd
 from ipywidgets import Output
 from matplotlib import pyplot as plt
+from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
 from component.message import cm
 
+
 # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
 def human_format(num, round_to=2):
-
     magnitude = 0
     while abs(num) >= 1000:
         magnitude += 1
@@ -21,10 +20,10 @@ def human_format(num, round_to=2):
 
 
 class LayerFull(sw.Layout):
-    def __init__(self, layer_id, values, aoi_names, colors):
-
+    def __init__(self, layer_id, values, names_colors):
         # add one extra color for the AOI
-        colors = [c for c in reversed([scolor.primary] + colors)]
+
+        aoi_names, colors = zip(*names_colors)
 
         # get the layer labels from the translator object
         t_layer = getattr(cm.layers, layer_id)
@@ -50,7 +49,6 @@ class LayerFull(sw.Layout):
         # create a matplotlib stack horizontal bar chart
         w_chart = Output()
         with w_chart:
-
             # change pyplot style
             plt.style.use("dark_background")
 
@@ -87,17 +85,16 @@ class LayerFull(sw.Layout):
 
 
 class LayerPercentage(sw.Layout):
-    def __init__(self, layer_id, pcts, colors):
-
+    def __init__(self, layer_id, pcts, names_colors):
         # add one extra color for the AOI
-        colors = [scolor.primary] + colors
+        colors = [color for _, color in names_colors]
 
         # get the layer labels from the translator object
         t_layer = getattr(cm.layers, layer_id)
 
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_row = layer_list[layer_list.layer_id == layer_id].squeeze()
+        layer_list[layer_list.layer_id == layer_id].squeeze()
 
         # deal with land_use special case
         if layer_id in [*cp.land_use_criterias]:
@@ -110,7 +107,7 @@ class LayerPercentage(sw.Layout):
                 "unit",
             ]
             content = ["", "", layer_id, "", layer_id, "HA"]
-            layer_row = pd.Series(dict(zip(columns, content)))
+            pd.Series(dict(zip(columns, content)))
 
         # add the title
         w_title = sw.Html(tag="h4", children=[t_layer.name])

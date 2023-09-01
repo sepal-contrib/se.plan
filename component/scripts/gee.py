@@ -1,44 +1,70 @@
+from typing import Literal, Union
+
 import ee
-import time
-import sys
-
-ee.Initialize()
-
-STATUS = "Status: {}"
+from sepal_ui import mapping as sm
 
 
-def wait_for_completion(task_descripsion, widget_alert):
-    """Wait until the selected process is finished. Display some output information
+def get_layer(
+    image: ee.Image, vis_params: dict, name: str, visible: bool
+) -> sm.layer.EELayer:
+    map_id_dict = ee.Image(image).getMapId(vis_params)
+
+    return sm.layer.EELayer(
+        ee_object=image,
+        url=map_id_dict["tile_fetcher"].url_format,
+        attribution="Google Earth Engine",
+        name=name,
+        opacity=1,
+        visible=visible,
+        max_zoom=24,
+    )
+
+
+def get_limits(
+    asset: str,
+    data_type: Literal["binary", "continuous", "categorical"],
+    aoi: Union[ee.FeatureCollection, ee.Geometry],
+    factor: int = 2,
+) -> list:
+    """Computes limits or histogram keys for the given Earth Engine image based on the specified data type.
 
     Args:
-        task_descripsion (str) : name of the running task
-        widget_alert (v.Alert) : alert to display the output messages
+        asset (str): Google Earth Engine asset ID.
+        data_type (str): Either 'binary', 'continuous', or any other type indicating the type of data processing.
+        aoi (ee.Geometry): Area of interest.
+        band_index (int, optional): Band index to select from the image. Defaults to 0.
+        factor (int, optional): Factor to multiply the nominal scale of the image. Defaults to 2 (i.e. 2x the nominal scale
+
+    Returns:
+        list: A list containing either min-max values or histogram keys depending on the data_type.
     """
-    state = "UNSUBMITTED"
-    while state != "COMPLETED":
-        widget_alert.add_live_msg(STATUS.format(state))
-        time.sleep(5)
+    if data_type in ["binary", "continuous"]:
+        reducer = ee.Reducer.minMax()
 
-        # search for the task in task_list
-        current_task = isTask(task_descripsion)
-        state = current_task.state
+        def get_value(reduction):
+            return list(reduction.getInfo().values())
 
+    else:
+        reducer = ee.Reducer.frequencyHistogram()
 
-def isTask(task_descripsion):
-    """Search for the described task in the user Task list return None if nothing is find
+        def get_value(reduction):
+            return (
+                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0)))
+                .keys()
+                .getInfo()
+            )
 
-    Args:
-        task_descripsion (str): the task descripsion
+    ee_image = ee.Image(asset).select(0)
 
-    Returns
-        task (ee.Task) : return the found task else None
-    """
-
-    tasks_list = ee.batch.Task.list()
-    current_task = None
-    for task in tasks_list:
-        if task.config["description"] == task_descripsion:
-            current_task = task
-            break
-
-    return current_task
+    values = get_value(
+        ee_image.reduceRegion(
+            reducer=reducer,
+            geometry=aoi,
+            scale=ee_image.projection().nominalScale().multiply(factor),
+            maxPixels=1e13,
+        )
+    )
+    # depending on the scale, values from the histogram can be floats, we'll
+    # convert them to integers... sometimes we'll show more values than the
+    # asset really has
+    return sorted(set(int(float(val)) for val in values))

@@ -3,13 +3,16 @@ no_data_color = ["#353535"]  # the color used for values filtered by constraints
 
 
 def hex_to_RGB(hex):
-    """ "#FFFFFF" -> [255,255,255]"""
+    """Changes from hex to RGB.
+
+    #FFFFFF -> [255,255,255].
+    """
     # Pass 16 to the integer function for change of base
     return [int(hex[i : i + 2], 16) for i in range(1, 6, 2)]
 
 
 def RGB_to_hex(RGB):
-    '''[255,255,255] -> "#FFFFFF"'''
+    """[255,255,255] -> "#FFFFFF"."""
     # Components need to be integers for hex to make sense
     RGB = [int(x) for x in RGB]
 
@@ -19,11 +22,10 @@ def RGB_to_hex(RGB):
 
 
 def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
-    """
-    Returns a gradient list of (n) colors between two hex colors.
-    start_hex and finish_hex should be the full six-digit color string, inlcuding the number sign ("#FFFFFF")
-    """
+    """Returns a gradient list of (n) colors between two hex colors.
 
+    start_hex and finish_hex should be the full six-digit color string, inlcuding the number sign ("#FFFFFF").
+    """
     # Starting and ending colors in RGB form
     s = hex_to_RGB(start_hex)
     f = hex_to_RGB(finish_hex)
@@ -33,7 +35,6 @@ def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
 
     # Calcuate a color at each evenly spaced value of t from 1 to n
     for t in range(1, n):
-
         # Interpolate RGB vector for color at the current value of t
         curr_vector = []
         for j in range(3):
@@ -46,19 +47,15 @@ def linear_gradient(start_hex, finish_hex="#FFFFFF", n=10):
 
 
 def color_dict(gradient):
-    """
-    Takes in a list of RGB sub-lists and returns dictionary of colors in Hex
-    """
-
+    """Takes in a list of RGB sub-lists and returns dictionary of colors in Hex."""
     return [RGB_to_hex(RGB) for RGB in gradient]
 
 
 def gradient(n, colors=red_to_green):
-    """
-    Returns a list of colors forming linear gradients between all sequential pairs of colors.
-    "n" specifies the total number of desired output colors
-    """
+    """Returns a list of colors forming linear gradients between all sequential pairs of colors.
 
+    "n" specifies the total number of desired output colors.
+    """
     # The number of colors per individual linear gradient
     n_out = int(float(n) / (len(colors) - 1))
 

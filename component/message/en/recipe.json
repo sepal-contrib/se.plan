@@ -1,0 +1,97 @@
+{
+    "recipe": {
+        "title": "Load an existing recipe",
+        "load": {
+            "title" :"Load recipe",
+            "desc" : "Load a recipe created from a previous session.",
+            "btn" : "Load",
+            "hint" : "Load an existing recipe",
+            "dialog" : {
+                "title" : "Load a recipe",
+                "desc" : "Select a recipe to load",
+                "cancel" : "Cancel",
+                "load" : "Load"
+            }
+        },
+        "new": {
+            "title" :"New recipe",
+            "desc" : "Create a new recipe for this session.",
+            "btn" : "New",
+            "text_field_label" : "Recipe name",
+            "hint" : "Set a name for the new recipe"
+        },
+        "save": {
+            "title" :"Save recipe",
+            "btn" : "Save",
+            "text_field_label" : "Recipe name",
+            "hint" : "Save the current recipe",
+            "desc" : "Save any changes done on during this session"
+        },
+        "states": {
+            "new": {
+                "aoi": {
+                    "building": "Setting up the AOI tile...",
+                    "done": "AOI tile loaded successfully.",
+                    "waiting": "Waiting for the AOI tile..."
+                },
+                "questionnaire": {
+                    "building": "Setting up the questionnaire tile...",
+                    "done": "Questionnaire tile loaded successfully.",
+                    "waiting": "Waiting for the questionnaire tile..."
+                },
+                "map": {
+                    "building": "Setting up the map tile...",
+                    "done": "Map tile loaded successfully.",
+                    "waiting": "Waiting for the map tile..."
+                },
+                "dashboard": {
+                    "building": "Setting up the dashboard tile...",
+                    "done": "Dashboard tile loaded successfully.",
+                    "waiting": "Waiting for the dashboard tile..."
+                }
+            },
+            "load": {
+                "aoi": {
+                    "building": "Importing the area of interest...",
+                    "done": "Area of interest loaded successfully."
+                },
+                "questionnaire": {
+                    "building": "Importing layers for benefits, constraints, and costs...",
+                    "done": "Questionnaire layers loaded successfully."
+                },
+                "map": {
+                    "building": "Importing custom geometries to the map...",
+                    "done": "Map geometries loaded successfully."
+                },
+                "dashboard": {
+                    "building": "Importing the dashboard...",
+                    "done": "Dashboard loaded successfully."
+                }
+            },
+            "reset": {
+                "aoi": {
+                    "building": "Resetting AOI tile to default values...",
+                    "done": "AOI tile reset to default values successfully."
+                },
+                "questionnaire": {
+                    "building": "Resetting questionnaire tile to default values...",
+                    "done": "Questionnaire tile reset to default values successfully."
+                },
+                "map": {
+                    "building": "Resetting map tile to default values...",
+                    "done": "Map tile reset to default values successfully."
+                },
+                "dashboard": {
+                    "building": "Resetting dashboard tile to default values...",
+                    "done": "Dashboard tile reset to default values successfully."
+                }
+            },
+            "save": "Recipe saved successfully as {}."
+        },
+            "error" : {
+            "no_seplan" : "There is no nothing to save, please create and existing recipe or load an existing one.",
+            "no_name" : "Please set a name for the recipe."
+        }
+
+    }
+}

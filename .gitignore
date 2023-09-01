@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*[Uu]ntitled*
+
+test*.ipynb
 
 # C extensions
 *.so
@@ -128,5 +131,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# IDE specific ignore 
+# IDE specific ignore
 .vscode/

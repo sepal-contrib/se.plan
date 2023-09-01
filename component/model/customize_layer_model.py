@@ -1,5 +1,3 @@
-import random
-
 import pandas as pd
 from sepal_ui import model
 from traitlets import Any
@@ -10,7 +8,6 @@ layer_list = pd.read_csv(cp.layer_list).fillna("")
 
 
 class CustomizeLayerModel(model.Model):
-
     layer_list = Any(
         [
             {
@@ -26,7 +23,6 @@ class CustomizeLayerModel(model.Model):
     ).tag(sync=True)
 
     def export_data(self):
-
         # remove eeimage parameter from every layer as it is not serializable
         [layer.pop("eeimage", None) for layer in self.layer_list]
 

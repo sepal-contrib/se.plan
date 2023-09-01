@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
+import io
+import logging
 from pathlib import Path
 
 import ee
-import io
-from googleapiclient.http import MediaIoBaseDownload
 from apiclient import discovery
-
-import logging
+from googleapiclient.http import MediaIoBaseDownload
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
 
 class gdrive(object):
     def __init__(self):
-
         self.initialize = ee.Initialize()
         self.credentials = ee.Credentials()
         self.service = discovery.build(
@@ -24,7 +22,7 @@ class gdrive(object):
         )
 
     def tasks_list(self):
-        """for debugging purpose, print the list of all the tasks in gee"""
+        """for debugging purpose, print the list of all the tasks in gee."""
         service = self.service
 
         tasks = service.tasks().list(tasklist="@default", q="trashed = false").execute()
@@ -33,7 +31,7 @@ class gdrive(object):
             print(task["title"])
 
     def print_file_list(self):
-        """for debugging purpose, print the list of all the file in the Gdrive"""
+        """for debugging purpose, print the list of all the file in the Gdrive."""
         service = self.service
 
         results = (
@@ -50,8 +48,7 @@ class gdrive(object):
                 print("{0} ({1})".format(item["name"], item["id"]))
 
     def get_items(self, mimeType="image/tiff"):
-        """get all the items in the Gdrive, items will have 2 columns, 'name' and 'id'"""
-
+        """get all the items in the Gdrive, items will have 2 columns, 'name' and 'id'."""
         service = self.service
 
         # get list of files
@@ -69,8 +66,7 @@ class gdrive(object):
         return items
 
     def get_files(self, file_name):
-        """look for the file_name patern in my Gdrive files and retreive a list of Ids"""
-
+        """look for the file_name patern in my Gdrive files and retreive a list of Ids."""
         items = self.get_items()
         files = []
         for item in items:
@@ -80,8 +76,7 @@ class gdrive(object):
         return files
 
     def download_files(self, files, local_path):
-        """download the selected files to the selected local_path"""
-
+        """download the selected files to the selected local_path."""
         service = self.service
 
         # cast as path
@@ -106,7 +101,6 @@ class gdrive(object):
         return local_files
 
     def delete_files(self, files):
-
         service = self.service
 
         for f in files:

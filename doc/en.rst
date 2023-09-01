@@ -1075,3 +1075,5 @@ This tool has been developed by UN FAO in close collaboration with Spatial Infor
     :class: ma-1
     :alt: MAAF_logo
     :height: 100
+
+.. custom-edit:: https://raw.githubusercontent.com/sepal-contrib/se.plan/release/doc/en.rst
