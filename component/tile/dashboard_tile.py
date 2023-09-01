@@ -7,6 +7,7 @@ from sepal_ui.scripts import utils as su
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.compute import export_as_csv
 from component.scripts.statistics import get_summary_statistics, parse_theme_stats
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.custom_widgets import DashToolBar
@@ -17,10 +18,11 @@ ID = "dashboard_widget"
 
 class DashboardTile(sw.Layout):
     def __init__(self):
+        super().__init__()
+
         self._metadata = {"mount_id": "dashboard_tile"}
         self.class_ = "d-block"
-
-        super().__init__()
+        self.summary_stats = None
 
     def build(self, recipe: Recipe, build_alert: AlertState):
         """Build the dashboard tile."""
@@ -49,31 +51,31 @@ class DashboardTile(sw.Layout):
         )(self._dashboard)
 
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
+        dash_toolbar.btn_download.on_event("click", self.export_event)
 
         build_alert.set_state("new", "dashboard", "done")
 
+    def export_event(self, *_):
+        """Export the dashboard as a csv file."""
+        self.summary_stats = get_summary_statistics(self.recipe.seplan)
+
+        # save the dashboard as a csv
+        export_as_csv(self.recipe.recipe_session_path, self.summary_stats)
+
     def _dashboard(self, *_):
         """Compute the restoration plan and display the map."""
-        summary_stats = get_summary_statistics(self.recipe.seplan)
+        self.summary_stats = get_summary_statistics(self.recipe.seplan)
 
         # set the content of the panels
-        self.overall_dash.set_summary(summary_stats)
-        self.theme_dash.set_summary(summary_stats)
+        self.overall_dash.set_summary(self.summary_stats)
+        self.theme_dash.set_summary(self.summary_stats)
 
     def reset(self):
         """Reset the dashboard to its initial state."""
         print("resettig the dashboard")
-
+        self.summary_stats = None
         self.overall_dash.reset()
         self.theme_dash.reset()
-
-        # # save the dashboard as a csv
-        # cs.export_as_csv(
-        #     self.area_dashboard,
-        #     self.theme_dashboard,
-        #     self.aoi_model.name,
-        #     self.question_model.recipe_name,
-        # )
 
 
 class ThemeDashboard(sw.Card):
