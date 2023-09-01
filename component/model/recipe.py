@@ -25,7 +25,7 @@ class Recipe(HasTraits):
     new_changes = Int().tag(sync=True)
     """A counter that is incremented every time any of the app model changes. This trait is linked to the app_model, so we can show messaages on the app_bar"""
 
-    recipe_session_path = Unicode("").tag(sync=True)
+    recipe_session_path = Unicode("", allow_none=True).tag(sync=True)
     """The path to the recipe session file. This value will come from the recipe view, it will be used by the export csv function and to create the names of the assets to export"""
 
     def __init__(self):
