@@ -10,10 +10,10 @@
         "primary": {
           "type": "object",
           "properties": {
-            "admin": { "type": "string" },
+            "admin": { "type": ["string", "null"] },
             "asset_name": { "type": ["string", "null"] },
-            "method": { "type": "string" },
-            "name": { "type": "string" },
+            "method": { "type": ["string", "null"] },
+            "name": { "type": ["string", "null"] },
             "asset_json": { "type": ["string", "null"] },
             "vector_json": { "type": ["string", "null"] },
             "point_json": { "type": ["string", "null"] },

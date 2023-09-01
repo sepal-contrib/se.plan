@@ -7,6 +7,7 @@ from sepal_ui.scripts import utils as su
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.compute import export_as_csv
 from component.scripts.statistics import get_summary_statistics, parse_theme_stats
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.custom_widgets import DashToolBar
@@ -17,10 +18,11 @@ ID = "dashboard_widget"
 
 class DashboardTile(sw.Layout):
     def __init__(self):
+        super().__init__()
+
         self._metadata = {"mount_id": "dashboard_tile"}
         self.class_ = "d-block"
-
-        super().__init__()
+        self.summary_stats = None
 
     def build(self, recipe: Recipe, build_alert: AlertState):
         """Build the dashboard tile."""
@@ -49,36 +51,42 @@ class DashboardTile(sw.Layout):
         )(self._dashboard)
 
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
+        dash_toolbar.btn_download.on_event("click", self.export_event)
 
         build_alert.set_state("new", "dashboard", "done")
 
+    def export_event(self, *_):
+        """Export the dashboard as a csv file."""
+        self.summary_stats = get_summary_statistics(self.recipe.seplan)
+
+        # save the dashboard as a csv
+        export_as_csv(self.recipe.recipe_session_path, self.summary_stats)
+
     def _dashboard(self, *_):
         """Compute the restoration plan and display the map."""
-        summary_stats = get_summary_statistics(self.recipe.seplan)
+        self.summary_stats = get_summary_statistics(self.recipe.seplan)
 
         # set the content of the panels
-        self.overall_dash.set_summary(summary_stats)
-        self.theme_dash.set_summary(summary_stats)
+        self.overall_dash.set_summary(self.summary_stats)
+        self.theme_dash.set_summary(self.summary_stats)
 
-        # # save the dashboard as a csv
-        # cs.export_as_csv(
-        #     self.area_dashboard,
-        #     self.theme_dashboard,
-        #     self.aoi_model.name,
-        #     self.question_model.recipe_name,
-        # )
+    def reset(self):
+        """Reset the dashboard to its initial state."""
+        print("resettig the dashboard")
+        self.summary_stats = None
+        self.overall_dash.reset()
+        self.theme_dash.reset()
 
 
-class ThemeDashboard(sw.Tile):
+class ThemeDashboard(sw.Card):
     def __init__(self):
-        sw.Markdown(cm.dashboard.theme.txt)
+        super().__init__()
 
-        # TODO for no reason this alert is shared between DashThemeTile and
-        # DashRegionTile. that's a wanted behaviour but I would like to have more control over it
-        alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
+        self.title = sw.CardTitle(children=[cm.dashboard.theme.title])
+        self.content = sw.CardText()
+        self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
 
-        # create the tile
-        super().__init__(id_=ID, title=cm.dashboard.theme.title, alert=alert)
+        self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats):
         # Extract the aoii names and color from summary_stats
@@ -133,17 +141,26 @@ class ThemeDashboard(sw.Tile):
         ep = v.ExpansionPanels(children=[ben_panel, cost_panel, const_panel])
         ep.value = 1
 
-        self.set_content([ep])
+        self.content.children = [ep]
 
         # hide the alert
         self.alert.reset()
 
         return self
 
+    def reset(self):
+        """Reset the dashboard to its initial state."""
+        self.__init__()
 
-class OverallDashboard(sw.Tile):
+
+class OverallDashboard(sw.Card):
     def __init__(self):
-        super().__init__(id_=ID, title=cm.dashboard.region.title)
+        super().__init__()
+        self.title = sw.CardTitle(children=[cm.dashboard.region.title])
+        self.content = sw.CardText()
+        self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
+
+        self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats: List[Dict]):
         feats = []
@@ -152,7 +169,10 @@ class OverallDashboard(sw.Tile):
             values = aoi_data[next(iter(aoi_data))]["suitability"]["values"]
             feats.append(cw.AreaSumUp(aoi_name, self.format_values(values)))
 
-        self.set_content(feats)
+        self.content.children = feats
+
+        # hide the alert
+        self.alert.reset()
 
         return self
 
@@ -163,3 +183,7 @@ class OverallDashboard(sw.Tile):
             out_values.append(index_i)
 
         return out_values
+
+    def reset(self):
+        """Reset the dashboard to its initial state."""
+        self.__init__()

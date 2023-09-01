@@ -51,6 +51,8 @@ class SeplanMap(sm.SepalMap):
         # It has to be two way, so we can load the data by just updating the model
         link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
 
+        self.aoi_model.observe(self.reset, "reset_view")
+
     def on_custom_layers(self, *_):
         """Event triggered when there are new custom layers (created by user).
 
@@ -104,6 +106,7 @@ class SeplanMap(sm.SepalMap):
         if action == "created":
             # save_geom_dialog will be listening to this trait
             self.new_geom += 1
+            self.aoi_model.updated += 1
 
         elif action == "deleted":
             current_feats = deepcopy(self.custom_layers)
@@ -126,3 +129,9 @@ class SeplanMap(sm.SepalMap):
         self.html.children = [name]
 
         return self
+
+    def reset(self, change):
+        """Reset the map view (remove all the layers)."""
+        self.center = [0, 0]
+        self.zoom = 3
+        self.remove_all()

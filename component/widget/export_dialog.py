@@ -1,5 +1,5 @@
-from datetime import datetime as dt
 from pathlib import Path
+from typing import Literal
 
 import ee
 import rasterio as rio
@@ -11,20 +11,20 @@ from sepal_ui.scripts import utils as su
 from component import parameter as cp
 from component import scripts as cs
 from component.message import cm
+from component.model.recipe import Recipe
+from component.scripts.seplan import asset_to_image, mask_image, quintiles
 from component.widget.base_dialog import BaseDialog
 
 ee.Initialize()
 
 
 class ExportMapDialog(BaseDialog):
-    def __init__(self, **kwargs):
+    def __init__(self, recipe: Recipe, **kwargs):
         super().__init__(**kwargs)
 
         # init the downloadable informations
-        self.geometry = None
-        self.dataset = None
-        self.name = None
-        self.aoi_name = None
+        self.recipe = recipe
+        self.items = []
 
         # create the useful widgets
         # align on the landsat images
@@ -34,9 +34,12 @@ class ExportMapDialog(BaseDialog):
         )
 
         w_method_lbl = sw.Html(tag="h4", children=[cm.map.dialog.export.radio.label])
-        sepal = sw.Radio(label=cm.map.dialog.export.radio.sepal, value="sepal")
+        sepal = sw.Radio(
+            label=cm.map.dialog.export.radio.sepal, value="sepal", disabled=True
+        )
         gee = sw.Radio(label=cm.map.dialog.export.radio.gee, value="gee")
         self.w_method = sw.RadioGroup(v_model="gee", row=True, children=[sepal, gee])
+        self.w_asset = sw.Select(items=[], v_model=[])
 
         # add alert and btn component for the loading_button
         self.alert = sw.Alert()
@@ -47,6 +50,7 @@ class ExportMapDialog(BaseDialog):
 
         text = sw.CardText(
             children=[
+                self.w_asset,
                 w_scale_lbl,
                 self.w_scale,
                 w_method_lbl,
@@ -67,16 +71,112 @@ class ExportMapDialog(BaseDialog):
         super().__init__()
 
         # add js behaviour
-        self.btn.on_event("click", self._apply)
+        self.btn.on_event("click", self.on_download)
         self.btn_cancel.on_event("click", self.close_dialog)
+
+        # Let's observe "updated" trait, this one changes only when there's change
+        # in the assets (new/deleted), but later we'll skip the edit one on set_asset_items
+        self.recipe.seplan.benefit_model.observe(self.set_asset_items, "updated")
+        self.recipe.seplan.constraint_model.observe(self.set_asset_items, "updated")
+        self.recipe.seplan.cost_model.observe(self.set_asset_items, "updated")
+
+    def set_asset_items(self, *_):
+        """Set selectable widget with the available assets."""
+        if self.items != self.get_asset_items():
+            self.items = self.w_asset.items = self.get_asset_items()
+            self.w_asset.v_model = ["index", "benefit_index"]
+
+    def get_asset_items(self):
+        """Get gee assets that are available for download."""
+        # One way can be to observe all the models from the seplan model
+        # and check if there's a difference between the current and the previous
+        # if there's a difference, then we can update the assets item list
+
+        index_items = [
+            {"header": "Index"},
+            {"text": "Suitability index", "value": ["index", "benefit_index"]},
+            {"text": "Benefit cost intex", "value": ["index", "benefit_cost_index"]},
+            {"text": "Constraint index", "value": ["index", "constraint_index"]},
+            {"divider": True},
+        ]
+
+        normalized_benefits = (
+            [{"header": "Normalized benefits"}]
+            + [
+                {
+                    "text": self.recipe.seplan.benefit_model.names[idx],
+                    "value": ["benefit", id_],
+                }
+                for idx, id_ in enumerate(self.recipe.seplan.benefit_model.ids)
+            ]
+            + [{"divider": True}]
+        )
+
+        maskedout_constraints = (
+            [{"header": "Masked out constraints"}]
+            + [
+                {
+                    "text": self.recipe.seplan.constraint_model.names[idx],
+                    "value": ["constraint", id_],
+                }
+                for idx, id_ in enumerate(self.recipe.seplan.constraint_model.ids)
+            ]
+            + [{"divider": True}]
+        )
+
+        normalized_costs = [{"header": "Normalized costs"}] + [
+            {"text": self.recipe.seplan.cost_model.names[idx], "value": ["cost", id_]}
+            for idx, id_ in enumerate(self.recipe.seplan.cost_model.ids)
+        ]
+
+        return (
+            index_items + normalized_benefits + maskedout_constraints + normalized_costs
+        )
+
+    def get_ee_image(
+        self, theme: Literal["index", "benefit", "constraint"], id_: str
+    ) -> ee.Image:
+        """Retrieve the specific image to download from seplan.
+
+        The image will depend on the user's selection.
+        """
+        if theme == "index":
+            return {
+                "benefit_index": self.recipe.seplan.get_benefit_index,
+                "benefit_cost_index": self.recipe.seplan.get_benefit_cost_index,
+                "constraint_index": self.recipe.seplan.get_constraint_index,
+            }[id_]()
+
+        else:
+            model = {
+                "benefit": self.recipe.seplan.benefit_model,
+                "constraint": self.recipe.seplan.constraint_model,
+                "cost": self.recipe.seplan.cost_model,
+            }[theme]
+
+            idx = model.get_index(id=id_)
+            ee_asset = asset_to_image(model.assets[idx])
+
+            if theme == "benefit":
+                return quintiles(
+                    ee_asset, self.recipe.seplan.aoi_model.feature_collection
+                )
+
+            elif theme == "constraint":
+                asset_id = model.assets[idx]
+                data_type = model.data_type[idx]
+                values = model.values[idx]
+
+                return mask_image(
+                    asset_id=asset_id, data_type=data_type, maskout_values=values
+                )
+
+            elif theme == "cost":
+                # TODO: check if we have to normalize or not
+                return ee_asset
 
     def set_data(self, dataset, geometry, name, aoi_name):
         """set the dataset and the geometry to allow the download."""
-        self.geometry = geometry
-        self.dataset = dataset
-        self.name = name
-        self.aoi_name = aoi_name
-
         # add vizualization properties to the image
         # cast to image as set is a ee.Element method
         palette = ",".join(cp.no_data_color + cp.gradient(5))
@@ -95,31 +195,39 @@ class ExportMapDialog(BaseDialog):
 
         return self
 
-    @su.loading_button(debug=False)
-    def _apply(self, widget, event, data):
+    @su.loading_button(debug=True)
+    def on_download(self, *_):
         """download the dataset using the given parameters."""
-        folder = Path(ee.data.getAssetRoots()[0]["id"])
+        aoi = self.recipe.seplan.aoi_model.feature_collection
 
-        # check if a dataset is existing
-        if any([self.dataset is None, self.geometry is None]):
-            return self
+        if not aoi:
+            raise Exception(cm.questionnaire.error.no_aoi_on_map)
+
+        # The value from the w_asset is a tuple with (theme, id_)
+        ee_image = self.get_ee_image(*self.w_asset.v_model)
 
         # set the parameters
-        name = self.name or dt.now().strftime("%Y-%m-%d_%H-%M-%S")
+        name = (
+            "_".join(self.w_asset.v_model)
+            + "_"
+            + str(Path(self.recipe.recipe_session_path).stem)
+        )
+
         export_params = {
-            "image": self.dataset,
+            "image": ee_image,
             "description": name,
             "scale": self.w_scale.v_model,
-            "region": self.geometry,
+            "region": aoi.geometry(),
             "maxPixels": 1e13,
         }
 
         # launch the task
         if self.w_method.v_model == "gee":
+            folder = Path(ee.data.getAssetRoots()[0]["id"])
             export_params.update(assetId=str(folder / name), description=f"{name}_gee")
             task = ee.batch.Export.image.toAsset(**export_params)
             task.start()
-            msg = "the task have been launched in your GEE acount"
+            msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "sepal":

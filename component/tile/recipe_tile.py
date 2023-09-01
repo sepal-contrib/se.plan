@@ -167,6 +167,10 @@ class RecipeView(sw.Card):
             (self.load_dialog, "load_recipe_path"), (self, "load_recipe_path")
         )
 
+        directional_link(
+            (self, "recipe_session_path"), (self.recipe, "recipe_session_path")
+        )
+
         # link the current session path with save_card.recipe_name
         self.observe(self.session_path_handler, "recipe_session_path")
 
@@ -281,7 +285,10 @@ class RecipeView(sw.Card):
 
         self.recipe.save(recipe_path)
 
-        self.alert.set_state("save", "all", "done")
+        # Assign the recipe path to the current session path
+        self.recipe_session_path = str(recipe_path)
+
+        self.alert.add_msg(cm.recipe.states.save.format(recipe_path), type_="success")
 
 
 class LoadDialog(BaseDialog):
@@ -377,28 +384,18 @@ class RecipeTile(sw.Layout):
         self.dashboard_tile = dashboard_tile
 
         self.children = [self.recipe_view]
+
         self.recipe_view.observe(self.render, "create_view")
 
-    # def render(self, *_):
-    #     """Render all the different tiles.
+        directional_link(
+            (self.recipe_view, "recipe_session_path"), (self.app_model, "recipe_name")
+        )
 
-    #     This element is intended to be used only once, when the app has to start.
-    #     """
-    #     try:
-    #         self.aoi_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-    #         self.questionnaire_tile.build(
-    #             self.recipe_view.recipe, self.recipe_view.alert
-    #         )
-    #         self.map_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-    #         self.dashboard_tile.build(self.recipe_view.recipe, self.recipe_view.alert)
-    #     except Exception as e:
-    #         # If something fails, I want to return the recipe to its original state
-    #         self.recipe_view.recipe.__init__()
-    #         raise e
-
-    #     # This trait will let know the app drawers that the app is ready to be used
-    #     self.app_model.ready = True
-
+        # link the recipe new_changes counter to the app new_changes counter
+        directional_link(
+            (self.recipe_view.recipe, "new_changes"), (self.app_model, "new_changes")
+        )
+        
     def render(self, *_):
         """Render all the different tiles.
 

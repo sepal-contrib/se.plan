@@ -1,4 +1,4 @@
-from typing import Union
+from typing import Literal, Union
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
@@ -183,3 +183,59 @@ class CustomNavDrawer(sw.NavDrawer):
         [setattr(i, "input_value", False) for i in self.items if i != change["owner"]]
 
         return self
+
+
+class CustomAppBar(sw.AppBar):
+    recipe_holder = sw.Flex(
+        attributes={"id": "recipe_holder"},
+        class_="d-inline-flex justify-end",
+        children=[
+            sw.Html(
+                tag="span",
+                class_="text--secondary mr-1",
+                attributes={"id": "recipe_name"},
+            ),
+            sw.Html(
+                tag="span",
+                class_="font-weight-thin font-italic text-lowercase",
+                attributes={"id": "new_changes"},
+            ),
+        ],
+    )
+
+    def update_recipe(
+        self, element: Literal["recipe_name", "new_changes"], value: str = ""
+    ) -> None:
+        """Update the recipe name and state in the app bar."""
+        if not value:
+            return
+
+        if not self.get_children(attr="id", value="recipe_holder"):
+            self.children = self.children[:3] + [self.recipe_holder] + self.children[3:]
+
+        if element == "new_changes":
+            value = cm.app.recipe_state[value]
+
+        self.get_children(attr="id", value=element)[0].children = value
+
+
+class CustomApp(sw.App):
+    def __init__(self, app_model, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        app_model.observe(self.update_recipe_state, "recipe_name")
+        app_model.observe(self.update_recipe_state, "new_changes")
+
+    def update_recipe_state(self, change):
+        """Update the recipe state in the app bar."""
+        print("update_recipe_state")
+
+        if not change["new"]:
+            change["new"] = ""
+
+        if change["name"] == "new_changes":
+            change["new"] = "unsaved" if change["new"] else "saved"
+        else:
+            change["new"] = change["new"].split("/")[-1].replace(".json", "")
+
+        self.appBar.update_recipe(element=change["name"], value=change["new"])

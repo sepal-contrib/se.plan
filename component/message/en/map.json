@@ -44,7 +44,9 @@
                     "sepal": "As a SEPAL file"
                 },
                 "export": "Export",
-                "cancel": "Cancel"
+                "cancel": "Cancel",
+                "gee_task_success" : "The task <i>'{}'</i> have been tasked in your <a href='https://code.earthengine.google.com/tasks'>GEE accoung</a>. "
+
             },
             "drawing": {
                 "title": "Custom geometries",

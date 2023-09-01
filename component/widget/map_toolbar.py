@@ -5,7 +5,7 @@ from traitlets import Bool
 
 from component import widget as cw
 from component.message import cm
-from component.scripts.seplan import Seplan
+from component.model.recipe import Recipe
 from component.widget.base_dialog import BaseDialog
 from component.widget.map import SeplanMap
 
@@ -13,16 +13,16 @@ from component.widget.map import SeplanMap
 class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
-    def __init__(self, model: Seplan, map_: SeplanMap, *args, **kwargs) -> None:
+    def __init__(self, recipe: Recipe, map_: SeplanMap, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
 
         self.attributes = {"id": "map_toolbar"}
-        self.model = model
+        self.recipe = recipe
         self.map_ = map_
 
         # Dialogs
         self.save_geom_dialog = cw.CustomAoiDialog(self.map_)
-        self.download_map_dialog = cw.ExportMapDialog()
+        self.download_map_dialog = cw.ExportMapDialog(self.recipe)
         self.load_shape_dialog = cw.LoadDialog(self.map_)
         self.info_dialog = MapInfoDialog()
 
@@ -41,11 +41,11 @@ class MapToolbar(sw.Toolbar):
             color="primary",
         ).set_tooltip(cm.map.toolbar.tooltip.download, right=True, max_width="200px")
 
-        self.btn_load = sw.Btn(
-            gliph="mdi-upload",
-            icon=True,
-            color="primary",
-        ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
+        # self.btn_load = sw.Btn(
+        #     gliph="mdi-upload",
+        #     icon=True,
+        #     color="primary",
+        # ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
 
         self.btn_info = sw.Btn(
             gliph="fa-regular fa-circle-question",
@@ -56,7 +56,7 @@ class MapToolbar(sw.Toolbar):
         self.children = [
             # Main buttons
             self.btn_draw,
-            self.btn_load.with_tooltip,
+            # self.btn_load.with_tooltip,
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
@@ -73,7 +73,7 @@ class MapToolbar(sw.Toolbar):
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
-        self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
+        # self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
 
         self.btn_draw.on_event("new", self.on_draw)
@@ -149,6 +149,8 @@ class MapInfoDialog(BaseDialog):
     def __init__(self) -> None:
         super().__init__()
 
+        self.well_read = False
+
         description = sw.Markdown("  \n".join(cm.map.txt))
         btn_close = sw.Btn(
             "Close",
@@ -167,4 +169,9 @@ class MapInfoDialog(BaseDialog):
             ),
         ]
 
-        btn_close.on_event("click", self.close_dialog)
+        btn_close.on_event("click", self.manual_close_dialog)
+
+    def manual_close_dialog(self, *args):
+        """Close the dialog and also update a trait so we can know that user already saw the info."""
+        self.well_read = True
+        self.close_dialog()

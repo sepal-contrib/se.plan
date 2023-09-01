@@ -114,6 +114,7 @@ class TaskMsg(sw.Flex):
 class AlertDialog(sw.Dialog):
     def __init__(self, w_alert: AlertState):
         self.max_width = 650
+        self.persistent = True
         super().__init__()
 
         self.v_model = False
