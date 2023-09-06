@@ -19,4 +19,5 @@ class QuestionnaireModel(model.Model):
 
     def get_index(self, id: str) -> int:
         """get the index of the searched layer id."""
+        print("getting index", id)
         return next(i for i, v in enumerate(self.ids) if v == id)
