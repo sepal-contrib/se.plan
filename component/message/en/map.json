@@ -45,7 +45,7 @@
                 },
                 "export": "Export",
                 "cancel": "Cancel",
-                "gee_task_success" : "The task <i>'{}'</i> have been tasked in your <a href='https://code.earthengine.google.com/tasks'>GEE accoung</a>. "
+                "gee_task_success" : "The task <i>'{}'</i> have been tasked in your <a href='https://code.earthengine.google.com/tasks'>GEE account</a>. "
 
             },
             "drawing": {
