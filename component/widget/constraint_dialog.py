@@ -101,14 +101,18 @@ class ConstraintDialog(BaseDialog):
 
     def on_asset_change(self, change) -> None:
         """Set the default data type depending on the asset."""
-        # check if the asset is in the default list of layers
-
+        # check if the asset is in the default list of layers, and set its default
+        # values
         if change["new"] in self._CONSTRAINTS.gee_asset.tolist():
-            self.w_data_type.v_model = self._CONSTRAINTS[
+            layer_id, units, data_type = self._CONSTRAINTS[
                 self._CONSTRAINTS.gee_asset == change["new"]
-            ].data_type.values[0]
+            ][["layer_id", "unit", "data_type"]].values[0]
 
+            self.w_desc.v_model = cm.layers[layer_id].detail
+            self.w_unit.v_model = units
+            self.w_data_type.v_model = data_type
             self.set_readonly(True)
+
         else:
             self.set_readonly(False)
 

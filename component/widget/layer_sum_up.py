@@ -1,3 +1,5 @@
+from typing import Union
+
 import pandas as pd
 from ipywidgets import Output
 from matplotlib import pyplot as plt
@@ -5,6 +7,9 @@ from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
 from component.message import cm
+from component.model.benefit_model import BenefitModel
+from component.model.constraint_model import ConstraintModel
+from component.model.cost_model import CostModel
 
 
 # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
@@ -20,17 +25,31 @@ def human_format(num, round_to=2):
 
 
 class LayerFull(sw.Layout):
-    def __init__(self, layer_id, values, names_colors):
+    model: Union[BenefitModel, CostModel]
+    "Questionnaire model used to retrieve the layer name, description and units"
+
+    def __init__(
+        self,
+        layer_id,
+        values,
+        names_colors,
+        model: Union[BenefitModel, CostModel],
+    ):
         # add one extra color for the AOI
+
+        self.model = model
 
         aoi_names, colors = zip(*names_colors)
 
-        # get the layer labels from the translator object
-        t_layer = getattr(cm.layers, layer_id)
+        # We need to get the labels from the seplan models
+        layer_idx = self.model.get_index(layer_id)
+        detail = self.model.descs[layer_idx]
+        name = self.model.names[layer_idx]
+        units = self.model.units[layer_idx]
 
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_row = layer_list[layer_list.layer_id == layer_id].squeeze()
+        layer_list[layer_list.layer_id == layer_id].squeeze()
 
         # build the internal details
         w_header = sw.ExpansionPanelHeader(
@@ -38,12 +57,12 @@ class LayerFull(sw.Layout):
             expand_icon="mdi-help-circle-outline",
             disable_icon_rotate=True,
         )
-        w_content = sw.ExpansionPanelContent(children=[t_layer.detail])
+        w_content = sw.ExpansionPanelContent(children=[detail])
         w_panel = sw.ExpansionPanel(children=[w_header, w_content])
         w_details = sw.ExpansionPanels(xs12=True, class_="mt-3", children=[w_panel])
 
         # create a title with the layer name
-        label = f"{t_layer.name} ({layer_row.unit})"
+        label = f"{name} ({units})"
         w_title = sw.Html(class_="mt-2 mb-2", xs12=True, tag="h3", children=[label])
 
         # create a matplotlib stack horizontal bar chart
@@ -85,12 +104,18 @@ class LayerFull(sw.Layout):
 
 
 class LayerPercentage(sw.Layout):
-    def __init__(self, layer_id, pcts, names_colors):
+    model: ConstraintModel
+    "Questionnaire model used to retrieve the layer name, description and units"
+
+    def __init__(self, layer_id, pcts, names_colors, model: ConstraintModel):
+        self.model = model
         # add one extra color for the AOI
         colors = [color for _, color in names_colors]
 
-        # get the layer labels from the translator object
-        t_layer = getattr(cm.layers, layer_id)
+        # We need to get the labels from the seplan models
+        layer_idx = self.model.get_index(layer_id)
+        detail = self.model.descs[layer_idx]
+        name = self.model.names[layer_idx]
 
         # read the layer list and find the layer information based on the layer name
         layer_list = pd.read_csv(cp.layer_list).fillna("")
@@ -110,7 +135,7 @@ class LayerPercentage(sw.Layout):
             pd.Series(dict(zip(columns, content)))
 
         # add the title
-        w_title = sw.Html(tag="h4", children=[t_layer.name])
+        w_title = sw.Html(tag="h4", children=[name])
 
         # build the internal expantionpanel
         w_header = sw.ExpansionPanelHeader(
@@ -118,7 +143,7 @@ class LayerPercentage(sw.Layout):
             expand_icon="mdi-help-circle-outline",
             disable_icon_rotate=True,
         )
-        w_content = sw.ExpansionPanelContent(children=[t_layer.detail])
+        w_content = sw.ExpansionPanelContent(children=[detail])
         w_panel = sw.ExpansionPanel(children=[w_header, w_content])
         w_details = sw.ExpansionPanels(xs12=True, class_="mt-3", children=[w_panel])
 
