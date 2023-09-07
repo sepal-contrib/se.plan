@@ -118,9 +118,9 @@
         }
     },
     "theme": {
-        "cost": "cost",
-        "benefit": "priorities",
-        "constraint": "constraint"
+        "cost": "costs",
+        "benefit": "benefits",
+        "constraint": "constraints"
     },
     "subtheme": {
         "land_use": "Land Use",

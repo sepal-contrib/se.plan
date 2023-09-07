@@ -8,6 +8,7 @@ from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
 from component.scripts.compute import export_as_csv
+from component.scripts.seplan import Seplan
 from component.scripts.statistics import get_summary_statistics, parse_theme_stats
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.custom_widgets import DashToolBar
@@ -37,7 +38,7 @@ class DashboardTile(sw.Layout):
 
         # init the dashboard
         self.overall_dash = OverallDashboard()
-        self.theme_dash = ThemeDashboard()
+        self.theme_dash = ThemeDashboard(recipe.seplan)
         self.children = [
             dash_toolbar,
             self.overall_dash,
@@ -79,9 +80,12 @@ class DashboardTile(sw.Layout):
 
 
 class ThemeDashboard(sw.Card):
-    def __init__(self):
-        super().__init__()
+    seplan: Seplan
+    "Seplan object used to retrieve the layer description and units"
 
+    def __init__(self, seplan: Seplan):
+        super().__init__()
+        self.seplan = seplan
         self.title = sw.CardTitle(children=[cm.dashboard.theme.title])
         self.content = sw.CardText()
         self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
@@ -111,11 +115,21 @@ class ThemeDashboard(sw.Card):
             for name, values in layers.items():
                 values = values["values"]
                 if theme == "benefit":
-                    ben_layer.append(cw.LayerFull(name, values, names_colors))
+                    ben_layer.append(
+                        cw.LayerFull(
+                            name, values, names_colors, self.seplan.benefit_model
+                        )
+                    )
                 elif theme == "cost":
-                    cost_layer.append(cw.LayerFull(name, values, names_colors))
+                    cost_layer.append(
+                        cw.LayerFull(name, values, names_colors, self.seplan.cost_model)
+                    )
                 elif theme == "constraint":
-                    const_layer.append(cw.LayerPercentage(name, values, names_colors))
+                    const_layer.append(
+                        cw.LayerPercentage(
+                            name, values, names_colors, self.seplan.constraint_model
+                        )
+                    )
                 else:
                     continue  # Aois names are also stored in the dictionary
 
