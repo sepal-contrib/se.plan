@@ -47,10 +47,6 @@ class LayerFull(sw.Layout):
         name = self.model.names[layer_idx]
         units = self.model.units[layer_idx]
 
-        # read the layer list and find the layer information based on the layer name
-        layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_list[layer_list.layer_id == layer_id].squeeze()
-
         # build the internal details
         w_header = sw.ExpansionPanelHeader(
             children=[cm.dashboard.theme.benefit.details],
@@ -116,10 +112,6 @@ class LayerPercentage(sw.Layout):
         layer_idx = self.model.get_index(layer_id)
         detail = self.model.descs[layer_idx]
         name = self.model.names[layer_idx]
-
-        # read the layer list and find the layer information based on the layer name
-        layer_list = pd.read_csv(cp.layer_list).fillna("")
-        layer_list[layer_list.layer_id == layer_id].squeeze()
 
         # deal with land_use special case
         if layer_id in [*cp.land_use_criterias]:
