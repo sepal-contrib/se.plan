@@ -13,7 +13,6 @@ convention = "google"
 [tool.commitizen]
 version = "1.0.0"
 update_changelog_on_bump = true
-
 changelog_file = "CHANGELOG.md"
 changelog_incremental = true
 version_files = [
