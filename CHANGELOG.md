@@ -1,3 +1,10 @@
+## 1.1.1 (2023-09-25)
+
+### Refactor
+
+- **__version__.py**: remove __version__.py file and use [[project.version]] in pypoject.toml
+- move __version__ file to root
+
 ## 1.1.0 (2023-09-21)
 
 ### Feat
