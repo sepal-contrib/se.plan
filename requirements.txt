@@ -3,8 +3,10 @@ jupyter
 voila
 toml
 
-# This version contains file input improements
-git+https://github.com/12rambau/sepal_ui.git@cd7d97cd5b2c05fdbbef651e5dd99c19bb71ad65
+# This version contains file input improements and a fix for the map resize
+# and javascript links error fixed + versioning + navdrawer fix 
+git+https://github.com/12rambau/sepal_ui.git@4e0055d08110e352789878829bfe5afff62dc4a8
+
 
 # custom libs
 earthengine-api
@@ -13,9 +15,4 @@ Shapely
 matplotlib
 geopandas
 numpy
-ipyleaflet
 numexpr
-
-# To make it work on sepal
-ipyvuetify==1.8.1
-ipywidgets==7.6.5
