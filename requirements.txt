@@ -5,7 +5,7 @@ toml
 
 # This version contains file input improements and a fix for the map resize
 # and javascript links error fixed + versioning + navdrawer fix 
-git+https://github.com/12rambau/sepal_ui.git@4e0055d08110e352789878829bfe5afff62dc4a8
+git+https://github.com/12rambau/sepal_ui.git@sepal_pre_release
 
 
 # custom libs
@@ -16,3 +16,6 @@ matplotlib
 geopandas
 numpy
 numexpr
+
+# even though it will installed by sepal_ui, I want to point out that it is required by the app
+pygaul

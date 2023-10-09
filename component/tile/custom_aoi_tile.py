@@ -1,5 +1,6 @@
 import ee
 import pandas as pd
+import pkg_resources
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
 from sepal_ui.mapping import SepalMap
@@ -47,13 +48,17 @@ class AoiTile(sw.Layout):
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""
-        # TODO: check this method
         # check over the lmic country number
         if self.view.model.admin:
             code = self.view.model.admin
 
             # get the country code out of the admin one (that can be level 1 or 2)
-            df = pd.read_parquet(self.view.model.FILE[1]).astype(str)
+
+            # Access to the parquet file in the package data (required with sepal_ui>2.16.4)
+            resource_path = "data/gaul_database.parquet"
+            content = pkg_resources.resource_filename("pygaul", resource_path)
+
+            df = pd.read_parquet(content).astype(str)
             level_0_code = df[
                 (df.ADM0_CODE == code) | (df.ADM1_CODE == code) | (df.ADM2_CODE == code)
             ].ADM0_CODE.iloc[0]
