@@ -1,3 +1,6 @@
+[project]
+version = "1.1.1"
+
 [tool.ruff]
 ignore-init-module-imports = true
 fix = true
@@ -11,11 +14,10 @@ docstring-quotes = "double"
 convention = "google"
 
 [tool.commitizen]
-version = "1.1.0"
+version = "1.1.1"
 update_changelog_on_bump = true
 changelog_file = "CHANGELOG.md"
 changelog_incremental = true
 version_files = [
     "pyproject.toml:version",
-    "component/__version__.py"
 ]
