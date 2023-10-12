@@ -90,7 +90,8 @@
             "mandatory_layer" : "This layer is mandatory and cannot be removed",
             "last_layer" : "At least one layer is required",
             "no_aoi": "To create new constraints you need to select an area of interest first",
-            "no_aoi_on_map" : "To visualize layers you need to select an area of interest first"
+            "no_aoi_on_map" : "To visualize layers you need to select an area of interest first",
+            "no_limits" : "The selected dataset has a spatial resolution too coarse to be used in the area of interest selected. Please select a dataset with higher spatial resolution."
         },
         "map" : {
             "close" : "Close"

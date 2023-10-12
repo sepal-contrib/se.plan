@@ -3,6 +3,8 @@ from typing import Literal, Union
 import ee
 from sepal_ui import mapping as sm
 
+from component.message import cm
+
 
 def get_layer(
     image: ee.Image, vis_params: dict, name: str, visible: bool
@@ -64,6 +66,11 @@ def get_limits(
             maxPixels=1e13,
         )
     )
+
+    # check if values are none and if so, raise a ValueError
+    if any([val is None for val in values]):
+        raise ValueError(cm.questionnaire.error.no_limits)
+
     # depending on the scale, values from the histogram can be floats, we'll
     # convert them to integers... sometimes we'll show more values than the
     # asset really has
