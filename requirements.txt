@@ -1,5 +1,4 @@
 # these libs are requested to build application env
-jupyter
 voila
 toml
 
