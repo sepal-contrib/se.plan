@@ -40,7 +40,7 @@ class LoadDialog(BaseDialog):
 
         self.btn.on_event("click", self._load_shapes)
 
-    @su.loading_button(debug=False)
+    @su.loading_button()
     def read_data(self):
         # extract information for compacity
         value = self.w_vector.v_model["value"]
@@ -90,13 +90,6 @@ class LoadDialog(BaseDialog):
 class CustomVector(sw.VectorField):
     def _update_file(self, change):
         """remove the select 'all feature' option as feature is used to name the AOIs."""
-
-        def __init__(self, **kwargs):
-            super().__init__(**kwargs)
-
-            self.w_column.v_model = None
-            self.w_column.items = None
-
         super()._update_file(change)
 
         # update the columns

@@ -88,7 +88,7 @@ class Table(sw.Layout):
         if self.aoi_model:
             self.aoi_model.observe(self.set_rows, "feature_collection")
 
-    @sd.catch_errors(debug=True)
+    @sd.catch_errors()
     def set_rows(self, *args):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time. That's too expensive (specially the set_limits method)

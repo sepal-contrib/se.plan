@@ -60,7 +60,7 @@ class ToolBar(sw.Toolbar):
             self.w_new,
         ]
 
-    @sd.catch_errors(debug=True)
+    @sd.catch_errors()
     def open_new_dialog(self, *args) -> None:
         """open the new benefit dialog."""
         # Avoid opening if there is not a valid AOI when adding a constraint

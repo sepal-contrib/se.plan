@@ -63,7 +63,7 @@ class CostRow(sw.Html):
         self.name = self.model.names[idx]
         self.asset = self.model.assets[idx]
 
-    @sd.catch_errors(debug=True)
+    @sd.catch_errors()
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
         ee_image = asset_to_image(self.asset)
@@ -84,7 +84,7 @@ class CostRow(sw.Html):
 
         super().__init__(tag="tr", children=td_list)
 
-    @sd.catch_errors(debug=True)
+    @sd.catch_errors()
     def on_delete(self, widget, *_):
         """remove the line from the model and trigger table update."""
         if widget.attributes["data-layer"] in cp.mandatory_layers["cost"]:

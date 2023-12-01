@@ -47,9 +47,9 @@ class DashboardTile(sw.Layout):
             alert_dialog,
         ]
 
-        self._dashboard = su.loading_button(
-            self.alert, dash_toolbar.btn_dashboard, debug=True
-        )(self._dashboard)
+        self._dashboard = su.loading_button(self.alert, dash_toolbar.btn_dashboard)(
+            self._dashboard
+        )
 
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
         dash_toolbar.btn_download.on_event("click", self.export_event)

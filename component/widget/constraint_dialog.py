@@ -88,9 +88,9 @@ class ConstraintDialog(BaseDialog):
         self.children = [card]
 
         # decorate the validate method with self buttons
-        self.validate = sd.loading_button(
-            alert=self.w_alert, button=self.w_validate, debug=True
-        )(self.validate)
+        self.validate = sd.loading_button(alert=self.w_alert, button=self.w_validate)(
+            self.validate
+        )
 
         # add JS behaviour
         self.w_validate.on_event("click", self.validate)

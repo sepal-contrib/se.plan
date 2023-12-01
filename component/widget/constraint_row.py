@@ -70,7 +70,7 @@ class ConstraintRow(sw.Html):
         self.data_type = self.model.data_type[idx]
         self.asset = self.model.assets[idx]
 
-    @sd.catch_errors(debug=True)
+    @sd.catch_errors()
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
         masked_layer = mask_image(self.asset, self.data_type, self.value)
@@ -104,8 +104,7 @@ class ConstraintRow(sw.Html):
         self.w_maskout.observe(self.update_value, "v_model")
         self.aoi_model.observe(self.set_limits, "updated")
 
-    @sd.catch_errors(debug=True)
-    @sd.catch_errors(debug=True)
+    @sd.catch_errors()
     def on_delete(self, widget, *_):
         """Remove the line from the model and trigger table update."""
         if widget.attributes["data-layer"] in cp.mandatory_layers["constraint"]:

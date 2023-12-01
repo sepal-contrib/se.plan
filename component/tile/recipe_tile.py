@@ -175,15 +175,15 @@ class RecipeView(sw.Card):
         self.observe(self.session_path_handler, "recipe_session_path")
 
         # Capture errors with alert (we have to decorate before the events definition)
-        self.new_event = loading_button(
-            alert=self.alert, button=self.card_new.btn, debug=True
-        )(self.new_event)
-        self.load_event = loading_button(
-            alert=self.alert, button=self.card_load.btn, debug=True
-        )(self.load_event)
-        self.save_event = loading_button(
-            alert=self.alert, button=self.card_save.btn, debug=True
-        )(self.save_event)
+        self.new_event = loading_button(alert=self.alert, button=self.card_new.btn)(
+            self.new_event
+        )
+        self.load_event = loading_button(alert=self.alert, button=self.card_load.btn)(
+            self.load_event
+        )
+        self.save_event = loading_button(alert=self.alert, button=self.card_save.btn)(
+            self.save_event
+        )
 
         # Create events
         self.card_new.btn.on_event("click", self.new_event)
@@ -395,7 +395,7 @@ class RecipeTile(sw.Layout):
         directional_link(
             (self.recipe_view.recipe, "new_changes"), (self.app_model, "new_changes")
         )
-        
+
     def render(self, *_):
         """Render all the different tiles.
 

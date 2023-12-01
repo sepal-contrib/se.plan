@@ -195,7 +195,7 @@ class ExportMapDialog(BaseDialog):
 
         return self
 
-    @su.loading_button(debug=True)
+    @su.loading_button()
     def on_download(self, *_):
         """download the dataset using the given parameters."""
         aoi = self.recipe.seplan.aoi_model.feature_collection

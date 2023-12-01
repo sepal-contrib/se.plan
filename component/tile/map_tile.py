@@ -50,9 +50,9 @@ class MapTile(sw.Layout):
         ]
 
         # decorate compute indicator and dashboard
-        self._compute = su.loading_button(
-            self.alert, self.map_toolbar.btn_compute, debug=True
-        )(self._compute)
+        self._compute = su.loading_button(self.alert, self.map_toolbar.btn_compute)(
+            self._compute
+        )
 
         # # add js behaviour
         self.map_toolbar.btn_compute.on_event("click", self._compute)
@@ -69,23 +69,23 @@ class MapTile(sw.Layout):
 
         self.recipe.seplan_aoi.observe(self.reset_map, "reset_view")
 
-    def open_info_dialog(self, change):
-        """Open the info dialog when the map_tile app drawer is clicked."""
-        if change["new"] == "map_tile":
-            # I just want to open the dialog once, so I remove the observer
-            # but only when I'm sure the user has read the content and closed the dialog.
-            if self.map_toolbar.info_dialog.well_read:
-                self.app_model.unobserve(self.open_info_dialog, "active_drawer")
-                return
+    # def open_info_dialog(self, change):
+    #     """Open the info dialog when the map_tile app drawer is clicked."""
+    #     if change["new"] == "map_tile":
+    #         # I just want to open the dialog once, so I remove the observer
+    #         # but only when I'm sure the user has read the content and closed the dialog.
+    #         if self.map_toolbar.info_dialog.well_read:
+    #             self.app_model.unobserve(self.open_info_dialog, "active_drawer")
+    #             return
 
-            self.map_toolbar.info_dialog.open_dialog()
+    #         self.map_toolbar.info_dialog.open_dialog()
 
-        else:
-            self.map_toolbar.info_dialog.close_dialog()
+    #     else:
+    #         self.map_toolbar.info_dialog.close_dialog()
 
-        # This will open the info dialog when the map_tile drawer is clicked
-        if self.app_model:
-            self.app_model.observe(self.open_info_dialog, "active_drawer")
+    #     # This will open the info dialog when the map_tile drawer is clicked
+    #     if self.app_model:
+    #         self.app_model.observe(self.open_info_dialog, "active_drawer")
 
     def open_info_dialog(self, change):
         """Open the info dialog when the map_tile app drawer is clicked."""
