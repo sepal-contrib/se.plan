@@ -1,3 +1,19 @@
+## 1.2.0 (2023-12-11)
+
+### Feat
+
+- use sepal_ui==2.17 to avoid conflicts with ipyleaflet
+- remove pinned requirements. use convenient sepal_ui version
+
+### Fix
+
+- display meaningful error message when resolution is too coarse. related with #220
+- **aoi_model**: imports gaul_database from pygaul
+
+### Refactor
+
+- **decorator**: drop debug arg
+
 ## 1.1.1 (2023-09-25)
 
 ### Refactor
