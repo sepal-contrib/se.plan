@@ -16,9 +16,6 @@
 		},
 		"banner": "The se.plan application is now exporting the dashboard in .csv format. You will find it in the same folder as the recipe."
 	},
-    "questionnaire": {
-        "title": "Questionnaire identifying restoration priorities & constraints"
-    },
 	"valid": {
 		"title": "Model recipe (input benefits, costs, and constraints)",
 		"display": "Save your recipe",
