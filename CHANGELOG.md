@@ -1,3 +1,9 @@
+## 1.2.1 (2023-12-13)
+
+### Fix
+
+- **questionnaire_tile**: remove unused translation key
+
 ## 1.2.0 (2023-12-11)
 
 ### Feat
