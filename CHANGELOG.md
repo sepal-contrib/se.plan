@@ -1,3 +1,14 @@
+## 1.3.0 (2023-12-17)
+
+### Feat
+
+- Export results as csv format
+- export as csv
+
+### Fix
+
+- **schema**: set object as valid value for recipe schema on aoi parameter
+
 ## 1.2.1 (2023-12-13)
 
 ### Fix
