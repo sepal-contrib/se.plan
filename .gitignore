@@ -4,8 +4,6 @@ __pycache__/
 *$py.class
 *[Uu]ntitled*
 
-test*.ipynb
-
 # C extensions
 *.so
 
