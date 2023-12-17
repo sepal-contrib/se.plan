@@ -41,7 +41,9 @@
                 "radio": {
                     "label": "Select export method",
                     "gee": "As a GEE asset",
-                    "sepal": "As a SEPAL file"
+                    "sepal": "As a SEPAL file",
+                    "gdrive": "As Google Drive file"
+
                 },
                 "export": "Export",
                 "cancel": "Cancel",
