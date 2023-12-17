@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Dict, List
 
 import ipyvuetify as v
@@ -50,18 +51,26 @@ class DashboardTile(sw.Layout):
         self._dashboard = su.loading_button(self.alert, dash_toolbar.btn_dashboard)(
             self._dashboard
         )
+        self.csv_export = su.loading_button(self.alert, dash_toolbar.btn_download)(
+            self.csv_export
+        )
 
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
-        dash_toolbar.btn_download.on_event("click", self.export_event)
+        dash_toolbar.btn_download.on_event("click", self.csv_export)
 
         build_alert.set_state("new", "dashboard", "done")
 
-    def export_event(self, *_):
+    def csv_export(self, *_):
         """Export the dashboard as a csv file."""
         self.summary_stats = get_summary_statistics(self.recipe.seplan)
+        recipe_session_name = Path(self.recipe.recipe_session_path).name
 
         # save the dashboard as a csv
-        export_as_csv(self.recipe.recipe_session_path, self.summary_stats)
+        session_results_path = export_as_csv(recipe_session_name, self.summary_stats)
+
+        self.alert.add_msg(
+            f"File successfully saved in {session_results_path}", "success"
+        )
 
     def _dashboard(self, *_):
         """Compute the restoration plan and display the map."""

@@ -6,7 +6,6 @@ from traitlets import Int, Unicode, link, observe
 
 from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
-from component.scripts.compute import export_as_csv
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert
 
@@ -98,14 +97,6 @@ class DashToolBar(sw.Toolbar):
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_dashboard,
         ]
-
-    @sd.loading_button()
-    def export_csv(self, *_):
-        """Export the csv file."""
-        if not self.model.summary_stats:
-            raise Exception("You need to compute the dashboard first")
-
-        export_as_csv(self.model.summary_stats)
 
 
 class Tabs(sw.Card):

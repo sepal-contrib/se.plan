@@ -58,7 +58,6 @@ class Recipe(HasTraits):
 
     def update_changes(self, change):
         """Increment the new_changes counter by 1."""
-        print(change)
         self.new_changes += 1
 
     def load(self, recipe_path: str):
