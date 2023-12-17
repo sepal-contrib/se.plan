@@ -48,6 +48,16 @@ mandatory_layers = {
 }
 
 
+suitability_labels = {
+    1: "Very low",
+    2: "Low",
+    3: "Medium",
+    4: "High",
+    5: "Very High",
+    6: "Unsuitable land",
+}
+
+
 def _crit(*args):
     """Return a dict of the criteria caracteristic.
 
