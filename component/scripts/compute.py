@@ -1,54 +1,46 @@
-import ee
-
-from component import parameter as cp
-
-ee.Initialize()
+import pandas as pd
 
 
-def add_area(feature):
-    return feature.set({"rp_area": feature.geometry().area()})
+def export_as_csv(recipe_session_path, summary_stats):
+    # Function to create a multi-row format for each sub-category
+    print(recipe_session_path)
+    formatted_data = []
+    for area_data in summary_stats:
+        for area, contents in area_data.items():
+            for category, details in contents.items():
+                if isinstance(details, list):  # For 'benefit', 'constraint', 'cost'
+                    for item in details:
+                        for sub_category, value in item.items():
+                            row = {
+                                "Area": area,
+                                "Category": category,
+                                "Sub-category": sub_category,
+                                "Total": value["total"][0],
+                                "Values": value["values"][0],
+                            }
+                            formatted_data.append(row)
+                elif isinstance(details, dict):  # For 'suitability'
+                    for value in details["values"]:
+                        row = {
+                            "Area": area,
+                            "Category": category,
+                            "Sub-category": f'image_{value["image"]}',
+                            "Total": None,
+                            "Values": value["sum"],
+                        }
+                        formatted_data.append(row)
+                    # Adding total suitability as a separate row
+                    formatted_data.append(
+                        {
+                            "Area": area,
+                            "Category": category,
+                            "Sub-category": "total",
+                            "Total": details["total"],
+                            "Values": None,
+                        }
+                    )
 
+    formatted_df = pd.DataFrame(formatted_data)
 
-def display_layer(layer, aoi_model, m):
-    aoi_ee = aoi_model.feature_collection
-    m.zoom_ee_object(aoi_ee.geometry())
-    m.addLayer(layer.round().clip(aoi_ee.geometry()), cp.final_viz, "restoration layer")
-
-    return
-
-
-def export_as_csv(recipe_name, summary_stats):
-    pass
-    # path to the dst file
-    # the folder already exist as the recipe is exported
-    # dst = cp.result_dir / aoi_name / f"dashboard_{recipe_name}.csv"
-
-    # with dst.open("w") as dst:
-    #     # get the aoi name list
-    #     aoi_names = [aoi for aoi in area]
-
-    #     # write the suitability index results per each AOI
-    #     dst.write("suitability\n")
-    #     dst.write(f"AOI,{','.join(cm.csv.index.labels)}\n")
-    #     for aoi, v in area.items():
-    #         content = [aoi]
-    #         for j in range(1, 7):
-    #             content.append(
-    #                 f"{next((i['sum'] for i in v['values'] if isclose(i['image'], j)), 0):.2f}"
-    #             )
-    #         content.append(f"{v['total']:.2f}")
-    #         dst.write(f"{','.join(content)}\n")
-
-    #     # get results by theme
-    #     for t in ["benefit", "cost", "constraint"]:
-    #         dst.write(f"{cm.csv.theme[t]}\n")
-    #         dst.write(f"layer,{','.join(aoi_names)}\n")
-    #         for layer, v in theme[t].items():
-    #             if all([isclose(i, 0) for i in v["values"]]):
-    #                 continue
-    #             value_list = []
-    #             for i in range(len(aoi_names)):
-    #                 value_list.append(str(v["values"][i]))
-    #             dst.write(f"{layer},{','.join(value_list)}\n")
-
-    # return
+    # Exporting the reformatted DataFrame to an Excel file
+    formatted_df.to_excel(recipe_session_path, index=False)
