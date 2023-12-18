@@ -38,7 +38,11 @@ class ExportMapDialog(BaseDialog):
             label=cm.map.dialog.export.radio.sepal, value="sepal", disabled=True
         )
         gee = sw.Radio(label=cm.map.dialog.export.radio.gee, value="gee")
-        self.w_method = sw.RadioGroup(v_model="gee", row=True, children=[sepal, gee])
+        gdrive = sw.Radio(label=cm.map.dialog.export.radio.gdrive, value="gdrive")
+
+        self.w_method = sw.RadioGroup(
+            v_model="gee", row=True, children=[sepal, gee, gdrive]
+        )
         self.w_asset = sw.Select(items=[], v_model=[])
 
         # add alert and btn component for the loading_button
@@ -80,11 +84,13 @@ class ExportMapDialog(BaseDialog):
         self.recipe.seplan.constraint_model.observe(self.set_asset_items, "updated")
         self.recipe.seplan.cost_model.observe(self.set_asset_items, "updated")
 
+        self.set_asset_items()
+
     def set_asset_items(self, *_):
         """Set selectable widget with the available assets."""
         if self.items != self.get_asset_items():
             self.items = self.w_asset.items = self.get_asset_items()
-            self.w_asset.v_model = ["index", "benefit_index"]
+            self.w_asset.v_model = ["index", "constraint_index"]
 
     def get_asset_items(self):
         """Get gee assets that are available for download."""
@@ -94,9 +100,9 @@ class ExportMapDialog(BaseDialog):
 
         index_items = [
             {"header": "Index"},
-            {"text": "Suitability index", "value": ["index", "benefit_index"]},
-            {"text": "Benefit cost intex", "value": ["index", "benefit_cost_index"]},
-            {"text": "Constraint index", "value": ["index", "constraint_index"]},
+            {"text": "Suitability index", "value": ["index", "constraint_index"]},
+            {"text": "Benefit cost index", "value": ["index", "benefit_cost_index"]},
+            {"text": "Benefit index", "value": ["index", "benefit_index"]},
             {"divider": True},
         ]
 
@@ -226,6 +232,12 @@ class ExportMapDialog(BaseDialog):
             folder = Path(ee.data.getAssetRoots()[0]["id"])
             export_params.update(assetId=str(folder / name), description=f"{name}_gee")
             task = ee.batch.Export.image.toAsset(**export_params)
+            task.start()
+            msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
+            self.alert.add_msg(msg, "success")
+
+        elif self.w_method.v_model == "gdrive":
+            task = ee.batch.Export.image.toDrive(**export_params)
             task.start()
             msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
             self.alert.add_msg(msg, "success")

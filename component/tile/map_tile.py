@@ -67,7 +67,7 @@ class MapTile(sw.Layout):
 
         # Use reset_view trait ffrom seplan_aoi to reset the map view (remove all the layers)
 
-        self.recipe.seplan_aoi.observe(self.reset_map, "reset_view")
+        self.recipe.seplan_aoi.observe(lambda *_: self.map_.remove_all(), "reset_view")
 
     # def open_info_dialog(self, change):
     #     """Open the info dialog when the map_tile app drawer is clicked."""
