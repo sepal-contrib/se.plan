@@ -1,6 +1,7 @@
 from sepal_ui.aoi.aoi_view import AoiView
 
 from component.model.aoi_model import SeplanAoi
+from component.auth import gee_folder
 
 
 class SeplanAoiView(AoiView):
@@ -12,6 +13,7 @@ class SeplanAoiView(AoiView):
                 "min_width": "462px",
                 "max_width": "462px",
                 "model": model.aoi_model,
+                "folder": gee_folder,
             }
         )
 
