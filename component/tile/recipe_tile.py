@@ -204,7 +204,7 @@ class RecipeView(sw.Card):
         """Initialize a new recipe."""
         if not ee.data.getAssetRoots():
             raise Exception(
-                "Error: You have not initialized the GEE home folder. Please follow the following instructions: https://docs.sepal.io/en/latest/setup/gee.html#initialize-the-home-folder."
+                "Error: You have not initialized the GEE home folder. Please follow the the SEPAL documentation: https://docs.sepal.io/en/latest/setup/gee.html#initialize-the-home-folder."
             )
 
         self.recipe.load_model()
