@@ -204,7 +204,7 @@ class RecipeView(sw.Card):
         """Initialize a new recipe."""
         if not ee.data.getAssetRoots():
             raise Exception(
-                "Please instantiate your home folder in GEE first, <a href='https://developers.google.com/earth-engine/guides/service_account#setting-up-a-service-account'>see here</a>"
+                "Error: You have not initialized the GEE home folder. Please follow the following instructions: https://docs.sepal.io/en/latest/setup/gee.html#initialize-the-home-folder."
             )
 
         self.recipe.load_model()
