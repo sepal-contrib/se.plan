@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
+import ee
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
@@ -201,6 +202,11 @@ class RecipeView(sw.Card):
 
     def new_recipe(self):
         """Initialize a new recipe."""
+        if not ee.data.getAssetRoots():
+            raise Exception(
+                "Please instantiate your home folder in GEE first, <a href='https://developers.google.com/earth-engine/guides/service_account#setting-up-a-service-account'>see here</a>"
+            )
+
         self.recipe.load_model()
         self.create_view += 1
 
