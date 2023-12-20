@@ -9,6 +9,7 @@ from component.message import cm
 from component.scripts.ui_helpers import set_default_asset
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog
+from component.auth import gee_folder
 
 
 class ConstraintDialog(BaseDialog):
@@ -46,7 +47,7 @@ class ConstraintDialog(BaseDialog):
             label=cm.constraint.dialog.name, items=[], v_model=None
         )
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect(types=["IMAGE"])
+        self.w_asset = sw.AssetSelect(types=["IMAGE"], folder=gee_folder)
         self.w_desc = sw.Textarea(label=cm.constraint.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
             label=cm.constraint.dialog.unit, v_model=None, class_="mr-2"
