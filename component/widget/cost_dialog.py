@@ -9,7 +9,6 @@ from component.message import cm
 from component.scripts.ui_helpers import set_default_asset
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog
-from component.auth import gee_folder
 
 
 class CostDialog(BaseDialog):
@@ -36,7 +35,7 @@ class CostDialog(BaseDialog):
         default_layers = self._COSTS.layer_id.unique().tolist()
         self.w_name.items = [cm.layers[ly].name for ly in default_layers]
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect(types=["IMAGE"], folder=gee_folder)
+        self.w_asset = sw.AssetSelect(types=["IMAGE"])
         self.w_desc = sw.Textarea(label=cm.cost.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
             label=cm.cost.dialog.unit,

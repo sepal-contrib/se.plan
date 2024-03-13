@@ -1,10 +1,10 @@
 """SE.PLAN model to store the data related with areas of interest."""
+
 from sepal_ui import color, model
 from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.message import ms
 from sepal_ui.scripts import utils as su
 from traitlets import Any, Dict, Int
-from component.auth import gee_folder
 
 
 class AoiModel(AoiModel):
@@ -12,7 +12,7 @@ class AoiModel(AoiModel):
     """announces when the model is updated"""
 
     def __init__(self, **kwargs):
-        super().__init__(folder=gee_folder, **kwargs)
+        super().__init__(**kwargs)
 
         # set the default
         self.set_default(self.default_vector, self.default_admin, self.default_asset)
