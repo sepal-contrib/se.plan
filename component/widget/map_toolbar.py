@@ -21,7 +21,8 @@ class MapToolbar(sw.Toolbar):
         self.map_ = map_
 
         # Dialogs
-        self.save_geom_dialog = cw.CustomAoiDialog(self.map_)
+        self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
+        self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
         self.download_map_dialog = cw.ExportMapDialog(self.recipe)
         self.load_shape_dialog = cw.LoadDialog(self.map_)
         self.info_dialog = MapInfoDialog()
@@ -41,12 +42,6 @@ class MapToolbar(sw.Toolbar):
             color="primary",
         ).set_tooltip(cm.map.toolbar.tooltip.download, right=True, max_width="200px")
 
-        # self.btn_load = sw.Btn(
-        #     gliph="mdi-upload",
-        #     icon=True,
-        #     color="primary",
-        # ).set_tooltip(cm.map.toolbar.tooltip.load, right=True, max_width="200px")
-
         self.btn_info = sw.Btn(
             gliph="fa-regular fa-circle-question",
             icon=True,
@@ -64,7 +59,8 @@ class MapToolbar(sw.Toolbar):
             self.btn_compute,
             # Auxiliar buttons
             # Dialogs - not visible on the toolbar
-            self.save_geom_dialog,
+            self.custom_aoi_dialog,
+            self.import_aoi_dialog,
             self.download_map_dialog,
             self.load_shape_dialog,
             self.info_dialog,
@@ -78,9 +74,11 @@ class MapToolbar(sw.Toolbar):
 
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)
+        self.btn_draw.on_event("import", self.on_draw)
 
     def on_draw(self, widget, event, data):
         """Show or hide drawing control on the map."""
+
         if widget.attributes["id"] == "new":
             if not self.aoi_tools:
                 widget.style_ = f"background-color: {color.menu};"
@@ -91,8 +89,13 @@ class MapToolbar(sw.Toolbar):
 
             self.aoi_tools = not self.aoi_tools
 
+        elif widget.attributes["id"] == "import":
+            self.map_.dc.hide()
+            self.import_aoi_dialog.open_dialog()
+
         elif widget.attributes["id"] == "show":
-            self.save_geom_dialog.open_dialog(new_geom=False)
+            self.map_.dc.hide()
+            self.custom_aoi_dialog.open_dialog(new_geom=False)
 
 
 class DrawMenu(sw.Menu):
@@ -127,7 +130,7 @@ class DrawMenu(sw.Menu):
                     v.ListItemTitle(children=[cm.map.toolbar.draw_menu[title]]),
                 ],
             )
-            for title in ["new", "show"]
+            for title in ["show", "import", "new"]
         ]
 
         self.children = [
