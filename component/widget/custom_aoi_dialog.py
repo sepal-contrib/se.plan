@@ -3,6 +3,7 @@ from copy import deepcopy
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.aoi.aoi_model import AoiModel
 
 import component.parameter as cp
 from component.message import cm
@@ -13,10 +14,10 @@ from .map import SeplanMap
 
 
 class CustomAoiDialog(BaseDialog):
-    feature = None
-    "the geo_json feature selected by th user"
+    feature: dict = None
+    "feature collection of new geometry imported from ImportAoiDialog."
 
-    def __init__(self, map_):
+    def __init__(self, map_: SeplanMap):
         super().__init__()
         self.attributes = {"id": "custom_aoi_dialog"}
         self.map_ = map_
@@ -53,14 +54,28 @@ class CustomAoiDialog(BaseDialog):
     def on_save_geom(self, *_):
         """Updates map_.custom_layers with the new geometry."""
         # Get all the fc in the map_.dc, there should be only one
-        features = self.map_.dc.to_json()["features"]
+
+        if self.feature:
+            features = self.feature["features"]
+
+            # Increase the new_geom counter but don't trigger the event
+            self.map_.unobserve(self.on_new_geom, "new_geom")
+            self.map_.new_geom += 1
+            self.map_.observe(self.on_new_geom, "new_geom")
+
+        else:
+            features = self.map_.dc.to_json()["features"]
+
+        geom_number = self.map_.new_geom
+        aoi_color = to_hex(plt.cm.tab10(geom_number))
+        style = {
+            **cp.aoi_style,
+            "color": aoi_color,
+            "fillColor": aoi_color,
+        }
+
         for feature in features:
-            style = {
-                **cp.aoi_style,
-                "color": to_hex(plt.cm.tab10(self.map_.new_geom)),
-                "fillColor": to_hex(plt.cm.tab10(self.map_.new_geom)),
-            }
-            feature["properties"]["id"] = self.map_.new_geom
+            feature["properties"]["id"] = geom_number
             feature["properties"]["name"] = self.w_name.v_model
             feature["properties"]["style"] = style
             feature["properties"]["hover_style"] = {
@@ -68,7 +83,6 @@ class CustomAoiDialog(BaseDialog):
                 "fillOpacity": 0.4,
                 "weight": 2,
             }
-
         current_feats = deepcopy(self.map_.custom_layers)
         current_feats["features"] += features
 
@@ -82,23 +96,42 @@ class CustomAoiDialog(BaseDialog):
         """Remove all the geometries from the map_.dc."""
         self.map_.dc.clear()
 
+        # Clear any feature that was selected
+        self.feature = None
+
         # Close the dialog
         self.close_dialog()
 
-    def open_dialog(self, new_geom: bool, *_):
+    def open_dialog(
+        self,
+        new_geom: bool,
+        *_,
+    ):
         """Open dialog in two different ways."""
         # hide save element and only show table
         self.save_input.show() if new_geom else self.save_input.hide()
 
         super().open_dialog()
 
-    def on_new_geom(self, *_):
-        """Read the aoi and give an default name."""
+    def on_new_geom(self, *_, feature_collection: dict = None, name: str = None):
+        """Read the aoi and give an default name.
+
+        It will manage the new geometries drawn by the user and the custom ones
+        imported by the user (using ImportAoiDialog)
+
+        Args:
+            aoi_model (AoiModel): Aoi Model when using the import aoi dialog
+        """
         # Count the number of geometries in map_.custom_layers
         index = len(self.map_.custom_layers["features"]) + 1
 
-        self.w_name.v_model = f"Sub AOI {index}"
+        if not feature_collection:
+            aoi_name = f"Custom AOI {index}"
+        else:
+            aoi_name = f"Custom_{name}"
+            self.feature = feature_collection
 
+        self.w_name.v_model = aoi_name
         self.open_dialog(new_geom=True)
 
 
