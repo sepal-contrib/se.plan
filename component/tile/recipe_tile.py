@@ -404,7 +404,7 @@ class RecipeTile(sw.Layout):
         This element is intended to be used only once, when the app has to start.
         """
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
                 futures = [
                     executor.submit(
                         self.aoi_tile.build,
