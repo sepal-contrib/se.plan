@@ -31,6 +31,7 @@
             },
             "draw_menu" : {
                 "new" : "Draw geometry",
+                "import" : "Import geometry",
                 "show" : "Show map geometries"
             }
         },
@@ -58,6 +59,12 @@
                 "table" : {
                     "no_geometries" : "There are not custom geometries on the map."
                 }
+            },
+            "import_": {
+                "title": "Import geometry",
+                "label": "Select file",
+                "btn": "Import",
+                "cancel": "Cancel"
             }
         },
         "error" : {
