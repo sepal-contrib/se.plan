@@ -71,6 +71,7 @@ class SeplanMap(sm.SepalMap):
                     data=feat,
                     hover_style=feat["properties"]["hover_style"],
                     name=feat["properties"]["name"],
+                    style=feat["properties"]["style"],
                 )
                 layer.on_hover(self._display_name)
 
@@ -104,7 +105,7 @@ class SeplanMap(sm.SepalMap):
             geo_json = self.to_json()
 
         if action == "created":
-            # save_geom_dialog will be listening to this trait
+            # custom_aoi_dialog will be listening to this trait
             self.new_geom += 1
             self.aoi_model.updated += 1
 
