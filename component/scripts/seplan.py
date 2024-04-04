@@ -1,4 +1,5 @@
 """All tools to build the suitability index."""
+
 from typing import List, Literal, Tuple, Union
 
 import ee
@@ -56,7 +57,7 @@ class Seplan:
 
         # unmask the images without normalizing as everything is in $/ha
         aoi = self.aoi_model.feature_collection
-        images = [ee.Image(i).unmask() for i in self.cost_model.assets]
+        images = [ee.Image(i) for i in self.cost_model.assets]
 
         # create a normalized sum
         norm_cost = ee.Image(0)
@@ -90,14 +91,14 @@ class Seplan:
     def get_benefits_list(self) -> List[Tuple[ee.Image, str]]:
         """Returns a list of named ee_image benefits from user input."""
         return [
-            [ee.Image(asset).unmask(0), self.benefit_model.ids[i]]
+            [ee.Image(asset), self.benefit_model.ids[i]]
             for i, asset in enumerate(self.benefit_model.assets)
         ]
 
     def get_costs_list(self) -> List[Tuple[ee.Image, str]]:
         """Returns a list of named costs ee.Images from user input."""
         return [
-            [ee.Image(asset).unmask(0), self.cost_model.ids[i]]
+            [ee.Image(asset), self.cost_model.ids[i]]
             for i, asset in enumerate(self.cost_model.assets)
         ]
 
@@ -252,9 +253,9 @@ def quintiles(
 
     return (
         ee.Image(0)
-        .where(ee_image.lte(low), 1)
+        .where(ee_image.gt(0).And(ee_image.lte(low)), 1)
         .where(ee_image.gt(low).And(ee_image.lte(lowmed)), 2)
         .where(ee_image.gt(lowmed).And(ee_image.lte(highmed)), 3)
         .where(ee_image.gt(highmed).And(ee_image.lte(high)), 4)
         .where(ee_image.gt(high), 5)
-    )
+    ).selfMask()
