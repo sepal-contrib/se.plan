@@ -404,7 +404,7 @@ class RecipeTile(sw.Layout):
         This element is intended to be used only once, when the app has to start.
         """
         try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
                 futures = [
                     executor.submit(
                         self.aoi_tile.build,
@@ -427,7 +427,14 @@ class RecipeTile(sw.Layout):
                         self.recipe_view.alert,
                     ),
                 ]
-                concurrent.futures.wait(futures)
+
+                # Check if any future has raised an exception
+                for future in concurrent.futures.as_completed(futures):
+                    e = future.exception()
+                    if e:
+                        raise e  # Rethrow the first exception encountered
+
+                # concurrent.futures.wait(futures)
         except Exception as e:
             # If something fails, I want to return the recipe to its original state
             self.recipe_view.recipe.__init__()
