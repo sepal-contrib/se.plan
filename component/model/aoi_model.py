@@ -132,7 +132,9 @@ class SeplanAoi(model.Model):
         self.aoi_model.import_data(data["primary"])
         self.custom_layers = data["custom"]
 
-        self.set_map += 1
+        # if there's no aoi we don't need to update the view
+        if data["primary"]["method"]:
+            self.set_map += 1
 
     def export_data(self):
         """Save the data from each of the AOIs."""
