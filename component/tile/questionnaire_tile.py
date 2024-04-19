@@ -7,8 +7,6 @@ from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.custom_widgets import Tabs
 from component.widget.questionaire_table import Table
 
-sw.DrawerItem
-
 
 class QuestionnaireTile(sw.Layout):
     def __init__(self):

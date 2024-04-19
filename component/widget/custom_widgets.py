@@ -1,5 +1,6 @@
 from typing import Literal, Union
 
+from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from traitlets import Int, Unicode, link, observe
@@ -54,8 +55,12 @@ class ToolBar(sw.Toolbar):
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
 
-        self.children = [
-            sw.Spacer(),
+        children = [sw.Spacer()]
+
+        if isinstance(model, BenefitModel):
+            children.append(ExpressionBtn(model))
+
+        self.children = children + [
             sw.Divider(vertical=True, class_="mr-2"),
             self.w_new,
         ]
