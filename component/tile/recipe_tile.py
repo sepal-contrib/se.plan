@@ -54,7 +54,7 @@ class CardAction(sw.Card):
         self.hover = True
         self.min_width = 344
         self.btn = sw.Btn(
-            msg=content["btn"], gliph=content["icon"], outlined=True, color="menu"
+            msg=content["btn"], gliph=content["icon"], outlined=True, color="primary"
         )
         self.children = [
             sw.CardActions(children=[sw.Spacer(), self.btn]),

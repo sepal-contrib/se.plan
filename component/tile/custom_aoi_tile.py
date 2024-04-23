@@ -29,7 +29,8 @@ class AoiTile(sw.Layout):
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
-        self.map_.min_zoom = 2
+        self.map_.min_zoom = 5
+        self.map_.add_basemap("SATELLITE")
 
         # Build the aoi view with our custom aoi_model
         self.view = SeplanAoiView(model=recipe.seplan_aoi, map_=self.map_)

@@ -78,10 +78,10 @@ class ExpressionDialog(v.Dialog):
                                         color: inherit !important;
                                     }
                                     .expression .MathJax {
-                                        font-size: 16pxx !important;
+                                        font-size: 22px !important;
                                     }
                                     .expression .widget-htmlmath-content {
-                                        font-size: 16pxx !important;
+                                        font-size: 22px !important;
                                     }
                                 </style>
                                 """

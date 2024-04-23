@@ -16,5 +16,3 @@ numexpr
 
 # even though it will installed by sepal_ui, I want to point out that it is required by the app
 pygaul
-
-ipyvuetify==1.9.2
