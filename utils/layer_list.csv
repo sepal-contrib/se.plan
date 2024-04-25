@@ -18,7 +18,7 @@ deforestation_rate,constraint,forest,projects/se-plan/assets/inputLayers/defores
 climate_risk,constraint,forest,projects/se-plan/assets/inputLayers/future_risk,percent,continuous
 population_density,constraint,socio_eco,CIESIN/GPWv411/GPW_Population_Density/gpw_v4_population_density_rev11_2015_30_sec,people/km2,continuous
 annual_rainfall,constraint,bio,projects/se-plan/assets/inputLayers/era5_land_mean_annual_precip_1993_2022,mm/yr,continuous
-treecover_with_potential,constraint,,projects/john-ee-282116/assets/fao-restoration/features/rest_pot_gt_treecoverfrac_mask_urban,binary,binary
+treecover_with_potential,constraint,,projects/se-plan/assets/inputLayers/total_rest_pot_gt_treecoverfrac_masks,binary,binary
 opportunity_cost,cost,monetary,projects/se-plan/assets/inputLayers/opportunity_cost_20221110,$/ha,continuous
 water_stress,constraint,bio,projects/se-plan/assets/inputLayers/bws_score,index (0 to 5),continuous
 implementation_cost,cost,monetary,projects/se-plan/assets/inputLayers/AfCost_ha,$/ha,continuous
