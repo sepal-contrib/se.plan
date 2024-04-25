@@ -191,9 +191,17 @@ class CustomNavDrawer(sw.NavDrawer):
 
 
 class CustomAppBar(sw.AppBar):
+
+    save_recipe_btn = sw.Btn(
+        gliph="mdi-content-save",
+        icon=True,
+    )
+    save_recipe_btn.v_icon.left = False
+
     recipe_holder = sw.Flex(
         attributes={"id": "recipe_holder"},
         class_="d-inline-flex justify-end",
+        style_="align-items: center;",
         children=[
             sw.Html(
                 tag="span",
@@ -205,6 +213,7 @@ class CustomAppBar(sw.AppBar):
                 class_="font-weight-thin font-italic text-lowercase",
                 attributes={"id": "new_changes"},
             ),
+            save_recipe_btn,
         ],
     )
 
@@ -228,8 +237,15 @@ class CustomApp(sw.App):
     def __init__(self, app_model, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        app_model.observe(self.update_recipe_state, "recipe_name")
-        app_model.observe(self.update_recipe_state, "new_changes")
+        self.app_model = app_model
+        self.app_model.observe(self.update_recipe_state, "recipe_name")
+        self.app_model.observe(self.update_recipe_state, "new_changes")
+
+        self.appBar.save_recipe_btn.on_event("click", self.save_recipe)
+
+    def save_recipe(self, *_):
+        """Save the recipe in the app model."""
+        self.app_model.on_save += 1
 
     def update_recipe_state(self, change):
         """Update the recipe state in the app bar."""

@@ -133,13 +133,20 @@ class RecipeView(sw.Card):
     recipe_session_path = Unicode(None, allow_none=True).tag(sync=True)
     """Normalized recipe path of the current session. It will come from NewCard/LoadCard"""
 
-    def __init__(self):
+    app_model: AppModel
+    """It will be used to listen the on_save trait and trigger the save button here"""
+
+    def __init__(self, app_model: AppModel = None):
         self.attributes = {"_metadata": "recipe_tile"}
 
         super().__init__()
         self.recipe = Recipe()
         self.alert = AlertState()
         self.alert_dialog = AlertDialog(self.alert)
+
+        self.app_model = app_model
+        if not app_model:
+            self.app_model = AppModel()
 
         self.card_new = CardNewSave(type_="new")
         self.card_load = CardLoad()
@@ -189,9 +196,8 @@ class RecipeView(sw.Card):
         # Create events
         self.card_new.btn.on_event("click", self.new_event)
         self.card_load.btn.on_event("click", lambda *_: self.load_dialog.show())
-        self.card_save.btn.on_event("click", self.save_event)
-
         self.load_dialog.btn_load.on_event("click", self.load_event)
+        self.app_model.observe(self.save_event, "on_save")
 
     def session_path_handler(self, change):
         """handle current session path and link its value with save_card.recipe_name."""
@@ -378,7 +384,7 @@ class RecipeTile(sw.Layout):
         super().__init__()
 
         self.app_model = app_model
-        self.recipe_view = RecipeView()
+        self.recipe_view = RecipeView(app_model=app_model)
 
         self.aoi_tile = aoi_tile
         self.questionnaire_tile = questionnaire_tile
