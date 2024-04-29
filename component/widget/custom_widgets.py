@@ -148,7 +148,8 @@ class CustomDrawerItem(sw.DrawerItem):
         if self.attributes["id"] not in (["recipe_tile", "about_tile"]):
             self.viz = False
 
-    @observe("alert")
+        self.observe(self.add_notif, "alert")
+
     def add_notif(self, change: dict) -> None:
         """Add a notification alert to drawer."""
         if self.attributes["id"] in (["recipe_tile", "about_tile"]):
