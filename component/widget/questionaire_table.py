@@ -36,17 +36,17 @@ class Table(sw.Layout):
         self.aoi_model = aoi_model
 
         if isinstance(model, BenefitModel):
-            type_ = "benefit"
+            self.type_ = "benefit"
             self.Row = BenefitRow
             self.dialog = BenefitDialog(model=model, alert=self.alert)
 
         elif isinstance(model, ConstraintModel):
-            type_ = "constraint"
+            self.type_ = "constraint"
             self.Row = ConstraintRow
             self.dialog = ConstraintDialog(model=model, alert=self.alert)
 
         elif isinstance(model, CostModel):
-            type_ = "cost"
+            self.type_ = "cost"
             self.Row = CostRow
             self.dialog = CostDialog(model=model, alert=self.alert)
 
@@ -63,12 +63,12 @@ class Table(sw.Layout):
             tag="tr",
             children=[
                 sw.Html(tag="th", children=[title])
-                for title in cp.table_headers[type_].values()
+                for title in cp.table_headers[self.type_].values()
             ],
         )
 
         self.tbody = sw.Html(tag="tbody", children=[])
-        self.set_rows()
+        self.set_rows(who="init")
 
         # create the table
         self.table = sw.SimpleTable(
@@ -82,19 +82,27 @@ class Table(sw.Layout):
         self.children = [self.dialog, self.preview_map, self.toolbar, self.table]
 
         # set rows everytime the feature collection is updated on aoitile
-        self.model.observe(self.set_rows, "updated")
+        self.model.observe(lambda args: self.set_rows(*args, who="model"), "updated")
 
         # This will only happen with the constraints table
         if self.aoi_model:
-            self.aoi_model.observe(self.set_rows, "feature_collection")
+            self.aoi_model.observe(
+                lambda args: self.set_rows(
+                    *args,
+                    who="aoi",
+                ),
+                "feature_collection",
+            )
 
     @sd.catch_errors()
-    def set_rows(self, *args):
+    def set_rows(self, *args, who: str = ""):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time. That's too expensive (specially the set_limits method)
-        print("setting rows")
+        print("Setting rows by", who)
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
+        print("Current model IDs", model_ids)
+        print("Current view IDs", view_ids)
 
         new_ids = [id_ for id_ in model_ids if id_ not in view_ids]
         old_ids = [id_ for id_ in view_ids if id_ not in model_ids]
@@ -127,6 +135,10 @@ class Table(sw.Layout):
                 row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
                     0
                 ]
+                # unobserve the row to avoid ghost listeners
+                if self.type_ == "constraint":
+                    row_to_remove.unobserve_all()
+
                 self.tbody.children = [
                     row for row in self.tbody.children if row != row_to_remove
                 ]
@@ -142,6 +154,12 @@ class Table(sw.Layout):
         # without a real change.
         elif not (new_ids or old_ids or edited_id):
             print("no ID")
+
+            # let's first unobserve all the previou rows
+            if self.type_ == "constraint":
+                for row in self.tbody.children:
+                    row.unobserve_all()
+
             rows = [
                 self.Row(
                     self.model,

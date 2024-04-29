@@ -26,7 +26,7 @@ class QuestionnaireTile(sw.Layout):
         benefit_table = Table(
             model=recipe.benefit_model, alert=self.alert, aoi_model=recipe.seplan_aoi
         )
-
+        print("Building questionnaire tile")
         constraint_table = Table(
             model=recipe.constraint_model, alert=self.alert, aoi_model=recipe.seplan_aoi
         )
