@@ -197,6 +197,7 @@ class RecipeView(sw.Card):
         self.card_new.btn.on_event("click", self.new_event)
         self.card_load.btn.on_event("click", lambda *_: self.load_dialog.show())
         self.load_dialog.btn_load.on_event("click", self.load_event)
+        self.card_save.btn.on_event("click", self.save_event)
         self.app_model.observe(self.save_event, "on_save")
 
     def session_path_handler(self, change):
@@ -235,7 +236,7 @@ class RecipeView(sw.Card):
             self.card_new.recipe_name
         )
 
-        self.recipe.save(self.recipe_session_path)
+        # self.recipe.save(self.recipe_session_path)
 
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
     @switch("loading", on_widgets=["card_load"])
