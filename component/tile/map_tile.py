@@ -103,13 +103,17 @@ class MapTile(sw.Layout):
 
     def _compute(self, *_):
         """Compute the restoration plan and display the map."""
+
+        aoi = self.recipe.seplan_aoi.feature_collection
+
         benefit_index = self.recipe.seplan.get_benefit_index(clip=True)
         benefit_cost_index = (
             self.recipe.seplan.get_benefit_cost_index(clip=True).multiply(4).add(1)
         )
-        constraint_index = self.recipe.seplan.get_constraint_index(clip=True)
 
-        self.map_.centerObject(self.recipe.seplan_aoi.feature_collection, zoom_out=3)
+        constraint_index = self.recipe.seplan.get_constraint_index().unmask(0).clip(aoi)
+
+        self.map_.centerObject(aoi, zoom_out=3)
         self.map_.add_ee_layer(benefit_index, cp.final_viz, "benefit index")
         self.map_.add_ee_layer(benefit_cost_index, cp.final_viz, "benefit_cost index")
         self.map_.add_ee_layer(constraint_index, cp.final_viz, "constraint_index")

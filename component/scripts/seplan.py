@@ -82,8 +82,7 @@ class Seplan:
             self.get_benefit_cost_index(clip=clip)
             .multiply(4)
             .add(1)
-            .mask(mask_out_areas)
-            .unmask(0)
+            .updateMask(mask_out_areas)
         )
 
         return index.clip(aoi) if clip is True else index
