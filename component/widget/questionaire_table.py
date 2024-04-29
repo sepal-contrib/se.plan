@@ -68,7 +68,7 @@ class Table(sw.Layout):
         )
 
         self.tbody = sw.Html(tag="tbody", children=[])
-        self.set_rows(who="init")
+        self.set_rows()
 
         # create the table
         self.table = sw.SimpleTable(
@@ -82,23 +82,17 @@ class Table(sw.Layout):
         self.children = [self.dialog, self.preview_map, self.toolbar, self.table]
 
         # set rows everytime the feature collection is updated on aoitile
-        self.model.observe(lambda args: self.set_rows(*args, who="model"), "updated")
+        self.model.observe(self.set_rows, "updated")
 
         # This will only happen with the constraints table
         if self.aoi_model:
-            self.aoi_model.observe(
-                lambda args: self.set_rows(
-                    *args,
-                    who="aoi",
-                ),
-                "feature_collection",
-            )
+            self.aoi_model.observe(self.set_rows, "feature_collection")
 
     @sd.catch_errors()
-    def set_rows(self, *args, who: str = ""):
+    def set_rows(self, *args):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time. That's too expensive (specially the set_limits method)
-        print("Setting rows by", who)
+        print("setting rows")
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
         print("Current model IDs", model_ids)
