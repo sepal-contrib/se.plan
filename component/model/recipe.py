@@ -42,6 +42,7 @@ class Recipe(HasTraits):
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
+        self.dash_model = cmod.DashboardModel()
         self.seplan = Seplan(
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )
@@ -108,6 +109,8 @@ class Recipe(HasTraits):
 
         print("constraint_model.ids", self.constraint_model.ids)
         self.seplan_aoi.reset()
+
+        self.dash_model.reset()
 
         self.new_changes = 0
 
