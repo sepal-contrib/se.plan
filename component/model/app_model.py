@@ -13,3 +13,6 @@ class AppModel(HasTraits):
 
     recipe_name = Unicode("", allow_none=True).tag(sync=True)
     """The name of the current recipe"""
+
+    on_save = Int().tag(sync=True)
+    """A counter that is incremented every time the recipe is saved. Useful to trigger the save button"""

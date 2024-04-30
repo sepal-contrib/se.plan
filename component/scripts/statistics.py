@@ -70,7 +70,7 @@ def get_image_stats(image, mask, geom):
         eedictionary : a dictionary of suitability with the name of the region of intrest, list of values for each category, and total area.
     """
     # set masked areas as 6
-    image = image.where(mask.unmask(0).eq(0), 6)
+    image = image.unmask(6)
 
     image = image.rename("image").round()
 

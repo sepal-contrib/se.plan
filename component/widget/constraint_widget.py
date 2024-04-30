@@ -78,6 +78,8 @@ class ConstraintWidget(sw.Layout):
 
         if self.data_type == "continuous":
             self.widget = CustomSlider()
+            # before linking set the default v_model
+            self.v_model = [0, 1]
 
             link((self.widget, "v_model"), (self, "v_model"))
 
@@ -100,6 +102,9 @@ class ConstraintWidget(sw.Layout):
                     return 0
                 return value[0]
 
+            # before linking set the default v_model
+            self.v_model = [0]
+
             link(
                 (self.widget, "v_model"),
                 (self, "v_model"),
@@ -115,6 +120,9 @@ class ConstraintWidget(sw.Layout):
                 hide_details=True,
             )
 
+            # before linking set the default v_model
+            self.v_model = []
+
             link((self.widget, "v_model"), (self, "v_model"))
 
         self.v_model = v_model
@@ -123,9 +131,17 @@ class ConstraintWidget(sw.Layout):
             sw.Flex(class_="d-block", children=[self.widget, self.message])
         ]
 
-    @observe("v_model")
+        self.observe(self.set_message, "v_model")
+
+        # just for the first time
+        self.set_message({"new": self.v_model})
+        self.observe(lambda *args: print(self.v_model), "v_model")
+
     def set_message(self, change):
         """Set message to the widget based on the data type."""
+
+        # print(f"ConstraintWidget({self.layer_id}).set_message", change["new"])
+
         if not change["new"]:
             return
 

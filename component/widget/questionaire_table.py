@@ -8,6 +8,7 @@ from component.model import BenefitModel, ConstraintModel, CostModel
 from component.model.aoi_model import SeplanAoi
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
+from component.widget.preview_theme_btn import PreviewThemeBtn
 
 from .benefit_dialog import BenefitDialog
 from .benefit_row import BenefitRow
@@ -30,28 +31,37 @@ class Table(sw.Layout):
         model: Union[BenefitModel, ConstraintModel, CostModel],
         alert: Alert,
         aoi_model: SeplanAoi,
+        preview_map: PreviewMapDialog = None,
+        preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:
         self.model = model
         self.alert = alert
         self.aoi_model = aoi_model
+        self.preview_map = preview_theme_map_btn
 
         if isinstance(model, BenefitModel):
-            type_ = "benefit"
+            self.type_ = "benefit"
             self.Row = BenefitRow
             self.dialog = BenefitDialog(model=model, alert=self.alert)
 
         elif isinstance(model, ConstraintModel):
-            type_ = "constraint"
+            self.type_ = "constraint"
             self.Row = ConstraintRow
             self.dialog = ConstraintDialog(model=model, alert=self.alert)
 
         elif isinstance(model, CostModel):
-            type_ = "cost"
+            self.type_ = "cost"
             self.Row = CostRow
             self.dialog = CostDialog(model=model, alert=self.alert)
 
-        self.toolbar = cw.ToolBar(model, self.dialog, self.aoi_model, self.alert)
-        self.preview_map = PreviewMapDialog()
+        self.preview_map = preview_map or PreviewMapDialog()
+        self.toolbar = cw.ToolBar(
+            model,
+            self.dialog,
+            self.aoi_model,
+            self.alert,
+            preview_theme_map_btn,
+        )
 
         # create the table
         super().__init__()
@@ -63,7 +73,7 @@ class Table(sw.Layout):
             tag="tr",
             children=[
                 sw.Html(tag="th", children=[title])
-                for title in cp.table_headers[type_].values()
+                for title in cp.table_headers[self.type_].values()
             ],
         )
 
@@ -95,6 +105,8 @@ class Table(sw.Layout):
         print("setting rows")
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
+        print("Current model IDs", model_ids)
+        print("Current view IDs", view_ids)
 
         new_ids = [id_ for id_ in model_ids if id_ not in view_ids]
         old_ids = [id_ for id_ in view_ids if id_ not in model_ids]
@@ -127,6 +139,10 @@ class Table(sw.Layout):
                 row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
                     0
                 ]
+                # unobserve the row to avoid ghost listeners
+                if self.type_ == "constraint":
+                    row_to_remove.unobserve_all()
+
                 self.tbody.children = [
                     row for row in self.tbody.children if row != row_to_remove
                 ]
@@ -142,6 +158,12 @@ class Table(sw.Layout):
         # without a real change.
         elif not (new_ids or old_ids or edited_id):
             print("no ID")
+
+            # let's first unobserve all the previou rows
+            if self.type_ == "constraint":
+                for row in self.tbody.children:
+                    row.unobserve_all()
+
             rows = [
                 self.Row(
                     self.model,

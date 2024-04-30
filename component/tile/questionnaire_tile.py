@@ -5,6 +5,8 @@ from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.custom_widgets import Tabs
+from component.widget.preview_map_dialog import PreviewMapDialog
+from component.widget.preview_theme_btn import PreviewThemeBtn
 from component.widget.questionaire_table import Table
 
 
@@ -23,16 +25,46 @@ class QuestionnaireTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
+        # define a reusable preview map dialog
+        preview_map = PreviewMapDialog()
+
         benefit_table = Table(
-            model=recipe.benefit_model, alert=self.alert, aoi_model=recipe.seplan_aoi
+            model=recipe.benefit_model,
+            alert=self.alert,
+            aoi_model=recipe.seplan_aoi,
+            preview_map=preview_map,
+            preview_theme_map_btn=PreviewThemeBtn(
+                type_="benefit",
+                map_=preview_map,
+                seplan=recipe.seplan,
+                alert=self.alert,
+            ),
         )
 
         constraint_table = Table(
-            model=recipe.constraint_model, alert=self.alert, aoi_model=recipe.seplan_aoi
+            model=recipe.constraint_model,
+            alert=self.alert,
+            aoi_model=recipe.seplan_aoi,
+            preview_map=preview_map,
+            preview_theme_map_btn=PreviewThemeBtn(
+                type_="constraint",
+                map_=preview_map,
+                seplan=recipe.seplan,
+                alert=self.alert,
+            ),
         )
 
         cost_table = Table(
-            model=recipe.cost_model, alert=self.alert, aoi_model=recipe.seplan_aoi
+            model=recipe.cost_model,
+            alert=self.alert,
+            aoi_model=recipe.seplan_aoi,
+            preview_map=preview_map,
+            preview_theme_map_btn=PreviewThemeBtn(
+                type_="cost",
+                map_=preview_map,
+                seplan=recipe.seplan,
+                alert=self.alert,
+            ),
         )
 
         tabs = Tabs(
@@ -43,6 +75,6 @@ class QuestionnaireTile(sw.Layout):
             centered=True,
         )
 
-        self.set_children([alert_dialog] + [tabs], position="last")
+        self.set_children([alert_dialog, preview_map] + [tabs], position="last")
 
         build_alert.set_state("new", "questionnaire", "done")

@@ -42,6 +42,7 @@ class Recipe(HasTraits):
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
+        self.dash_model = cmod.DashboardModel()
         self.seplan = Seplan(
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )
@@ -102,10 +103,14 @@ class Recipe(HasTraits):
         # Each of the models will return to its default values and
         # they'll update their respective views by themselves
 
-        self.seplan_aoi.reset()
         self.benefit_model.reset()
         self.constraint_model.reset()
         self.cost_model.reset()
+
+        print("constraint_model.ids", self.constraint_model.ids)
+        self.seplan_aoi.reset()
+
+        self.dash_model.reset()
 
         self.new_changes = 0
 

@@ -60,6 +60,8 @@ class DashboardTile(sw.Layout):
 
         build_alert.set_state("new", "dashboard", "done")
 
+        self.recipe.dash_model.observe(self.reset, "reset_count")
+
     def csv_export(self, *_):
         """Export the dashboard as a csv file."""
         self.summary_stats = get_summary_statistics(self.recipe.seplan)
@@ -80,7 +82,7 @@ class DashboardTile(sw.Layout):
         self.overall_dash.set_summary(self.summary_stats)
         self.theme_dash.set_summary(self.summary_stats)
 
-    def reset(self):
+    def reset(self, *_):
         """Reset the dashboard to its initial state."""
         print("resettig the dashboard")
         self.summary_stats = None
@@ -173,7 +175,7 @@ class ThemeDashboard(sw.Card):
 
     def reset(self):
         """Reset the dashboard to its initial state."""
-        self.__init__()
+        self.__init__(self.seplan)
 
 
 class OverallDashboard(sw.Card):

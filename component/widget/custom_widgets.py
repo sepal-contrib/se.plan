@@ -9,6 +9,7 @@ from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert
+from component.widget.preview_theme_btn import PreviewThemeBtn
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -35,6 +36,7 @@ class ToolBar(sw.Toolbar):
         dialog: Union[ConstraintDialog, CostDialog, BenefitDialog],
         seplan_aoi: SeplanAoi,
         alert: Alert,
+        preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:
         super().__init__()
 
@@ -55,13 +57,13 @@ class ToolBar(sw.Toolbar):
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
 
-        children = [sw.Spacer()]
+        children = [sw.Spacer(), preview_theme_map_btn]
 
         if isinstance(model, BenefitModel):
             children.append(ExpressionBtn(model))
 
         self.children = children + [
-            sw.Divider(vertical=True, class_="mr-2"),
+            sw.Divider(vertical=True, class_="ml-1 mr-2"),
             self.w_new,
         ]
 
@@ -148,7 +150,8 @@ class CustomDrawerItem(sw.DrawerItem):
         if self.attributes["id"] not in (["recipe_tile", "about_tile"]):
             self.viz = False
 
-    @observe("alert")
+        self.observe(self.add_notif, "alert")
+
     def add_notif(self, change: dict) -> None:
         """Add a notification alert to drawer."""
         if self.attributes["id"] in (["recipe_tile", "about_tile"]):
@@ -191,9 +194,17 @@ class CustomNavDrawer(sw.NavDrawer):
 
 
 class CustomAppBar(sw.AppBar):
+
+    save_recipe_btn = sw.Btn(
+        gliph="mdi-content-save",
+        icon=True,
+    )
+    save_recipe_btn.v_icon.left = False
+
     recipe_holder = sw.Flex(
         attributes={"id": "recipe_holder"},
         class_="d-inline-flex justify-end",
+        style_="align-items: center;",
         children=[
             sw.Html(
                 tag="span",
@@ -205,6 +216,7 @@ class CustomAppBar(sw.AppBar):
                 class_="font-weight-thin font-italic text-lowercase",
                 attributes={"id": "new_changes"},
             ),
+            save_recipe_btn,
         ],
     )
 
@@ -228,8 +240,15 @@ class CustomApp(sw.App):
     def __init__(self, app_model, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        app_model.observe(self.update_recipe_state, "recipe_name")
-        app_model.observe(self.update_recipe_state, "new_changes")
+        self.app_model = app_model
+        self.app_model.observe(self.update_recipe_state, "recipe_name")
+        self.app_model.observe(self.update_recipe_state, "new_changes")
+
+        self.appBar.save_recipe_btn.on_event("click", self.save_recipe)
+
+    def save_recipe(self, *_):
+        """Save the recipe in the app model."""
+        self.app_model.on_save += 1
 
     def update_recipe_state(self, change):
         """Update the recipe state in the app bar."""

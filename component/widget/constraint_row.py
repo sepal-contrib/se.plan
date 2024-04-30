@@ -44,6 +44,7 @@ class ConstraintRow(sw.Html):
         self.alert = alert
 
         self.get_model_data()
+        print(f"ConstraintRow.{self.name}.{self.aoi_model.aoi_model.name}__init__")
 
         # View
 
@@ -81,6 +82,9 @@ class ConstraintRow(sw.Html):
 
     def update_view(self):
         """Create the view of the widget based on the model."""
+
+        print(f"ConstraintRow({self.layer_id}).update_view()")
+
         # create Maskout widget
         self.w_maskout = ConstraintWidget(
             data_type=self.data_type,
@@ -112,6 +116,15 @@ class ConstraintRow(sw.Html):
 
         self.model.remove(widget.attributes["data-layer"])
 
+    def unobserve_all(self):
+        """Remove all the observers."""
+        try:
+            self.w_maskout.unobserve(self.update_value, "v_model")
+            self.aoi_model.unobserve(self.set_limits, "updated")
+        except Exception as e:
+            print("Error: unloading the constraint row")
+            pass
+
     @sd.switch("loading", on_widgets=["dialog"])
     def on_edit(self, widget, data, event):
         """Open the dialog and load data contained in the model."""
@@ -142,13 +155,13 @@ class ConstraintRow(sw.Html):
         # if there's no AOI we'll assume we are in the default constraint
         # and we will return the default value
         if not self.aoi:
-            print("theres no aoi")
+            print(f"theres no aoi {id(self)}xx")
             self.w_maskout.v_model = [0]
             self.update_value()
             return
 
         values = gee.get_limits(self.asset, self.data_type, self.aoi)
-        print(values)
+        print(f"ConstraintRow({self.layer_id}).set_limits.values:", values)
 
         if self.data_type == "binary":
             if not all(val in values for val in [0, 1]):

@@ -40,6 +40,7 @@ def get_limits(
     Returns:
         list: A list containing either min-max values or histogram keys depending on the data_type.
     """
+
     if data_type in ["binary", "continuous"]:
         reducer = ee.Reducer.minMax()
 
@@ -57,15 +58,28 @@ def get_limits(
             )
 
     ee_image = ee.Image(asset).select(0)
+    # Multiply the nominal scale by 2 in case the nominal scale is finer than 45
+    scale = ee.Number(
+        ee.Algorithms.If(
+            ee_image.projection().nominalScale().lt(30),
+            ee_image.projection().nominalScale().multiply(2),
+            ee_image.projection().nominalScale(),
+        )
+    )
+
+    # If scale is less than 30, set it to 30
+    scale = ee.Algorithms.If(scale.lt(30), 30, scale)
 
     values = get_value(
         ee_image.reduceRegion(
             reducer=reducer,
             geometry=aoi,
-            scale=ee_image.projection().nominalScale().multiply(factor),
+            scale=scale,
             maxPixels=1e13,
         )
     )
+
+    print("get_limits_values:", values)
 
     # check if values are none and if so, raise a ValueError
     if any([val is None for val in values]):
