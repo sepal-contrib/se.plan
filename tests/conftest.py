@@ -1,11 +1,3 @@
-import pytest
+from sepal_ui.scripts import utils as su
 
-
-@pytest.fixture(scope="session")
-def file_start() -> str:
-    """The start of any link to the sepal platform.
-
-    Args:
-        the value of the sandbox path
-    """
-    return "https://sepal.io/api/sandbox/jupyter/files/"
+su.init_ee()
