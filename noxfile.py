@@ -31,3 +31,12 @@ def jupyter(session):
     session.install("-r", "requirements.txt")
     session.run("jupyter", "trust", "no_ui.ipynb")
     session.run("jupyter", "notebook", "no_ui.ipynb")
+
+
+@nox.session(reuse_venv=True)
+def test(session):
+    """Run the application."""
+
+    session.install("-r", "requirements.txt")
+    test_files = session.posargs or ["tests"]
+    session.run("pytest", "--color=yes", "--cov", "--cov-report=xml", *test_files)

@@ -1,0 +1,438 @@
+{
+    "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
+    "aoi": {
+        "primary": {
+            "admin": "959",
+            "asset_name": null,
+            "method": "ADMIN1",
+            "name": "COL_Risaralda",
+            "updated": 9,
+            "asset_json": null,
+            "vector_json": null,
+            "point_json": null,
+            "geo_json": {
+                "type": "FeatureCollection",
+                "features": []
+            }
+        },
+        "custom": {
+            "type": "FeatureCollection",
+            "features": [
+                {
+                    "id": "0",
+                    "type": "Feature",
+                    "properties": {
+                        "ADM0_CODE": 57,
+                        "ADM0_NAME": "Colombia",
+                        "ADM1_CODE": 959,
+                        "ADM1_NAME": "Risaralda",
+                        "ADM2_CODE": 14191,
+                        "ADM2_NAME": "Belen De Umbria",
+                        "DISP_AREA": "NO",
+                        "EXP2_YEAR": 3000,
+                        "STATUS": "Member State",
+                        "STR2_YEAR": 1000,
+                        "Shape_Area": 0.0142980478307,
+                        "Shape_Leng": 0.483782087526,
+                        "ISO": "COL",
+                        "id": 1,
+                        "name": "Custom_COL_Risaralda_Belen_De_Umbria",
+                        "style": {
+                            "stroke": true,
+                            "color": "#ff7f0e",
+                            "weight": 1,
+                            "opacity": 1,
+                            "fill": true,
+                            "fillColor": "#ff7f0e",
+                            "fillOpacity": 0.05
+                        },
+                        "hover_style": {
+                            "stroke": true,
+                            "color": "#ff7f0e",
+                            "weight": 2,
+                            "opacity": 1,
+                            "fill": true,
+                            "fillColor": "#ff7f0e",
+                            "fillOpacity": 0.4
+                        }
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [
+                                    -75.88099525703937,
+                                    5.134400708103579
+                                ],
+                                [
+                                    -75.8786988696803,
+                                    5.141900923470893
+                                ],
+                                [
+                                    -75.87699995508858,
+                                    5.151198138367563
+                                ],
+                                [
+                                    -75.86949973911334,
+                                    5.160401676549815
+                                ],
+                                [
+                                    -75.8510970233442,
+                                    5.187499693496826
+                                ],
+                                [
+                                    -75.84880059392,
+                                    5.19610128308356
+                                ],
+                                [
+                                    -75.851698984368,
+                                    5.212898679221378
+                                ],
+                                [
+                                    -75.85399545549073,
+                                    5.222699850866091
+                                ],
+                                [
+                                    -75.85690278206363,
+                                    5.241798163851318
+                                ],
+                                [
+                                    -75.86440295688308,
+                                    5.261997840498351
+                                ],
+                                [
+                                    -75.86549994580224,
+                                    5.2664079043848275
+                                ],
+                                [
+                                    -75.8719031773528,
+                                    5.265498300931676
+                                ],
+                                [
+                                    -75.87760189455763,
+                                    5.265498281307336
+                                ],
+                                [
+                                    -75.88970395852098,
+                                    5.264401329859792
+                                ],
+                                [
+                                    -75.89550077530826,
+                                    5.262697946647666
+                                ],
+                                [
+                                    -75.89779715493181,
+                                    5.26449942805161
+                                ],
+                                [
+                                    -75.90699630066081,
+                                    5.260499611438583
+                                ],
+                                [
+                                    -75.90930170894552,
+                                    5.258198756446402
+                                ],
+                                [
+                                    -75.91400155853864,
+                                    5.2546983038247586
+                                ],
+                                [
+                                    -75.92489516544357,
+                                    5.250100962908251
+                                ],
+                                [
+                                    -75.93120027020416,
+                                    5.24899956229022
+                                ],
+                                [
+                                    -75.93869604590597,
+                                    5.246698670378934
+                                ],
+                                [
+                                    -75.97390064081574,
+                                    5.232398358690908
+                                ],
+                                [
+                                    -75.9859982001465,
+                                    5.229000513521437
+                                ],
+                                [
+                                    -75.98999801175997,
+                                    5.220398933852722
+                                ],
+                                [
+                                    -75.99170140182231,
+                                    5.210597848482396
+                                ],
+                                [
+                                    -75.99230337999602,
+                                    5.195601827745555
+                                ],
+                                [
+                                    -75.9824978166806,
+                                    5.185100696807917
+                                ],
+                                [
+                                    -75.96459896931827,
+                                    5.17000214528316
+                                ],
+                                [
+                                    -75.95420038909751,
+                                    5.15550113111059
+                                ],
+                                [
+                                    -75.94389981914627,
+                                    5.144500536230641
+                                ],
+                                [
+                                    -75.93579767252535,
+                                    5.135198905347807
+                                ],
+                                [
+                                    -75.93628816660984,
+                                    5.123556146698505
+                                ],
+                                [
+                                    -75.93169972934437,
+                                    5.124800245375167
+                                ],
+                                [
+                                    -75.92189859292775,
+                                    5.124800237669669
+                                ],
+                                [
+                                    -75.91850081095015,
+                                    5.124800246402791
+                                ],
+                                [
+                                    -75.91269501683483,
+                                    5.120697912819483
+                                ],
+                                [
+                                    -75.9029028339459,
+                                    5.107998379082327
+                                ],
+                                [
+                                    -75.88970395852098,
+                                    5.109099784728734
+                                ],
+                                [
+                                    -75.88559704883002,
+                                    5.112502061400686
+                                ],
+                                [
+                                    -75.8839026489505,
+                                    5.115997980571393
+                                ],
+                                [
+                                    -75.88159726811026,
+                                    5.125799057850983
+                                ],
+                                [
+                                    -75.88099525703937,
+                                    5.134400708103579
+                                ]
+                            ]
+                        ]
+                    },
+                    "bbox": [
+                        -75.99230337999602,
+                        5.107998379082327,
+                        -75.84880059392,
+                        5.2664079043848275
+                    ]
+                },
+                {
+                    "type": "Feature",
+                    "properties": {
+                        "id": 2,
+                        "name": "Custom AOI 2",
+                        "style": {
+                            "stroke": true,
+                            "color": "#2ca02c",
+                            "weight": 1,
+                            "opacity": 1,
+                            "fill": true,
+                            "fillColor": "#2ca02c",
+                            "fillOpacity": 0.05
+                        },
+                        "hover_style": {
+                            "stroke": true,
+                            "color": "#2ca02c",
+                            "weight": 2,
+                            "opacity": 1,
+                            "fill": true,
+                            "fillColor": "#2ca02c",
+                            "fillOpacity": 0.4
+                        }
+                    },
+                    "geometry": {
+                        "type": "Polygon",
+                        "coordinates": [
+                            [
+                                [
+                                    -76.236753,
+                                    5.111321
+                                ],
+                                [
+                                    -76.236753,
+                                    5.254959
+                                ],
+                                [
+                                    -76.103585,
+                                    5.254959
+                                ],
+                                [
+                                    -76.103585,
+                                    5.111321
+                                ],
+                                [
+                                    -76.236753,
+                                    5.111321
+                                ]
+                            ]
+                        ]
+                    }
+                }
+            ]
+        }
+    },
+    "benefits": {
+        "new_changes": 20,
+        "updated": 6,
+        "names": [
+            "Biodiversity Intactness Index",
+            "Endangered species",
+            "Unrealized biomass potential",
+            "Forest employment",
+            "Woodfuel harvest",
+            "Plantation growth rate"
+        ],
+        "ids": [
+            "biodiversity_intactness",
+            "endangered_species",
+            "ground_carbon",
+            "forest_job",
+            "woodfuel_harvest",
+            "plantation_growth_rates"
+        ],
+        "themes": [
+            "bii",
+            "bii",
+            "carbon_seq",
+            "local",
+            "local",
+            "wood"
+        ],
+        "assets": [
+            "projects/john-ee-282116/assets/fao-restoration/features/ibii-4326",
+            "projects/john-ee-282116/assets/fao-restoration/features/terra-bio-div-image",
+            "projects/ee-amcmahon/assets/seplan/seplan_layers/Base_Unr_AGB_BGB_SOC_MgCha_500m",
+            "projects/john-ee-282116/assets/fao-restoration/features/emp_ha",
+            "projects/john-ee-282116/assets/fao-restoration/features/Woodfuel_gadm36_1_edited_image",
+            "projects/john-ee-282116/assets/fao-restoration/features/yields-4326"
+        ],
+        "descs": [
+            "The average abundance of a large and diverse set of species, expressed as a percentage of the set of originally present species. A higher percentage tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit.",
+            "Total number of critically endangered and endangered mammal, bird, reptile, and amphibian species, expressed per square kilometer. A higher number tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit.",
+            "Unrealized potential aboveground biomass, belowground biomass, and soil organic carbon combined density (megagrams carbon per hectare) under baseline climate.",
+            "Number of forest-related jobs per hectare of forestland for the most recent available year. A higher level of forest employment implies attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make restoration more feasible when income for local households is a desired restoration benefit.",
+            "Annual harvest of wood fuel for the most recent available year, expressed in cubic meters per hectare of forest. A higher level of harvest implies greater demand for wood fuel as an energy source, which tends to make restoration more feasible when supply of wood to meet local demands is a desired restoration benefit.",
+            "Annual production of woody biomass by plantation-grown tree species, expressed in dry tons per hectare per year. A higher growth rate tends to make restoration more feasible when income for landholders and wood supply to meet local demands are desired restoration benefits."
+        ],
+        "weights": [
+            0,
+            0,
+            2,
+            1,
+            1,
+            0
+        ],
+        "units": [
+            "percent",
+            "number/km2",
+            "MgC/ha",
+            "jobs/ha",
+            "m3/ha",
+            "dry tons/ha/yr"
+        ]
+    },
+    "constraints": {
+        "new_changes": 99,
+        "updated": 12,
+        "themes": [
+            "",
+            "socio_eco",
+            "socio_eco"
+        ],
+        "names": [
+            "Current tree cover less than potential",
+            "Current land cover",
+            "Accessibility to cities"
+        ],
+        "ids": [
+            "treecover_with_potential",
+            "land_cover",
+            "city_access"
+        ],
+        "assets": [
+            "projects/john-ee-282116/assets/fao-restoration/features/rest_pot_gt_treecoverfrac_mask_urban",
+            "COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019",
+            "Oxford/MAP/accessibility_to_cities_2015_v1_0"
+        ],
+        "descs": [
+            "Sites that have the potential for restoration. Their tree-cover fraction is less its potential and they are not in urban areas.",
+            "Indicator of current land cover (cropland, urban, etc.). Some restoration stakeholders might prefer to avoid forest restoration on sites with particular land cover (e.g., cropland, to reduce competition with food production).",
+            "Estimated travel time to the nearest city for the most recent available year, expressed in hours. Greater accessibility can make restoration more feasible by increasing the return earned by forest products sold in urban markets, but it can also make restoration less feasible by increasing the return earned by products from nonforest land uses."
+        ],
+        "units": [
+            "binary",
+            "binary",
+            "hours"
+        ],
+        "values": [
+            [
+                0
+            ],
+            [
+                20,
+                60,
+                70,
+                40
+            ],
+            [
+                249,
+                594
+            ]
+        ],
+        "data_type": [
+            "binary",
+            "categorical",
+            "continuous"
+        ]
+    },
+    "costs": {
+        "new_changes": 6,
+        "updated": 6,
+        "names": [
+            "Land opportunity cost",
+            "Implementation cost"
+        ],
+        "ids": [
+            "opportunity_cost",
+            "implementation_cost"
+        ],
+        "assets": [
+            "projects/ee-amcmahon/assets/seplan/seplan_layers/features/opportunity_cost_20221110",
+            "projects/john-ee-282116/assets/fao-restoration/features/AfCost_ha"
+        ],
+        "descs": [
+            "Value of land if it is not used for forest restoration, expressed in US dollars per hectare for the most recent available year. Represents the value at which land would sell under competitive market conditions (i.e., the land's \"fair market value\"). A lower opportunity cost tends to make restoration more feasible.",
+            "Implementation cost in se.plan refers to expenses associated with active forest restoration on former agricultural land: preparing a site for tree regeneration, and then artificially regenerating the site by sowing seeds or planting seedlings. A higher implementation cost tends to make FR less feasible, although FR can be feasible on land with a high implementation cost if land opportunity cost is low and FR generates large benefits.\nImplementation cost is expressed in US dollars per hectare. It varies by country and, for countries with sufficient data, by first-level administrative subdivision (e.g., state or province). The cost reported by the tool is the average for the country or subdivision. The actual cost at different locations within the country or subdivision could be higher or lower than the reported average estimate. In addition, compared to the estimates reported by the tool, se.plan team estimates that implementation cost is, on average, 45% higher if the restoration site is a forest that has been heavily damaged (for example, by fire, windthrow, or pest outbreak) and 66% lower if passive restoration, which relies on natural tree regeneration, is feasible. The tool contains a variable that predicts the likely success of natural regeneration."
+        ],
+        "units": [
+            "$/ha",
+            "$/ha"
+        ]
+    }
+}

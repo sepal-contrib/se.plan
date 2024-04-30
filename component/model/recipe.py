@@ -114,7 +114,8 @@ class Recipe(HasTraits):
 
         self.new_changes = 0
 
-    def get_recipe_path(self, recipe_name: str):
+    @staticmethod
+    def get_recipe_path(recipe_name: str):
         """generate full recipe path."""
         res_dir = cp.result_dir / "recipes"
         res_dir.mkdir(exist_ok=True)
