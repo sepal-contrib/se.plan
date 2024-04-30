@@ -30,4 +30,4 @@ jobs:
       - name: Install nox
         run: python -m pip install nox
       - name: test with pytest
-        run: nox -s test -- tests/test_scripts/*
+        run: nox -s test
