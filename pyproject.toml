@@ -21,3 +21,8 @@ changelog_incremental = true
 version_files = [
     "pyproject.toml:version",
 ]
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]

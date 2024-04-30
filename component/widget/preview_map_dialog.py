@@ -1,10 +1,13 @@
 """Custom dialog to display individual layers from questionnaire tile."""
+
 from typing import Literal
 
 import ee
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.frontend.resize_trigger import rt
 from sepal_ui.mapping import SepalMap
+import sepal_ui.scripts.decorator as sd
+
 
 from component import parameter as cp
 from component.message import cm
@@ -17,27 +20,33 @@ class PreviewMapDialog(BaseDialog):
         super().__init__(max_width="950px", min_width="950px")
 
         self.map_ = SepalMap()
+        self.map_.layout.height = "60vw"
+        self.map_.layout.height = "60vh"
+
         self.rt = rt
 
         self.legend = Legend()
         self.map_.add(self.legend)
+        self.map_.min_zoom = 5
 
         self.title = sw.CardTitle()
         self.btn_close = sw.Btn(cm.questionnaire.map.close, class_="mr-2")
 
+        self.map_card = sw.Card(
+            children=[
+                self.title,
+                sw.CardText(
+                    children=[
+                        self.map_,
+                    ]
+                ),
+                sw.CardActions(children=[sw.Spacer(), self.btn_close]),
+            ],
+        )
+
         self.children = [
             self.rt,
-            sw.Card(
-                children=[
-                    self.title,
-                    sw.CardText(
-                        children=[
-                            self.map_,
-                        ]
-                    ),
-                    sw.CardActions(children=[sw.Spacer(), self.btn_close]),
-                ],
-            ),
+            self.map_card,
         ]
 
         self.btn_close.on_event("click", self.close_dialog)
@@ -47,6 +56,7 @@ class PreviewMapDialog(BaseDialog):
         super().open_dialog()
         self.rt.resize()
 
+    @sd.switch("loading", on_widgets=["map_card"])
     def show_layer(
         self,
         layer: ee.Image,
@@ -58,7 +68,7 @@ class PreviewMapDialog(BaseDialog):
         if not aoi:
             raise Exception(cm.questionnaire.error.no_aoi_on_map)
 
-        self.map_.centerObject(aoi, zoom_out=3)
+        self.map_.centerObject(aoi)
         self.map_.remove_layer("layer", none_ok=True)
 
         self.open_dialog()
@@ -121,9 +131,14 @@ class PreviewMapDialog(BaseDialog):
 
         # get minmax
         min_max = ee_image.reduceRegion(
-            reducer=ee.Reducer.minMax(), geometry=geometry, scale=10000, bestEffort=True
+            reducer=ee.Reducer.minMax(),
+            geometry=geometry,
+            scale=1,
+            maxPixels=1e5,
+            bestEffort=True,
+            tileScale=16,
         )
-        max_, min_ = min_max.getInfo().values()
+        max_, min_ = [round(val, 2) for val in min_max.getInfo().values()]
 
         min_ = 0 if not min_ else min_
         max_ = 1 if not max_ else max_

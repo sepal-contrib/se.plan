@@ -16,3 +16,7 @@ numexpr
 
 # even though it will installed by sepal_ui, I want to point out that it is required by the app
 pygaul
+
+# For testing
+pytest
+pytest-cov
