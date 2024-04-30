@@ -1,3 +1,44 @@
+## 1.4.0 (2024-04-30)
+
+### Feat
+
+- add overall preview map in tables
+- reset dashboard when new recipe is created
+- observe after the creation
+- make save recipe button always visible in the appbar
+- change recipe button color + tune maps styles
+- add expression to benefit index table
+- create import custom area of interests in seplan map
+- paint map layer features with layer's style
+- set default root folder to aoi model
+- move asset verification to on app initialization
+- remove layers when view is reseted
+
+### Fix
+
+- combine constraint mask and benefit mask. - There was a bug that created extra zero pixels in the constraint_index layer because:     - benefit_cost_index layer has its own mask     - Constraint mask has a different mask     - When we updated the benefit_cost_index  mask  we were "activating" some already masked values, which created zero values Now we are basically updating the default benefit_cost mask (plus) with the constraint mask.
+- remove ghost events. - As we are not destroying the rows per se, they remained linked to the aoi, I've added a method to unobserve all its callbacks after removing them. - add some useful debug messages - set a default value in the constraintwidgets
+- **recipe_import**: closes #232
+- remove legacy auth
+- authenticate directly in the notebook
+- fix new authentication process for new users
+- closes #222
+
+### Refactor
+
+- remove legacy functions script
+- only multiply by a factor when the scale is smaller than 30 px
+- disable the automatic recipe creation
+- use a better water for the tree_cover_with_potentnial base layer
+- change default layer storage location
+- **ercipe_tile**: - Use again max-workers = 2: Catch error in the independent threads by connecting their outputs to the main thread. Errors were caused by double initialization of gee authentication:     - see: https://github.com/12rambau/sepal_ui/commit/3f1d5422f5a07cc95d86c1cc21d90b7141cb4753
+- **Seplan**: - benefit_cost_index: don't unmask costs layers. - benefits and costs layer lists: don't fill the masked values with 0
+- use just one worker when build UI. There's a kernel error when using more than one related to #227
+- remove home folder creation
+- improve no home folder message
+- set project folder to aoi_view
+- set project folder to asset select
+
 ## 1.3.0 (2023-12-17)
 
 ### Feat
