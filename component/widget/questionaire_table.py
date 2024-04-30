@@ -8,6 +8,7 @@ from component.model import BenefitModel, ConstraintModel, CostModel
 from component.model.aoi_model import SeplanAoi
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
+from component.widget.preview_theme_btn import PreviewThemeBtn
 
 from .benefit_dialog import BenefitDialog
 from .benefit_row import BenefitRow
@@ -30,10 +31,13 @@ class Table(sw.Layout):
         model: Union[BenefitModel, ConstraintModel, CostModel],
         alert: Alert,
         aoi_model: SeplanAoi,
+        preview_map: PreviewMapDialog = None,
+        preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:
         self.model = model
         self.alert = alert
         self.aoi_model = aoi_model
+        self.preview_map = preview_theme_map_btn
 
         if isinstance(model, BenefitModel):
             self.type_ = "benefit"
@@ -50,8 +54,14 @@ class Table(sw.Layout):
             self.Row = CostRow
             self.dialog = CostDialog(model=model, alert=self.alert)
 
-        self.toolbar = cw.ToolBar(model, self.dialog, self.aoi_model, self.alert)
-        self.preview_map = PreviewMapDialog()
+        self.preview_map = preview_map or PreviewMapDialog()
+        self.toolbar = cw.ToolBar(
+            model,
+            self.dialog,
+            self.aoi_model,
+            self.alert,
+            preview_theme_map_btn,
+        )
 
         # create the table
         super().__init__()

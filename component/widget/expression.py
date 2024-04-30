@@ -5,10 +5,10 @@ from component.model.benefit_model import BenefitModel
 from component.frontend.remath import remath
 
 
-class ExpressionBtn(v.Layout):
+class ExpressionBtn(v.Flex):
     def __init__(self, benefit_model, **kwargs):
-
-        self.class_ = "flex-row-reverse"
+        # to align the flex container to the right
+        self.style_ = "flex: 0"
 
         super().__init__(**kwargs)
 

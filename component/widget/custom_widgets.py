@@ -9,6 +9,7 @@ from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert
+from component.widget.preview_theme_btn import PreviewThemeBtn
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -35,6 +36,7 @@ class ToolBar(sw.Toolbar):
         dialog: Union[ConstraintDialog, CostDialog, BenefitDialog],
         seplan_aoi: SeplanAoi,
         alert: Alert,
+        preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:
         super().__init__()
 
@@ -55,13 +57,13 @@ class ToolBar(sw.Toolbar):
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
 
-        children = [sw.Spacer()]
+        children = [sw.Spacer(), preview_theme_map_btn]
 
         if isinstance(model, BenefitModel):
             children.append(ExpressionBtn(model))
 
         self.children = children + [
-            sw.Divider(vertical=True, class_="mr-2"),
+            sw.Divider(vertical=True, class_="ml-1 mr-2"),
             self.w_new,
         ]
 
