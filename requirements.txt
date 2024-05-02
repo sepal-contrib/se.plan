@@ -5,7 +5,7 @@ toml
 # Fixes authentication process
 git+https://github.com/12rambau/sepal_ui.git@sepal_pre_release
 
-https://github.com/openforis/sepal/issues/321
+# https://github.com/openforis/sepal/issues/321
 ipyleaflet==1.8.2
 
 # custom libs
