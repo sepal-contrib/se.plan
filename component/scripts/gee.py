@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal, Union
 
 import ee
@@ -89,3 +90,28 @@ def get_limits(
     # convert them to integers... sometimes we'll show more values than the
     # asset really has
     return sorted(set(int(float(val)) for val in values))
+
+
+def get_gee_recipe_folder(recipe_name: str) -> Path:
+    """Create a folder for the recipe in GEE"""
+
+    project_folder = Path(f"projects/{ee.data._cloud_api_user_project}/assets/")
+    seplan_folder = project_folder / "seplan"
+    recipe_folder = seplan_folder / recipe_name
+
+    try:
+        if not ee.data.getInfo(str(seplan_folder)):
+            ee.data.createAsset({"type": "FOLDER"}, str(seplan_folder))
+
+        # Create the recipe folder
+        if not ee.data.getInfo(str(recipe_folder)):
+            ee.data.createAsset({"type": "FOLDER"}, str(recipe_folder))
+
+        return Path(recipe_folder)
+
+    except Exception as e:
+
+        print("Error in get_gee_recipe_folder:", e)
+
+    finally:
+        return Path(recipe_folder)
