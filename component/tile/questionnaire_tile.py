@@ -71,8 +71,6 @@ class QuestionnaireTile(sw.Layout):
             titles=[cm[theme].tab_title for theme in cp.themes],
             content=[benefit_table, constraint_table, cost_table],
             class_="mt-5",
-            fixed_tabs=True,
-            centered=True,
         )
 
         self.set_children([alert_dialog, preview_map] + [tabs], position="last")

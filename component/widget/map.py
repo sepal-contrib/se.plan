@@ -23,7 +23,7 @@ class SeplanMap(sm.SepalMap):
         self.attributes = {"id": "map"}
         self.dc = True
         self.vinspector = True
-        self.min_zoom = 5
+        self.min_zoom = 3
 
         super().__init__(*args, **kwargs)
 

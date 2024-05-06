@@ -13,41 +13,41 @@ This tool has been developed by FAO in close collaboration with Spatial Informat
 <div style="inline-block">
     <a href="https://duke.edu">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/img/light/img/light/duke.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/light/duke.png" 
             alt="duke_logo" 
-            height="100" 
+            height="80" 
             class="ma-3 with-dark-light-theme"
         />
     </a>
     <a href="http://english.pku.edu.cn">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/img/light/peking.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/light/peking.png" 
             alt="pku_logo" 
-            height="100" 
+            height="80" 
             class="ma-3 with-dark-light-theme"
         />
     </a>
     <a href="https://sig-gis.com">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/img/light/sig.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/light/sig.png" 
             alt="sig-gis_logo" 
-            height="100" 
+            height="80" 
             class="ma-3 with-dark-light-theme"
         />
     </a>
     <a href="https://www.silvacarbon.org">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/img/light/SilvaCarbon.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/light/SilvaCarbon.png" 
             alt="silvacarbon_logo" 
-            height="100" 
+            height="80" 
             class="ma-3 with-dark-light-theme"
         />
     </a>
     <a href="https://www.maff.go.jp/e/">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/img/light/MAFF.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/light/MAFF.png" 
             alt="SEPAL_logo" 
-            height="100" 
+            height="80" 
             class="ma-3 with-dark-light-theme"
         />
     </a>

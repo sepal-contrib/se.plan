@@ -7,6 +7,7 @@ from sepal_ui.message import ms
 
 from component.message import cm
 from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import TextBtn
 
 
 class ImportAoiDialog(BaseDialog):
@@ -24,7 +25,7 @@ class ImportAoiDialog(BaseDialog):
         self.aoi_view = ImportAoiView(custom_aoi_dialog=custom_aoi_dialog)
 
         text = sw.CardText(children=[self.aoi_view])
-        btn_cancel = sw.Btn(cm.map.dialog.drawing.cancel, small=True)
+        btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
         action = sw.CardActions(children=[sw.Spacer(), btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 

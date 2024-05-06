@@ -4,6 +4,8 @@ from typing import Literal
 import ee
 import rasterio as rio
 from matplotlib.colors import to_rgba
+from component.scripts.gee import get_gee_recipe_folder
+from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import gee
 from sepal_ui.scripts import utils as su
@@ -47,12 +49,12 @@ class ExportMapDialog(BaseDialog):
 
         # add alert and btn component for the loading_button
         self.alert = sw.Alert()
-        self.btn = sw.Btn(cm.map.dialog.export.export, small=True)
-        self.btn_cancel = sw.Btn(cm.map.dialog.export.cancel, small=True)
+        self.btn = TextBtn(cm.map.dialog.export.export)
+        self.btn_cancel = TextBtn(cm.map.dialog.export.cancel, outlined=True)
 
         title = sw.CardTitle(children=[cm.map.dialog.export.title])
 
-        text = sw.CardText(
+        self.content = sw.CardText(
             children=[
                 self.w_asset,
                 w_scale_lbl,
@@ -62,7 +64,7 @@ class ExportMapDialog(BaseDialog):
                 self.alert,
             ]
         )
-        actions = sw.CardActions(
+        self.actions = sw.CardActions(
             children=[
                 sw.Spacer(),
                 self.btn,
@@ -70,7 +72,7 @@ class ExportMapDialog(BaseDialog):
             ]
         )
 
-        self.children = [sw.Card(children=[title, text, actions])]
+        self.children = [sw.Card(children=[title, self.content, self.actions])]
 
         super().__init__()
 
@@ -212,12 +214,10 @@ class ExportMapDialog(BaseDialog):
         # The value from the w_asset is a tuple with (theme, id_)
         ee_image = self.get_ee_image(*self.w_asset.v_model)
 
+        recipe_name = str(Path(self.recipe.recipe_session_path).stem)
+
         # set the parameters
-        name = (
-            "_".join(self.w_asset.v_model)
-            + "_"
-            + str(Path(self.recipe.recipe_session_path).stem)
-        )
+        name = "_".join(self.w_asset.v_model) + "_" + recipe_name
 
         export_params = {
             "image": ee_image,
@@ -229,8 +229,11 @@ class ExportMapDialog(BaseDialog):
 
         # launch the task
         if self.w_method.v_model == "gee":
-            folder = Path(ee.data.getAssetRoots()[0]["id"])
-            export_params.update(assetId=str(folder / name), description=f"{name}_gee")
+
+            recipe_gee_folder = get_gee_recipe_folder(recipe_name)
+            export_params.update(
+                assetId=str(recipe_gee_folder / name), description=f"{name}_gee"
+            )
             task = ee.batch.Export.image.toAsset(**export_params)
             task.start()
             msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))

@@ -1,15 +1,25 @@
-from typing import Literal, Union
+from pathlib import Path
+from typing import Literal, Optional, Union
 
 from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
-from traitlets import Int, Unicode, link, observe
+from sepal_ui.scripts import utils as su
+
+from sepal_ui import color
+from sepal_ui.frontend.styles import get_theme
+from traitlets import Bool, Int, Unicode, directional_link, link, observe
+from sepal_ui.sepalwidgets.widget import Markdown
+import ipyvuetify as v
+from sepal_ui.message import ms
+
 
 from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert
 from component.widget.preview_theme_btn import PreviewThemeBtn
+from component.widget.buttons import IconBtn, TextBtn
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -44,6 +54,8 @@ class ToolBar(sw.Toolbar):
         self.dialog = dialog
         self.alert = alert
         self.seplan_aoi = seplan_aoi
+        self.elevation = 0
+        self.color = "accent"
 
         if isinstance(model, BenefitModel):
             name = "benefit"
@@ -52,7 +64,7 @@ class ToolBar(sw.Toolbar):
         elif isinstance(model, CostModel):
             name = "cost"
 
-        self.w_new = sw.Btn(f"New {name}", "mdi-plus", small=True, type_="success")
+        self.w_new = TextBtn(f"New {name}", gliph="mdi-plus", type_="success")
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
@@ -83,20 +95,18 @@ class ToolBar(sw.Toolbar):
 class DashToolBar(sw.Toolbar):
     def __init__(self, model: Seplan) -> None:
         super().__init__()
-
+        self.height = "48px"
         self.model = model
+        self.elevation = 0
+        self.color = "accent"
 
-        self.btn_download = sw.Btn(
-            gliph="mdi-download",
-            icon=True,
-            color="primary",
+        self.btn_download = IconBtn(
+            gliph="fa-solid fa-circle-down",
         ).set_tooltip(
             cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
         )
 
-        self.btn_dashboard = sw.Btn(
-            cm.dashboard.toolbar.btn.compute.title, class_="ma-2"
-        )
+        self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
 
         self.children = [
             self.btn_download.with_tooltip,
@@ -111,7 +121,6 @@ class Tabs(sw.Card):
 
     def __init__(self, titles, content, **kwargs):
         self.background_color = "primary"
-        self.dark = True
 
         self.tabs = [
             sw.Tabs(
@@ -195,10 +204,8 @@ class CustomNavDrawer(sw.NavDrawer):
 
 class CustomAppBar(sw.AppBar):
 
-    save_recipe_btn = sw.Btn(
-        gliph="mdi-content-save",
-        icon=True,
-    )
+    save_recipe_btn = IconBtn(gliph="mdi-content-save")
+    save_recipe_btn.color = "#f3f3f3"
     save_recipe_btn.v_icon.left = False
 
     recipe_holder = sw.Flex(
@@ -208,12 +215,12 @@ class CustomAppBar(sw.AppBar):
         children=[
             sw.Html(
                 tag="span",
-                class_="text--secondary mr-1",
+                class_="mr-1 white--text",
                 attributes={"id": "recipe_name"},
             ),
             sw.Html(
                 tag="span",
-                class_="font-weight-thin font-italic text-lowercase",
+                class_="font-weight-thin font-italic text-lowercase mr-2 white--text",
                 attributes={"id": "new_changes"},
             ),
             save_recipe_btn,
@@ -252,7 +259,6 @@ class CustomApp(sw.App):
 
     def update_recipe_state(self, change):
         """Update the recipe state in the app bar."""
-        print("update_recipe_state")
 
         if not change["new"]:
             change["new"] = ""
@@ -263,3 +269,71 @@ class CustomApp(sw.App):
             change["new"] = change["new"].split("/")[-1].replace(".json", "")
 
         self.appBar.update_recipe(element=change["name"], value=change["new"])
+
+
+class CustomTileAbout(sw.Tile):
+    def __init__(self, pathname: Union[str, Path], **kwargs) -> None:
+        """Create an about tile using a .md file.
+
+        This tile will have the "about_widget" id and "About" title.
+
+        Args:
+            pathname: the path to the .md file
+        """
+
+        text = Path(pathname).read_text()
+
+        # get current stored theme
+        theme = get_theme()
+
+        # Search any url in the text and look for the dark/light theme
+        text = (
+            text.replace("/light/", "/dark/")
+            if theme == "dark"
+            else text.replace("/dark/", "/light/")
+        )
+
+        content = Markdown(text)
+
+        update_script = UpdateImages(dark=True)
+        super().__init__("about_tile", "About", inputs=[content, update_script])
+
+        directional_link((v.theme, "dark"), (update_script, "dark"))
+
+
+class UpdateImages(v.VuetifyTemplate):
+    """Update the image source when the theme changes."""
+
+    dark = Bool(v.theme.dark, allow_none=True).tag(sync=True)
+    template = Unicode(
+        """
+        <script class='sepal-ui-script'>
+            {
+                methods: {
+                    jupyter_updateImageSources() {
+
+                        suffix = this.dark?"dark":"light"
+
+                        // Select all images with the class 'themeable'
+                        const images = document.querySelectorAll('.with-dark-light-theme');
+                        
+                        images.forEach(image => {
+                            // Replace 'light' with 'dark' or vice versa in the image src path
+                            if (suffix === 'dark' && image.src.includes('light')) {
+                                image.src = image.src.replace('light', 'dark');
+                            } else if (suffix === 'light' && image.src.includes('dark')) {
+                                image.src = image.src.replace('dark', 'light');
+                            }
+                        });
+                    }
+                }
+            }
+        </script>
+        """
+    ).tag(sync=True)
+    "Unicode: the javascript script to manually trigger the resize event"
+
+    @observe("dark")
+    def update_images(self, *_):
+        """trigger the template method i.e. the resize event."""
+        return self.send({"method": "updateImageSources"})

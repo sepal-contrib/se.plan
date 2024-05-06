@@ -2,6 +2,7 @@ from typing import Literal
 import ee
 import ipyvuetify as v
 from component.scripts.seplan import Seplan, reduce_constraints
+from component.widget.buttons import IconBtn
 from component.widget.preview_map_dialog import PreviewMapDialog
 from component.widget.alert_state import Alert
 from sepal_ui.scripts import decorator as sd
@@ -27,7 +28,7 @@ class PreviewThemeBtn(v.Flex):
         self.alert = alert
 
         self.color = "primary"
-        self.btn = v.Btn(icon=True, children=[v.Icon(children=["mdi-map"])])
+        self.btn = IconBtn("mdi-map")
         self.children = [self.btn]
 
         self.btn.on_event("click", self.load_layer)

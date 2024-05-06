@@ -5,6 +5,7 @@ from typing import Literal
 
 import ee
 import ipyvuetify as v
+from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
@@ -53,9 +54,7 @@ class CardAction(sw.Card):
         super().__init__()
         self.hover = True
         self.min_width = 344
-        self.btn = sw.Btn(
-            msg=content["btn"], gliph=content["icon"], outlined=True, color="primary"
-        )
+        self.btn = TextBtn(content["btn"], gliph=content["icon"])
         self.children = [
             sw.CardActions(children=[sw.Spacer(), self.btn]),
         ]
@@ -317,10 +316,8 @@ class LoadDialog(BaseDialog):
         )
         self.text_field_msg = self.w_input_recipe.children[-1]
 
-        self.btn_load = sw.Btn(cm.recipe.load.dialog.load)
-        self.btn_cancel = sw.Btn(
-            cm.recipe.load.dialog.cancel, outlined=True, class_="ml-2"
-        )
+        self.btn_load = TextBtn(cm.recipe.load.dialog.load)
+        self.btn_cancel = TextBtn(cm.recipe.load.dialog.cancel, outlined=True)
 
         # assemlble the layout
         self.children = [
@@ -329,8 +326,9 @@ class LoadDialog(BaseDialog):
                 children=[
                     sw.CardTitle(children=[cm.recipe.load.dialog.title]),
                     sw.CardText(children=[self.w_input_recipe]),
-                    self.btn_load,
-                    self.btn_cancel,
+                    sw.CardActions(
+                        children=[sw.Spacer(), self.btn_load, self.btn_cancel]
+                    ),
                 ],
             )
         ]

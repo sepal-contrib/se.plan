@@ -9,6 +9,7 @@ import component.parameter as cp
 from component.message import cm
 from component.widget import custom_widgets as cw
 from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import TextBtn
 
 from .map import SeplanMap
 
@@ -23,7 +24,7 @@ class CustomAoiDialog(BaseDialog):
         self.map_ = map_
 
         # create the widgets
-        self.btn = sw.Btn(cm.map.dialog.drawing.btn, "mdi-check", small=True)
+        self.btn = TextBtn(cm.map.dialog.drawing.btn, gliph="mdi-check")
         title = sw.CardTitle(children=[cm.map.dialog.drawing.title])
         # Create table to show the custom geometries
         table = CustomGeometriesTable(self.map_)
@@ -39,7 +40,7 @@ class CustomAoiDialog(BaseDialog):
             ],
         )
         text = sw.CardText(children=[table, self.save_input])
-        btn_cancel = sw.Btn(cm.map.dialog.drawing.cancel, small=True)
+        btn_cancel = TextBtn(cm.map.dialog.drawing.cancel)
         action = sw.CardActions(children=[sw.Spacer(), btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 

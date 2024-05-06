@@ -70,9 +70,7 @@ class ConstraintWidget(sw.Layout):
         self.attributes = {"data-layer": layer_id, "id": f"{layer_id}_widget"}
         self.v_model = []
 
-        self.message = sw.Html(
-            tag="div", children=[""], class_=f"v-messages theme--{get_theme()} my-2"
-        )
+        self.message = sw.Html(tag="div", children=[""], class_=f"v-messages my-2")
 
         super().__init__()
 

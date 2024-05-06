@@ -1,4 +1,5 @@
 import ipyvuetify as v
+from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui import color
 from traitlets import Bool
@@ -14,38 +15,37 @@ class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
     def __init__(self, recipe: Recipe, map_: SeplanMap, *args, **kwargs) -> None:
+
+        self.height = "48px"
         super().__init__(*args, **kwargs)
 
         self.attributes = {"id": "map_toolbar"}
         self.recipe = recipe
         self.map_ = map_
+        self.elevation = 0
+        self.color = "accent"
 
         # Dialogs
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
         self.download_map_dialog = cw.ExportMapDialog(self.recipe)
-        self.load_shape_dialog = cw.LoadDialog(self.map_)
         self.info_dialog = MapInfoDialog()
 
         # Main buttons
-        self.btn_compute = sw.Btn(cm.compute.btn, class_="ma-2")
+        self.btn_compute = TextBtn(cm.compute.btn)
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
             gliph="mdi-draw",
             icon=True,
-            color="primary",
+            small=True,
         )
 
-        self.btn_download = sw.Btn(
-            gliph="mdi-download",
-            icon=True,
-            color="primary",
+        self.btn_download = IconBtn(
+            gliph="fa-solid fa-circle-down",
         ).set_tooltip(cm.map.toolbar.tooltip.download, right=True, max_width="200px")
 
-        self.btn_info = sw.Btn(
-            gliph="fa-regular fa-circle-question",
-            icon=True,
-            color="primary",
+        self.btn_info = IconBtn(
+            gliph="fa-solid fa-circle-info",
         ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
 
         self.children = [
@@ -62,14 +62,12 @@ class MapToolbar(sw.Toolbar):
             self.custom_aoi_dialog,
             self.import_aoi_dialog,
             self.download_map_dialog,
-            self.load_shape_dialog,
             self.info_dialog,
         ]
 
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
-        # self.btn_load.on_event("click", lambda *_: self.load_shape_dialog.open_dialog())
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
 
         self.btn_draw.on_event("new", self.on_draw)
@@ -101,18 +99,11 @@ class MapToolbar(sw.Toolbar):
 class DrawMenu(sw.Menu):
     def __init__(self, *args, **kwargs):
         self.offset_x = True
-        self.v_model = (False,)
+        self.v_model = False
 
         super().__init__(*args, **kwargs)
 
-        btn_draw = v.Btn(
-            v_on="menuData.on",
-            # small=True,
-            children=[
-                v.Icon(children=["mdi-draw"], small=True),
-                v.Icon(children=["fa fa-caret-down"], small=True, right=True),
-            ],
-        )
+        btn_draw = DrawMenuBtn()
 
         self.v_slots = [
             {
@@ -125,7 +116,6 @@ class DrawMenu(sw.Menu):
         self.items = [
             v.ListItem(
                 attributes={"id": title},
-                style_=f"background-color: {color.main};",
                 children=[
                     v.ListItemTitle(children=[cm.map.toolbar.draw_menu[title]]),
                 ],
@@ -135,7 +125,6 @@ class DrawMenu(sw.Menu):
 
         self.children = [
             v.List(
-                style_=f"background-color: {color.main};",
                 dense=True,
                 children=self.items,
             ),
@@ -155,12 +144,7 @@ class MapInfoDialog(BaseDialog):
         self.well_read = False
 
         description = sw.Markdown("  \n".join(cm.map.txt))
-        btn_close = sw.Btn(
-            "Close",
-            color="primary",
-            small=True,
-            class_="ml-2",
-        )
+        btn_close = TextBtn("Close", outlined=True)
 
         self.children = [
             v.Card(

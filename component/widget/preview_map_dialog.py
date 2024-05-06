@@ -12,6 +12,7 @@ import sepal_ui.scripts.decorator as sd
 from component import parameter as cp
 from component.message import cm
 from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import TextBtn
 from component.widget.legend import Legend
 
 
@@ -22,15 +23,16 @@ class PreviewMapDialog(BaseDialog):
         self.map_ = SepalMap()
         self.map_.layout.height = "60vw"
         self.map_.layout.height = "60vh"
+        self.retain_focus = False  # To prevent on focus ipyvuetify error
 
         self.rt = rt
 
         self.legend = Legend()
         self.map_.add(self.legend)
-        self.map_.min_zoom = 5
+        self.map_.min_zoom = 3
 
         self.title = sw.CardTitle()
-        self.btn_close = sw.Btn(cm.questionnaire.map.close, class_="mr-2")
+        self.btn_close = TextBtn(cm.questionnaire.map.close)
 
         self.map_card = sw.Card(
             children=[
