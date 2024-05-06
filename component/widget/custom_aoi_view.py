@@ -17,6 +17,8 @@ class SeplanAoiView(AoiView):
 
         super().__init__(**kwargs)
 
+        self.btn.small = True
+
         model.observe(self.update_view, "set_map")
         model.observe(self.reset_view, "reset_view")
 

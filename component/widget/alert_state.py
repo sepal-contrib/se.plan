@@ -1,6 +1,5 @@
 """Custom alert component to inform the user the state of the building process after selecting a new or loading an existing recipe."""
 
-
 from typing import Literal
 
 import sepal_ui.sepalwidgets as sw
@@ -121,15 +120,17 @@ class AlertDialog(sw.Dialog):
         self.w_alert = w_alert
 
         btn_close = Btn(
+            color="primary",
             block=True,
             children=["Close"],
         )
         self.children = [
             sw.Card(
+                # class_="pa-2",
                 children=[
                     self.w_alert,
-                    sw.CardActions(children=[btn_close]),
-                ]
+                    sw.CardActions(children=[btn_close], class_="pa-0 pt-2"),
+                ],
             )
         ]
         btn_close.on_event("click", lambda *_: setattr(self, "v_model", False))

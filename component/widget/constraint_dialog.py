@@ -9,6 +9,7 @@ from component.message import cm
 from component.scripts.ui_helpers import set_default_asset
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import TextBtn
 
 
 class ConstraintDialog(BaseDialog):
@@ -72,11 +73,14 @@ class ConstraintDialog(BaseDialog):
         )
 
         # create the actions
-        self.w_validate = sw.Btn(
-            cm.constraint.dialog.validate, "fa-solid fa-check", type_="success"
+        self.w_validate = TextBtn(
+            cm.constraint.dialog.validate, gliph="fa-solid fa-check", type_="success"
         )
-        self.w_cancel = sw.Btn(
-            cm.constraint.dialog.cancel, "fa-solid fa-times", type_="error"
+        self.w_cancel = TextBtn(
+            cm.constraint.dialog.cancel,
+            gliph="fa-solid fa-times",
+            type_="error",
+            outlined=True,
         )
         w_actions = sw.CardActions(
             children=[sw.Spacer(), self.w_validate, self.w_cancel]

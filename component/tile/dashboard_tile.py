@@ -180,6 +180,7 @@ class ThemeDashboard(sw.Card):
 
 class OverallDashboard(sw.Card):
     def __init__(self):
+        self.class_ = "my-2"
         super().__init__()
         self.title = sw.CardTitle(children=[cm.dashboard.region.title])
         self.content = sw.CardText()

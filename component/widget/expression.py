@@ -3,6 +3,7 @@ from ipywidgets import Output, HTMLMath
 from collections import defaultdict
 from component.model.benefit_model import BenefitModel
 from component.frontend.remath import remath
+from component.widget.buttons import IconBtn
 
 
 class ExpressionBtn(v.Flex):
@@ -14,7 +15,7 @@ class ExpressionBtn(v.Flex):
 
         self.color = "primary"
         self.snack = ExpressionDialog(benefit_model)
-        btn = v.Btn(icon=True, children=[v.Icon(children=["mdi-information"])])
+        btn = IconBtn("fa-solid fa-circle-info")
         self.children = [btn, self.snack]
 
         btn.on_event("click", self.show_snack)
@@ -49,7 +50,7 @@ class ExpressionDialog(v.Dialog):
         weights = benefit_model.weights
         self.wabi_expanded_expression = Expression(expand_wabi(benefits, weights))
 
-        btn_close = v.Btn(icon=True, children=[v.Icon(children=["mdi-close"])])
+        btn_close = IconBtn(gliph="mdi-close")
         self.children = [
             v.Card(
                 width=780,
