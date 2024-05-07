@@ -31,7 +31,6 @@ class SeplanMap(sm.SepalMap):
         self.add_basemap("SATELLITE")
 
         # create the map
-        self.add(sm.FullScreenControl(self, position="topright"))
         self.add(SuitabilityLegend())
 
         # create a window to display AOI information
