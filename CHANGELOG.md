@@ -1,3 +1,14 @@
+## 1.5.0 (2024-05-07)
+
+### Feat
+
+- show known legends + base layers on preview map
+- create a sepal/recipe folder when exporting on gee
+
+### Refactor
+
+- general style customization
+
 ## 1.4.0 (2024-04-30)
 
 ### Feat
