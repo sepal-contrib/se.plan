@@ -65,17 +65,26 @@ class PreviewMapDialog(BaseDialog):
         type_: Literal["benefit", "constraint", "cost"],
         name: str,
         aoi: ee.FeatureCollection,
+        base_layer: ee.Image = None,
     ) -> None:
-        """Adds given layer to the map and opens the dialog."""
+        """Adds given layer to the map and opens the dialog.
+
+        Args:
+            layer (ee.Image): the image to display
+            type_ (str): the type of the layer
+            name (str): the name of the layer
+            aoi (ee.FeatureCollection): the area of interest
+            base_layer (ee.Image, optional): the base layer without mask. Defaults to None.
+        """
         if not aoi:
             raise Exception(cm.questionnaire.error.no_aoi_on_map)
 
+        self.map_.addLayer(aoi, {}, "AOI")
         self.map_.centerObject(aoi)
-        self.map_.remove_layer("layer", none_ok=True)
+        self.map_.remove_all()
 
         self.open_dialog()
         self.title.children = [name]
-        self.map_.addLayer(aoi, {}, "AOI")
 
         legend_type = "gradient" if type_ in ["benefit", "cost"] else "binary"
 
@@ -102,23 +111,10 @@ class PreviewMapDialog(BaseDialog):
             vis_params = map_vis.copy()
             vis_params.update(min=0, max=1)
             layer = layer.unmask(0)
+            if base_layer:
+                self.map_.addLayer(base_layer.clip(aoi), {}, "base_layer")
 
         self.map_.addLayer(layer.clip(aoi), vis_params, "layer")
-
-    def add_weighted_benefit(self, layer: ee.Image):
-        """Adds given layer to the map and opens the dialog."""
-        self.map_.addLayer(layer, {}, "weighted_benefit")
-        self.open_dialog()
-
-    def add_normalized_costs(self, layer: ee.Image):
-        """Adds normalized cost layer."""
-        self.map_.addLayer(layer, {}, "costs")
-        self.open_dialog()
-
-    def add_mask(self, layer: ee.Image):
-        """Adds mask layer."""
-        self.map_.addLayer(layer, {}, "mask")
-        self.open_dialog()
 
     def get_min_max(self, image, geometry):
         """Display the image on the map.

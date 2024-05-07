@@ -1,4 +1,9 @@
+import json
+from typing import Dict, List, Union
+
+import pandas as pd
 from component.message import cm
+from component.parameter.file_params import legends_path
 
 
 def set_default_asset(w_asset_items: list, asset: str) -> list:
@@ -18,3 +23,39 @@ def set_default_asset(w_asset_items: list, asset: str) -> list:
 
     if w_asset_items[1] != asset:
         return default_asset_item + w_asset_items[2:]
+
+
+def get_categorical_values(
+    asset: str, values: List[int]
+) -> Union[List[int], List[Dict]]:
+    """Returns a list of items based on known legends for the categorical widget.
+
+    Args:
+        asset (str): asset name
+        values (list): list of pixel values
+    """
+
+    # Load legends JSON file
+    try:
+        with open(legends_path, "r") as file:
+            json_data = json.load(file)
+    except FileNotFoundError:
+        print("Error: The file was not found.")
+        return values
+    except json.JSONDecodeError:
+        print("Error: File is not a valid JSON.")
+        return values
+
+    # Check if the asset exists in the json data and has a legend
+    if asset in json_data and "legend" in json_data[asset]:
+        legend = json_data[asset]["legend"]
+        # Create a list of dictionaries based on the legend and input values
+        result = [
+            {"text": f"{str(value)} : {legend[str(value)]}", "value": value}
+            for value in values
+            if str(value) in legend
+        ]
+        return result
+    else:
+        # Return the original values if no legend is found for the asset
+        return values

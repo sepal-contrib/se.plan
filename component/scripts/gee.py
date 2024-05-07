@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Literal, Union
+from typing import List, Literal, Union
 
 import ee
 from sepal_ui import mapping as sm
@@ -28,7 +28,7 @@ def get_limits(
     data_type: Literal["binary", "continuous", "categorical"],
     aoi: Union[ee.FeatureCollection, ee.Geometry],
     factor: int = 2,
-) -> list:
+) -> List[int]:
     """Computes limits or histogram keys for the given Earth Engine image based on the specified data type.
 
     Args:

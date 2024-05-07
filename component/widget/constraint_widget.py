@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import Literal
 
 # from sepal_ui import mapping as sm
@@ -116,6 +117,7 @@ class ConstraintWidget(sw.Layout):
                 items=[],
                 v_model=None,
                 hide_details=True,
+                style_="max-width: 750px",
             )
 
             # before linking set the default v_model

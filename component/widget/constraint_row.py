@@ -1,3 +1,4 @@
+from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 
@@ -6,7 +7,7 @@ import component.scripts.gee as gee
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.model.constraint_model import ConstraintModel
-from component.scripts.seplan import mask_image
+from component.scripts.seplan import asset_to_image, mask_image
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
 
@@ -74,10 +75,20 @@ class ConstraintRow(sw.Html):
     @sd.catch_errors()
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
+        print(f"ConstraintRow({self.layer_id}).on_show_map()_{self.data_type}")
         masked_layer = mask_image(self.asset, self.data_type, self.value)
+        base_layer = (
+            asset_to_image(self.asset)
+            if self.data_type == "continuous"
+            else asset_to_image(self.asset).randomVisualizer()
+        )
 
         self.preview_map.show_layer(
-            masked_layer, "constraint", self.name, self.aoi_model.feature_collection
+            masked_layer,
+            "constraint",
+            self.name,
+            self.aoi_model.feature_collection,
+            base_layer,
         )
 
     def update_view(self):
@@ -174,6 +185,8 @@ class ConstraintRow(sw.Html):
         elif self.data_type == "categorical":
             if len(values) > 256:
                 raise Exception("Categorical asset must have less than 256 values")
+            # look for known legends
+            values = get_categorical_values(self.asset, values)
             self.w_maskout.items = values
 
         elif self.data_type == "continuous":
