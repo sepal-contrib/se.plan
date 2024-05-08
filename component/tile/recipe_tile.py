@@ -3,7 +3,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Literal
 
-import ee
 import ipyvuetify as v
 from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw

@@ -7,6 +7,7 @@ from component.model.recipe import Recipe
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.map import SeplanMap
 from component.widget.map_toolbar import MapToolbar
+from component.message import cm
 
 
 class MapTile(sw.Layout):
@@ -114,6 +115,12 @@ class MapTile(sw.Layout):
         constraint_index = self.recipe.seplan.get_constraint_index().unmask(0).clip(aoi)
 
         self.map_.centerObject(aoi, zoom_out=3)
-        self.map_.add_ee_layer(benefit_index, cp.final_viz, "benefit index")
-        self.map_.add_ee_layer(benefit_cost_index, cp.final_viz, "benefit_cost index")
-        self.map_.add_ee_layer(constraint_index, cp.final_viz, "constraint_index")
+        self.map_.add_ee_layer(
+            benefit_index, cp.final_viz, cm.layer.index.benefit_index.name
+        )
+        self.map_.add_ee_layer(
+            benefit_cost_index, cp.final_viz, cm.layer.index.benefit_cost_index.name
+        )
+        self.map_.add_ee_layer(
+            constraint_index, cp.final_viz, cm.layer.index.constraint_index.name
+        )

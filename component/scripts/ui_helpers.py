@@ -1,8 +1,8 @@
 import json
 from typing import Dict, List, Union
 
-import pandas as pd
 from component.message import cm
+from sepal_ui.scripts import utils as su
 from component.parameter.file_params import legends_path
 
 
@@ -59,3 +59,19 @@ def get_categorical_values(
     else:
         # Return the original values if no legend is found for the asset
         return values
+
+
+def parse_export_name(name: str) -> str:
+    """for constraint_index, benefit_index and benefit_cost_index return
+    the translated key."""
+
+    index_names = ["constraint_index", "benefit_index", "benefit_cost_index"]
+
+    for index_name in index_names:
+        if index_name in name:
+            if index_name in cm.layer.index:
+                key_value = cm.layer.index[index_name]["name"].replace("index", "")
+                readable_name = su.normalize_str(key_value).lower()
+                return name.replace(index_name, readable_name).replace("__", "_")
+
+    return name

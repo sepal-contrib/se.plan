@@ -140,5 +140,24 @@
         "continuous" : "Continuous",
         "binary" : "Binary"
     },
-    "default_asset_header" : "Default asset"
+    "default_asset_header" : "Default asset",
+    "layer" : {
+        "index" : {
+            "benefit_index" : {
+                "name" : "Benefit index"
+            },
+            "benefit_cost_index" : {
+                "name" : "Benefit cost index"
+            },
+            "constraint_index" : {
+                "name" : "Suitability index"
+            }
+        },
+        "header": {
+            "normalized_benefits" : "Normalized benefits",
+            "constraints" : "Masked out constraints",
+            "costs" : "Costs"
+        }
+    }
+    
 }

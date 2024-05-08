@@ -5,6 +5,7 @@ import ee
 import rasterio as rio
 from matplotlib.colors import to_rgba
 from component.scripts.gee import get_gee_recipe_folder
+from component.scripts.ui_helpers import parse_export_name
 from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import gee
@@ -102,14 +103,23 @@ class ExportMapDialog(BaseDialog):
 
         index_items = [
             {"header": "Index"},
-            {"text": "Suitability index", "value": ["index", "constraint_index"]},
-            {"text": "Benefit cost index", "value": ["index", "benefit_cost_index"]},
-            {"text": "Benefit index", "value": ["index", "benefit_index"]},
+            {
+                "text": cm.layer.index.constraint_index.name,
+                "value": ["index", "constraint_index"],
+            },
+            {
+                "text": cm.layer.index.benefit_cost_index.name,
+                "value": ["index", "benefit_cost_index"],
+            },
+            {
+                "text": cm.layer.index.benefit_index.name,
+                "value": ["index", "benefit_index"],
+            },
             {"divider": True},
         ]
 
         normalized_benefits = (
-            [{"header": "Normalized benefits"}]
+            [{"header": cm.layer.header.normalized_benefits}]
             + [
                 {
                     "text": self.recipe.seplan.benefit_model.names[idx],
@@ -121,7 +131,7 @@ class ExportMapDialog(BaseDialog):
         )
 
         maskedout_constraints = (
-            [{"header": "Masked out constraints"}]
+            [{"header": cm.layer.header.constraints}]
             + [
                 {
                     "text": self.recipe.seplan.constraint_model.names[idx],
@@ -132,7 +142,7 @@ class ExportMapDialog(BaseDialog):
             + [{"divider": True}]
         )
 
-        normalized_costs = [{"header": "Normalized costs"}] + [
+        normalized_costs = [{"header": cm.layer.header.costs}] + [
             {"text": self.recipe.seplan.cost_model.names[idx], "value": ["cost", id_]}
             for idx, id_ in enumerate(self.recipe.seplan.cost_model.ids)
         ]
@@ -219,6 +229,9 @@ class ExportMapDialog(BaseDialog):
         # set the parameters
         name = "_".join(self.w_asset.v_model) + "_" + recipe_name
 
+        # Parse the name to provide a better description
+        name = parse_export_name(name)
+
         export_params = {
             "image": ee_image,
             "description": name,
@@ -232,7 +245,7 @@ class ExportMapDialog(BaseDialog):
 
             recipe_gee_folder = get_gee_recipe_folder(recipe_name)
             export_params.update(
-                assetId=str(recipe_gee_folder / name), description=f"{name}_gee"
+                assetId=str(recipe_gee_folder / name), description=f"{name}"
             )
             task = ee.batch.Export.image.toAsset(**export_params)
             task.start()
