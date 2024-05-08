@@ -1,7 +1,6 @@
 import json
 from pathlib import Path
 
-import ee
 from sepal_ui.scripts.warning import SepalWarning
 from traitlets import HasTraits, Int, Unicode
 
@@ -11,8 +10,6 @@ from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.scripts import validation
 from component.scripts.seplan import Seplan
-
-ee.Initialize()
 
 
 class Recipe(HasTraits):
