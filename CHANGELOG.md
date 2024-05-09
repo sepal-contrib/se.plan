@@ -1,3 +1,13 @@
+## 1.5.1 (2024-05-09)
+
+### Fix
+
+- remove unused fullscreen widget
+
+### Refactor
+
+- rename output layers
+
 ## 1.5.0 (2024-05-07)
 
 ### Feat
