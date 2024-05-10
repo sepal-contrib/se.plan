@@ -34,3 +34,9 @@ def test_get_categorical_values():
 
     asset = "COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019"
     values = [1, 2, 3]
+
+    assert get_categorical_values(asset, values) == [
+        {"text": "1 : No data", "value": 1},
+        {"text": "2 : Cropland", "value": 2},
+        {"text": "3 : Forest", "value": 3},
+    ]
