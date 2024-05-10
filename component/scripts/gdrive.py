@@ -12,7 +12,6 @@ logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
 
 class gdrive(object):
     def __init__(self):
-        self.initialize = ee.Initialize()
         self.credentials = ee.Credentials()
         self.service = discovery.build(
             serviceName="drive",

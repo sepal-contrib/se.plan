@@ -11,7 +11,9 @@ from component.model.recipe import Recipe
 from component.widget.alert_state import AlertState
 from component.widget.custom_aoi_view import SeplanAoiView
 
-ee.Initialize()
+from sepal_ui.scripts.utils import init_ee
+
+init_ee()
 
 
 class AoiTile(sw.Layout):
