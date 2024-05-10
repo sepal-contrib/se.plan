@@ -33,7 +33,7 @@ def jupyter(session):
     session.run("jupyter", "notebook", "no_ui.ipynb")
 
 
-@nox.session(reuse_venv=True)
+@nox.session(reuse_venv=False)
 def test(session):
     """Run the application."""
 

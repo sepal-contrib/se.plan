@@ -50,11 +50,15 @@ def get_categorical_values(
     if asset in json_data and "legend" in json_data[asset]:
         legend = json_data[asset]["legend"]
         # Create a list of dictionaries based on the legend and input values
+
         result = [
-            {"text": f"{str(value)} : {legend[str(value)]}", "value": value}
+            {
+                "text": f"{str(value)} : {legend.get(str(value), 'Unknown')}",
+                "value": value,
+            }
             for value in values
-            if str(value) in legend
         ]
+
         return result
     else:
         # Return the original values if no legend is found for the asset
