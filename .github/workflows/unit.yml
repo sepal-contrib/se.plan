@@ -1,5 +1,5 @@
 name: Build
-
+# To test with act: gh act --secret-file $ENV_FILE --workflows .github/workflows/unit.yml
 on:
   push:
     branches:
@@ -10,7 +10,7 @@ env:
   EARTHENGINE_TOKEN: ${{ secrets.EARTHENGINE_TOKEN }}
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false

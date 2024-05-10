@@ -2,9 +2,6 @@ import ee
 from component.scripts.seplan import get_weighted_average
 
 
-ee.Initialize()
-
-
 def test_get_weighted_benefits():
     images = [
         ee.Image(value)

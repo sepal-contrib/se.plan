@@ -1,11 +1,28 @@
 {
-    "projects/se-plan/assets/inputLayers/gez_2010_wgs84_split__" : {
+    "projects/se-plan/assets/inputLayers/gez_2010_wgs84_split" : {
         "legend" : {
-                "1" : "value_name",
-                "2" : "value_name",
-                "3" : "value_name",
-                "4" : "value_name",
-                "5" : "value_name"
+                "41" : "Boreal coniferous forest (Ba)" ,
+                "42" : "Boreal tundra woodland (Bb)" ,
+                "43" : "Boreal mountain system (BM)" ,
+                "50" : "Polar (P)" ,
+                "24" : "Subtropical desert (SBWh)" ,
+                "22" : "Subtropical dry forest (SCs)" ,
+                "21" : "Subtropical humid forest (SCf)" ,
+                "25" : "Subtropical mountain system (SM)" ,
+                "23" : "Subtropical steppe (SBSh)" ,
+                "32" : "Temperate continental forest (TeDc)" ,
+                "34" : "Temperate desert (TeBWk)" ,
+                "35" : "Temperate mountain system (TeM)" ,
+                "31" : "Temperate oceanic forest (TeDo)" ,
+                "33" : "Temperate steppe (TeBSk)" ,
+                "15" : "Tropical desert (TBWh)" ,
+                "13" : "Tropical dry forest (TAwb)" ,
+                "12" : "Tropical moist forest (TAwa)" ,
+                "16" : "Tropical mountain system (TM)" ,
+                "11" : "Tropical rainforest (TAr)" ,
+                "14" : "Tropical shrubland (TBSh)" ,
+                "90" : "Water" ,
+                "0" : "No Data" 
         }
     },
     "COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019" : {

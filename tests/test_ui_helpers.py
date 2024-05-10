@@ -1,4 +1,4 @@
-from component.scripts.ui_helpers import parse_export_name
+from component.scripts.ui_helpers import get_categorical_values, parse_export_name
 from component.message import cm
 
 
@@ -23,3 +23,14 @@ def test_parse_export_name():
     expected_output = "index_benefit_test_cundinamarca"
 
     assert parse_export_name(input_str) == expected_output
+
+
+def test_get_categorical_values():
+
+    asset = "no_asset/asdf"
+    values = [1, 2, 3]
+
+    assert get_categorical_values(asset, values) == values
+
+    asset = "COPERNICUS/Landcover/100m/Proba-V-C3/Global/2019"
+    values = [1, 2, 3]
