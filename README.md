@@ -14,7 +14,7 @@ Before running the tool, users select their areas of interest, provide informati
 <div style="inline-block">
     <a href="https://duke.edu">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/duke.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/dark/duke.png" 
             alt="duke_logo" 
             height="100" 
             class="ma-3"
@@ -22,7 +22,7 @@ Before running the tool, users select their areas of interest, provide informati
     </a>
     <a href="http://english.pku.edu.cn">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/peking.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/dark/peking.png" 
             alt="pku_logo" 
             height="100" 
             class="ma-3"
@@ -30,7 +30,7 @@ Before running the tool, users select their areas of interest, provide informati
     </a>
     <a href="https://sig-gis.com">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/sig.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/dark/sig.png" 
             alt="sig-gis_logo" 
             height="100" 
             class="ma-3"
@@ -38,7 +38,7 @@ Before running the tool, users select their areas of interest, provide informati
     </a>
     <a href="https://www.silvacarbon.org">
         <img 
-            src="https://raw.githubusercontent.com/12rambau/restoration_planning_module/master/utils/SilvaCarbon.png" 
+            src="https://raw.githubusercontent.com/sepal-contrib/se.plan/main/utils/img/dark/SilvaCarbon.png" 
             alt="silvacarbon_logo" 
             height="100" 
             class="ma-3"
