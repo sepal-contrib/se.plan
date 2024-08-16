@@ -17,10 +17,10 @@ from component.widget.legend import Legend
 
 
 class PreviewMapDialog(BaseDialog):
-    def __init__(self):
+    def __init__(self, solara_basemap_tiles: dict):
         super().__init__(max_width="950px", min_width="950px")
 
-        self.map_ = SepalMap()
+        self.map_ = SepalMap(solara_basemap_tiles=solara_basemap_tiles)
         self.map_.layout.height = "60vw"
         self.map_.layout.height = "60vh"
         self.retain_focus = False  # To prevent on focus ipyvuetify error
@@ -47,7 +47,7 @@ class PreviewMapDialog(BaseDialog):
         )
 
         self.children = [
-            self.rt,
+            # self.rt,
             self.map_card,
         ]
 

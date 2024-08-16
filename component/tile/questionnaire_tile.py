@@ -11,22 +11,20 @@ from component.widget.questionaire_table import Table
 
 
 class QuestionnaireTile(sw.Layout):
-    def __init__(self):
+    def __init__(
+        self, recipe: Recipe, build_alert: AlertState, solara_basemap_tiles: dict
+    ):
         # name the tile
         self._metadata = {"mount_id": "questionnaire_tile"}
         self.class_ = "d-block"
 
         super().__init__()
 
-    def build(self, recipe: Recipe, build_alert: AlertState):
-        """Build the questionnaire tile."""
-        build_alert.set_state("new", "questionnaire", "building")
-
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
         # define a reusable preview map dialog
-        preview_map = PreviewMapDialog()
+        preview_map = PreviewMapDialog(solara_basemap_tiles=solara_basemap_tiles)
 
         benefit_table = Table(
             model=recipe.benefit_model,

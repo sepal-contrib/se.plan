@@ -17,7 +17,7 @@ class SeplanMap(sm.SepalMap):
     new_geom = Int(0).tag(sync=True)
     """int: either a new geometry has been drawn on the map"""
 
-    def __init__(self, seplan_aoi: SeplanAoi, *args, **kwargs):
+    def __init__(self, seplan_aoi: SeplanAoi, solara_basemap_tiles, *args, **kwargs):
         self.aoi_model = seplan_aoi
 
         self.attributes = {"id": "map"}
@@ -25,7 +25,7 @@ class SeplanMap(sm.SepalMap):
         self.vinspector = True
         self.min_zoom = 3
 
-        super().__init__(*args, **kwargs)
+        super().__init__(solara_basemap_tiles=solara_basemap_tiles, *args, **kwargs)
 
         self.dc.hide()
         self.add_basemap("SATELLITE")

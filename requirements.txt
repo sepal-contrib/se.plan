@@ -1,5 +1,6 @@
 # these libs are requested to build application env
-voila
+solara
+ee-client
 toml
 
 # Fixes authentication process

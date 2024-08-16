@@ -14,22 +14,23 @@ from component.widget.custom_aoi_view import SeplanAoiView
 from sepal_ui.scripts.utils import init_ee
 
 init_ee()
+from ipyleaflet import Map
 
 
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(self):
+    def __init__(
+        self, recipe: Recipe, build_alert: AlertState, solara_basemap_tiles: dict = None
+    ):
         self.class_ = "d-block custom_map"
         self._metadata = {"mount_id": "aoi_tile"}
 
         super().__init__()
 
-    def build(self, recipe: Recipe, build_alert: AlertState):
-        """Build the custom aoi tile."""
         build_alert.set_state("new", "aoi", "building")
 
-        self.map_ = SepalMap(gee=True)
+        self.map_ = SepalMap(gee=True, solara_basemap_tiles=solara_basemap_tiles)
         self.map_.dc.hide()
         self.map_.min_zoom = 3
         self.map_.add_basemap("SATELLITE")
@@ -44,7 +45,7 @@ class AoiTile(sw.Layout):
         self.map_.add(aoi_control)
         self.children = [self.map_]
 
-        # bind an extra js behaviour
+        # bind an extra js behaviour7
         self.view.observe(self._check_lmic, "updated")
 
         build_alert.set_state("new", "aoi", "done")

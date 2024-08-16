@@ -134,12 +134,14 @@ class RecipeView(sw.Card):
     app_model: AppModel
     """It will be used to listen the on_save trait and trigger the save button here"""
 
-    def __init__(self, app_model: AppModel = None):
+    def __init__(
+        self, recipe: Recipe, app_model: AppModel = None, alert: AlertState = None
+    ):
         self.attributes = {"_metadata": "recipe_tile"}
 
         super().__init__()
-        self.recipe = Recipe()
-        self.alert = AlertState()
+        self.recipe = recipe
+        self.alert = alert
         self.alert_dialog = AlertDialog(self.alert)
 
         self.app_model = app_model

@@ -11,7 +11,13 @@ from component.message import cm
 
 
 class MapTile(sw.Layout):
-    def __init__(self, app_model: AppModel = None):
+    def __init__(
+        self,
+        app_model: AppModel,
+        recipe: Recipe,
+        build_alert: AlertState,
+        solara_basemap_tiles: dict = None,
+    ):
         """Define the map tile layout.
 
         Args:
@@ -24,19 +30,14 @@ class MapTile(sw.Layout):
 
         super().__init__()
 
-    def build(
-        self,
-        recipe: Recipe,
-        build_alert: AlertState,
-    ):
-        build_alert.set_state("new", "map", "building")
-
         self.recipe = recipe
         self.colors = []
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        self.map_ = SeplanMap(recipe.seplan_aoi)
+        self.map_ = SeplanMap(
+            recipe.seplan_aoi, solara_basemap_tiles=solara_basemap_tiles
+        )
         self.map_toolbar = MapToolbar(recipe=self.recipe, map_=self.map_)
 
         # init the final layers
