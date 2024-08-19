@@ -12,7 +12,7 @@ from component.widget.questionaire_table import Table
 
 class QuestionnaireTile(sw.Layout):
     def __init__(
-        self, recipe: Recipe, build_alert: AlertState, solara_basemap_tiles: dict
+        self, recipe: Recipe, build_alert: AlertState, solara_basemap_tiles: dict = None
     ):
         # name the tile
         self._metadata = {"mount_id": "questionnaire_tile"}

@@ -17,7 +17,7 @@ from component.widget.legend import Legend
 
 
 class PreviewMapDialog(BaseDialog):
-    def __init__(self, solara_basemap_tiles: dict):
+    def __init__(self, solara_basemap_tiles: dict = None):
         super().__init__(max_width="950px", min_width="950px")
 
         self.map_ = SepalMap(solara_basemap_tiles=solara_basemap_tiles)

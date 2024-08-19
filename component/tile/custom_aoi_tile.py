@@ -1,3 +1,6 @@
+import time
+
+start = time.time()
 import ee
 import pandas as pd
 import pkg_resources
@@ -16,6 +19,9 @@ from sepal_ui.scripts.utils import init_ee
 init_ee()
 from ipyleaflet import Map
 
+end = time.time()
+print(f"Import aoi_tile time: {end - start}")
+
 
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
@@ -23,13 +29,17 @@ class AoiTile(sw.Layout):
     def __init__(
         self, recipe: Recipe, build_alert: AlertState, solara_basemap_tiles: dict = None
     ):
+        start = time.time()
+        # print the time it takes to start the tile and cast to seconds
+        print(f"Starting AoiTile at {start}")
+
         self.class_ = "d-block custom_map"
         self._metadata = {"mount_id": "aoi_tile"}
 
         super().__init__()
 
         build_alert.set_state("new", "aoi", "building")
-
+        print(f"{time.time()}")
         self.map_ = SepalMap(gee=True, solara_basemap_tiles=solara_basemap_tiles)
         self.map_.dc.hide()
         self.map_.min_zoom = 3
@@ -49,6 +59,9 @@ class AoiTile(sw.Layout):
         self.view.observe(self._check_lmic, "updated")
 
         build_alert.set_state("new", "aoi", "done")
+
+        end = time.time()
+        print(f"AoiTile load time: {end - start}")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""
