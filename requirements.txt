@@ -3,7 +3,7 @@ voila
 toml
 
 # Fixes authentication process
-git+https://github.com/12rambau/sepal_ui.git@sepal_pre_release
+sepal_ui==2.18.1
 
 # https://github.com/openforis/sepal/issues/321
 ipyleaflet==0.18.2
