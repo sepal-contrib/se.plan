@@ -35,7 +35,7 @@ class Table(sw.Layout):
         preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:
         self.model = model
-        self.alert = alert
+        self.alert = alert or Alert()
         self.aoi_model = aoi_model
         self.preview_map = preview_theme_map_btn
 
@@ -53,6 +53,11 @@ class Table(sw.Layout):
             self.type_ = "cost"
             self.Row = CostRow
             self.dialog = CostDialog(model=model, alert=self.alert)
+
+        else:
+            raise ValueError(
+                f"model should be an instance of BenefitModel, ConstraintModel or CostModel, not {type(model)}"
+            )
 
         self.preview_map = preview_map or PreviewMapDialog()
         self.toolbar = cw.ToolBar(
@@ -78,7 +83,7 @@ class Table(sw.Layout):
         )
 
         self.tbody = sw.Html(tag="tbody", children=[])
-        self.set_rows()
+        self.set_rows(_v="init")
 
         # create the table
         self.table = sw.SimpleTable(
@@ -92,17 +97,13 @@ class Table(sw.Layout):
         self.children = [self.dialog, self.preview_map, self.toolbar, self.table]
 
         # set rows everytime the feature collection is updated on aoitile
-        self.model.observe(self.set_rows, "updated")
-
-        # This will only happen with the constraints table
-        if self.aoi_model:
-            self.aoi_model.observe(self.set_rows, "feature_collection")
+        self.model.observe(lambda *x: self.set_rows(_v="obs"), "updated")
 
     @sd.catch_errors()
-    def set_rows(self, *args):
+    def set_rows(self, _v, *args):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time. That's too expensive (specially the set_limits method)
-        print("setting rows")
+        print(f"setting rows from: {_v}")
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
         print("Current model IDs", model_ids)
@@ -110,6 +111,10 @@ class Table(sw.Layout):
 
         new_ids = [id_ for id_ in model_ids if id_ not in view_ids]
         old_ids = [id_ for id_ in view_ids if id_ not in model_ids]
+
+        print("new IDs", new_ids)
+        print("old IDs", old_ids)
+
         edited_id = (
             self.dialog.w_id.v_model if self.dialog.w_id.v_model in view_ids else False
         )
@@ -133,7 +138,7 @@ class Table(sw.Layout):
 
                 self.tbody.children = [*self.tbody.children, row]
         # Remove rows
-        elif old_ids:
+        if old_ids:
             print("old ID")
             for old_id in old_ids:
                 row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
@@ -146,7 +151,7 @@ class Table(sw.Layout):
                 self.tbody.children = [
                     row for row in self.tbody.children if row != row_to_remove
                 ]
-        elif edited_id:
+        if edited_id:
             print("edited ID")
             if edited_id:
                 row_to_edit = self.tbody.get_children(attr="layer_id", value=edited_id)[
@@ -162,6 +167,7 @@ class Table(sw.Layout):
             # let's first unobserve all the previou rows
             if self.type_ == "constraint":
                 for row in self.tbody.children:
+                    print("unobserving row")
                     row.unobserve_all()
 
             rows = [

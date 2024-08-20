@@ -1,5 +1,5 @@
 import pandas as pd
-from traitlets import List
+from traitlets import List, observe
 
 from component import parameter as cp
 from component.message import cm
@@ -54,6 +54,7 @@ class ConstraintModel(QuestionnaireModel):
         del self.data_type[idx]
 
         if update:
+            print("updating from remove")
             self.updated += 1
         self.new_changes += 1
 
@@ -76,7 +77,7 @@ class ConstraintModel(QuestionnaireModel):
         self.units.append(unit)
         self.values.append([])
         self.data_type.append(data_type)
-
+        print("updating from add")
         self.updated += 1
         self.new_changes += 1
 
@@ -100,7 +101,7 @@ class ConstraintModel(QuestionnaireModel):
         self.descs[idx] = desc
         self.units[idx] = unit
         self.data_type[idx] = data_type
-
+        print("updating from update")
         self.updated += 1
         self.new_changes += 1
 
@@ -123,6 +124,10 @@ class ConstraintModel(QuestionnaireModel):
         self.data_type = []
 
         self.__init__()
-
+        print("updating from reset")
         self.updated += 1
         self.new_changes = 0
+
+    @observe("updated")
+    def _on_update(self, *_):
+        print("######## updated ########")

@@ -61,7 +61,6 @@
         "units": { "type": "array" }
       },
       "required": [
-        "updated",
         "names",
         "ids",
         "themes",
@@ -85,7 +84,6 @@
         "data_type": { "type": "array" }
       },
       "required": [
-        "updated",
         "themes",
         "names",
         "ids",
@@ -106,7 +104,7 @@
         "descs": { "type": "array" },
         "units": { "type": "array" }
       },
-      "required": ["updated", "names", "ids", "assets", "descs", "units"]
+      "required": ["names", "ids", "assets", "descs", "units"]
     }
   },
   "required": ["signature", "aoi", "benefits", "constraints", "costs"]
