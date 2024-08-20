@@ -25,16 +25,9 @@ class Recipe(HasTraits):
     recipe_session_path = Unicode("", allow_none=True).tag(sync=True)
     """The path to the recipe session file. This value will come from the recipe view, it will be used by the export csv function and to create the names of the assets to export"""
 
-    def __init__(self):
+    def __init__(self, **delete_aoi):
         super().__init__()
-        self.seplan_aoi = None
-        self.benefit_model = None
-        self.constraint_model = None
-        self.cost_model = None
-        self.seplan = None
 
-    def load_model(self, **delete_aoi):
-        """Define all the models required by the module."""
         self.seplan_aoi = SeplanAoi(**delete_aoi)
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
@@ -52,8 +45,6 @@ class Recipe(HasTraits):
         self.constraint_model.observe(self.update_changes, "new_changes")
         self.cost_model.observe(self.update_changes, "new_changes")
 
-        return self
-
     def update_changes(self, change):
         """Increment the new_changes counter by 1."""
         self.new_changes += 1
@@ -65,6 +56,9 @@ class Recipe(HasTraits):
         recipe_path = Path(validation.validate_recipe(recipe_path))
         with recipe_path.open() as f:
             data = json.loads(f.read())
+
+        # Remove all the "updated" keys from the data in the second level
+        [validation.remove_key(data, key) for key in ["updated", "new_changes"]]
 
         # load the aoi_model
         self.seplan_aoi.import_data(data["aoi"])

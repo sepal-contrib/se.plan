@@ -11,7 +11,7 @@ from component.message import cm
 
 
 class MapTile(sw.Layout):
-    def __init__(self, app_model: AppModel = None):
+    def __init__(self, recipe: Recipe, app_model: AppModel = None):
         """Define the map tile layout.
 
         Args:
@@ -23,13 +23,6 @@ class MapTile(sw.Layout):
         self.app_model = app_model
 
         super().__init__()
-
-    def build(
-        self,
-        recipe: Recipe,
-        build_alert: AlertState,
-    ):
-        build_alert.set_state("new", "map", "building")
 
         self.recipe = recipe
         self.colors = []
@@ -57,8 +50,6 @@ class MapTile(sw.Layout):
 
         # # add js behaviour
         self.map_toolbar.btn_compute.on_event("click", self._compute)
-
-        build_alert.set_state("new", "map", "done")
 
         self.recipe.seplan_aoi.observe(self._update_aoi, "updated")
 

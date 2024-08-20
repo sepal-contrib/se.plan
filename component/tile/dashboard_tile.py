@@ -19,16 +19,13 @@ ID = "dashboard_widget"
 
 
 class DashboardTile(sw.Layout):
-    def __init__(self):
+    def __init__(self, recipe: Recipe):
         super().__init__()
 
         self._metadata = {"mount_id": "dashboard_tile"}
         self.class_ = "d-block"
         self.summary_stats = None
 
-    def build(self, recipe: Recipe, build_alert: AlertState):
-        """Build the dashboard tile."""
-        build_alert.set_state("new", "dashboard", "building")
         self.recipe = recipe
 
         dash_toolbar = DashToolBar(recipe.seplan)
@@ -57,8 +54,6 @@ class DashboardTile(sw.Layout):
 
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
         dash_toolbar.btn_download.on_event("click", self.csv_export)
-
-        build_alert.set_state("new", "dashboard", "done")
 
         self.recipe.dash_model.observe(self.reset, "reset_count")
 

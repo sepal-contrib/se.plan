@@ -155,10 +155,6 @@ class CustomDrawerItem(sw.DrawerItem):
 
         self.attributes = {"id": kwargs["card"]}
 
-        # Only hide the drawers that are not the main ones
-        if self.attributes["id"] not in (["recipe_tile", "about_tile"]):
-            self.viz = False
-
         self.observe(self.add_notif, "alert")
 
     def add_notif(self, change: dict) -> None:
