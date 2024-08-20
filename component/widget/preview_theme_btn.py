@@ -23,9 +23,9 @@ class PreviewThemeBtn(v.Flex):
         super().__init__()
 
         self.type_ = type_
-        self.map_ = map_
+        self.map_ = map_ or PreviewMapDialog()
         self.seplan = seplan
-        self.alert = alert
+        self.alert = alert or Alert()
 
         self.color = "primary"
         self.btn = IconBtn("mdi-map")

@@ -171,6 +171,12 @@ class ConstraintRow(sw.Html):
             self.update_value()
             return
 
+        # before updating the limits, check if this layer is in the model
+
+        if self.layer_id not in self.model.ids:
+            print(f"layer_id {self.layer_id} not in model.ids")
+            return
+
         values = gee.get_limits(self.asset, self.data_type, self.aoi)
         print(f"ConstraintRow({self.layer_id}).set_limits.values:", values)
 
