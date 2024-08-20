@@ -1,4 +1,5 @@
 """functions to read and validate a recipe and return meaningful errors."""
+
 import json
 from pathlib import Path
 from typing import Optional
@@ -79,3 +80,15 @@ def validate_recipe(
         raise ValidationError(e)
 
     return recipe_path
+
+
+def remove_key(data, key_to_remove):
+    """Remove a key from a dictionary."""
+    if isinstance(data, dict):
+        if key_to_remove in data:
+            del data[key_to_remove]
+        for key, value in list(data.items()):
+            remove_key(value, key_to_remove)
+    elif isinstance(data, list):
+        for item in data:
+            remove_key(item, key_to_remove)

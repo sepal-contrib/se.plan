@@ -11,16 +11,12 @@ from component.widget.questionaire_table import Table
 
 
 class QuestionnaireTile(sw.Layout):
-    def __init__(self):
+    def __init__(self, recipe: Recipe):
         # name the tile
         self._metadata = {"mount_id": "questionnaire_tile"}
         self.class_ = "d-block"
 
         super().__init__()
-
-    def build(self, recipe: Recipe, build_alert: AlertState):
-        """Build the questionnaire tile."""
-        build_alert.set_state("new", "questionnaire", "building")
 
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
@@ -74,5 +70,3 @@ class QuestionnaireTile(sw.Layout):
         )
 
         self.set_children([alert_dialog, preview_map] + [tabs], position="last")
-
-        build_alert.set_state("new", "questionnaire", "done")
