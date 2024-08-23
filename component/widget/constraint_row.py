@@ -1,3 +1,4 @@
+from component.scripts.logger import logger
 from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
@@ -45,7 +46,9 @@ class ConstraintRow(sw.Html):
         self.alert = alert
 
         self.get_model_data()
-        print(f"ConstraintRow.{self.name}.{self.aoi_model.aoi_model.name}__init__")
+        logger.info(
+            f"ConstraintRow.{self.name}.{self.aoi_model.aoi_model.name}__init__"
+        )
 
         # View
 
@@ -75,7 +78,7 @@ class ConstraintRow(sw.Html):
     @sd.catch_errors()
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
-        print(f"ConstraintRow({self.layer_id}).on_show_map()_{self.data_type}")
+        logger.info(f"ConstraintRow({self.layer_id}).on_show_map()_{self.data_type}")
         masked_layer = mask_image(self.asset, self.data_type, self.value)
         base_layer = (
             asset_to_image(self.asset)
@@ -94,7 +97,7 @@ class ConstraintRow(sw.Html):
     def update_view(self):
         """Create the view of the widget based on the model."""
 
-        print(f"ConstraintRow({self.layer_id}).update_view()")
+        logger.info(f"ConstraintRow({self.layer_id}).update_view()")
 
         # create Maskout widget
         self.w_maskout = ConstraintWidget(
@@ -133,7 +136,7 @@ class ConstraintRow(sw.Html):
             self.w_maskout.unobserve(self.update_value, "v_model")
             self.aoi_model.unobserve(self.set_limits, "updated")
         except Exception as e:
-            print("Error: unloading the constraint row")
+            logger.info("Error: unloading the constraint row")
             pass
 
     @sd.switch("loading", on_widgets=["dialog"])
@@ -166,7 +169,7 @@ class ConstraintRow(sw.Html):
         # if there's no AOI we'll assume we are in the default constraint
         # and we will return the default value
         if not self.aoi:
-            print(f"theres no aoi {id(self)}xx")
+            logger.info(f"theres no aoi {id(self)}xx")
             self.w_maskout.v_model = [0]
             self.update_value()
             return
@@ -174,11 +177,11 @@ class ConstraintRow(sw.Html):
         # before updating the limits, check if this layer is in the model
 
         if self.layer_id not in self.model.ids:
-            print(f"layer_id {self.layer_id} not in model.ids")
+            logger.info(f"layer_id {self.layer_id} not in model.ids")
             return
 
         values = gee.get_limits(self.asset, self.data_type, self.aoi)
-        print(f"ConstraintRow({self.layer_id}).set_limits.values:", values)
+        logger.info(f"ConstraintRow({self.layer_id}).set_limits.values:", values)
 
         if self.data_type == "binary":
             if not all(val in values for val in [0, 1]):
@@ -212,6 +215,6 @@ class ConstraintRow(sw.Html):
             else:
                 self.w_maskout.widget.step = 1
 
-        print("lims:", self.w_maskout.v_model)
+        logger.info("lims:", self.w_maskout.v_model)
 
         self.update_value()

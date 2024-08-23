@@ -4,6 +4,7 @@ from typing import Dict, List, Union
 from component.message import cm
 from sepal_ui.scripts import utils as su
 from component.parameter.file_params import legends_path
+from component.scripts.logger import logger
 
 
 def set_default_asset(w_asset_items: list, asset: str) -> list:
@@ -40,10 +41,10 @@ def get_categorical_values(
         with open(legends_path, "r") as file:
             json_data = json.load(file)
     except FileNotFoundError:
-        print("Error: The file was not found.")
+        logger.info("Error: The file was not found.")
         return values
     except json.JSONDecodeError:
-        print("Error: File is not a valid JSON.")
+        logger.info("Error: File is not a valid JSON.")
         return values
 
     # Check if the asset exists in the json data and has a legend

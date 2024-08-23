@@ -8,6 +8,7 @@ from sepal_ui.scripts import utils as su
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
 from component.scripts.seplan import Seplan
 from component.scripts.statistics import get_summary_statistics, parse_theme_stats
@@ -79,7 +80,7 @@ class DashboardTile(sw.Layout):
 
     def reset(self, *_):
         """Reset the dashboard to its initial state."""
-        print("resettig the dashboard")
+        logger.info("resettig the dashboard")
         self.summary_stats = None
         self.overall_dash.reset()
         self.theme_dash.reset()

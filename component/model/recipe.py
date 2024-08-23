@@ -8,6 +8,7 @@ import component.parameter as cp
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
+from component.scripts.logger import logger
 from component.scripts import validation
 from component.scripts.seplan import Seplan
 
@@ -98,7 +99,7 @@ class Recipe(HasTraits):
         self.constraint_model.reset()
         self.cost_model.reset()
 
-        print("constraint_model.ids", self.constraint_model.ids)
+        logger.info("constraint_model.ids", self.constraint_model.ids)
         self.seplan_aoi.reset()
 
         self.dash_model.reset()
