@@ -1,11 +1,10 @@
+from pathlib import Path
 import logging
 import sys
 
 
 class CustomLogger:
-    def __init__(
-        self, name: str, log_file: str = "app.log", level: int = logging.DEBUG
-    ):
+    def __init__(self, name: str, level: int = logging.DEBUG):
         """
         Creates a custom logger with a file handler.
         """
@@ -14,6 +13,7 @@ class CustomLogger:
         self.logger.setLevel(level)
 
         # Create handlers (console and file)
+        log_file = str(Path.home() / "se_plan.log")
         file_handler = logging.FileHandler(log_file)
 
         # Set log level for handlers
