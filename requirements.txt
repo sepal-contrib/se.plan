@@ -2,8 +2,7 @@
 voila
 toml
 
-# Fixes authentication process
-sepal_ui==2.18.1
+sepal_ui==2.19.0
 
 # https://github.com/openforis/sepal/issues/321
 ipyleaflet==0.18.2
