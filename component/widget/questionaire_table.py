@@ -6,6 +6,7 @@ from sepal_ui.scripts import decorator as sd
 import component.parameter as cp
 from component.model import BenefitModel, ConstraintModel, CostModel
 from component.model.aoi_model import SeplanAoi
+from component.scripts.logger import logger
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
 from component.widget.preview_theme_btn import PreviewThemeBtn
@@ -103,24 +104,24 @@ class Table(sw.Layout):
     def set_rows(self, _v, *args):
         """Add, remove or update rows in the table."""
         # We don't want to recreate all the elements of the table each time. That's too expensive (specially the set_limits method)
-        print(f"setting rows from: {_v}")
+        logger.info(f"setting rows from: {_v}")
         view_ids = [row.layer_id for row in self.tbody.children]
         model_ids = self.model.ids
-        print("Current model IDs", model_ids)
-        print("Current view IDs", view_ids)
+        logger.info("Current model IDs", model_ids)
+        logger.info("Current view IDs", view_ids)
 
         new_ids = [id_ for id_ in model_ids if id_ not in view_ids]
         old_ids = [id_ for id_ in view_ids if id_ not in model_ids]
 
-        print("new IDs", new_ids)
-        print("old IDs", old_ids)
+        logger.info("new IDs", new_ids)
+        logger.info("old IDs", old_ids)
 
         edited_id = (
             self.dialog.w_id.v_model if self.dialog.w_id.v_model in view_ids else False
         )
         # Add new rows from the model
         if new_ids:
-            print("new IDs")
+            logger.info("new IDs")
             for new_id in new_ids:
                 try:
                     row = self.Row(
@@ -139,7 +140,7 @@ class Table(sw.Layout):
                 self.tbody.children = [*self.tbody.children, row]
         # Remove rows
         if old_ids:
-            print("old ID")
+            logger.info("old ID")
             for old_id in old_ids:
                 row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
                     0
@@ -152,7 +153,7 @@ class Table(sw.Layout):
                     row for row in self.tbody.children if row != row_to_remove
                 ]
         if edited_id:
-            print("edited ID")
+            logger.info("edited ID")
             if edited_id:
                 row_to_edit = self.tbody.get_children(attr="layer_id", value=edited_id)[
                     0
@@ -162,12 +163,12 @@ class Table(sw.Layout):
         # This will be triggered the first time and every time update is modified
         # without a real change.
         elif not (new_ids or old_ids or edited_id):
-            print("no ID")
+            logger.info("no ID")
 
             # let's first unobserve all the previou rows
             if self.type_ == "constraint":
                 for row in self.tbody.children:
-                    print("unobserving row")
+                    logger.info("unobserving row")
                     row.unobserve_all()
 
             rows = [

@@ -8,6 +8,7 @@ from jsonschema import ValidationError, validate
 from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
+from component.scripts.logger import logger
 
 
 def find_missing_property(instance, schema):
@@ -47,7 +48,7 @@ def validate_recipe(
 
     except ValidationError as e:
         # Constructing a path string
-        print(e)
+        logger.info(e)
         path = ".".join(map(str, e.path))
 
         # Check if the error is related to the signature field

@@ -5,6 +5,7 @@ import ee
 from sepal_ui import mapping as sm
 
 from component.message import cm
+from component.scripts.logger import logger
 
 
 def get_layer(
@@ -80,7 +81,7 @@ def get_limits(
         )
     )
 
-    print("get_limits_values:", values)
+    logger.info("get_limits_values:", values)
 
     # check if values are none and if so, raise a ValueError
     if any([val is None for val in values]):
@@ -111,7 +112,7 @@ def get_gee_recipe_folder(recipe_name: str) -> Path:
 
     except Exception as e:
 
-        print("Error in get_gee_recipe_folder:", e)
+        logger.info("Error in get_gee_recipe_folder:", e)
 
     finally:
         return Path(recipe_folder)
