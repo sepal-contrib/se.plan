@@ -1,0 +1,59 @@
+{
+  "values": [],
+  "metadata": {
+    "browsers": {
+      "chromium": "129.0.6668.29"
+    },
+    "benchmark": {
+      "BENCHMARK_OUTPUTFILE": "voila-benchmark.json",
+      "BENCHMARK_REFERENCE": "actual"
+    },
+    "systemInformation": {
+      "cpu": {
+        "manufacturer": "Intel",
+        "brand": "Gen Intel® Core™ i7-13850HX",
+        "vendor": "Intel",
+        "family": "6",
+        "model": "183",
+        "stepping": "1",
+        "revision": "",
+        "voltage": "",
+        "speed": 2.05,
+        "speedMin": 0.8,
+        "speedMax": 5.3,
+        "governor": "powersave",
+        "cores": 28,
+        "physicalCores": 20,
+        "performanceCores": 8,
+        "efficiencyCores": 12,
+        "processors": 1,
+        "socket": "",
+        "flags": "fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc art arch_perfmon pebs bts rep_good nopl xtopology nonstop_tsc cpuid aperfmperf tsc_known_freq pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 sdbg fma cx16 xtpr pdcm sse4_1 sse4_2 x2apic movbe popcnt tsc_deadline_timer aes xsave avx f16c rdrand lahf_lm abm 3dnowprefetch cpuid_fault epb ssbd ibrs ibpb stibp ibrs_enhanced tpr_shadow flexpriority ept vpid ept_ad fsgsbase tsc_adjust bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb intel_pt sha_ni xsaveopt xsavec xgetbv1 xsaves split_lock_detect avx_vnni dtherm ida arat pln pts hwp hwp_notify hwp_act_window hwp_epp hwp_pkg_req hfi vnmi umip pku ospke waitpkg gfni vaes vpclmulqdq tme rdpid movdiri movdir64b fsrm md_clear serialize pconfig arch_lbr ibt flush_l1d arch_capabilities",
+        "virtualization": true,
+        "cache": {
+          "l1d": 786432,
+          "l1i": 1048576,
+          "l2": 29360128,
+          "l3": 31457280
+        }
+      },
+      "mem": {
+        "total": 33223946240
+      },
+      "osInfo": {
+        "platform": "linux",
+        "distro": "Ubuntu",
+        "release": "22.04.4 LTS",
+        "codename": "jammy",
+        "kernel": "6.5.0-1027-oem",
+        "arch": "x64",
+        "codepage": "UTF-8",
+        "logofile": "ubuntu",
+        "serial": "34a32595aabb43749ab4f038c6e0de7d",
+        "build": "",
+        "servicepack": "",
+        "uefi": true
+      }
+    }
+  }
+}
