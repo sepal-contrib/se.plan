@@ -8,6 +8,9 @@ nox_ui.ipynb
 # C extensions
 *.so
 
+# test build
+node_modules/*
+
 # Distribution / packaging
 .Python
 build/
@@ -132,3 +135,15 @@ dmypy.json
 
 # IDE specific ignore
 .vscode/
+ui-tests/.yarn/
+ui-tests/node_modules/
+
+package-lock.json
+
+ui-tests/playwright-report
+ui-tests/test-results
+ui-tests/benchmark-results
+ui-tests/jlab_root
+
+.yarn/
+yarn.lock

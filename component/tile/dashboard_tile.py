@@ -72,7 +72,9 @@ class DashboardTile(sw.Layout):
 
     def _dashboard(self, *_):
         """Compute the restoration plan and display the map."""
-        self.summary_stats = get_summary_statistics(self.recipe.seplan)
+
+        if not self.summary_stats:
+            self.summary_stats = get_summary_statistics(self.recipe.seplan)
 
         # set the content of the panels
         self.overall_dash.set_summary(self.summary_stats)
