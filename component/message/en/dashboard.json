@@ -11,18 +11,12 @@
         "region": {
             "title": "Summary of restoration suitability by region",
             "detail": "Details",
-            "potentials": {
-                "0": "Very low",
-                "1": "Low",
-                "2": "Medium",
-                "3": "High",
-                "4": "Very High",
-                "5": "Unsuitable land"
-            },
-            "names": {
-                "0": "restoration potential",
-                "1": "surface (ha)",
-                "2": "ratio over total surface (%)"
+            "table" : {
+                "header" : {
+                    "res_potential": "Restoration potential",
+                    "surface_ha": "surface (ha)",
+                    "ratio": "ratio over total surface (%)"
+                }
             }
         },
         "theme": {

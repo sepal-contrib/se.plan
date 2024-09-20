@@ -48,13 +48,19 @@ mandatory_layers = {
 }
 
 
-suitability_labels = {
+SUITABILITY_LEVELS = {
     1: "Very low",
     2: "Low",
     3: "Medium",
     4: "High",
     5: "Very High",
     6: "Unsuitable land",
+}
+
+SUMMARY_TABLE_HEADERS = {
+    "res_potential": cm.dashboard.region.table.header.res_potential,
+    "surface_ha": cm.dashboard.region.table.header.surface_ha,
+    "ratio": cm.dashboard.region.table.header.ratio,
 }
 
 

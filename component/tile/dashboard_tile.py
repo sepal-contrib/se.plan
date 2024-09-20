@@ -10,9 +10,11 @@ from component.message import cm
 from component.model.recipe import Recipe
 from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
+from component.scripts.plots import get_chart, get_individual_charts, parse_suitability
 from component.scripts.seplan import Seplan
 from component.scripts.statistics import get_summary_statistics, parse_theme_stats
 from component.widget.alert_state import Alert, AlertDialog, AlertState
+from component.widget.area_sum_up import get_summary_table
 from component.widget.custom_widgets import DashToolBar
 
 ID = "dashboard_widget"
@@ -74,6 +76,7 @@ class DashboardTile(sw.Layout):
         """Compute the restoration plan and display the map."""
 
         if not self.summary_stats:
+            logger.info("No dashboard to display")
             self.summary_stats = get_summary_statistics(self.recipe.seplan)
 
         # set the content of the panels
@@ -102,6 +105,8 @@ class ThemeDashboard(sw.Card):
         self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats):
+        return
+
         # Extract the aoii names and color from summary_stats
         names_colors = []
         for aoi_data in summary_stats:
@@ -187,26 +192,17 @@ class OverallDashboard(sw.Card):
         self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats: List[Dict]):
-        feats = []
-        for aoi_data in summary_stats:
-            aoi_name = next(iter(aoi_data))
-            values = aoi_data[next(iter(aoi_data))]["suitability"]["values"]
-            feats.append(cw.AreaSumUp(aoi_name, self.format_values(values)))
 
-        self.content.children = feats
+        ipechart = get_chart(summary_stats)
+        charts = get_individual_charts(summary_stats)
+        # summary_table = get_summary_table(summary_stats)
 
+        self.content.children = [ipechart] + charts
+        # self.content.children += [summary_table]
+
+        print(self.children)
         # hide the alert
         self.alert.reset()
-
-        return self
-
-    def format_values(self, raw):
-        out_values = []
-        for class_ in range(1, 7):
-            index_i = next((i["sum"] for i in raw if i["image"] == class_), 0)
-            out_values.append(index_i)
-
-        return out_values
 
     def reset(self):
         """Reset the dashboard to its initial state."""
