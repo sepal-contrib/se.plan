@@ -1,8 +1,6 @@
 from typing import Union
 
 import pandas as pd
-from ipywidgets import Output
-from matplotlib import pyplot as plt
 from sepal_ui import sepalwidgets as sw
 
 from component import parameter as cp
@@ -10,6 +8,9 @@ from component.message import cm
 from component.model.benefit_model import BenefitModel
 from component.model.constraint_model import ConstraintModel
 from component.model.cost_model import CostModel
+from component.scripts.plots import get_bars_chart
+from component.scripts.statistics import parse_layer_data
+from component.types import SummaryStatsDict
 
 
 # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
@@ -30,22 +31,16 @@ class LayerFull(sw.Layout):
 
     def __init__(
         self,
-        layer_id,
-        values,
-        names_colors,
+        summary_stats: SummaryStatsDict,
+        layer_id: str,
         model: Union[BenefitModel, CostModel],
     ):
-        # add one extra color for the AOI
-
-        self.model = model
-
-        aoi_names, colors = zip(*names_colors)
 
         # We need to get the labels from the seplan models
-        layer_idx = self.model.get_index(layer_id)
-        detail = self.model.descs[layer_idx]
-        name = self.model.names[layer_idx]
-        units = self.model.units[layer_idx]
+        layer_idx = model.get_index(layer_id)
+        detail = model.descs[layer_idx]
+        name = model.names[layer_idx]
+        units = model.units[layer_idx]
 
         # build the internal details
         w_header = sw.ExpansionPanelHeader(
@@ -61,37 +56,9 @@ class LayerFull(sw.Layout):
         label = f"{name} ({units})"
         w_title = sw.Html(class_="mt-2 mb-2", xs12=True, tag="h3", children=[label])
 
-        # create a matplotlib stack horizontal bar chart
-        w_chart = Output()
-        with w_chart:
-            # change pyplot style
-            plt.style.use("dark_background")
-
-            # create the chart
-            transparent = (0, 0, 0, 0)
-            width = len(values) * 2
-            fig, ax = plt.subplots(figsize=[50, width], facecolor=transparent)
-
-            # set the datas
-            max_value = max(values) if max(values) != 0 else 1
-            norm_values = [v / max_value * 100 for v in reversed(values)]
-            human_values = [f"{human_format(val)}" for val in reversed(values)]
-
-            # add the axes
-            ax.barh(aoi_names, norm_values, color=colors)
-
-            # add the text
-            info = (norm_values, human_values, colors)
-            for i, (norm, val, color) in enumerate(zip(*info)):
-                ax.text(norm + 1, i, val, fontsize=40, color=color)
-
-            # cosmetic tuning
-            ax.set_xlim(0, 110)
-            ax.tick_params(axis="y", which="major", pad=30, labelsize=40, left=False)
-            ax.tick_params(axis="x", bottom=False, labelbottom=False)
-            ax.set_frame_on(False)
-
-            plt.show()
+        # create the chart
+        aoi_names, values, colors = parse_layer_data(summary_stats, layer_id)
+        w_chart = get_bars_chart(aoi_names, values, colors)
 
         # build the final widget
         widgets = [w_title, w_chart, w_details]

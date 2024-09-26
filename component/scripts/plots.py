@@ -8,6 +8,7 @@ from typing import Dict, List, Tuple, Any
 
 from component.parameter.gui_params import SUITABILITY_LEVELS
 from component.parameter.vis_params import SUITABILITY_COLORS
+from component.types import SummaryStatsDict
 
 
 def get_level_name(code: int) -> str:
@@ -18,9 +19,14 @@ def get_level_color(code: int) -> str:
     return SUITABILITY_COLORS.get(code, "#000")  # Default to black if unknown
 
 
-def parse_suitability(
-    summary_results: Dict[str, Any]
+def parse_suitability_data(
+    summary_results: SummaryStatsDict,
 ) -> Tuple[List[str], List[str], List[Dict[str, Any]]]:
+    """Parse the suitability theme data from the summary results
+
+    Returns a tuple of region names, level names, and series data for the ECharts widget.
+    """
+
     region_names = list(summary_results.keys())
     level_codes_set = set()
     level_data_dict: Dict[str, List[float]] = {}
@@ -69,8 +75,38 @@ def parse_suitability(
     return region_names, level_names, series_data
 
 
-def get_bars(series_data):
-    """Create a list of bar series from the series data."""
+def parse_layer_data(
+    summary_results: SummaryStatsDict, layer_id: str
+) -> Tuple[List[str], List[float], List[str]]:
+    """Returns a tuple of statistics for a given layer.
+
+    Returns a tuple of region names, values, and colors for the ECharts widget.
+    """
+
+    aoi_names = []
+    values = []
+    colors = []
+
+    # We know the layer_id is unique among all the themes
+    for aoi_name, aoi_data in summary_results.items():
+        for theme, layers in aoi_data.items():
+
+            if theme in ["suitability", "color"]:
+                continue
+
+            for layer_dict in layers:
+                if layer_dict.get(layer_id):
+                    layer_data = layer_dict[layer_id]
+
+                    aoi_names.append(aoi_name)
+                    values.append(layer_data["values"][0])
+                    colors.append(summary_results[aoi_name]["color"])
+
+    return aoi_names, values, colors
+
+
+def get_stacked_bars(series_data: List[dict]) -> List[Bar]:
+    """Create a list of echar bars from the series data."""
     bars = []
     for series in series_data:
         bars.append(
@@ -87,25 +123,77 @@ def get_bars(series_data):
     return bars
 
 
-def get_chart(summary_results):
-    region_names, level_names, series_data = parse_suitability(summary_results)
-    bars = get_bars(series_data)
+def get_bars(values: Tuple, colors: Tuple) -> List[Bar]:
+    """Create a list of bar series from the series data."""
+
+    data = [
+        {
+            "value": value,
+            "itemStyle": {"color": color},
+        }
+        for value, color in zip(values, colors)
+    ]
+
+    return [Bar(type="bar", data=data)]
+
+
+def get_bars_chart(region_names: Tuple, values: Tuple, colors: str) -> EChartsWidget:
+    """Create a stacked, horizontal bar chart with no legend."""
+
+    height = max(170, 50 + 30 * len(region_names))
+    axis_label = {
+        "inside:": True,
+        # "overflow": "",
+        "width": 60,
+        "height": 15,
+        "fontSize": 12,
+    }
+
+    series = get_bars(values, colors)
+
+    option = Option(
+        backgroundColor="#1e1e1e00",
+        yAxis=YAxis(type="category", axisLabel=axis_label, data=region_names),
+        xAxis=XAxis(type="value"),
+        series=series,
+        tooltip=Tooltip(),
+    )
+
+    return EChartsWidget(option=option, style={"height": f"{height}px"})
+
+
+def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
+    """Create a stacked, horizontal bar chart with a legend."""
+
+    region_names, level_names, series_data = parse_suitability_data(summary_results)
+    bars = get_stacked_bars(series_data)
 
     selected = {name: True for name in level_names}
     selected["Unsuitable land"] = False
 
+    height = max(200, 50 + 75 * len(region_names))
+    axis_label = {
+        "inside:": True,
+        "overflow": "breakAll",
+        "width": 60,
+        "height": 15,
+    }
+
+    title = Title(text="Suitability for each region", left="center", subtext="Total")
+
     option = Option(
         backgroundColor="#1e1e1e00",
-        legend=Legend(data=level_names, selected=selected),
-        yAxis=YAxis(type="category", data=region_names),
+        # title=title,
+        legend=Legend(data=level_names, selected=selected, top=0),
+        yAxis=YAxis(type="category", axisLabel=axis_label, data=region_names),
         xAxis=XAxis(type="value"),
         series=bars,
         tooltip=Tooltip(),
     )
-    return EChartsWidget(option=option)
+    return EChartsWidget(option=option, style={"height": f"{height}px"})
 
 
-def get_individual_charts(summary_results):
+def get_individual_charts(summary_results: SummaryStatsDict):
     """Create individual charts for each region with stacked, horizontal bars and no legend."""
     charts = []
     for region, data in summary_results.items():
@@ -137,14 +225,15 @@ def get_individual_charts(summary_results):
         option = Option(
             legend=Legend(data=level_names, selected=selected),
             backgroundColor="#1e1e1e00",
-            title=Title(text=f"Suitability for {region}"),
-            xAxis=XAxis(type="value"),  # xAxis is value
+            # title=Title(text=f"Suitability for {region}"),
+            xAxis=XAxis(type="value"),
+            # yAxis=YAxis(type="category", rotate=90, data=[region]),
             yAxis=YAxis(type="category", data=[region]),
             series=bars,
             tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
-            grid=Grid(height="100px"),
+            grid=Grid(height="60px"),
             toolbox=Toolbox(show=True),
         )
-        charts.append(EChartsWidget(option=option))
+        charts.append(EChartsWidget(option=option, style={"height": "150px"}))
 
     return charts

@@ -10,9 +10,12 @@ from component.message import cm
 from component.model.recipe import Recipe
 from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
-from component.scripts.plots import get_chart, get_individual_charts, parse_suitability
+from component.scripts.plots import (
+    get_individual_charts,
+    get_stacked_bars_chart,
+)
 from component.scripts.seplan import Seplan
-from component.scripts.statistics import get_summary_statistics, parse_theme_stats
+from component.scripts.statistics import get_summary_statistics
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.area_sum_up import get_summary_table
 from component.widget.custom_widgets import DashToolBar
@@ -105,64 +108,55 @@ class ThemeDashboard(sw.Card):
         self.children = [self.title, self.alert, self.content]
 
     def set_summary(self, summary_stats):
-        return
 
-        # Extract the aoii names and color from summary_stats
-        names_colors = []
-        for aoi_data in summary_stats:
-            aoi_name = next(iter(aoi_data))
-            color = aoi_data[aoi_name]["color"]
-            names_colors.append((aoi_name, color))
+        # Get all the layers for the benefit theme
+        benefit_charts = [
+            cw.LayerFull(
+                summary_stats,
+                layer_id,
+                self.seplan.benefit_model,
+            )
+            for layer_id in self.seplan.benefit_model.ids
+        ]
 
-        themes_values = parse_theme_stats(summary_stats)
+        # Get all the layers for the cost theme
+        cost_charts = [
+            cw.LayerFull(
+                summary_stats,
+                layer_id,
+                self.seplan.cost_model,
+            )
+            for layer_id in self.seplan.cost_model.ids
+        ]
 
-        # init the layer list
-        ben_layer, const_layer, cost_layer = [], [], []
-
-        # reorder the aois with the main one in first
-        # TODO: check this reorder
-        names_colors = names_colors[::-1]
-
-        # filter the names of the aois  from the json_theme values
-
-        for theme, layers in themes_values.items():
-            for name, values in layers.items():
-                values = values["values"]
-                if theme == "benefit":
-                    ben_layer.append(
-                        cw.LayerFull(
-                            name, values, names_colors, self.seplan.benefit_model
-                        )
-                    )
-                elif theme == "cost":
-                    cost_layer.append(
-                        cw.LayerFull(name, values, names_colors, self.seplan.cost_model)
-                    )
-                elif theme == "constraint":
-                    const_layer.append(
-                        cw.LayerPercentage(
-                            name, values, names_colors, self.seplan.constraint_model
-                        )
-                    )
-                else:
-                    continue  # Aois names are also stored in the dictionary
+        # Get all the layers for the constraint theme
+        constraint_charts = [
+            # cw.LayerPercentage(
+            #     summary_stats,
+            #     layer_id,
+            #     self.seplan.constraint_model,
+            # )
+            # for layer_id in self.seplan.constraint_model.ids
+        ]
 
         ben = v.Html(tag="h2", children=[cm.theme.benefit.capitalize()])
         ben_txt = sw.Markdown("  \n".join(cm.dashboard.theme.benefit.description))
         ben_header = v.ExpansionPanelHeader(children=[ben])
-        ben_content = v.ExpansionPanelContent(children=[ben_txt, *ben_layer])
+        ben_content = v.ExpansionPanelContent(children=[ben_txt, *benefit_charts])
         ben_panel = v.ExpansionPanel(children=[ben_header, ben_content])
 
         cost = v.Html(tag="h2", children=[cm.theme.cost.capitalize()])
         cost_txt = sw.Markdown("  \n".join(cm.dashboard.theme.cost.description))
         cost_header = v.ExpansionPanelHeader(children=[cost])
-        cost_content = v.ExpansionPanelContent(children=[cost_txt, *cost_layer])
+        cost_content = v.ExpansionPanelContent(children=[cost_txt, *cost_charts])
         cost_panel = v.ExpansionPanel(children=[cost_header, cost_content])
 
         const = v.Html(tag="h2", children=[cm.theme.constraint.capitalize()])
         const_txt = sw.Markdown("  \n".join(cm.dashboard.theme.constraint.description))
         const_header = v.ExpansionPanelHeader(children=[const])
-        const_content = v.ExpansionPanelContent(children=[const_txt, *const_layer])
+        const_content = v.ExpansionPanelContent(
+            children=[const_txt, *constraint_charts]
+        )
         const_panel = v.ExpansionPanel(children=[const_header, const_content])
 
         # create an expansion panel to store everything
@@ -193,11 +187,11 @@ class OverallDashboard(sw.Card):
 
     def set_summary(self, summary_stats: List[Dict]):
 
-        ipechart = get_chart(summary_stats)
+        ipechart = get_stacked_bars_chart(summary_stats)
         charts = get_individual_charts(summary_stats)
-        # summary_table = get_summary_table(summary_stats)
+        summary_table = get_summary_table(summary_stats)
 
-        self.content.children = [ipechart] + charts
+        self.content.children = [ipechart] + [summary_table]
         # self.content.children += [summary_table]
 
         print(self.children)
