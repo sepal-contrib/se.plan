@@ -4,6 +4,7 @@ from traitlets import List
 from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
+from component.types import CostLayerData
 
 
 class CostModel(QuestionnaireModel):
@@ -87,3 +88,14 @@ class CostModel(QuestionnaireModel):
 
         self.updated += 1
         self.new_changes = 0
+
+    def get_layer_data(self, layer_id: str) -> CostLayerData:
+        """Return the data of a specific layer."""
+        idx = self.get_index(layer_id)
+        return {
+            "id": self.ids[idx],
+            "name": self.names[idx],
+            "asset": self.assets[idx],
+            "desc": self.descs[idx],
+            "unit": self.units[idx],
+        }

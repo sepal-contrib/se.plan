@@ -1,7 +1,7 @@
 """Define functions to create the plots for the dashboard tile."""
 
 from ipecharts.option import Option, Legend, Tooltip, XAxis, YAxis, Title, Grid, Toolbox
-from ipecharts.option.series import Bar
+from ipecharts.option.series import Bar, Pie
 from ipecharts.echarts import EChartsWidget
 
 from typing import Dict, List, Tuple, Any
@@ -105,7 +105,7 @@ def parse_layer_data(
     return aoi_names, values, colors
 
 
-def get_stacked_bars(series_data: List[dict]) -> List[Bar]:
+def get_stacked_series(series_data: List[dict]) -> List[Bar]:
     """Create a list of echar bars from the series data."""
     bars = []
     for series in series_data:
@@ -123,40 +123,66 @@ def get_stacked_bars(series_data: List[dict]) -> List[Bar]:
     return bars
 
 
-def get_bars(values: Tuple, colors: Tuple) -> List[Bar]:
+def get_bars_series(
+    values: List[Tuple[float]],
+    colors: List[Tuple[str]],
+    series_names: List[str],
+    custom_color: bool = False,
+) -> List[Bar]:
     """Create a list of bar series from the series data."""
 
-    data = [
-        {
-            "value": value,
-            "itemStyle": {"color": color},
-        }
-        for value, color in zip(values, colors)
-    ]
+    assert len(values) == len(colors) == len(series_names)
 
-    return [Bar(type="bar", data=data)]
+    bars = []
+    for i, series_name in enumerate(series_names):
+        bars.append(
+            Bar(
+                data=[
+                    {
+                        "value": value,
+                        "itemStyle": {"color": color if custom_color else None},
+                    }
+                    for value, color in zip(values[i], colors[i])
+                ],
+                name=series_name,
+                type="bar",
+            )
+        )
+
+    return bars
 
 
-def get_bars_chart(region_names: Tuple, values: Tuple, colors: str) -> EChartsWidget:
-    """Create a stacked, horizontal bar chart with no legend."""
+def get_bars_chart(
+    categories: Tuple,
+    values: Tuple,
+    colors: str,
+    series_names: List,
+    custom_color: bool = False,
+    bars_width: int = 30,
+    show_legend: bool = True,
+) -> EChartsWidget:
+    """Create a simple, horizontal bar chart."""
 
-    height = max(170, 50 + 30 * len(region_names))
+    height = max(170, 50 + bars_width * len(categories))
     axis_label = {
         "inside:": True,
-        # "overflow": "",
+        "overflow": "breakAll",
         "width": 60,
         "height": 15,
         "fontSize": 12,
     }
 
-    series = get_bars(values, colors)
+    series = get_bars_series(
+        values, colors, series_names=series_names, custom_color=custom_color
+    )
 
     option = Option(
         backgroundColor="#1e1e1e00",
-        yAxis=YAxis(type="category", axisLabel=axis_label, data=region_names),
+        yAxis=YAxis(type="category", axisLabel=axis_label, data=categories),
         xAxis=XAxis(type="value"),
         series=series,
-        tooltip=Tooltip(),
+        tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
+        legend=Legend() if show_legend else None,
     )
 
     return EChartsWidget(option=option, style={"height": f"{height}px"})
@@ -166,7 +192,7 @@ def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
     """Create a stacked, horizontal bar chart with a legend."""
 
     region_names, level_names, series_data = parse_suitability_data(summary_results)
-    bars = get_stacked_bars(series_data)
+    bars = get_stacked_series(series_data)
 
     selected = {name: True for name in level_names}
     selected["Unsuitable land"] = False

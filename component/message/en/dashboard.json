@@ -28,7 +28,7 @@
                     "0": "For each assessed benefit, the mean value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
                     "1": "For any of these thematic layers, if you have used your own data in the model, make sure that you provided the correct information."
                 },
-                "details": "details"
+                "details": "Details"
             },
             "cost": {
                 "description": {

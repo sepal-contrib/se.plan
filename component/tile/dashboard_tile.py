@@ -11,17 +11,17 @@ from component.model.recipe import Recipe
 from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
 from component.scripts.plots import (
+    get_bars_chart,
     get_individual_charts,
     get_stacked_bars_chart,
+    parse_layer_data,
 )
 from component.scripts.seplan import Seplan
 from component.scripts.statistics import get_summary_statistics
-from component.widget.alert_state import Alert, AlertDialog, AlertState
+from component.types import SummaryStatsDict
+from component.widget.alert_state import Alert, AlertDialog
 from component.widget.area_sum_up import get_summary_table
 from component.widget.custom_widgets import DashToolBar
-
-ID = "dashboard_widget"
-"the dashboard tiles share id"
 
 
 class DashboardTile(sw.Layout):
@@ -107,37 +107,52 @@ class ThemeDashboard(sw.Card):
 
         self.children = [self.title, self.alert, self.content]
 
-    def set_summary(self, summary_stats):
+    def set_summary(self, summary_stats: SummaryStatsDict):
+        # We need to get the labels from the seplan models
 
-        # Get all the layers for the benefit theme
-        benefit_charts = [
-            cw.LayerFull(
-                summary_stats,
-                layer_id,
-                self.seplan.benefit_model,
-            )
-            for layer_id in self.seplan.benefit_model.ids
-        ]
+        benefit_charts, cost_charts, constraint_charts = [], [], []
 
-        # Get all the layers for the cost theme
-        cost_charts = [
-            cw.LayerFull(
-                summary_stats,
-                layer_id,
-                self.seplan.cost_model,
+        for layer_id in self.seplan.benefit_model.ids:
+
+            aoi_names, values, colors = parse_layer_data(summary_stats, layer_id)
+
+            layer_data = self.seplan.benefit_model.get_layer_data(layer_id)
+            w_chart = get_bars_chart(
+                aoi_names,
+                [values],
+                [colors],
+                [layer_data["name"]],
+                custom_color=True,
+                show_legend=False,
             )
-            for layer_id in self.seplan.cost_model.ids
-        ]
+
+            # Get all the layers for the benefit theme
+            benefit_charts.append(cw.LayerFull(layer_data, w_chart))
+
+        # Each of the series has to be one of the costs in the cost model
+        aoi_names, values, colors, series_names = [], [], [], []
+        for layer_id in self.seplan.cost_model.ids:
+
+            layer_data = self.seplan.cost_model.get_layer_data(layer_id)
+
+            aoi_name, value, color = parse_layer_data(summary_stats, layer_id)
+            aoi_names.append(aoi_name)
+            values.append(value)
+            colors.append(color)
+            series_names.append(layer_data["name"])
+
+        w_chart = get_bars_chart(
+            aoi_names[0], values, colors, series_names, bars_width=70
+        )
+        cost_charts = [cw.LayerFull(layer_data, w_chart)]
 
         # Get all the layers for the constraint theme
-        constraint_charts = [
-            # cw.LayerPercentage(
-            #     summary_stats,
-            #     layer_id,
-            #     self.seplan.constraint_model,
-            # )
-            # for layer_id in self.seplan.constraint_model.ids
-        ]
+        for layer_id in self.seplan.constraint_model.ids:
+
+            layer_data = self.seplan.constraint_model.get_layer_data(layer_id)
+            aoi_names, values, colors = parse_layer_data(summary_stats, layer_id)
+
+            constraint_charts.append(cw.LayerPercentage(layer_data, values, colors))
 
         ben = v.Html(tag="h2", children=[cm.theme.benefit.capitalize()])
         ben_txt = sw.Markdown("  \n".join(cm.dashboard.theme.benefit.description))
@@ -187,15 +202,12 @@ class OverallDashboard(sw.Card):
 
     def set_summary(self, summary_stats: List[Dict]):
 
-        ipechart = get_stacked_bars_chart(summary_stats)
+        suitability_charts = get_stacked_bars_chart(summary_stats)
+        suitability_table = get_summary_table(summary_stats, "both")
         charts = get_individual_charts(summary_stats)
-        summary_table = get_summary_table(summary_stats)
 
-        self.content.children = [ipechart] + [summary_table]
-        # self.content.children += [summary_table]
+        self.content.children = [suitability_charts] + [suitability_table]
 
-        print(self.children)
-        # hide the alert
         self.alert.reset()
 
     def reset(self):

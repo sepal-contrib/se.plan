@@ -10,11 +10,6 @@ from component.model.aoi_model import SeplanAoi
 
 
 class Seplan:
-    # -- model parameters -----------------------
-    aoi_model: SeplanAoi
-    benefit_model: cmod.BenefitModel
-    constraint_model: cmod.ConstraintModel
-    cost_model: cmod.CostModel
 
     def __init__(
         self,

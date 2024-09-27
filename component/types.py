@@ -28,7 +28,7 @@ class AreaStats(TypedDict):
 
 
 SummaryStatsDict = Dict[str, AreaStats]
-"The result of running get_summary_statistics" ""
+"The result of running get_summary_statistics script on a given seplan_model"
 
 
 # Parsed layer stats
@@ -41,3 +41,30 @@ class ParsedLayer(TypedDict):
 
 ParsedLayerStats = Dict[str, ParsedLayer]
 "The result of parsing a SummaryStatsDict for a given layer."
+
+
+# Data returned from the models get_layer_data method
+class ModelLayerData(TypedDict):
+    "The data returned from a Benefit, Cost or Constraint model."
+    id: str
+    "The unique identifier of the layer."
+    name: str
+    asset: str
+    desc: str
+    unit: str
+
+
+class BenefitLayerData(ModelLayerData):
+    "The data returned from a Cost model."
+    theme: str
+    weight: float
+
+
+class ConstraintLayerData(ModelLayerData):
+    "The data returned from a Constraint model."
+    value: float
+    data_type: Literal["binary", "categorical", "continuous"]
+
+
+class CostLayerData(ModelLayerData):
+    "The data returned from a Benefit model."

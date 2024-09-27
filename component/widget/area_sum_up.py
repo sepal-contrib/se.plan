@@ -1,9 +1,12 @@
+from typing import Literal
 import ipyvuetify as v
 from component.parameter.gui_params import SUITABILITY_LEVELS
 from component.parameter.vis_params import SUITABILITY_COLORS
 
 
-def get_summary_table(summary_stats, display_type="absolute"):
+def get_summary_table(
+    summary_stats, display_type: Literal["absolute", "percentage", "both"] = "both"
+):
 
     # Pre-sort the suitability levels
     suitability_levels = sorted(SUITABILITY_LEVELS.keys())
