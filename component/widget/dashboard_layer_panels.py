@@ -1,5 +1,3 @@
-from typing import Literal, Union
-
 from ipecharts import EChartsWidget
 from sepal_ui import sepalwidgets as sw
 
