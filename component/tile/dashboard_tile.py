@@ -20,7 +20,7 @@ from component.scripts.seplan import Seplan
 from component.scripts.statistics import get_summary_statistics
 from component.types import SummaryStatsDict
 from component.widget.alert_state import Alert, AlertDialog
-from component.widget.area_sum_up import get_summary_table
+from component.widget.suitability_table import get_summary_table
 from component.widget.custom_widgets import DashToolBar
 
 
