@@ -31,7 +31,7 @@ def export_as_csv(recipe_session_name: str, summary_stats: List[dict]):
                         row = {
                             "Area": area,
                             "Theme": category,
-                            "Sub-theme": param.suitability_labels[value["image"]],
+                            "Sub-theme": param.SUITABILITY_LEVELS[value["image"]],
                             "Values": value["sum"],
                         }
                         formatted_data.append(row)

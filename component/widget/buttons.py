@@ -7,9 +7,9 @@ btn_color = "primary"
 class IconBtn(sw.Btn):
     def __init__(self, gliph: str, *args, **kwargs):
 
-        kwargs["icon"] = True
-        kwargs["small"] = True
-        kwargs["class_"] = "mr-2"
+        kwargs["icon"] = kwargs.get("icon", True)
+        kwargs["small"] = kwargs.get("small", True)
+        kwargs["class_"] = kwargs.get("class_", "mr-2")
 
         super().__init__(gliph=gliph, *args, **kwargs)
 

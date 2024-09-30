@@ -1,10 +1,19 @@
-from .color_gradient import gradient, no_data_color
+from component.scripts.colors import gradient
+
+palettes = {"green": ["#edf8fb", "#66c2a4", "#006d2c"]}
+no_data_color = ["#353535"]  # the color used for values filtered by constraints
+gradient_palette = gradient(levels=5, palette=palettes["green"])
 
 # vizualisation parameters of the final_layer
 final_viz = {
     "min": 0,
     "max": 5,
-    "palette": no_data_color + gradient(5),
+    "palette": no_data_color + gradient_palette,
+}
+
+SUITABILITY_COLORS = {
+    suit_code: suit_color
+    for suit_code, suit_color in enumerate(gradient_palette + no_data_color, 1)
 }
 
 # matplotlib viz_param but in GEE

@@ -1,11 +1,10 @@
-from typing import Dict, List
-
 import ee
 
 from component.scripts.seplan import Seplan, reduce_constraints
+from component.types import SummaryStatsDict
 
 
-def get_summary_statistics(seplan_model: Seplan) -> List[Dict]:
+def get_summary_statistics(seplan_model: Seplan) -> SummaryStatsDict:
     """Returns summary statistics using seplan inputs.
 
     The statistics will be later parsed to be displayed in the dashboard.
@@ -28,33 +27,39 @@ def get_summary_statistics(seplan_model: Seplan) -> List[Dict]:
     # Get the restoration suitability index
     wlc_out = seplan_model.get_constraint_index()
 
-    return [
+    return (
         ee.Dictionary(
             {
-                aoi_name: {
-                    "suitability": get_image_stats(
-                        wlc_out, mask_out_areas, data["ee_feature"]
-                    ),
-                    "benefit": [
-                        get_image_mean(image, data["ee_feature"], mask_out_areas, name)
-                        for image, name in benefit_list
-                    ],
-                    "cost": [
-                        get_image_sum(image, data["ee_feature"], mask_out_areas, name)
-                        for image, name in cost_list
-                    ],
-                    "constraint": [
-                        get_image_percent_cover_pixelarea(
-                            image, data["ee_feature"], name
-                        )
-                        for image, name in constraint_list
-                    ],
-                    "color": data["color"],
-                }
+                aoi_name: ee.Dictionary(
+                    {
+                        "suitability": get_image_stats(
+                            wlc_out, mask_out_areas, data["ee_feature"]
+                        ),
+                        "benefit": [
+                            get_image_mean(
+                                image, data["ee_feature"], mask_out_areas, name
+                            )
+                            for image, name in benefit_list
+                        ],
+                        "cost": [
+                            get_image_sum(
+                                image, data["ee_feature"], mask_out_areas, name
+                            )
+                            for image, name in cost_list
+                        ],
+                        "constraint": [
+                            get_image_percent_cover_pixelarea(
+                                image, data["ee_feature"], name
+                            )
+                            for image, name in constraint_list
+                        ],
+                        "color": data["color"],
+                    }
+                )
+                for aoi_name, data in ee_features.items()
             }
-        ).getInfo()
-        for aoi_name, data in ee_features.items()
-    ]
+        )
+    ).getInfo()
 
 
 def get_image_stats(image, mask, geom):
@@ -194,50 +199,3 @@ def get_image_sum(image, aoi, mask, name):
 
     # return ee.Dictionary({image.get("name").getInfo(): value})
     return ee.Dictionary({name: value})
-
-
-def parse_theme_stats(stats: List[Dict]):
-    """Prepares the dashboard export for plotting on the theme area of the dashboard by appending values for each layer and AOI into a single dictionary.
-
-    Args:
-        stats (list): List of string dicts. Each feature with summary values for benefits, costs, risks and constraints.
-
-    Returns:
-        json_themes_values (dict):Theme formatted dictionay of {THEME: {LAYER: 'total':float, 'values':[float]}}
-    """
-    tmp_dict = {}
-
-    for aoi_data in stats:
-        # remove suitability from the start
-        features = {
-            k: v
-            for k, v in list(aoi_data.values())[0].items()
-            if k not in ["suitability", "color"]
-        }
-
-        for theme, layers in features.items():
-            # add the theme to the keys if necessary (during the first loop)
-            tmp_dict.setdefault(theme, {})
-
-            # first loop to sum all the values related to the same layer (e.g. land_cover)
-            # each layer is tored in a dict: {lid: {"value": xx, "total": cc}}
-            d = {}
-            for layer in layers:
-                lid = next(iter(layer))
-                stat = layer[lid]
-                lid in d or d.update({lid: {"values": 0, "total": 0}})
-                v = stat["values"][0] if stat["values"][0] is not None else 0
-                d[lid]["values"] += v
-                d[lid]["layer_total"] = stat["total"][0]
-
-            # second loop to write down everything in the tmp_dict
-            for lid, stat in d.items():
-                lid in tmp_dict[theme] or tmp_dict[theme].update(
-                    {lid: {"values": [], "total": 0}}
-                )
-                tmp_dict[theme][lid]["values"].append(stat["values"])
-                tmp_dict[theme][lid]["total"] = max(
-                    stat["total"], tmp_dict[theme][lid]["total"]
-                )
-
-    return tmp_dict

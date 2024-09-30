@@ -1,15 +1,10 @@
-from typing import Union
+from typing import Literal, Union
 
-import pandas as pd
-from ipywidgets import Output
-from matplotlib import pyplot as plt
+from ipecharts import EChartsWidget
 from sepal_ui import sepalwidgets as sw
 
-from component import parameter as cp
 from component.message import cm
-from component.model.benefit_model import BenefitModel
-from component.model.constraint_model import ConstraintModel
-from component.model.cost_model import CostModel
+from component.types import ModelLayerData
 
 
 # taken from https://stackoverflow.com/questions/579310/formatting-long-numbers-as-strings-in-python
@@ -25,27 +20,13 @@ def human_format(num, round_to=2):
 
 
 class LayerFull(sw.Layout):
-    model: Union[BenefitModel, CostModel]
-    "Questionnaire model used to retrieve the layer name, description and units"
 
-    def __init__(
-        self,
-        layer_id,
-        values,
-        names_colors,
-        model: Union[BenefitModel, CostModel],
-    ):
-        # add one extra color for the AOI
+    def __init__(self, layer_data: ModelLayerData, w_chart: EChartsWidget):
 
-        self.model = model
-
-        aoi_names, colors = zip(*names_colors)
-
-        # We need to get the labels from the seplan models
-        layer_idx = self.model.get_index(layer_id)
-        detail = self.model.descs[layer_idx]
-        name = self.model.names[layer_idx]
-        units = self.model.units[layer_idx]
+        # get the layer data
+        name = layer_data["name"]
+        detail = layer_data["desc"]
+        units = layer_data["unit"]
 
         # build the internal details
         w_header = sw.ExpansionPanelHeader(
@@ -61,37 +42,7 @@ class LayerFull(sw.Layout):
         label = f"{name} ({units})"
         w_title = sw.Html(class_="mt-2 mb-2", xs12=True, tag="h3", children=[label])
 
-        # create a matplotlib stack horizontal bar chart
-        w_chart = Output()
-        with w_chart:
-            # change pyplot style
-            plt.style.use("dark_background")
-
-            # create the chart
-            transparent = (0, 0, 0, 0)
-            width = len(values) * 2
-            fig, ax = plt.subplots(figsize=[50, width], facecolor=transparent)
-
-            # set the datas
-            max_value = max(values) if max(values) != 0 else 1
-            norm_values = [v / max_value * 100 for v in reversed(values)]
-            human_values = [f"{human_format(val)}" for val in reversed(values)]
-
-            # add the axes
-            ax.barh(aoi_names, norm_values, color=colors)
-
-            # add the text
-            info = (norm_values, human_values, colors)
-            for i, (norm, val, color) in enumerate(zip(*info)):
-                ax.text(norm + 1, i, val, fontsize=40, color=color)
-
-            # cosmetic tuning
-            ax.set_xlim(0, 110)
-            ax.tick_params(axis="y", which="major", pad=30, labelsize=40, left=False)
-            ax.tick_params(axis="x", bottom=False, labelbottom=False)
-            ax.set_frame_on(False)
-
-            plt.show()
+        # create the chart
 
         # build the final widget
         widgets = [w_title, w_chart, w_details]
@@ -100,31 +51,11 @@ class LayerFull(sw.Layout):
 
 
 class LayerPercentage(sw.Layout):
-    model: ConstraintModel
-    "Questionnaire model used to retrieve the layer name, description and units"
 
-    def __init__(self, layer_id, pcts, names_colors, model: ConstraintModel):
-        self.model = model
-        # add one extra color for the AOI
-        colors = [color for _, color in names_colors]
+    def __init__(self, layer_data, values, colors):
 
-        # We need to get the labels from the seplan models
-        layer_idx = self.model.get_index(layer_id)
-        detail = self.model.descs[layer_idx]
-        name = self.model.names[layer_idx]
-
-        # deal with land_use special case
-        if layer_id in [*cp.land_use_criterias]:
-            columns = [
-                "theme",
-                "subtheme",
-                "layer_name",
-                "gee_asset",
-                "layer_info",
-                "unit",
-            ]
-            content = ["", "", layer_id, "", layer_id, "HA"]
-            pd.Series(dict(zip(columns, content)))
+        detail = layer_data.get("desc")
+        name = layer_data.get("name")
 
         # add the title
         w_title = sw.Html(tag="h4", children=[name])
@@ -141,7 +72,7 @@ class LayerPercentage(sw.Layout):
 
         # create the list of value
         spans = []
-        for i, val in enumerate(pcts):
+        for i, val in enumerate(values):
             c = f"color: {colors[i]}"
             val = f"{round(val,2)}%"
             w_span = sw.Html(tag="span", class_="ml-1 mr-1", style_=c, children=[val])
@@ -153,4 +84,4 @@ class LayerPercentage(sw.Layout):
         super().__init__(class_="ma-5", row=True, children=children)
 
         # hide the constraints if all values are 0
-        self.viz = any([v != 0 for v in pcts])
+        self.viz = any([v != 0 for v in values])
