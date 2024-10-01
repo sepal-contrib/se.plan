@@ -13,9 +13,7 @@
             "detail": "Details",
             "table" : {
                 "header" : {
-                    "res_potential": "Restoration potential",
-                    "surface_ha": "surface (ha)",
-                    "ratio": "ratio over total surface (%)"
+                    "area_name": "Area name"
                 }
             }
         },

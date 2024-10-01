@@ -56,9 +56,3 @@ SUITABILITY_LEVELS = {
     5: "Very High",
     6: "Unsuitable land",
 }
-
-SUMMARY_TABLE_HEADERS = {
-    "res_potential": cm.dashboard.region.table.header.res_potential,
-    "surface_ha": cm.dashboard.region.table.header.surface_ha,
-    "ratio": cm.dashboard.region.table.header.ratio,
-}

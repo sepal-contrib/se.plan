@@ -1,7 +1,7 @@
-from typing import Literal, Union
-
 from ipecharts import EChartsWidget
+
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.frontend.resize_trigger import rt
 
 from component.message import cm
 from component.types import ModelLayerData

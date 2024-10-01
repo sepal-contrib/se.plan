@@ -4,6 +4,7 @@ from component.parameter.gui_params import SUITABILITY_LEVELS
 from component.parameter.vis_params import SUITABILITY_COLORS
 from component.types import SummaryStatsDict
 from component.widget.buttons import IconBtn
+from component.message import cm
 
 DISPLAY_TYPES: list = ["absolute", "percentage", "both"]
 
@@ -22,7 +23,7 @@ def get_table_table_body(
         total_sum = sum(image_sums.get(level, 0) for level in suitability_levels)
 
         # Create table cells
-        tds = [v.Html(tag="td", children=[area_name])]
+        tds = [v.Html(tag="td", children=[area_name], style_="width: 20%")]
         for level in suitability_levels:
             value = image_sums.get(level, 0)
             if total_sum > 0:
@@ -41,6 +42,7 @@ def get_table_table_body(
                     tag="td",
                     class_="text-right",
                     children=[cell_content],
+                    style_="width: 13.33%",
                 )
             )
         row = v.Html(tag="tr", children=tds)
@@ -61,10 +63,14 @@ def get_summary_table(
     suitability_levels = sorted(SUITABILITY_LEVELS.keys())
 
     # Create table headers
-    headers = [v.Html(tag="th", children=["Area", btn_switch])] + [
+    headers = [
+        v.Html(
+            tag="th", children=[cm.dashboard.region.table.header.area_name, btn_switch]
+        )
+    ] + [
         v.Html(
             tag="th",
-            style_=f"color: {SUITABILITY_COLORS[level]}",
+            # style_=f"color: {SUITABILITY_COLORS[level]}",
             class_="text-right",
             children=[SUITABILITY_LEVELS[level]],
         )

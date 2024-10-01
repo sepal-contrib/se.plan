@@ -1,7 +1,8 @@
 """Define functions to create the plots for the dashboard tile."""
 
-from ipecharts.option import Option, Legend, Tooltip, XAxis, YAxis, Title, Grid, Toolbox
-from ipecharts.option.series import Bar, Pie
+import ipyvuetify as v
+from ipecharts.option import Option, Legend, Tooltip, XAxis, YAxis, Grid, Toolbox
+from ipecharts.option.series import Bar
 from ipecharts.echarts import EChartsWidget
 
 from typing import Dict, List, Tuple, Any
@@ -17,6 +18,17 @@ def get_level_name(code: int) -> str:
 
 def get_level_color(code: int) -> str:
     return SUITABILITY_COLORS.get(code, "#000")  # Default to black if unknown
+
+
+class EChartsWidget(EChartsWidget):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.renderer = "svg"
+        v.theme.observe(self.set_theme, "dark")
+
+    def set_theme(self, change):
+        self.theme = "dark" if change["new"] else "light"
 
 
 def parse_suitability_data(
@@ -108,7 +120,9 @@ def parse_layer_data(
 def get_stacked_series(series_data: List[dict]) -> List[Bar]:
     """Create a list of echar bars from the series data."""
     bars = []
+
     for series in series_data:
+        series["data"] = [round(value, 2) for value in series["data"]]
         bars.append(
             Bar(
                 **{
@@ -125,13 +139,37 @@ def get_stacked_series(series_data: List[dict]) -> List[Bar]:
 
 def get_bars_series(
     values: List[Tuple[float]],
-    colors: List[Tuple[str]],
     series_names: List[str],
-    custom_color: bool = False,
+    series_colors: List[str] = [],
+    custom_item_color: bool = False,
+    custom_item_colors: List[Tuple[str]] = None,
 ) -> List[Bar]:
-    """Create a list of bar series from the series data."""
+    """Create a list of bar series from the series data.
 
-    assert len(values) == len(colors) == len(series_names)
+    Args:
+        values: A list of tuples containing the int values for each series.
+        series_colors: A list of tuples containing the str colors for each series.
+        series_names: A list of names for each series.
+        custom_item_color: A boolean indicating whether to use custom colors for each of the series item.
+        custom_item_colors: A list of tuples containing the str colors for each of the elements of the series item.
+    """
+
+    # Do sanity checks
+    if len(values) != len(series_names):
+        raise ValueError(
+            "The number of series names does not match the number of values series."
+        )
+
+    if custom_item_color and len(custom_item_colors) != len(values):
+        raise ValueError(
+            "The number of colors does not match the number of values series."
+        )
+
+    if not series_colors:
+        series_colors = [None] * len(series_names)
+
+    if not custom_item_colors:
+        custom_item_colors = [[None] * len(value) for value in values]
 
     bars = []
     for i, series_name in enumerate(series_names):
@@ -139,11 +177,12 @@ def get_bars_series(
             Bar(
                 data=[
                     {
-                        "value": value,
-                        "itemStyle": {"color": color if custom_color else None},
+                        "value": round(value, 2),
+                        "itemStyle": {"color": color if custom_item_color else None},
                     }
-                    for value, color in zip(values[i], colors[i])
+                    for value, color in zip(values[i], custom_item_colors[i])
                 ],
+                itemStyle={"color": series_colors[i]},
                 name=series_name,
                 type="bar",
             )
@@ -155,9 +194,10 @@ def get_bars_series(
 def get_bars_chart(
     categories: Tuple,
     values: Tuple,
-    colors: str,
-    series_names: List,
-    custom_color: bool = False,
+    series_names: List[str],
+    series_colors: List[str] = [],
+    custom_item_colors: List[str] = [],
+    custom_item_color: bool = False,
     bars_width: int = 30,
     show_legend: bool = True,
 ) -> EChartsWidget:
@@ -173,7 +213,11 @@ def get_bars_chart(
     }
 
     series = get_bars_series(
-        values, colors, series_names=series_names, custom_color=custom_color
+        values,
+        series_names=series_names,
+        series_colors=series_colors,
+        custom_item_color=custom_item_color,
+        custom_item_colors=custom_item_colors,
     )
 
     option = Option(
@@ -189,7 +233,11 @@ def get_bars_chart(
 
 
 def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
-    """Create a stacked, horizontal bar chart with a legend."""
+    """Create a stacked, horizontal bar chart with a legend.
+
+    This one will be used for the suitability index.
+
+    """
 
     region_names, level_names, series_data = parse_suitability_data(summary_results)
     bars = get_stacked_series(series_data)
@@ -198,25 +246,30 @@ def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
     selected["Unsuitable land"] = False
 
     height = max(200, 50 + 75 * len(region_names))
-    axis_label = {
+    axis_label_y = {
         "inside:": True,
         "overflow": "breakAll",
         "width": 60,
         "height": 15,
     }
-
-    title = Title(text="Suitability for each region", left="center", subtext="Total")
+    axis_label_x = {
+        "show": False,
+    }
 
     option = Option(
         backgroundColor="#1e1e1e00",
-        # title=title,
         legend=Legend(data=level_names, selected=selected, top=0),
-        yAxis=YAxis(type="category", axisLabel=axis_label, data=region_names),
-        xAxis=XAxis(type="value"),
+        yAxis=YAxis(
+            type="category",
+            axisLabel=axis_label_y,
+            data=region_names,
+        ),
+        xAxis=XAxis(type="value", axisLabel=axis_label_x, splitLine={"show": False}),
         series=bars,
-        tooltip=Tooltip(),
+        tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
     )
-    return EChartsWidget(option=option, style={"height": f"{height}px"})
+
+    return EChartsWidget(option=option, style={"height": f"{height}px"}, rederer="svg")
 
 
 def get_individual_charts(summary_results: SummaryStatsDict):
