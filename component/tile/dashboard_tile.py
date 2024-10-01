@@ -8,6 +8,7 @@ from sepal_ui.scripts import utils as su
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.parameter.vis_params import PLOT_COLORS
 from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
 from component.scripts.plots import (
@@ -22,6 +23,7 @@ from component.types import SummaryStatsDict
 from component.widget.alert_state import Alert, AlertDialog
 from component.widget.suitability_table import get_summary_table
 from component.widget.custom_widgets import DashToolBar
+from component.widget.dashboard_layer_panels import LayerFull, LayerPercentage
 
 
 class DashboardTile(sw.Layout):
@@ -118,16 +120,16 @@ class ThemeDashboard(sw.Card):
 
             layer_data = self.seplan.benefit_model.get_layer_data(layer_id)
             w_chart = get_bars_chart(
-                aoi_names,
-                [values],
-                [colors],
-                [layer_data["name"]],
-                custom_color=True,
+                categories=aoi_names,
+                values=[values],
+                custom_item_color=True,
+                custom_item_colors=[colors],
+                series_names=[layer_data["name"]],
                 show_legend=False,
             )
 
             # Get all the layers for the benefit theme
-            benefit_charts.append(cw.LayerFull(layer_data, w_chart))
+            benefit_charts.append(LayerFull(layer_data, w_chart))
 
         # Each of the series has to be one of the costs in the cost model
         aoi_names, values, colors, series_names = [], [], [], []
@@ -135,16 +137,21 @@ class ThemeDashboard(sw.Card):
 
             layer_data = self.seplan.cost_model.get_layer_data(layer_id)
 
-            aoi_name, value, color = parse_layer_data(summary_stats, layer_id)
+            aoi_name, value, _ = parse_layer_data(summary_stats, layer_id)
             aoi_names.append(aoi_name)
             values.append(value)
-            colors.append(color)
-            series_names.append(layer_data["name"])
+            series_names.append(layer_data["name"]),
+            # TODO: make the theme a traits
+            colors.append(PLOT_COLORS.get(layer_data["id"], None).get("dark"))
 
         w_chart = get_bars_chart(
-            aoi_names[0], values, colors, series_names, bars_width=70
+            categories=aoi_names[0],
+            values=values,
+            series_names=series_names,
+            series_colors=colors,
+            bars_width=70,
         )
-        cost_charts = [cw.LayerFull(layer_data, w_chart)]
+        cost_charts = [LayerFull(layer_data, w_chart)]
 
         # Get all the layers for the constraint theme
         for layer_id in self.seplan.constraint_model.ids:
@@ -152,7 +159,7 @@ class ThemeDashboard(sw.Card):
             layer_data = self.seplan.constraint_model.get_layer_data(layer_id)
             aoi_names, values, colors = parse_layer_data(summary_stats, layer_id)
 
-            constraint_charts.append(cw.LayerPercentage(layer_data, values, colors))
+            constraint_charts.append(LayerPercentage(layer_data, values, colors))
 
         ben = v.Html(tag="h2", children=[cm.theme.benefit.capitalize()])
         ben_txt = sw.Markdown("  \n".join(cm.dashboard.theme.benefit.description))
@@ -202,11 +209,10 @@ class OverallDashboard(sw.Card):
 
     def set_summary(self, summary_stats: List[Dict]):
 
-        suitability_charts = get_stacked_bars_chart(summary_stats)
+        self.suitability_chart = get_stacked_bars_chart(summary_stats)
         suitability_table = get_summary_table(summary_stats, "both")
-        charts = get_individual_charts(summary_stats)
 
-        self.content.children = [suitability_charts] + [suitability_table]
+        self.content.children = [self.suitability_chart] + [suitability_table]
 
         self.alert.reset()
 
