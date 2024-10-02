@@ -8,6 +8,7 @@ from sepal_ui.scripts import utils as su
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
 from component.scripts.seplan import Seplan
 from component.scripts.statistics import get_summary_statistics, parse_theme_stats
@@ -19,16 +20,13 @@ ID = "dashboard_widget"
 
 
 class DashboardTile(sw.Layout):
-    def __init__(self):
+    def __init__(self, recipe: Recipe):
         super().__init__()
 
         self._metadata = {"mount_id": "dashboard_tile"}
         self.class_ = "d-block"
         self.summary_stats = None
 
-    def build(self, recipe: Recipe, build_alert: AlertState):
-        """Build the dashboard tile."""
-        build_alert.set_state("new", "dashboard", "building")
         self.recipe = recipe
 
         dash_toolbar = DashToolBar(recipe.seplan)
@@ -58,8 +56,6 @@ class DashboardTile(sw.Layout):
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
         dash_toolbar.btn_download.on_event("click", self.csv_export)
 
-        build_alert.set_state("new", "dashboard", "done")
-
         self.recipe.dash_model.observe(self.reset, "reset_count")
 
     def csv_export(self, *_):
@@ -84,7 +80,7 @@ class DashboardTile(sw.Layout):
 
     def reset(self, *_):
         """Reset the dashboard to its initial state."""
-        print("resettig the dashboard")
+        logger.info("resettig the dashboard")
         self.summary_stats = None
         self.overall_dash.reset()
         self.theme_dash.reset()

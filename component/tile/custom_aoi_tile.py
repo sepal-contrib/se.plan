@@ -11,21 +11,19 @@ from component.model.recipe import Recipe
 from component.widget.alert_state import AlertState
 from component.widget.custom_aoi_view import SeplanAoiView
 
-ee.Initialize()
+from sepal_ui.scripts.utils import init_ee
+
+init_ee()
 
 
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(self):
+    def __init__(self, recipe: Recipe):
         self.class_ = "d-block custom_map"
         self._metadata = {"mount_id": "aoi_tile"}
 
         super().__init__()
-
-    def build(self, recipe: Recipe, build_alert: AlertState):
-        """Build the custom aoi tile."""
-        build_alert.set_state("new", "aoi", "building")
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
@@ -44,8 +42,6 @@ class AoiTile(sw.Layout):
 
         # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
-
-        build_alert.set_state("new", "aoi", "done")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""

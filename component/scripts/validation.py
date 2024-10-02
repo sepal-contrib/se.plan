@@ -1,4 +1,5 @@
 """functions to read and validate a recipe and return meaningful errors."""
+
 import json
 from pathlib import Path
 from typing import Optional
@@ -7,6 +8,7 @@ from jsonschema import ValidationError, validate
 from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
+from component.scripts.logger import logger
 
 
 def find_missing_property(instance, schema):
@@ -46,7 +48,7 @@ def validate_recipe(
 
     except ValidationError as e:
         # Constructing a path string
-        print(e)
+        logger.info(e)
         path = ".".join(map(str, e.path))
 
         # Check if the error is related to the signature field
@@ -79,3 +81,15 @@ def validate_recipe(
         raise ValidationError(e)
 
     return recipe_path
+
+
+def remove_key(data, key_to_remove):
+    """Remove a key from a dictionary."""
+    if isinstance(data, dict):
+        if key_to_remove in data:
+            del data[key_to_remove]
+        for key, value in list(data.items()):
+            remove_key(value, key_to_remove)
+    elif isinstance(data, list):
+        for item in data:
+            remove_key(item, key_to_remove)

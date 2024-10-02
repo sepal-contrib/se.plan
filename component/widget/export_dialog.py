@@ -18,7 +18,7 @@ from component.model.recipe import Recipe
 from component.scripts.seplan import asset_to_image, mask_image, quintiles
 from component.widget.base_dialog import BaseDialog
 
-ee.Initialize()
+su.init_ee()
 
 
 class ExportMapDialog(BaseDialog):
