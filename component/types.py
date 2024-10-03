@@ -77,3 +77,15 @@ class ConstraintLayerData(ModelLayerData):
 
 class CostLayerData(ModelLayerData):
     """The data returned from a Cost model."""
+
+
+# For scenarios.py
+class RecipeInfo(TypedDict):
+    """A dictionary to hold the information of a recipe."""
+
+    path: str
+    valid: bool
+
+
+RecipePaths = Dict[str, RecipeInfo]
+"Where the key is the recipe id in the Widget and the value is the path to the recipe."

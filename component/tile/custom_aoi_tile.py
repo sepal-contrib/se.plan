@@ -8,7 +8,6 @@ from sepal_ui.mapping import SepalMap
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
-from component.widget.alert_state import AlertState
 from component.widget.custom_aoi_view import SeplanAoiView
 
 from sepal_ui.scripts.utils import init_ee

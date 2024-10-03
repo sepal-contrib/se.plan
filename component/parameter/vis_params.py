@@ -7,7 +7,7 @@ no_data_color = ["#353535"]  # the color used for values filtered by constraints
 gradient_palette = gradient(levels=5, palette=palettes["green"])
 
 # vizualisation parameters of the final_layer
-final_viz = {
+layer_vis = {
     "min": 0,
     "max": 5,
     "palette": no_data_color + gradient_palette,

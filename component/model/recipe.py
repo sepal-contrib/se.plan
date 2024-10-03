@@ -120,3 +120,7 @@ class Recipe(HasTraits):
 
         # create the json file
         return str(res_dir / recipe_path)
+
+    def get_recipe_name(self) -> str:
+        """Generate the recipe name based on the aoi name."""
+        return str(Path(self.recipe_session_path).stem)

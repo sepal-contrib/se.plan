@@ -9,6 +9,7 @@ from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
 from component.scripts.logger import logger
+from component.types import RecipePaths
 
 
 def find_missing_property(instance, schema):
@@ -93,3 +94,17 @@ def remove_key(data, key_to_remove):
     elif isinstance(data, list):
         for item in data:
             remove_key(item, key_to_remove)
+
+
+def validate_scenarios_recipes(recipe_paths: RecipePaths):
+    """Validate all the recipes in the scenario."""
+
+    for recipe_id, recipe_info in recipe_paths.items():
+        if not recipe_info["valid"]:
+            raise Exception(f"Error: Recipe {recipe_id} is not valid")
+
+
+def are_comparable(recipe_paths: RecipePaths):
+    """Check if we can compare the recipes or not."""
+
+    # They all have to have the main AOI

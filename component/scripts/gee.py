@@ -9,7 +9,7 @@ from component.scripts.logger import logger
 
 
 def get_layer(
-    image: ee.Image, vis_params: dict, name: str, visible: bool
+    image: ee.Image, vis_params: dict = {}, name: str = "", visible: bool = True
 ) -> sm.layer.EELayer:
     map_id_dict = ee.Image(image).getMapId(vis_params)
 

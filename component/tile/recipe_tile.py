@@ -9,19 +9,14 @@ from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
 from traitlets import Int, Unicode, directional_link
 
-import component.parameter as cp
 from component.message import cm
 from component.model.app_model import AppModel
 from component.model.recipe import Recipe
-from component.scripts import validation
-from component.tile.custom_aoi_tile import AoiTile
-from component.tile.dashboard_tile import DashboardTile
-from component.tile.map_tile import MapTile
 
 # Import types
-from component.tile.questionnaire_tile import QuestionnaireTile
 from component.widget.alert_state import AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
+from component.widget.custom_widgets import RecipeInput
 
 _content = {
     "new": {
@@ -295,10 +290,7 @@ class LoadDialog(BaseDialog):
         super().__init__()
 
         # Create input file widget wrapped in a layout
-        self.w_input_recipe = sw.FileInput(
-            ".json", folder=cp.result_dir, root=cp.result_dir
-        )
-        self.text_field_msg = self.w_input_recipe.children[-1]
+        self.w_input_recipe = RecipeInput()
 
         self.btn_load = TextBtn(cm.recipe.load.dialog.load)
         self.btn_cancel = TextBtn(cm.recipe.load.dialog.cancel, outlined=True)
@@ -319,26 +311,12 @@ class LoadDialog(BaseDialog):
 
         # Create events
         self.btn_cancel.on_event("click", self.cancel)
-        self.w_input_recipe.observe(self.validate_input, "v_model")
-
-    @su.switch("loading", on_widgets=["btn_load"])
-    def validate_input(self, change):
-        """Validate the recipe file."""
-        if not change["new"]:
-            return
-
-        # Reset any previous error messages
-        self.text_field_msg.error_messages = []
-
-        # Validate the recipe file and show errors if there are
-        self.load_recipe_path = validation.validate_recipe(
-            change["new"], self.text_field_msg
-        )
+        directional_link((self.w_input_recipe, "v_model"), (self, "load_recipe_path"))
 
     def show(self):
         """Display the dialog and write down the text in the alert."""
         self.load_recipe_path = None
-        self.text_field_msg.error_messages = []
+        self.w_input_recipe.text_field_msg.error_messages = []
         self.w_input_recipe.reset()
         self.valid = False
         self.open_dialog()

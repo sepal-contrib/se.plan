@@ -1,5 +1,5 @@
 import ipyvuetify as v
-from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
+from component.widget.buttons import CompareBtn, DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui import color
 from traitlets import Bool
@@ -29,10 +29,15 @@ class MapToolbar(sw.Toolbar):
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
         self.download_map_dialog = cw.ExportMapDialog(self.recipe)
+        self.compare_dialog = cw.CompareScenariosDialog(
+            map_=self.map_, recipe=self.recipe
+        )
         self.info_dialog = MapInfoDialog()
 
         # Main buttons
         self.btn_compute = TextBtn(cm.compute.btn)
+        self.btn_compare = IconBtn(gliph="mdi-compare")
+
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
             gliph="mdi-draw",
@@ -55,6 +60,7 @@ class MapToolbar(sw.Toolbar):
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
+            self.btn_compare,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
             # Auxiliar buttons
@@ -62,6 +68,7 @@ class MapToolbar(sw.Toolbar):
             self.custom_aoi_dialog,
             self.import_aoi_dialog,
             self.download_map_dialog,
+            self.compare_dialog,
             self.info_dialog,
         ]
 
@@ -69,6 +76,7 @@ class MapToolbar(sw.Toolbar):
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
+        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
 
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)
