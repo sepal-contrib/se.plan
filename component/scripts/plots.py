@@ -25,10 +25,14 @@ class EChartsWidget(EChartsWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.renderer = "svg"
+        self.theme = self.get_theme()
         v.theme.observe(self.set_theme, "dark")
 
-    def set_theme(self, change):
-        self.theme = "dark" if change["new"] else "light"
+    def get_theme(self):
+        return "dark" if v.theme.dark else "light"
+
+    def set_theme(self, _):
+        self.theme = self.get_theme()
 
 
 def parse_suitability_data(
@@ -207,7 +211,7 @@ def get_bars_chart(
     axis_label = {
         "inside:": True,
         "overflow": "breakAll",
-        "width": 60,
+        "width": 85,
         "height": 15,
         "fontSize": 12,
     }

@@ -126,6 +126,7 @@ class ThemeDashboard(sw.Card):
                 custom_item_colors=[colors],
                 series_names=[layer_data["name"]],
                 show_legend=False,
+                bars_width=50,
             )
 
             # Get all the layers for the benefit theme
@@ -149,7 +150,7 @@ class ThemeDashboard(sw.Card):
             values=values,
             series_names=series_names,
             series_colors=colors,
-            bars_width=70,
+            bars_width=80,
         )
         cost_charts = [LayerFull(layer_data, w_chart)]
 
