@@ -8,6 +8,7 @@ from traitlets import Dict, Int, link
 
 from component.model.aoi_model import SeplanAoi
 from component.widget.legend import SuitabilityLegend
+from ipyleaflet import SplitMapControl
 
 
 class SeplanMap(sm.SepalMap):
@@ -17,41 +18,51 @@ class SeplanMap(sm.SepalMap):
     new_geom = Int(0).tag(sync=True)
     """int: either a new geometry has been drawn on the map"""
 
-    def __init__(self, seplan_aoi: SeplanAoi, *args, **kwargs):
-        self.aoi_model = seplan_aoi
+    def __init__(self, seplan_aoi: SeplanAoi = None, *args, **kwargs):
+        # self.aoi_model = seplan_aoi if seplan_aoi else SeplanAoi()
 
-        self.attributes = {"id": "map"}
-        self.dc = True
-        self.vinspector = True
-        self.min_zoom = 3
+        # self.attributes = {"id": "map"}
+        # self.dc = True
+        # self.vinspector = True
+        self.min_zoom = 1
+        # self.layout.height = "700px"
 
         super().__init__(*args, **kwargs)
 
-        self.dc.hide()
-        self.add_basemap("SATELLITE")
+        # self.dc.hide()
+        # self.add_basemap("SATELLITE")
 
-        # create the map
-        self.add(SuitabilityLegend())
+        # self.add(SuitabilityLegend())
 
-        # create a window to display AOI information
-        self.html = sw.Html(tag="h3", style_="margin:0em 2em 0em 2em;")
-        control = WidgetControl(widget=self.html, position="bottomright")
-        self.add(control)
+        # # create a window to display AOI information
+        # self.html = sw.Html(tag="h3", style_="margin:0em 2em 0em 2em;")
+        # control = WidgetControl(widget=self.html, position="bottomright")
+        # self.add(control)
 
-        # add cartoDB layer after everything to make sure it stays on top
-        # workaround of https://github.com/jupyter-widgets/ipyleaflet/issues/452
-        default = "Positron" if v.theme.dark is False else "DarkMatter"
-        carto = basemap_to_tiles(basemaps.CartoDB[default])
-        carto.base = True
-        self.add_layer(carto)
+        # # add cartoDB layer after everything to make sure it stays on top
+        # # workaround of https://github.com/jupyter-widgets/ipyleaflet/issues/452
+        # default = "Positron" if v.theme.dark is False else "DarkMatter"
+        # carto = basemap_to_tiles(basemaps.CartoDB[default])
+        # carto.base = True
+        # self.add_layer(carto)
 
-        self.dc.on_draw(self._handle_draw)
-        self.observe(self.on_custom_layers, "custom_layers")
+        # self.dc.on_draw(self._handle_draw)
+        # self.observe(self.on_custom_layers, "custom_layers")
 
-        # It has to be two way, so we can load the data by just updating the model
-        link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
+        # # It has to be two way, so we can load the data by just updating the model
+        # link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
 
-        self.aoi_model.observe(self.reset, "reset_view")
+        # self.aoi_model.observe(self.reset, "reset_view")
+
+    def clean_map(self, *args):
+        """Remove control for split and all layers"""
+
+        self.remove_all()
+        self.controls = [
+            control
+            for control in self.controls
+            if not isinstance(control, SplitMapControl)
+        ]
 
     def on_custom_layers(self, *_):
         """Event triggered when there are new custom layers (created by user).

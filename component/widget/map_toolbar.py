@@ -37,6 +37,7 @@ class MapToolbar(sw.Toolbar):
         # Main buttons
         self.btn_compute = TextBtn(cm.compute.btn)
         self.btn_compare = IconBtn(gliph="mdi-compare")
+        self.btn_clean = IconBtn(gliph="mdi-broom")
 
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
@@ -60,6 +61,7 @@ class MapToolbar(sw.Toolbar):
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
+            self.btn_clean,
             self.btn_compare,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
@@ -77,6 +79,7 @@ class MapToolbar(sw.Toolbar):
         )
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
+        self.btn_clean.on_event("click", self.map_.clean_map)
 
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)

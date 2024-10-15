@@ -29,7 +29,7 @@ class PreviewMapDialog(BaseDialog):
 
         self.legend = Legend()
         self.map_.add(self.legend)
-        self.map_.min_zoom = 3
+        self.map_.min_zoom = 1
 
         self.title = sw.CardTitle()
         self.btn_close = TextBtn(cm.questionnaire.map.close)

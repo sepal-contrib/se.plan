@@ -2,7 +2,7 @@
 
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
-from typing import List
+from typing import List, Literal
 from component.model.recipe import Recipe
 from component.scripts import gee
 from component.scripts.statistics import get_summary_statistics
@@ -21,6 +21,175 @@ import component.scripts.gee as gee
 from component import parameter as cp
 from sepal_ui.scripts.decorator import loading_button
 
+from component.widget.map import SeplanMap
+
+
+class CompareScenariosDialog(BaseDialog):
+    """Dialog to compare multiple scenarios from recipes."""
+
+    def __init__(
+        self,
+        map_: SepalMap = None,
+        alert: Alert = None,
+        main_recipe: Recipe = None,
+        trashable=False,
+        increaseable=False,
+        limit=2,
+        type_=Literal["map", "chart"],
+        overal_dashboard=None,
+        theme_dashboard=None,
+    ):
+        super().__init__()
+
+        self.map_ = map_
+        self.alert = alert or Alert()
+        self.overal_dashboard = overal_dashboard
+        self.theme_dashboard = theme_dashboard
+
+        # Create UI elements for up to 2 scenario inputs
+        self.scenario_inputs = ScenarioInputs(
+            main_recipe=main_recipe if main_recipe else None,
+            limit=limit,
+            trashable=trashable,
+            increaseable=increaseable,
+        )
+        self.btn_compare_map = TextBtn("Compare")
+        self.btn_compare_stat = TextBtn("Compare")
+
+        self.btn_cancel = TextBtn("Cancel", outlined=True)
+
+        # Assemble the layout
+        scenario_inputs_layout = v.Layout(
+            children=[self.scenario_inputs], class_="pa-0 ma-0"
+        )
+
+        self.actions = sw.CardActions(children=[])
+        self.children = [
+            v.Card(
+                attributes={"id": "card_content"},
+                class_="ma-0 ",
+                children=[
+                    sw.CardTitle(children=["Compare Scenarios"]),
+                    sw.CardText(children=[scenario_inputs_layout]),
+                    self.actions,
+                ],
+            )
+        ]
+
+        self.set_actions(type_)
+
+        self.compare_layers = loading_button(self.alert, self.btn_compare_map)(
+            self.compare_layers
+        )
+
+        self.compare_statistics = loading_button(self.alert, self.btn_compare_stat)(
+            self.compare_statistics
+        )
+
+        self.btn_compare_map.on_event("click", self.compare_layers)
+        self.btn_compare_stat.on_event("click", self.compare_statistics)
+        self.btn_cancel.on_event("click", self.close_dialog)
+
+    def set_actions(self, type_: Literal["map", "chart"]):
+        """Set the actions for the dialog based on the type of comparison."""
+
+        btn = self.btn_compare_map if type_ == "map" else self.btn_compare_stat
+        self.actions.children = [sw.Spacer(), btn, self.btn_cancel]
+
+    def validate_scenarios(self):
+        """Validate that all selected scenarios have the same AOI."""
+
+        # First validate that all of them are valid
+        validate_scenarios_recipes(self.scenario_inputs.recipe_paths)
+        # TODO: set the logic to see if they are comparable
+        are_comparable(self.scenario_inputs.recipe_paths)
+
+    def read_recipes(self) -> List[Recipe]:
+        """Load the recipes from the recipe paths."""
+
+        recipes = []
+        self.validate_scenarios()
+
+        for _, recipe_data in self.scenario_inputs.recipe_paths.items():
+            recipe_path = recipe_data["path"]
+            recipe = Recipe()
+            recipe.load(recipe_path)
+            recipes.append(recipe)
+
+        return recipes
+
+    def compare_layers(self, widget, event, data, map_: SeplanMap = None):
+        """Add suitability indices as layers to the map."""
+
+        map_ = map_ or self.map_
+
+        # Remove all layers from the map
+        map_.remove_all()
+
+        # Remove previous layer controls
+        map_.controls = [
+            control
+            for control in map_.controls
+            if not isinstance(control, SplitMapControl)
+        ]
+
+        # Read the recipes
+        recipes = self.read_recipes()
+
+        # Assert that there must be only two recipes
+        assert len(recipes) == 2, "Only two recipes can be compared."
+
+        def process_recipe(recipe, gee, cp):
+            layer_name = recipe.get_recipe_name()
+            return gee.get_layer(
+                recipe.seplan.get_constraint_index()
+                .unmask(0)
+                .clip(recipe.seplan_aoi.feature_collection),
+                cp.layer_vis,
+                layer_name,
+            )
+
+        # Create a ThreadPoolExecutor
+        with ThreadPoolExecutor() as executor:
+            # Submit tasks to the executor
+            futures = [
+                executor.submit(process_recipe, recipe, gee, cp) for recipe in recipes
+            ]
+
+            # Collect the results
+            layers = [future.result() for future in futures]
+
+        map_.centerObject(recipes[0].seplan_aoi.feature_collection)
+        layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
+        map_.add(layer_control)
+        self.close_dialog()
+
+    def set_stats_content(self, overal_dashboard=None, theme_dashboard=None):
+        """Set the content of the statistics dashboard."""
+
+        self.overal_dashboard = overal_dashboard
+        self.theme_dashboard = theme_dashboard
+
+    def compare_statistics(self, *args):
+        """Compute and display summary statistics."""
+
+        if not self.overal_dashboard or not self.theme_dashboard:
+
+            self.overal_dashboard = sw.Card()
+            self.theme_dashboard = sw.Card()
+
+            self.children = self.children + [
+                self.overal_dashboard,
+                self.theme_dashboard,
+            ]
+
+        recipes = self.read_recipes()
+
+        recipe_summary_stats = [get_summary_statistics(recipe) for recipe in recipes]
+
+        self.overal_dashboard.set_summary(recipes_stats=recipe_summary_stats)
+        self.theme_dashboard.set_summary(recipes, recipes_stats=recipe_summary_stats)
+
 
 class ScenarioInputs(sw.Layout):
     """Returns a widget that can add dinamically fileInputs."""
@@ -33,33 +202,50 @@ class ScenarioInputs(sw.Layout):
     limited_reached = Int(0).tag(sync=True)
     "will be increased when user tries to add more inputs than the limit."
 
-    def __init__(self, main_recipe: Recipe = None, recipe_limit=4):
+    def __init__(
+        self,
+        main_recipe: Recipe = None,
+        limit=2,
+        trashable=False,
+        increaseable=False,
+    ):
 
         self.class_ = "d-block"
-        self.recipe_limit = recipe_limit
+        self.recipe_limit = limit
 
         super().__init__()
 
         # Add btn
         btn_add = IconBtn("mdi-plus", color="primary", class_="mr-2")
         btn_add.on_event("click", self.add_input)
-        main_recipe = self.get_input_row(trashable=False, main_recipe=main_recipe)
+        main_recipe = self.get_input_row(trashable=trashable, main_recipe=main_recipe)
+
+        action_header = sw.Html(
+            tag="th",
+            children=[v.Layout(children=["Action"])],
+            style_="text-align: center;",
+        )
+        file_input_header = sw.Html(
+            tag="th",
+            style_="text-align: center;",
+            children=[
+                v.Layout(
+                    children=["Recipe", v.Spacer(), btn_add if increaseable else ""]
+                )
+            ],
+        )
 
         headers = sw.Html(
             tag="tr",
-            children=[
-                sw.Html(tag="th", children=["Action"]),
-                sw.Html(
-                    tag="th",
-                    children=[v.Layout(children=["Recipe", v.Spacer(), btn_add])],
-                ),
-            ],
+            children=(
+                [action_header, file_input_header] if trashable else [file_input_header]
+            ),
         )
 
         self.tbody = sw.Html(
             attributes={"id": "tbody"},
             tag="tbody",
-            children=[main_recipe, self.get_input_row(trashable=False)],
+            children=[main_recipe, self.get_input_row(trashable=trashable)],
         )
         self.table = sw.SimpleTable(
             dense=False,
@@ -99,6 +285,7 @@ class ScenarioInputs(sw.Layout):
             # Unobserve the input
             remove_btn, file_input = row_to_remove[0].children
             file_input.unobserve(self.update_recipe_paths, "v_model")
+            remove_btn.unobserve(self.remove_input_row, "click")
 
             # Remove the recipe path, I need to reassign the dictionary
             self.recipe_paths = {
@@ -117,14 +304,25 @@ class ScenarioInputs(sw.Layout):
 
         row_id = self.get_id_name(self.idx)
 
-        remove_btn = TableIcon("mdi-trash-can", name="trash", disabled=not trashable)
-
         if trashable:
-            remove_btn.on_event("click", lambda *args: self.remove_input_row(row_id))
+
+            remove_btn = TableIcon(
+                "mdi-trash-can", name="trash", small=False, disabled=True
+            )
+            remove_btn_td = sw.Html(
+                style_="width: 65px", tag="td", children=[remove_btn]
+            )
+
+            # Only allow to remove the row if there are more than three rows
+            if len(self.recipe_paths) >= 2:
+                remove_btn.disabled = False
+                remove_btn.on_event(
+                    "click", lambda *args: self.remove_input_row(row_id)
+                )
 
         file_input = RecipeInput(attributes={"id": row_id}, default_recipe=main_recipe)
-
         file_input.observe(self.update_recipe_paths, ["v_model", "valid"])
+        file_input_td = sw.Html(tag="td", children=[file_input])
 
         # Set the structure of the recipe_paths
         row_info: RecipeInfo = {"path": file_input.v_model, "valid": False}
@@ -133,11 +331,9 @@ class ScenarioInputs(sw.Layout):
 
         return sw.Html(
             tag="tr",
+            style_="width: 65px; text-align: center; vertical-align: middle;",
             attributes={"id": row_id},
-            children=[
-                sw.Html(style_="width: 65px", tag="td", children=[remove_btn]),
-                sw.Html(tag="td", children=[file_input]),
-            ],
+            children=[remove_btn_td, file_input_td] if trashable else [file_input_td],
         )
 
     def update_recipe_paths(self, change: dict):
@@ -153,121 +349,3 @@ class ScenarioInputs(sw.Layout):
         tmp_recipe_paths[recipe_id][value_name] = value
 
         self.recipe_paths = tmp_recipe_paths
-
-
-class CompareScenariosDialog(BaseDialog):
-    """Dialog to compare multiple scenarios from recipes."""
-
-    def __init__(
-        self, map_: SepalMap = None, alert: Alert = None, recipe: Recipe = None
-    ):
-        super().__init__()
-
-        self.map_ = map_
-        self.alert = alert or Alert()
-
-        self.recipes: List[Recipe] = []
-        self.scenario_inputs = []
-        self.suitability_indices = []
-
-        # Create UI elements for up to 2 scenario inputs
-        self.scenario_inputs = ScenarioInputs(
-            main_recipe=recipe if recipe else None,
-            recipe_limit=2,
-        )
-        self.btn_compare = TextBtn("Compare")
-        self.btn_cancel = TextBtn("Cancel", outlined=True)
-
-        # Assemble the layout
-        scenario_inputs_layout = v.Layout(
-            children=[self.scenario_inputs], class_="pa-0 ma-0"
-        )
-        self.children = [
-            v.Card(
-                class_="ma-0 ",
-                children=[
-                    sw.CardTitle(children=["Compare Scenarios"]),
-                    sw.CardText(children=[scenario_inputs_layout]),
-                    sw.CardActions(
-                        children=[
-                            sw.Spacer(),
-                            self.btn_compare,
-                            self.btn_cancel,
-                        ]
-                    ),
-                ],
-            )
-        ]
-
-        self.compare_layers = loading_button(self.alert, self.btn_compare)(
-            self.compare_layers
-        )
-        self.btn_compare.on_event("click", self.compare_layers)
-        self.btn_cancel.on_event("click", self.close_dialog)
-
-    def validate_scenarios(self):
-        """Validate that all selected scenarios have the same AOI."""
-
-        # First validate that all of them are valid
-        validate_scenarios_recipes(self.scenario_inputs.recipe_paths)
-        are_comparable(self.scenario_inputs.recipe_paths)
-
-    def compare_layers(self, widget, event, data, map_: SepalMap = None):
-        """Add suitability indices as layers to the map."""
-
-        map_ = map_ or self.map_
-
-        # Remove previous layer controls
-        map_.controls = [
-            control
-            for control in map_.controls
-            if not isinstance(control, SplitMapControl)
-        ]
-
-        recipes = []
-        self.validate_scenarios()
-
-        for _, recipe_data in self.scenario_inputs.recipe_paths.items():
-            recipe_path = recipe_data["path"]
-            print(recipe_path)
-            recipe = Recipe()
-            recipe.load(recipe_path)
-            recipes.append(recipe)
-
-        # Assert that there must be only two recipes
-        assert len(recipes) == 2, "Only two recipes can be compared."
-
-        def process_recipe(recipe, gee, cp):
-            layer_name = recipe.get_recipe_name()
-            return gee.get_layer(
-                recipe.seplan.get_constraint_index()
-                .unmask(0)
-                .clip(recipe.seplan_aoi.feature_collection),
-                cp.layer_vis,
-                layer_name,
-            )
-
-        # Create a ThreadPoolExecutor
-        with ThreadPoolExecutor() as executor:
-            # Submit tasks to the executor
-            futures = [
-                executor.submit(process_recipe, recipe, gee, cp) for recipe in recipes
-            ]
-
-            # Collect the results
-            layers = [future.result() for future in futures]
-
-        map_.centerObject(recipes[0].seplan_aoi.feature_collection)
-        layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
-        map_.add(layer_control)
-        self.close_dialog()
-
-    def compare_statistics(self, main_container=None, layer_container=None):
-        """Compute and display summary statistics."""
-        if main_container is None:
-            main_container = v.Container()
-        if layer_container is None:
-            layer_container = v.Container()
-
-        for idx, recipe in enumerate(self.recipes):
-            stats = get_summary_statistics(recipe.seplan)

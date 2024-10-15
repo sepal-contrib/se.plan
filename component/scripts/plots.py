@@ -1,5 +1,7 @@
 """Define functions to create the plots for the dashboard tile."""
 
+from component.types import RecipeStatsDict, SummaryStatsDict
+
 import ipyvuetify as v
 from ipecharts.option import Option, Legend, Tooltip, XAxis, YAxis, Grid, Toolbox
 from ipecharts.option.series import Bar
@@ -196,8 +198,8 @@ def get_bars_series(
 
 
 def get_bars_chart(
-    categories: Tuple,
-    values: Tuple,
+    categories: List[str],
+    values: List[List[float]],
     series_names: List[str],
     series_colors: List[str] = [],
     custom_item_colors: List[str] = [],
@@ -236,20 +238,21 @@ def get_bars_chart(
     return EChartsWidget(option=option, style={"height": f"{height}px"})
 
 
-def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
+def get_stacked_bars_chart(
+    summary_results: SummaryStatsDict, show_legend: bool = True
+) -> EChartsWidget:
     """Create a stacked, horizontal bar chart with a legend.
 
     This one will be used for the suitability index.
 
     """
-
     region_names, level_names, series_data = parse_suitability_data(summary_results)
     bars = get_stacked_series(series_data)
 
     selected = {name: True for name in level_names}
     selected["Unsuitable land"] = False
 
-    height = max(200, 50 + 75 * len(region_names))
+    height = str(max(200, 50 + 75 * len(region_names)))
     axis_label_y = {
         "inside:": True,
         "overflow": "breakAll",
@@ -260,9 +263,11 @@ def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
         "show": False,
     }
 
+    legend = Legend(data=level_names, selected=selected, top=0, show=show_legend)
+
     option = Option(
         backgroundColor="#1e1e1e00",
-        legend=Legend(data=level_names, selected=selected, top=0),
+        legend=legend,
         yAxis=YAxis(
             type="category",
             axisLabel=axis_label_y,
@@ -272,12 +277,13 @@ def get_stacked_bars_chart(summary_results: SummaryStatsDict) -> EChartsWidget:
         series=bars,
         tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
     )
-
-    return EChartsWidget(option=option, style={"height": f"{height}px"}, rederer="svg")
+    # style={"height": f"{height}px"}
+    return EChartsWidget(option=option, height=height, rederer="svg")
 
 
 def get_individual_charts(summary_results: SummaryStatsDict):
     """Create individual charts for each region with stacked, horizontal bars and no legend."""
+
     charts = []
     for region, data in summary_results.items():
         suitability_values = data["suitability"]["values"]
@@ -320,3 +326,20 @@ def get_individual_charts(summary_results: SummaryStatsDict):
         charts.append(EChartsWidget(option=option, style={"height": "150px"}))
 
     return charts
+
+
+def get_suitability_charts(
+    recipes_stats: List[RecipeStatsDict], test=False
+) -> List[EChartsWidget]:
+    """Create a list of charts for each of the recipe stats."""
+    # We can do two things, either we display the summary for all the scenarios
+    # In the same chart or we display them separately... I think it's better to
+    # display them separately
+    charts = []
+    for i, recipe_stats in enumerate(recipes_stats):
+        recipe_name, summary_stats = list(recipe_stats.items())[0]
+
+        # Get the summary statistics for the suitability theme
+        charts.append(get_stacked_bars_chart(summary_stats, show_legend=i == 0))
+
+    return charts if not test else v.Card(children=[v.CardText(children=charts)])

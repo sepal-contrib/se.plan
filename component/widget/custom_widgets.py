@@ -6,7 +6,8 @@ from component.scripts import validation
 from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
-from sepal_ui.scripts import utils as su
+from component import widget as cw
+
 
 from sepal_ui.frontend.styles import get_theme
 from traitlets import Bool, Int, Unicode, directional_link, link, observe
@@ -76,10 +77,12 @@ class TableIcon(sw.Icon):
     """A simple icon to be used in a table."""
 
     def __init__(self, gliph: str, name: str, **kwargs: dict) -> None:
+        small = kwargs.pop("small", True)
+        kwargs["x_small"] = kwargs.pop("x_small", False)
         super().__init__(
             children=[gliph],
             icon=True,
-            small=True,
+            small=small,
             attributes={"data-layer": name},
             style_="font: var(--fa-font-solid);",
             **kwargs,
@@ -139,7 +142,7 @@ class ToolBar(sw.Toolbar):
         self.dialog.open_new()
 
 
-class DashToolBar(sw.Toolbar):
+class DashToolbar(sw.Toolbar):
     def __init__(self, model: Seplan) -> None:
         super().__init__()
         self.height = "48px"
@@ -153,13 +156,22 @@ class DashToolBar(sw.Toolbar):
             cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
         )
 
+        self.compare_dialog = cw.CompareScenariosDialog(
+            type_="chart", trashable=True, increaseable=True, limit=5
+        )
+
+        self.btn_compare = IconBtn(gliph="mdi-compare")
+        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
         self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
 
         self.children = [
             self.btn_download.with_tooltip,
             sw.Spacer(),
+            self.btn_compare,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_dashboard,
+            # Dialogs
+            self.compare_dialog,
         ]
 
 
