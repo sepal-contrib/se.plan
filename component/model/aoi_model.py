@@ -123,7 +123,7 @@ class SeplanAoi(model.Model):
 
         return {**primary_aoi, **custom_aois}
 
-    def import_data(self, data: dict):
+    def import_data(self, data: dict, auto_update: bool = True):
         """Set the data for each of the AOIs."""
         # I need to reset the traits before importing the data
         # so they can trigger events if they've no changed.
@@ -138,6 +138,9 @@ class SeplanAoi(model.Model):
             return
 
         self.set_map += 1
+
+        if auto_update:
+            self.aoi_model.set_object()
 
     def export_data(self):
         """Save the data from each of the AOIs."""

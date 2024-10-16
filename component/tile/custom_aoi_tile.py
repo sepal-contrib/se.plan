@@ -8,7 +8,6 @@ from sepal_ui.mapping import SepalMap
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
-from component.widget.alert_state import AlertState
 from component.widget.custom_aoi_view import SeplanAoiView
 
 from sepal_ui.scripts.utils import init_ee
@@ -27,7 +26,7 @@ class AoiTile(sw.Layout):
 
         self.map_ = SepalMap(gee=True)
         self.map_.dc.hide()
-        self.map_.min_zoom = 3
+        self.map_.min_zoom = 1
         self.map_.add_basemap("SATELLITE")
 
         # Build the aoi view with our custom aoi_model

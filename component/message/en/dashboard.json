@@ -5,11 +5,15 @@
                 "download": {"title": "Download", "tooltip": "Save dashboard statistics as .csv"},
                 "compute": {
                     "title": "Compute dashboard"
+                },
+                "compare": {
+                    "title": "Compare",
+                    "tooltip": "Compare multiple scenarios"
                 }
             }
         },
         "region": {
-            "title": "Summary of restoration suitability by region",
+            "title": "Forest restoration suitability",
             "detail": "Details",
             "table" : {
                 "header" : {

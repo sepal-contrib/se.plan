@@ -4,13 +4,17 @@ import pandas as pd
 
 import component.parameter.gui_params as param
 from component.parameter.directory import result_dir
+from component.types import RecipeStatsDict
 
 
-def export_as_csv(recipe_session_name: str, summary_stats: List[dict]):
+def export_as_csv(recipe_summary_stats: RecipeStatsDict):
     # Function to create a multi-row format for each sub-category
+
+    recipe_name, summary_stats = list(recipe_summary_stats.items())[0]
+
     csv_folder = result_dir / "results"
     csv_folder.mkdir(exist_ok=True)
-    session_results_path = (csv_folder / recipe_session_name).with_suffix(".csv")
+    session_results_path = (csv_folder / recipe_name).with_suffix(".csv")
 
     formatted_data = []
     for area_data in summary_stats:

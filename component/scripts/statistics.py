@@ -1,14 +1,22 @@
 import ee
 
+from component.model.recipe import Recipe
 from component.scripts.seplan import Seplan, reduce_constraints
-from component.types import SummaryStatsDict
+from component.types import RecipeStatsDict
 
 
-def get_summary_statistics(seplan_model: Seplan) -> SummaryStatsDict:
+def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
     """Returns summary statistics using seplan inputs.
 
     The statistics will be later parsed to be displayed in the dashboard.
     """
+
+    if not recipe:
+        raise ValueError("There is no recipe to get statistics from.")
+
+    seplan_model = recipe.seplan
+    recipe_name = recipe.get_recipe_name()
+
     # Get all inputs from the model
     ee_features = seplan_model.aoi_model.get_ee_features()
 
@@ -30,33 +38,37 @@ def get_summary_statistics(seplan_model: Seplan) -> SummaryStatsDict:
     return (
         ee.Dictionary(
             {
-                aoi_name: ee.Dictionary(
+                recipe_name: ee.Dictionary(
                     {
-                        "suitability": get_image_stats(
-                            wlc_out, mask_out_areas, data["ee_feature"]
-                        ),
-                        "benefit": [
-                            get_image_mean(
-                                image, data["ee_feature"], mask_out_areas, name
-                            )
-                            for image, name in benefit_list
-                        ],
-                        "cost": [
-                            get_image_sum(
-                                image, data["ee_feature"], mask_out_areas, name
-                            )
-                            for image, name in cost_list
-                        ],
-                        "constraint": [
-                            get_image_percent_cover_pixelarea(
-                                image, data["ee_feature"], name
-                            )
-                            for image, name in constraint_list
-                        ],
-                        "color": data["color"],
+                        aoi_name: ee.Dictionary(
+                            {
+                                "suitability": get_image_stats(
+                                    wlc_out, mask_out_areas, data["ee_feature"]
+                                ),
+                                "benefit": [
+                                    get_image_mean(
+                                        image, data["ee_feature"], mask_out_areas, name
+                                    )
+                                    for image, name in benefit_list
+                                ],
+                                "cost": [
+                                    get_image_sum(
+                                        image, data["ee_feature"], mask_out_areas, name
+                                    )
+                                    for image, name in cost_list
+                                ],
+                                "constraint": [
+                                    get_image_percent_cover_pixelarea(
+                                        image, data["ee_feature"], name
+                                    )
+                                    for image, name in constraint_list
+                                ],
+                                "color": data["color"],
+                            }
+                        )
+                        for aoi_name, data in ee_features.items()
                     }
                 )
-                for aoi_name, data in ee_features.items()
             }
         )
     ).getInfo()

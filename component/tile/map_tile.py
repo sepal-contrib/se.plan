@@ -107,11 +107,11 @@ class MapTile(sw.Layout):
 
         self.map_.centerObject(aoi, zoom_out=3)
         self.map_.add_ee_layer(
-            benefit_index, cp.final_viz, cm.layer.index.benefit_index.name
+            benefit_index, cp.layer_vis, cm.layer.index.benefit_index.name
         )
         self.map_.add_ee_layer(
-            benefit_cost_index, cp.final_viz, cm.layer.index.benefit_cost_index.name
+            benefit_cost_index, cp.layer_vis, cm.layer.index.benefit_cost_index.name
         )
         self.map_.add_ee_layer(
-            constraint_index, cp.final_viz, cm.layer.index.constraint_index.name
+            constraint_index, cp.layer_vis, cm.layer.index.constraint_index.name
         )

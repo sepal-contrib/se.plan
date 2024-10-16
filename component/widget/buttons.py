@@ -49,3 +49,16 @@ class DrawMenuBtn(v.Btn):
         super().__init__(*args, **kwargs)
         self.class_ = "mr-2"
         self.color = btn_color
+
+
+class CompareBtn(v.Flex):
+    def __init__(self):
+
+        # to align the flex container to the right
+        self.style_ = "flex: 0"
+
+        super().__init__()
+
+        self.color = "primary"
+        self.btn = IconBtn("mdi-map")
+        self.children = [self.btn]

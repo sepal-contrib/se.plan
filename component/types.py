@@ -1,4 +1,5 @@
-from typing import Dict, List, Literal, TypedDict
+from typing import Dict, List, Literal, Tuple, TypedDict
+from ipecharts import EChartsWidget
 
 
 class StatsDict(TypedDict):
@@ -33,7 +34,14 @@ class AreaStats(TypedDict):
 
 
 SummaryStatsDict = Dict[str, AreaStats]
-"""The result of running get_summary_statistics script on a given seplan_model."""
+"""The result of running get_summary_statistics script on a given seplan_model
+
+The key is the sub area id and the value is the AreaStats for that area.
+"""
+
+RecipeStatsDict = Dict[str, SummaryStatsDict]
+"""The result of running get_summary_statistics script on a given recipe
+The key is the recipe name and the value is the SummaryStatsDict for that recipe."""
 
 
 # Parsed layer stats
@@ -77,3 +85,30 @@ class ConstraintLayerData(ModelLayerData):
 
 class CostLayerData(ModelLayerData):
     """The data returned from a Cost model."""
+
+
+# For scenarios.py
+class RecipeInfo(TypedDict):
+    """A dictionary to hold the information of a recipe."""
+
+    path: str
+    valid: bool
+
+
+RecipePaths = Dict[str, RecipeInfo]
+"Where the key is the recipe id in the Widget and the value is the path and valid."
+
+
+# Set the default structure, based on the type
+BenefitChartsData = Dict[str, List[Tuple[str, BenefitLayerData, EChartsWidget]]]
+"""Where the key is the layer_id and the value is a tuple with the recipe name, the layer data and the echarts widget"""
+
+ConstraintChartsData = Dict[
+    str, List[Tuple[str, ConstraintLayerData, List[float], List[str]]]
+]
+"""Where the key is the layer_id and the value is a list of tuple with the recipe name, the layer data, the values and the colors"""
+
+CostChartData = Dict[
+    Literal["cost_layers"], List[Tuple[str, Tuple[CostLayerData], EChartsWidget]]
+]
+"""Where the key is "cost_layers" and the value is a tuple with the recipe name, a tuple with all the cost layer's data and the echarts widget"""
