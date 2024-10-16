@@ -11,6 +11,9 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
     The statistics will be later parsed to be displayed in the dashboard.
     """
 
+    if not recipe:
+        raise ValueError("There is no recipe to get statistics from.")
+
     seplan_model = recipe.seplan
     recipe_name = recipe.get_recipe_name()
 

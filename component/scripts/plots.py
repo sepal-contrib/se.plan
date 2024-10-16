@@ -1,6 +1,7 @@
 """Define functions to create the plots for the dashboard tile."""
 
 from component.types import RecipeStatsDict, SummaryStatsDict
+from sepal_ui import sepalwidgets as sw
 
 import ipyvuetify as v
 from ipecharts.option import Option, Legend, Tooltip, XAxis, YAxis, Grid, Toolbox
@@ -340,6 +341,16 @@ def get_suitability_charts(
         recipe_name, summary_stats = list(recipe_stats.items())[0]
 
         # Get the summary statistics for the suitability theme
-        charts.append(get_stacked_bars_chart(summary_stats, show_legend=i == 0))
+        chart = get_stacked_bars_chart(summary_stats)
+
+        charts.append(
+            sw.Flex(
+                xs12=True,
+                children=[
+                    sw.Html(tag="h4", children=["Recipe: ", recipe_name]),
+                    chart,
+                ],
+            )
+        )
 
     return charts if not test else v.Card(children=[v.CardText(children=charts)])

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from ipecharts import EChartsWidget
 
 from sepal_ui import sepalwidgets as sw
@@ -22,12 +22,27 @@ def human_format(num, round_to=2):
 
 class LayerFull(sw.Layout):
 
-    def __init__(self, layer_data: ModelLayerData, charts: List[EChartsWidget]):
+    def __init__(
+        self,
+        layer_data: Union[ModelLayerData, List[ModelLayerData]],
+        charts: List[EChartsWidget],
+        recipe_names: List[str] = [],
+    ):
 
-        # get the layer data
-        name = layer_data["name"]
-        detail = layer_data["desc"]
-        units = layer_data["unit"]
+        # For the case of multiple data layers I want to display all the info in the single panel
+        # This happens with the cost layer, where we want to display all them together
+
+        if isinstance(layer_data, list):
+            # concatenate all the data
+            name = ", ".join([l["name"] for l in layer_data])
+            detail = ", <br><br>".join([l["desc"] for l in layer_data])
+            units = ", ".join([l["unit"] for l in layer_data])
+
+        else:
+            # get the layer data
+            name = layer_data["name"]
+            detail = layer_data["desc"]
+            units = layer_data["unit"]
 
         # build the internal details
         w_header = sw.ExpansionPanelHeader(
@@ -35,13 +50,33 @@ class LayerFull(sw.Layout):
             expand_icon="mdi-help-circle-outline",
             disable_icon_rotate=True,
         )
-        w_content = sw.ExpansionPanelContent(children=[detail])
+        w_content = sw.ExpansionPanelContent(children=[sw.Markdown(detail)])
         w_panel = sw.ExpansionPanel(children=[w_header, w_content])
         w_details = sw.ExpansionPanels(xs12=True, class_="mt-3", children=[w_panel])
 
         # create a title with the layer name
         label = f"{name} ({units})"
-        w_title = sw.Html(class_="mt-2 mb-2", xs12=True, tag="h3", children=[label])
+
+        w_title = sw.Html(
+            class_="mt-2 mb-2",
+            xs12=True,
+            tag="h2",
+            children=[label],
+            style_="text-align: center;",
+        )
+
+        # If there's more than one chart, I want to display them in a row and with a title
+        if len(charts) > 1:
+            charts = [
+                sw.Flex(
+                    xs12=True,
+                    children=[
+                        sw.Html(tag="h4", children=["Recipe: ", recipe_name]),
+                        chart,
+                    ],
+                )
+                for chart, recipe_name in zip(charts, recipe_names)
+            ]
 
         # build the final widget
         widgets = [w_title] + charts + [w_details]

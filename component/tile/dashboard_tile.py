@@ -64,7 +64,7 @@ class DashboardTile(sw.Layout):
         )
 
         dash_toolbar.compare_dialog.set_stats_content(
-            overal_dashboard=self.overall_dash, theme_dashboard=self.theme_dash
+            overall_dashboard=self.overall_dash, theme_dashboard=self.theme_dash
         )
 
         dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
@@ -74,6 +74,12 @@ class DashboardTile(sw.Layout):
 
     def csv_export(self, *_) -> None:
         """Export the dashboard as a csv file."""
+
+        if not self.recipe.recipe_session_path:
+            raise ValueError(
+                "You can only export the dashboard data for the current recipe, load or create a recipe first in the recipe section"
+            )
+
         self.summary_stats = get_summary_statistics(self.recipe)
 
         # save the dashboard as a csv
@@ -85,6 +91,11 @@ class DashboardTile(sw.Layout):
 
     def _dashboard(self, *_):
         """Compute the restoration plan for the self.recipe and display the dashboard."""
+
+        if not self.recipe.recipe_session_path:
+            raise ValueError(
+                "You can only display the dashboard for the current recipe, load or create a recipe first in the recipe section"
+            )
 
         if not self.summary_stats:
             logger.info("No dashboard to display")
@@ -172,11 +183,12 @@ class ThemeDashboard(sw.Card):
                 )
 
             # Each of the series has to be one of the costs in the cost model
-            aoi_names, values, colors, series_names = [], [], [], []
+            layers_data, aoi_names, values, colors, series_names = [], [], [], [], []
             for layer_id in recipe.seplan.cost_model.ids:
 
                 layer_data = recipe.seplan.cost_model.get_layer_data(layer_id)
 
+                layers_data.append(layer_data)
                 aoi_name, value, _ = parse_layer_data(scenario_stats, layer_id)
                 aoi_names.append(aoi_name)
                 values.append(value)
@@ -193,18 +205,12 @@ class ThemeDashboard(sw.Card):
                 series_colors=colors,
                 bars_width=80,
             )
-            cost_charts["cost_layers"].append((recipe_name, layer_data, w_chart))
+            cost_charts["cost_layers"].append((recipe_name, layers_data, w_chart))
 
         return benefit_charts, constraint_charts, cost_charts
 
-    def set_summary(
-        self, recipes: Tuple[Recipe], recipes_stats: Tuple[RecipeStatsDict]
-    ):
-        """Set the summary statistics for all the summary comming from different scenarios"""
-
-        benefit_charts, constraint_charts, cost_charts = self.get_summary_charts(
-            recipes, recipes_stats
-        )
+    def get_benefit_panels(self, benefit_charts: BenefitChartsData):
+        """Get the benefit panels for the dashboard"""
 
         ben = v.Html(tag="h2", children=[cm.theme.benefit.capitalize()])
         ben_txt = sw.Markdown("  \n".join(cm.dashboard.theme.benefit.description))
@@ -212,25 +218,43 @@ class ThemeDashboard(sw.Card):
 
         benefit_panels = []
         for layer_id, charts_data in benefit_charts.items():
-            layer_data = recipes[0].seplan.benefit_model.get_layer_data(layer_id)
+            layer_data = charts_data[0][1]
             # Get all charts for that layer
             layer_charts = [chart for _, _, chart in charts_data]
-            layer_panel = LayerFull(layer_data, layer_charts)
+            recipe_names = [recipe_name for recipe_name, _, _ in charts_data]
+            layer_panel = LayerFull(layer_data, layer_charts, recipe_names)
             benefit_panels.append(layer_panel)
 
         ben_content = v.ExpansionPanelContent(children=[ben_txt, *benefit_panels])
         ben_panel = v.ExpansionPanel(children=[ben_header, ben_content])
+
+        return ben_panel
+
+    def get_cost_panels(self, cost_charts: CostChartData):
+        """Get the cost panels for the dashboard"""
+
+        layer_data = cost_charts["cost_layers"][0][1]
+        recipe_names = [recipe_name for recipe_name, _, _ in cost_charts["cost_layers"]]
 
         cost = v.Html(tag="h2", children=[cm.theme.cost.capitalize()])
         cost_txt = sw.Markdown("  \n".join(cm.dashboard.theme.cost.description))
         cost_header = v.ExpansionPanelHeader(children=[cost])
 
         cost_panels = [
-            LayerFull(layer_data, [chart for _, _, chart in cost_charts["cost_layers"]])
+            LayerFull(
+                layer_data,
+                [chart for _, _, chart in cost_charts["cost_layers"]],
+                recipe_names,
+            )
         ]
 
         cost_content = v.ExpansionPanelContent(children=[cost_txt, *cost_panels])
         cost_panel = v.ExpansionPanel(children=[cost_header, cost_content])
+
+        return cost_panel
+
+    def get_constraint_panels(self, constraint_charts: ConstraintChartsData):
+        """Get the constraint panels for the dashboard"""
 
         const = v.Html(tag="h2", children=[cm.theme.constraint.capitalize()])
         const_txt = sw.Markdown("  \n".join(cm.dashboard.theme.constraint.description))
@@ -249,6 +273,21 @@ class ThemeDashboard(sw.Card):
             children=[const_txt, *constraint_charts_data]
         )
         const_panel = v.ExpansionPanel(children=[const_header, const_content])
+
+        return const_panel
+
+    def set_summary(
+        self, recipes: Tuple[Recipe], recipes_stats: Tuple[RecipeStatsDict]
+    ):
+        """Set the summary statistics for all the summary comming from different scenarios"""
+
+        benefit_charts, constraint_charts, cost_charts = self.get_summary_charts(
+            recipes, recipes_stats
+        )
+
+        ben_panel = self.get_benefit_panels(benefit_charts)
+        cost_panel = self.get_cost_panels(cost_charts)
+        const_panel = self.get_constraint_panels(constraint_charts)
 
         # create an expansion panel to store everything
         ep = v.ExpansionPanels(children=[ben_panel, cost_panel, const_panel])

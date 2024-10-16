@@ -109,6 +109,6 @@ ConstraintChartsData = Dict[
 """Where the key is the layer_id and the value is a list of tuple with the recipe name, the layer data, the values and the colors"""
 
 CostChartData = Dict[
-    Literal["cost_layers"], List[Tuple[str, CostLayerData, EChartsWidget]]
+    Literal["cost_layers"], List[Tuple[str, Tuple[CostLayerData], EChartsWidget]]
 ]
-"""Where the key is the cost_layers and the value is a tuple with the recipe name, the layer data and the echarts widget"""
+"""Where the key is "cost_layers" and the value is a tuple with the recipe name, a tuple with all the cost layer's data and the echarts widget"""

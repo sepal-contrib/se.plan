@@ -55,6 +55,8 @@ class Recipe(HasTraits):
         # This is not necessary since the recipe path is already validated from the origin
         # but I want to keep it here if I want to call the load function from somewhere else
         recipe_path = Path(validation.validate_recipe(recipe_path))
+        self.recipe_session_path = str(recipe_path)
+
         with recipe_path.open() as f:
             data = json.loads(f.read())
 
@@ -68,6 +70,8 @@ class Recipe(HasTraits):
         self.cost_model.import_data(data["costs"])
 
         self.new_changes = 0
+
+        return self
 
     def save(self, full_recipe_path: str):
         """Save the recipe in a json file with a timestamp."""

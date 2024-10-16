@@ -30,14 +30,12 @@ class MapToolbar(sw.Toolbar):
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
         self.download_map_dialog = cw.ExportMapDialog(self.recipe)
         self.compare_dialog = cw.CompareScenariosDialog(
-            map_=self.map_, recipe=self.recipe
+            type_="map", map_=self.map_, main_recipe=self.recipe
         )
         self.info_dialog = MapInfoDialog()
 
         # Main buttons
         self.btn_compute = TextBtn(cm.compute.btn)
-        self.btn_compare = IconBtn(gliph="mdi-compare")
-        self.btn_clean = IconBtn(gliph="mdi-broom")
 
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
@@ -54,6 +52,13 @@ class MapToolbar(sw.Toolbar):
             gliph="fa-solid fa-circle-info",
         ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
 
+        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+            cm.map.toolbar.tooltip.compare, right=True, max_width="200px"
+        )
+        self.btn_clean = IconBtn(gliph="mdi-broom").set_tooltip(
+            cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
+        )
+
         self.children = [
             # Main buttons
             self.btn_draw,
@@ -61,8 +66,8 @@ class MapToolbar(sw.Toolbar):
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
-            self.btn_clean,
-            self.btn_compare,
+            self.btn_clean.with_tooltip,
+            self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
             # Auxiliar buttons

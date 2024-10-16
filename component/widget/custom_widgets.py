@@ -155,19 +155,19 @@ class DashToolbar(sw.Toolbar):
         ).set_tooltip(
             cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
         )
-
-        self.compare_dialog = cw.CompareScenariosDialog(
-            type_="chart", trashable=True, increaseable=True, limit=5
+        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+            cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
         )
 
-        self.btn_compare = IconBtn(gliph="mdi-compare")
+        self.compare_dialog = cw.CompareScenariosDialog(type_="chart")
+
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
         self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
 
         self.children = [
             self.btn_download.with_tooltip,
             sw.Spacer(),
-            self.btn_compare,
+            self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_dashboard,
             # Dialogs

@@ -29,22 +29,31 @@ class CompareScenariosDialog(BaseDialog):
 
     def __init__(
         self,
+        type_: Literal["map", "chart"],
         map_: SepalMap = None,
         alert: Alert = None,
         main_recipe: Recipe = None,
-        trashable=False,
-        increaseable=False,
-        limit=2,
-        type_=Literal["map", "chart"],
-        overal_dashboard=None,
+        trashable: bool = False,
+        increaseable: bool = False,
+        limit: int = 2,
+        overall_dashboard=None,
         theme_dashboard=None,
     ):
         super().__init__()
 
         self.map_ = map_
         self.alert = alert or Alert()
-        self.overal_dashboard = overal_dashboard
+        self.overall_dashboard = overall_dashboard
         self.theme_dashboard = theme_dashboard
+
+        if type_ == "chart":
+            trashable = True
+            increaseable = True
+            limit = 5
+
+        else:
+            if not map_:
+                raise ValueError("A map must be provided to compare maps.")
 
         # Create UI elements for up to 2 scenario inputs
         self.scenario_inputs = ScenarioInputs(
@@ -53,8 +62,8 @@ class CompareScenariosDialog(BaseDialog):
             trashable=trashable,
             increaseable=increaseable,
         )
-        self.btn_compare_map = TextBtn("Compare")
-        self.btn_compare_stat = TextBtn("Compare")
+        self.btn_compare_map = TextBtn("Compare maps")
+        self.btn_compare_stat = TextBtn("Compare statistics")
 
         self.btn_cancel = TextBtn("Cancel", outlined=True)
 
@@ -71,6 +80,7 @@ class CompareScenariosDialog(BaseDialog):
                 children=[
                     sw.CardTitle(children=["Compare Scenarios"]),
                     sw.CardText(children=[scenario_inputs_layout]),
+                    self.alert,
                     self.actions,
                 ],
             )
@@ -164,22 +174,22 @@ class CompareScenariosDialog(BaseDialog):
         map_.add(layer_control)
         self.close_dialog()
 
-    def set_stats_content(self, overal_dashboard=None, theme_dashboard=None):
+    def set_stats_content(self, overall_dashboard=None, theme_dashboard=None):
         """Set the content of the statistics dashboard."""
 
-        self.overal_dashboard = overal_dashboard
+        self.overall_dashboard = overall_dashboard
         self.theme_dashboard = theme_dashboard
 
     def compare_statistics(self, *args):
         """Compute and display summary statistics."""
 
-        if not self.overal_dashboard or not self.theme_dashboard:
+        if not self.overall_dashboard or not self.theme_dashboard:
 
-            self.overal_dashboard = sw.Card()
+            self.overall_dashboard = sw.Card()
             self.theme_dashboard = sw.Card()
 
             self.children = self.children + [
-                self.overal_dashboard,
+                self.overall_dashboard,
                 self.theme_dashboard,
             ]
 
@@ -187,8 +197,11 @@ class CompareScenariosDialog(BaseDialog):
 
         recipe_summary_stats = [get_summary_statistics(recipe) for recipe in recipes]
 
-        self.overal_dashboard.set_summary(recipes_stats=recipe_summary_stats)
+        self.overall_dashboard.set_summary(recipes_stats=recipe_summary_stats)
         self.theme_dashboard.set_summary(recipes, recipes_stats=recipe_summary_stats)
+
+        # Close the dialog
+        self.close_dialog()
 
 
 class ScenarioInputs(sw.Layout):

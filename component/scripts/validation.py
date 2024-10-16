@@ -101,7 +101,7 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
 
     for recipe_id, recipe_info in recipe_paths.items():
         if not recipe_info["valid"]:
-            raise Exception(f"Error: Recipe {recipe_id} is not valid")
+            raise Exception(f"Error: Recipe '{recipe_id}' is not a valid recipe.")
 
     # Validate that all the pahts have an unique stem name
 
@@ -110,7 +110,9 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
     ]
 
     if len(recipe_stems) != len(set(recipe_stems)):
-        raise Exception("Error: All the recipes must have an unique name")
+        raise Exception(
+            "Error: To compare recipes, all the recipes must have an unique name."
+        )
 
 
 def are_comparable(recipe_paths: RecipePaths):
