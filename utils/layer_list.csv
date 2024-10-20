@@ -1,7 +1,7 @@
 layer_id,theme,subtheme,gee_asset,unit,data_type
 ground_carbon,benefit,carbon_seq,projects/se-plan/assets/inputLayers/Base_Unr_AGB_BGB_SOC_MgCha_500m,MgC/ha,continuous
 woodfuel_harvest,benefit,local,projects/se-plan/assets/inputLayers/Woodfuel_gadm36_1_edited_image,m3/ha,continuous
-plantation_growth_rates,benefit,wood,projects/se-plan/assets/inputLayers/yields-4326,dry tons/ha/yr,continuous
+plantation_growth_rates,benefit,wood,projects/se-plan/assets/inputLayers/yields-4326-edited,dry tons/ha/yr,continuous
 city_access,constraint,socio_eco,Oxford/MAP/accessibility_to_cities_2015_v1_0,hours,continuous
 forest_job,benefit,local,projects/se-plan/assets/inputLayers/emp_ha,jobs/ha,continuous
 biodiversity_intactness,benefit,bii,projects/se-plan/assets/inputLayers/ibii-4326,percent,continuous

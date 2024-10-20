@@ -168,9 +168,7 @@ class CustomGeometriesTable(sw.Layout):
             ],
         )
 
-        self.children = [
-            self.table,
-        ]
+        self.children = [self.table]
 
         # add js behavior
         self.map_.observe(self.set_rows, "custom_layers")

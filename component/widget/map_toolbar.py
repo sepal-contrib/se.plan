@@ -1,5 +1,5 @@
 import ipyvuetify as v
-from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
+from component.widget.buttons import CompareBtn, DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui import color
 from traitlets import Bool
@@ -29,10 +29,14 @@ class MapToolbar(sw.Toolbar):
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
         self.download_map_dialog = cw.ExportMapDialog(self.recipe)
+        self.compare_dialog = cw.CompareScenariosDialog(
+            type_="map", map_=self.map_, main_recipe=self.recipe
+        )
         self.info_dialog = MapInfoDialog()
 
         # Main buttons
         self.btn_compute = TextBtn(cm.compute.btn)
+
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
             gliph="mdi-draw",
@@ -48,6 +52,13 @@ class MapToolbar(sw.Toolbar):
             gliph="fa-solid fa-circle-info",
         ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
 
+        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+            cm.map.toolbar.tooltip.compare, right=True, max_width="200px"
+        )
+        self.btn_clean = IconBtn(gliph="mdi-broom").set_tooltip(
+            cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
+        )
+
         self.children = [
             # Main buttons
             self.btn_draw,
@@ -55,6 +66,8 @@ class MapToolbar(sw.Toolbar):
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
+            self.btn_clean.with_tooltip,
+            self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
             # Auxiliar buttons
@@ -62,6 +75,7 @@ class MapToolbar(sw.Toolbar):
             self.custom_aoi_dialog,
             self.import_aoi_dialog,
             self.download_map_dialog,
+            self.compare_dialog,
             self.info_dialog,
         ]
 
@@ -69,6 +83,8 @@ class MapToolbar(sw.Toolbar):
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
+        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
+        self.btn_clean.on_event("click", self.map_.clean_map)
 
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)

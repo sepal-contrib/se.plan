@@ -5,6 +5,7 @@ from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
 from component.scripts.logger import logger
+from component.types import ConstraintLayerData
 
 
 class ConstraintModel(QuestionnaireModel):
@@ -132,3 +133,16 @@ class ConstraintModel(QuestionnaireModel):
     @observe("updated")
     def _on_update(self, *_):
         logger.info("######## updated ########")
+
+    def get_layer_data(self, layer_id: str) -> ConstraintLayerData:
+        """Return the data of a specific layer."""
+        idx = self.get_index(layer_id)
+        return {
+            "id": self.ids[idx],
+            "name": self.names[idx],
+            "asset": self.assets[idx],
+            "desc": self.descs[idx],
+            "unit": self.units[idx],
+            "value": self.values[idx],
+            "data_type": self.data_type[idx],
+        }
