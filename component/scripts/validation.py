@@ -118,4 +118,15 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
 def are_comparable(recipe_paths: RecipePaths):
     """Check if we can compare the recipes or not."""
 
-    pass
+    aoi_values = set()
+
+    for recipe_info in recipe_paths.values():
+        with open(recipe_info["path"], "r") as f:
+            recipe = json.load(f)
+            aoi_values.add(recipe["aoi"]["primary"])
+
+    # Raise an error if the recipes are not comparable
+    if len(aoi_values) > 1:
+        raise Exception(
+            "Error: The recipes are not comparable. All the recipes must have the same main Area of Interest."
+        )
