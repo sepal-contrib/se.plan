@@ -9,12 +9,15 @@ from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.base_dialog import BaseDialog
 from component.widget.map import SeplanMap
+from component.widget.alert_state import Alert
 
 
 class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
-    def __init__(self, recipe: Recipe, map_: SeplanMap, *args, **kwargs) -> None:
+    def __init__(
+        self, recipe: Recipe, map_: SeplanMap, alert: Alert, *args, **kwargs
+    ) -> None:
 
         self.height = "48px"
         super().__init__(*args, **kwargs)
@@ -28,14 +31,18 @@ class MapToolbar(sw.Toolbar):
         # Dialogs
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
-        self.download_map_dialog = cw.ExportMapDialog(self.recipe)
+        self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=alert)
+        self.compare_dialog = cw.CompareScenariosDialog(
+            type_="map", map_=self.map_, main_recipe=self.recipe, alert=alert
+        )
         self.info_dialog = MapInfoDialog()
 
         # Main buttons
         self.btn_compute = TextBtn(cm.compute.btn)
+
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
-            gliph="mdi-draw",
+            gliph="fa-solid fa-draw-polygon",
             icon=True,
             small=True,
         )
@@ -48,6 +55,13 @@ class MapToolbar(sw.Toolbar):
             gliph="fa-solid fa-circle-info",
         ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
 
+        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+            cm.map.toolbar.tooltip.compare, right=True, max_width="200px"
+        )
+        self.btn_clean = IconBtn(gliph="mdi-broom").set_tooltip(
+            cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
+        )
+
         self.children = [
             # Main buttons
             self.btn_draw,
@@ -55,6 +69,8 @@ class MapToolbar(sw.Toolbar):
             self.btn_download.with_tooltip,
             self.btn_info.with_tooltip,
             sw.Spacer(),
+            self.btn_clean.with_tooltip,
+            self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_compute,
             # Auxiliar buttons
@@ -62,6 +78,7 @@ class MapToolbar(sw.Toolbar):
             self.custom_aoi_dialog,
             self.import_aoi_dialog,
             self.download_map_dialog,
+            self.compare_dialog,
             self.info_dialog,
         ]
 
@@ -69,6 +86,8 @@ class MapToolbar(sw.Toolbar):
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
+        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
+        self.btn_clean.on_event("click", self.map_.clean_map)
 
         self.btn_draw.on_event("new", self.on_draw)
         self.btn_draw.on_event("show", self.on_draw)

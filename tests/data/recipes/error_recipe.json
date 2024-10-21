@@ -1,0 +1,127 @@
+{
+    "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
+    "aoi": {
+        "primary": {
+            "admin": null,
+            "asset_name": null,
+            "method": null,
+            "name": null,
+            "updated": 2,
+            "asset_json": null,
+            "vector_json": null,
+            "point_json": null,
+            "geo_json": null
+        },
+        "custom": {
+            "type": "FeatureCollection",
+            "features": []
+        }
+    },
+    "benefits": {
+        "new_changes": 1,
+        "updated": 2,
+        "names": [
+            "Biodiversity Intactness Index",
+            "Endangered species",
+            "Unrealized biomass potential",
+            "Forest employment",
+            "Woodfuel harvest",
+            "Plantation growth rate"
+        ],
+        "ids": [
+            "biodiversity_intactness",
+            "endangered_species",
+            "ground_carbon",
+            "forest_job",
+            "woodfuel_harvest",
+            "plantation_growth_rates"
+        ],
+        "themes": [
+            "bii",
+            "bii",
+            "carbon_seq",
+            "local",
+            "local",
+            "wood"
+        ],
+        "assets": [
+            "projects/se-plan/assets/inputLayers/ibii-4326",
+            "projects/se-plan/assets/inputLayers/terra-bio-div-image",
+            "projects/se-plan/assets/inputLayers/Base_Unr_AGB_BGB_SOC_MgCha_500m",
+            "projects/se-plan/assets/inputLayers/emp_ha",
+            "projects/se-plan/assets/inputLayers/Woodfuel_gadm36_1_edited_image",
+            "projects/se-plan/assets/inputLayers/yields-4326"
+        ],
+        "descs": [
+            "The average abundance of a large and diverse set of species, expressed as a percentage of the set of originally present species. A higher percentage tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit.",
+            "Total number of critically endangered and endangered mammal, bird, reptile, and amphibian species, expressed per square kilometer. A higher number tends to make restoration more feasible when biodiversity conservation is a desired restoration benefit.",
+            "Unrealized potential aboveground biomass, belowground biomass, and soil organic carbon combined density (megagrams carbon per hectare) under baseline climate.",
+            "Number of forest-related jobs per hectare of forestland for the most recent available year. A higher level of forest employment implies attractive business conditions for labor-intensive wood harvesting and processing industries, which tends to make restoration more feasible when income for local households is a desired restoration benefit.",
+            "Annual harvest of wood fuel for the most recent available year, expressed in cubic meters per hectare of forest. A higher level of harvest implies greater demand for wood fuel as an energy source, which tends to make restoration more feasible when supply of wood to meet local demands is a desired restoration benefit.",
+            "Annual production of woody biomass by plantation-grown tree species, expressed in dry tons per hectare per year. A higher growth rate tends to make restoration more feasible when income for landholders and wood supply to meet local demands are desired restoration benefits."
+        ],
+        "weights": [
+            4,
+            4,
+            4,
+            4,
+            4,
+            4
+        ],
+        "units": [
+            "percent",
+            "number/km2",
+            "MgC/ha",
+            "jobs/ha",
+            "m3/ha",
+            "dry tons/ha/yr"
+        ]
+    },
+    "constraints": {
+        "new_changes": 4,
+        "updated": 2,
+        "themes": [
+            ""
+        ],
+        "names": [
+            "Current tree cover less than potential"
+        ],
+        "ids": [
+            "treecover_with_potential"
+        ],
+        "assets": [
+            "projects/se-plan/assets/inputLayers/total_rest_pot_gt_treecoverfrac_masks"
+        ],
+        "descs": [
+            "Sites that have the potential for restoration. Their tree-cover fraction is less its potential and they are not in urban areas."
+        ],
+        "units": [
+            "binary"
+        ]
+
+    },
+    "costs": {
+        "new_changes": 1,
+        "updated": 2,
+        "names": [
+            "Land opportunity cost",
+            "Implementation cost"
+        ],
+        "ids": [
+            "opportunity_cost",
+            "implementation_cost"
+        ],
+        "assets": [
+            "projects/se-plan/assets/inputLayers/opportunity_cost_20221110",
+            "projects/se-plan/assets/inputLayers/AfCost_ha"
+        ],
+        "descs": [
+            "Value of land if it is not used for forest restoration, expressed in US dollars per hectare for the most recent available year. Represents the value at which land would sell under competitive market conditions (i.e., the land's \"fair market value\"). A lower opportunity cost tends to make restoration more feasible.",
+            "Implementation cost in se.plan refers to expenses associated with active forest restoration on former agricultural land: preparing a site for tree regeneration, and then artificially regenerating the site by sowing seeds or planting seedlings. A higher implementation cost tends to make FR less feasible, although FR can be feasible on land with a high implementation cost if land opportunity cost is low and FR generates large benefits.\nImplementation cost is expressed in US dollars per hectare. It varies by country and, for countries with sufficient data, by first-level administrative subdivision (e.g., state or province). The cost reported by the tool is the average for the country or subdivision. The actual cost at different locations within the country or subdivision could be higher or lower than the reported average estimate. In addition, compared to the estimates reported by the tool, se.plan team estimates that implementation cost is, on average, 45% higher if the restoration site is a forest that has been heavily damaged (for example, by fire, windthrow, or pest outbreak) and 66% lower if passive restoration, which relies on natural tree regeneration, is feasible. The tool contains a variable that predicts the likely success of natural regeneration."
+        ],
+        "units": [
+            "$/ha",
+            "$/ha"
+        ]
+    }
+}

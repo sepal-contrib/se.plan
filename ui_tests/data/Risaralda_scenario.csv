@@ -1,0 +1,53 @@
+Area,Theme,Sub-theme,Values
+COL_Risaralda,benefit,biodiversity_intactness,0.9087882497787145
+COL_Risaralda,benefit,endangered_species,17.20682579249609
+COL_Risaralda,benefit,ground_carbon,93.00980917972463
+COL_Risaralda,benefit,forest_job,0.008250078810436233
+COL_Risaralda,benefit,woodfuel_harvest,0.32803882175072735
+COL_Risaralda,benefit,plantation_growth_rates,20.102861233434673
+COL_Risaralda,constraint,treecover_with_potential,56.2066479642075
+COL_Risaralda,constraint,land_cover,0.7958169114216386
+COL_Risaralda,constraint,city_access,17.666615330048806
+COL_Risaralda,cost,opportunity_cost,2854.415674715182
+COL_Risaralda,cost,implementation_cost,698.8792083010825
+COL_Risaralda,suitability,Very low,39635.24954615135
+COL_Risaralda,suitability,Low,89925.8936412182
+COL_Risaralda,suitability,Medium,17564.802742805554
+COL_Risaralda,suitability,High,5724.048034173945
+COL_Risaralda,suitability,Very High,6734.877575038741
+COL_Risaralda,suitability,Unsuitable land,244257.09298493265
+COL_Risaralda,Total,Total,403841.96452432044
+Custom_COL_Risaralda_Belen_De_Umbria,benefit,biodiversity_intactness,0.957318755153382
+Custom_COL_Risaralda_Belen_De_Umbria,benefit,endangered_species,17.530677409561125
+Custom_COL_Risaralda_Belen_De_Umbria,benefit,ground_carbon,82.5630898033229
+Custom_COL_Risaralda_Belen_De_Umbria,benefit,forest_job,0.008104297684891836
+Custom_COL_Risaralda_Belen_De_Umbria,benefit,woodfuel_harvest,0.32475631172609987
+Custom_COL_Risaralda_Belen_De_Umbria,benefit,plantation_growth_rates,22.060649871826172
+Custom_COL_Risaralda_Belen_De_Umbria,constraint,treecover_with_potential,43.52602696187151
+Custom_COL_Risaralda_Belen_De_Umbria,constraint,land_cover,0.2991382849787664
+Custom_COL_Risaralda_Belen_De_Umbria,constraint,city_access,15.138517366952886
+Custom_COL_Risaralda_Belen_De_Umbria,cost,opportunity_cost,4180.350093278139
+Custom_COL_Risaralda_Belen_De_Umbria,cost,implementation_cost,974.4358784812482
+Custom_COL_Risaralda_Belen_De_Umbria,suitability,Very low,1519.7308704967074
+Custom_COL_Risaralda_Belen_De_Umbria,suitability,Low,7570.93094213084
+Custom_COL_Risaralda_Belen_De_Umbria,suitability,Medium,572.0686012373626
+Custom_COL_Risaralda_Belen_De_Umbria,suitability,High,19.787353515625
+Custom_COL_Risaralda_Belen_De_Umbria,suitability,Unsuitable land,7846.1855884532515
+Custom_COL_Risaralda_Belen_De_Umbria,Total,Total,17528.703355833786
+Custom AOI 2,benefit,biodiversity_intactness,0.8637940024698699
+Custom AOI 2,benefit,endangered_species,37.77713186552312
+Custom AOI 2,benefit,ground_carbon,94.53930450029229
+Custom AOI 2,benefit,forest_job,0.0084099006
+Custom AOI 2,benefit,woodfuel_harvest,0.33266178
+Custom AOI 2,benefit,plantation_growth_rates,19.49095916748047
+Custom AOI 2,constraint,treecover_with_potential,83.54813329225888
+Custom AOI 2,constraint,land_cover,0.016348275201132047
+Custom AOI 2,constraint,city_access,45.64849902811104
+Custom AOI 2,cost,opportunity_cost,104.25202549107685
+Custom AOI 2,cost,implementation_cost,95.18045009393207
+Custom AOI 2,suitability,Low,106.85580566406254
+Custom AOI 2,suitability,Medium,469.35879596315925
+Custom AOI 2,suitability,High,261.1889439453126
+Custom AOI 2,suitability,Very High,287.10538778760747
+Custom AOI 2,suitability,Unsuitable land,22322.8055611811
+Custom AOI 2,Total,Total,23447.314494541242

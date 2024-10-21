@@ -5,8 +5,7 @@ from component.tile.custom_aoi_tile import AoiTile
 def test_aoi_tile(empty_recipe, alert):
 
     recipe = empty_recipe
-    aoi_tile = AoiTile()
-    aoi_tile.build(recipe, alert)
+    aoi_tile = AoiTile(recipe=recipe)
 
     # Select a lmic country
     aoi_tile.view.model.admin = "959"

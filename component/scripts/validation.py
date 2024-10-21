@@ -9,6 +9,7 @@ from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
 from component.scripts.logger import logger
+from component.types import RecipePaths
 
 
 def find_missing_property(instance, schema):
@@ -93,3 +94,46 @@ def remove_key(data, key_to_remove):
     elif isinstance(data, list):
         for item in data:
             remove_key(item, key_to_remove)
+
+
+def validate_scenarios_recipes(recipe_paths: RecipePaths):
+    """Validate all the recipes in the scenario."""
+
+    for recipe_id, recipe_info in recipe_paths.items():
+        if not recipe_info["valid"]:
+            raise Exception(f"Error: Recipe '{recipe_id}' is not a valid recipe.")
+
+    # Validate that all the pahts have an unique stem name
+
+    recipe_stems = [
+        Path(recipe_info["path"]).stem for recipe_info in recipe_paths.values()
+    ]
+
+    if len(recipe_stems) != len(set(recipe_stems)):
+        raise Exception(
+            "Error: To compare recipes, all the recipes must have an unique name."
+        )
+
+    return True
+
+
+def are_comparable(recipe_paths: RecipePaths):
+    """Check if the recipes are comparable based on their primary AOI (Area of Interest)."""
+
+    aoi_values = set()
+
+    for _, recipe_info in recipe_paths.items():
+        with Path(recipe_info["path"]).open() as f:
+            data = json.loads(f.read())
+            remove_key(data, "updated")
+            remove_key(data, "new_changes")
+            primary_aoi = data["aoi"]["primary"]
+            aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
+
+    # Raise an error if the recipes are not comparable
+    if len(aoi_values) > 1:
+        raise Exception(
+            "Error: The recipes are not comparable. All recipes must have the same main Area of Interest."
+        )
+
+    return True
