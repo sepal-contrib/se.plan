@@ -80,7 +80,6 @@ class CompareScenariosDialog(BaseDialog):
                 children=[
                     sw.CardTitle(children=["Compare Scenarios"]),
                     sw.CardText(children=[scenario_inputs_layout]),
-                    self.alert,
                     self.actions,
                 ],
             )

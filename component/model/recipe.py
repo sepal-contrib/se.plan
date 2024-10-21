@@ -88,6 +88,8 @@ class Recipe(HasTraits):
                 "costs": self.cost_model.export_data(),
             }
 
+            [validation.remove_key(data, key) for key in ["updated", "new_changes"]]
+
             json.dump(data, f, indent=4)
 
         self.new_changes = 0

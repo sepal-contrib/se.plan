@@ -143,8 +143,11 @@ class ToolBar(sw.Toolbar):
 
 
 class DashToolbar(sw.Toolbar):
-    def __init__(self, model: Seplan) -> None:
+    def __init__(self, model: Seplan, alert: Alert = None) -> None:
         super().__init__()
+
+        alert = alert or Alert()
+
         self.height = "48px"
         self.model = model
         self.elevation = 0
@@ -159,7 +162,7 @@ class DashToolbar(sw.Toolbar):
             cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
         )
 
-        self.compare_dialog = cw.CompareScenariosDialog(type_="chart")
+        self.compare_dialog = cw.CompareScenariosDialog(type_="chart", alert=alert)
 
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
         self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)

@@ -1,5 +1,5 @@
 import ipyvuetify as v
-from component.widget.buttons import CompareBtn, DrawMenuBtn, IconBtn, TextBtn
+from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui import color
 from traitlets import Bool
@@ -9,12 +9,15 @@ from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.base_dialog import BaseDialog
 from component.widget.map import SeplanMap
+from component.widget.alert_state import Alert
 
 
 class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
-    def __init__(self, recipe: Recipe, map_: SeplanMap, *args, **kwargs) -> None:
+    def __init__(
+        self, recipe: Recipe, map_: SeplanMap, alert: Alert, *args, **kwargs
+    ) -> None:
 
         self.height = "48px"
         super().__init__(*args, **kwargs)
@@ -28,9 +31,9 @@ class MapToolbar(sw.Toolbar):
         # Dialogs
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
-        self.download_map_dialog = cw.ExportMapDialog(self.recipe)
+        self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=alert)
         self.compare_dialog = cw.CompareScenariosDialog(
-            type_="map", map_=self.map_, main_recipe=self.recipe
+            type_="map", map_=self.map_, main_recipe=self.recipe, alert=alert
         )
         self.info_dialog = MapInfoDialog()
 
@@ -39,7 +42,7 @@ class MapToolbar(sw.Toolbar):
 
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
-            gliph="mdi-draw",
+            gliph="fa-solid fa-draw-polygon",
             icon=True,
             small=True,
         )

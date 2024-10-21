@@ -17,12 +17,13 @@ from component.message import cm
 from component.model.recipe import Recipe
 from component.scripts.seplan import asset_to_image, mask_image, quintiles
 from component.widget.base_dialog import BaseDialog
+from component.widget.alert_state import Alert
 
 su.init_ee()
 
 
 class ExportMapDialog(BaseDialog):
-    def __init__(self, recipe: Recipe, **kwargs):
+    def __init__(self, recipe: Recipe, alert: Alert, **kwargs):
         super().__init__(**kwargs)
 
         # init the downloadable informations
@@ -49,7 +50,7 @@ class ExportMapDialog(BaseDialog):
         self.w_asset = sw.Select(items=[], v_model=[])
 
         # add alert and btn component for the loading_button
-        self.alert = sw.Alert()
+        self.alert = alert or sw.Alert()
         self.btn = TextBtn(cm.map.dialog.export.export)
         self.btn_cancel = TextBtn(cm.map.dialog.export.cancel, outlined=True)
 
@@ -62,7 +63,6 @@ class ExportMapDialog(BaseDialog):
                 self.w_scale,
                 w_method_lbl,
                 self.w_method,
-                self.alert,
             ]
         )
         self.actions = sw.CardActions(
