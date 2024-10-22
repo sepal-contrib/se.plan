@@ -10,7 +10,7 @@ from component import widget as cw
 
 
 from sepal_ui.frontend.styles import get_theme
-from traitlets import Bool, Int, Unicode, directional_link, link, observe
+from traitlets import Bool, Dict, Int, Unicode, directional_link, link, observe
 from sepal_ui.sepalwidgets.widget import Markdown
 import ipyvuetify as v
 import component.parameter as cp
@@ -57,19 +57,19 @@ class RecipeInput(sw.FileInput):
 
     def validate_input(self, change):
         """Validate the recipe file."""
+
         if not change["new"]:
             return
 
-        self.valid = False
-
         # Reset any previous error messages
+        self.valid = False
         self.text_field_msg.error_messages = []
+        self.load_recipe_path = None
 
         # Validate the recipe file and show errors if there are
         self.load_recipe_path = validation.validate_recipe(
             change["new"], self.text_field_msg
         )
-
         self.valid = bool(self.load_recipe_path)
 
 
@@ -395,3 +395,29 @@ class UpdateImages(v.VuetifyTemplate):
     def update_images(self, *_):
         """trigger the template method i.e. the resize event."""
         return self.send({"method": "updateImageSources"})
+
+
+class RecipeInspector(v.VuetifyTemplate):
+
+    template_file = Unicode(str(Path(__file__).parent / "vue/recipe_reader.vue")).tag(
+        sync=True
+    )
+    data_dict = Dict().tag(sync=True)
+    dialog = Bool(False).tag(sync=True)
+    recipe_name = Unicode("").tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def set_data(self, data: dict, recipe_name: str):
+        self.open_dialog()
+        self.recipe_name = recipe_name
+        self.data_dict = data
+
+    def open_dialog(self, *_):
+
+        self.dialog = True
+
+    def close_dialog(self, *_):
+
+        self.dialog = False
