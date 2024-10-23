@@ -137,3 +137,17 @@ def are_comparable(recipe_paths: RecipePaths):
         )
 
     return True
+
+
+def read_recipe_data(recipe_path: str):
+    """Read the recipe data from the recipe file."""
+
+    recipe_path = Path(validate_recipe(recipe_path))
+
+    with recipe_path.open() as f:
+        data = json.loads(f.read())
+
+    # Remove all the "updated" keys from the data in the second level
+    [remove_key(data, key) for key in ["updated", "new_changes"]]
+
+    return recipe_path, data

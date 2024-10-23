@@ -10,7 +10,8 @@
                 "title" : "Load a recipe",
                 "desc" : "Select a recipe to load",
                 "cancel" : "Cancel",
-                "load" : "Load"
+                "load" : "Load",
+                "view" : "View"
             }
         },
         "new": {

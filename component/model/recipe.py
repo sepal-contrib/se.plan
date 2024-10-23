@@ -52,16 +52,9 @@ class Recipe(HasTraits):
 
     def load(self, recipe_path: str):
         """Load the recipe element in the different element of the app."""
-        # This is not necessary since the recipe path is already validated from the origin
-        # but I want to keep it here if I want to call the load function from somewhere else
-        recipe_path = Path(validation.validate_recipe(recipe_path))
+
+        recipe_path, data = validation.read_recipe_data(recipe_path)
         self.recipe_session_path = str(recipe_path)
-
-        with recipe_path.open() as f:
-            data = json.loads(f.read())
-
-        # Remove all the "updated" keys from the data in the second level
-        [validation.remove_key(data, key) for key in ["updated", "new_changes"]]
 
         # load the aoi_model
         self.seplan_aoi.import_data(data["aoi"])
