@@ -2,12 +2,12 @@
     <v-dialog v-model="dialog" max-width="900px">
       <v-card>
         <v-card-title>
-          <v-icon color="white" class="mr-2">mdi-chef-hat</v-icon> Recipe: {{ recipe_name }}
+          <v-icon color="primary_contrast" class="mr-2">mdi-chef-hat</v-icon> Recipe: {{ recipe_name }}
         </v-card-title>
   
         <v-card-text ref="cardContent">
 
-          <div ref="scrollableContent" style="max-height: 750px; overflow-y: auto;">
+          <div ref="scrollableContent" style="max-height: 650px; overflow-y: auto;">
             <div v-if="data_dict">
             <!-- Display AOI -->
             <div>
@@ -119,7 +119,7 @@
             <!-- Display Signature at the Bottom -->
             <div>
               <div class="center-content">
-              <v-icon color="white" class="mr-2">mdi-fingerprint</v-icon>
+              <v-icon color="primary_contrast" class="mr-2">mdi-fingerprint</v-icon>
               <strong>Recipe signature: </strong> {{ data_dict.signature }}
             </div>
             </div>
@@ -244,15 +244,9 @@ module.exports = {
       },
     },
     methods: {
+
         getPriorityChipColor(weight) {
-  const colors = [
-    'grey lighten-1',    // Weight 0 - Neutral
-    'green lighten-2',   // Weight 1 - Very Low Priority
-    'lime lighten-2',    // Weight 2 - Low Priority
-    'yellow lighten-2',  // Weight 3 - Medium Priority
-    'orange lighten-2',  // Weight 4 - High Priority
-    'red lighten-2',     // Weight 5 - Very High Priority
-  ];
+  const colors = ['#gray', '#a8decb', '#66c2a4', '#339768', '#006d2c'];
   const index = Math.min(Math.max(parseInt(weight), 0), colors.length - 1);
   return colors[index] || 'black';
 },
