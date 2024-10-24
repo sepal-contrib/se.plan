@@ -28,6 +28,32 @@ from .constraint_dialog import ConstraintDialog
 from .cost_dialog import CostDialog
 
 
+class RecipeInspector(v.VuetifyTemplate):
+
+    template_file = Unicode(str(Path(__file__).parent / "vue/recipe_reader.vue")).tag(
+        sync=True
+    )
+    data_dict = Dict().tag(sync=True)
+    dialog = Bool(False).tag(sync=True)
+    recipe_name = Unicode("").tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def set_data(self, data: dict, recipe_name: str):
+        self.open_dialog()
+        self.recipe_name = recipe_name
+        self.data_dict = data
+
+    def open_dialog(self, *_):
+
+        self.dialog = True
+
+    def close_dialog(self, *_):
+
+        self.dialog = False
+
+
 class RecipeInput(sw.FileInput):
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
@@ -38,6 +64,11 @@ class RecipeInput(sw.FileInput):
 
         self.text_field_msg = self.children[-1]
         self.observe(self.validate_input, "v_model")
+        self.recipe_inspector = RecipeInspector()
+
+        self.btn_view = TextBtn(cm.recipe.load.dialog.view, class_="ml-2")
+        text_field = self.children[-1]
+        text_field.class_ = "mx-2"
 
         loading_button = self.children[2].v_slots[0]["children"]
         loading_button.small = True
@@ -47,6 +78,9 @@ class RecipeInput(sw.FileInput):
             main_recipe.observe(self.set_default_recipe, "recipe_session_path")
             loading_button.disabled = True
             self.reload.disabled = True
+
+        self.btn_view.on_event("click", self.view_event)
+        self.children = self.children + [self.btn_view, self.recipe_inspector]
 
     def set_default_recipe(self, change):
         """Set the default recipe."""
@@ -71,6 +105,15 @@ class RecipeInput(sw.FileInput):
             change["new"], self.text_field_msg
         )
         self.valid = bool(self.load_recipe_path)
+
+    def view_event(self, *_):
+        """View the recipe in a dialog."""
+
+        if not self.load_recipe_path:
+            return
+
+        recipe_path, data = validation.read_recipe_data(self.load_recipe_path)
+        self.recipe_inspector.set_data(data, recipe_name=str(Path(recipe_path)))
 
 
 class TableIcon(sw.Icon):
@@ -395,29 +438,3 @@ class UpdateImages(v.VuetifyTemplate):
     def update_images(self, *_):
         """trigger the template method i.e. the resize event."""
         return self.send({"method": "updateImageSources"})
-
-
-class RecipeInspector(v.VuetifyTemplate):
-
-    template_file = Unicode(str(Path(__file__).parent / "vue/recipe_reader.vue")).tag(
-        sync=True
-    )
-    data_dict = Dict().tag(sync=True)
-    dialog = Bool(False).tag(sync=True)
-    recipe_name = Unicode("").tag(sync=True)
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-    def set_data(self, data: dict, recipe_name: str):
-        self.open_dialog()
-        self.recipe_name = recipe_name
-        self.data_dict = data
-
-    def open_dialog(self, *_):
-
-        self.dialog = True
-
-    def close_dialog(self, *_):
-
-        self.dialog = False

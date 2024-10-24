@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Literal
 
 import ipyvuetify as v
-from component.scripts.validation import read_recipe_data
 from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
@@ -17,7 +16,7 @@ from component.model.recipe import Recipe
 # Import types
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
-from component.widget.custom_widgets import RecipeInput, RecipeInspector
+from component.widget.custom_widgets import RecipeInput
 
 _content = {
     "new": {
@@ -293,10 +292,7 @@ class LoadDialog(BaseDialog):
         self.w_input_recipe = RecipeInput()
 
         self.btn_load = TextBtn(cm.recipe.load.dialog.load)
-        self.btn_view = TextBtn(cm.recipe.load.dialog.view)
         self.btn_cancel = TextBtn(cm.recipe.load.dialog.cancel, outlined=True)
-
-        self.view_recipe_dialog = RecipeInspector()
 
         # assemlble the layout
         self.children = [
@@ -307,10 +303,8 @@ class LoadDialog(BaseDialog):
                     sw.CardText(children=[self.w_input_recipe]),
                     sw.CardActions(
                         children=[
-                            self.view_recipe_dialog,
                             sw.Spacer(),
                             self.btn_load,
-                            self.btn_view,
                             self.btn_cancel,
                         ]
                     ),
@@ -318,25 +312,11 @@ class LoadDialog(BaseDialog):
             )
         ]
 
-        self.view_event = loading_button(alert=self.alert, button=self.btn_view)(
-            self.view_event
-        )
-
         # Create events
         self.btn_cancel.on_event("click", self.cancel)
-        self.btn_view.on_event("click", self.view_event)
         directional_link(
             (self.w_input_recipe, "load_recipe_path"), (self, "load_recipe_path")
         )
-
-    def view_event(self, *_):
-        """View the recipe in a dialog."""
-
-        if not self.load_recipe_path:
-            return
-
-        recipe_path, data = read_recipe_data(self.load_recipe_path)
-        self.view_recipe_dialog.set_data(data, recipe_name=str(Path(recipe_path)))
 
     def show(self):
         """Display the dialog and write down the text in the alert."""
