@@ -74,7 +74,7 @@
         },
         "natural_regeneration": {
             "name": "Natural regeneration variability",
-            "detail": "Natural regeneration is more likely to succeed when restoration sites are closer to remaining natural forests, which are an essential seed source. The se.plan tool uses 2015 data on forest cover within a 5 km buffer of a restoration pixel to predict the probability of natural regeneration success on a scale of 0 (no chance of success) to 1 (certain success). Uncertainty in success of natural regeneration, expressed as an index ranging from 0 (no uncertainty) to 1 (complete uncertainty). Lower uncertainty tends to make restoration via natural regeneration more viable."
+            "detail": "Natural regeneration is more likely to succeed when restoration sites are closer to remaining natural forests, which are an essential seed source. The se.plan tool uses 2015 data on forest cover within a 5 km buffer of a restoration pixel to predict the probability of natural regeneration success on a scale of 0 (no chance of success) to 1 (certain success)."
         },
         "declining_population": {
             "name": "Declining population",

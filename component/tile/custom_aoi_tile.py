@@ -11,7 +11,6 @@ from sepal_ui.mapping import SepalMap
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
-from component.widget.alert_state import AlertState
 from component.widget.custom_aoi_view import SeplanAoiView
 
 from sepal_ui.scripts.utils import init_ee
@@ -26,23 +25,15 @@ print(f"Import aoi_tile time: {end - start}")
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(
-        self, recipe: Recipe, build_alert: AlertState, solara_basemap_tiles: dict = None
-    ):
-        start = time.time()
-        # print the time it takes to start the tile and cast to seconds
-        print(f"Starting AoiTile at {start}")
-
+    def __init__(self, recipe: Recipe, solara_basemap_tiles: dict = None):
         self.class_ = "d-block custom_map"
         self._metadata = {"mount_id": "aoi_tile"}
 
         super().__init__()
 
-        build_alert.set_state("new", "aoi", "building")
-        print(f"{time.time()}")
         self.map_ = SepalMap(gee=True, solara_basemap_tiles=solara_basemap_tiles)
         self.map_.dc.hide()
-        self.map_.min_zoom = 3
+        self.map_.min_zoom = 1
         self.map_.add_basemap("SATELLITE")
 
         # Build the aoi view with our custom aoi_model
@@ -57,11 +48,6 @@ class AoiTile(sw.Layout):
 
         # bind an extra js behaviour7
         self.view.observe(self._check_lmic, "updated")
-
-        build_alert.set_state("new", "aoi", "done")
-
-        end = time.time()
-        print(f"AoiTile load time: {end - start}")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""

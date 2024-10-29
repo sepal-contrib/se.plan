@@ -1,9 +1,11 @@
 import pandas as pd
-from traitlets import List
+from traitlets import List, observe
 
 from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
+from component.scripts.logger import logger
+from component.types import ConstraintLayerData
 
 
 class ConstraintModel(QuestionnaireModel):
@@ -54,6 +56,7 @@ class ConstraintModel(QuestionnaireModel):
         del self.data_type[idx]
 
         if update:
+            logger.info("updating from remove")
             self.updated += 1
         self.new_changes += 1
 
@@ -76,7 +79,7 @@ class ConstraintModel(QuestionnaireModel):
         self.units.append(unit)
         self.values.append([])
         self.data_type.append(data_type)
-
+        logger.info("updating from add")
         self.updated += 1
         self.new_changes += 1
 
@@ -100,7 +103,7 @@ class ConstraintModel(QuestionnaireModel):
         self.descs[idx] = desc
         self.units[idx] = unit
         self.data_type[idx] = data_type
-
+        logger.info("updating from update")
         self.updated += 1
         self.new_changes += 1
 
@@ -123,6 +126,23 @@ class ConstraintModel(QuestionnaireModel):
         self.data_type = []
 
         self.__init__()
-
+        logger.info("updating from reset")
         self.updated += 1
         self.new_changes = 0
+
+    @observe("updated")
+    def _on_update(self, *_):
+        logger.info("######## updated ########")
+
+    def get_layer_data(self, layer_id: str) -> ConstraintLayerData:
+        """Return the data of a specific layer."""
+        idx = self.get_index(layer_id)
+        return {
+            "id": self.ids[idx],
+            "name": self.names[idx],
+            "asset": self.assets[idx],
+            "desc": self.descs[idx],
+            "unit": self.units[idx],
+            "value": self.values[idx],
+            "data_type": self.data_type[idx],
+        }

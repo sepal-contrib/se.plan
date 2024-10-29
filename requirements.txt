@@ -3,11 +3,13 @@ solara
 ee-client
 toml
 
-# Fixes authentication process
-git+https://github.com/12rambau/sepal_ui.git@sepal_pre_release
+ipecharts>=1.0.8
+sepal_ui==2.21.0
+rasterio<1.3.11 # Leave it here even if it's already in the sepal_ui requirements. Check https://github.com/openforis/sepal/issues/328
 
-# https://github.com/openforis/sepal/issues/321
-ipyleaflet==0.18.2
+
+https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/jupyter_leaflet-0.19.2-py3-none-any.whl
+https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/ipyleaflet-0.19.2-py3-none-any.whl
 
 # custom libs
 earthengine-api

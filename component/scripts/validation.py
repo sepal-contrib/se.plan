@@ -1,4 +1,5 @@
 """functions to read and validate a recipe and return meaningful errors."""
+
 import json
 from pathlib import Path
 from typing import Optional
@@ -7,6 +8,8 @@ from jsonschema import ValidationError, validate
 from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
+from component.scripts.logger import logger
+from component.types import RecipePaths
 
 
 def find_missing_property(instance, schema):
@@ -46,7 +49,7 @@ def validate_recipe(
 
     except ValidationError as e:
         # Constructing a path string
-        print(e)
+        logger.info(e)
         path = ".".join(map(str, e.path))
 
         # Check if the error is related to the signature field
@@ -79,3 +82,72 @@ def validate_recipe(
         raise ValidationError(e)
 
     return recipe_path
+
+
+def remove_key(data, key_to_remove):
+    """Remove a key from a dictionary."""
+    if isinstance(data, dict):
+        if key_to_remove in data:
+            del data[key_to_remove]
+        for key, value in list(data.items()):
+            remove_key(value, key_to_remove)
+    elif isinstance(data, list):
+        for item in data:
+            remove_key(item, key_to_remove)
+
+
+def validate_scenarios_recipes(recipe_paths: RecipePaths):
+    """Validate all the recipes in the scenario."""
+
+    for recipe_id, recipe_info in recipe_paths.items():
+        if not recipe_info["valid"]:
+            raise Exception(f"Error: Recipe '{recipe_id}' is not a valid recipe.")
+
+    # Validate that all the pahts have an unique stem name
+
+    recipe_stems = [
+        Path(recipe_info["path"]).stem for recipe_info in recipe_paths.values()
+    ]
+
+    if len(recipe_stems) != len(set(recipe_stems)):
+        raise Exception(
+            "Error: To compare recipes, all the recipes must have an unique name."
+        )
+
+    return True
+
+
+def are_comparable(recipe_paths: RecipePaths):
+    """Check if the recipes are comparable based on their primary AOI (Area of Interest)."""
+
+    aoi_values = set()
+
+    for _, recipe_info in recipe_paths.items():
+        with Path(recipe_info["path"]).open() as f:
+            data = json.loads(f.read())
+            remove_key(data, "updated")
+            remove_key(data, "new_changes")
+            primary_aoi = data["aoi"]["primary"]
+            aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
+
+    # Raise an error if the recipes are not comparable
+    if len(aoi_values) > 1:
+        raise Exception(
+            "Error: The recipes are not comparable. All recipes must have the same main Area of Interest."
+        )
+
+    return True
+
+
+def read_recipe_data(recipe_path: str):
+    """Read the recipe data from the recipe file."""
+
+    recipe_path = Path(validate_recipe(recipe_path))
+
+    with recipe_path.open() as f:
+        data = json.loads(f.read())
+
+    # Remove all the "updated" keys from the data in the second level
+    [remove_key(data, key) for key in ["updated", "new_changes"]]
+
+    return recipe_path, data

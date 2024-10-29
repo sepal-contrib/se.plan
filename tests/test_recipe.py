@@ -11,16 +11,13 @@ from component.model.recipe import Recipe
 @pytest.fixture()
 def recipe():
 
-    recipe = Recipe()
-    recipe.load_model()
-
-    return recipe
+    return Recipe()
 
 
 def test_load_recipe(recipe: Recipe):
 
     # Get the path of the current file
-    path = Path(__file__).parent / "data/test_recipe.json"
+    path = Path(__file__).parent / "data/recipes/test_recipe.json"
 
     # Load the recipe
     recipe.load(path)
@@ -225,7 +222,7 @@ def test_load_recipe(recipe: Recipe):
 def test_save_recipe(recipe, tmp_path: pytest.TempPathFactory):
 
     # Get the path of the current file
-    path = Path(__file__).parent / "data/test_recipe.json"
+    path = Path(__file__).parent / "data/recipes/test_recipe.json"
 
     # Load the recipe
     recipe.load(path)
@@ -258,7 +255,7 @@ def test_save_recipe(recipe, tmp_path: pytest.TempPathFactory):
 def test_reset_recipe(recipe):
 
     # Get the path of the current file
-    path = Path(__file__).parent / "data/test_recipe.json"
+    path = Path(__file__).parent / "data/recipes/test_recipe.json"
 
     # Load the recipe
     recipe.load(path)

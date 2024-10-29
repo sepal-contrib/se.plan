@@ -1,7 +1,3 @@
-red_to_green = ["#edf8fb", "#66c2a4", "#006d2c"]  # lighgreen  # green  # darkgreen
-no_data_color = ["#353535"]  # the color used for values filtered by constraints
-
-
 def hex_to_RGB(hex):
     """Changes from hex to RGB.
 
@@ -51,22 +47,22 @@ def color_dict(gradient):
     return [RGB_to_hex(RGB) for RGB in gradient]
 
 
-def gradient(n, colors=red_to_green):
+def gradient(levels: int, palette: list) -> list:
     """Returns a list of colors forming linear gradients between all sequential pairs of colors.
 
-    "n" specifies the total number of desired output colors.
+    "lavels" specifies the total number of desired output colors.
     """
     # The number of colors per individual linear gradient
-    n_out = int(float(n) / (len(colors) - 1))
+    levels_out = int(float(levels) / (len(palette) - 1))
 
     # create an initial dictionary for a single pair
-    nb_colors = (n_out + 1) if n % 2 else n_out
-    gradient_dict = linear_gradient(colors[0], colors[1], nb_colors)
+    nb_palette = (levels_out + 1) if levels % 2 else levels_out
+    gradient = linear_gradient(palette[0], palette[1], nb_palette)
 
     # add the other color pairs if needed
-    if len(colors) > 1:
-        for i in range(1, len(colors) - 1):
-            next_ = linear_gradient(colors[i], colors[i + 1], n_out + 1)
-            gradient_dict += next_[1:]
+    if len(palette) > 1:
+        for i in range(1, len(palette) - 1):
+            next_ = linear_gradient(palette[i], palette[i + 1], levels_out + 1)
+            gradient += next_[1:]
 
-    return gradient_dict
+    return gradient

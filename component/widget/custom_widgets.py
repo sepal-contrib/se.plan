@@ -1,17 +1,19 @@
 from pathlib import Path
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
+from component.model.recipe import Recipe
+from component.scripts import validation
 from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
-from sepal_ui.scripts import utils as su
+from component import widget as cw
 
-from sepal_ui import color
+
 from sepal_ui.frontend.styles import get_theme
-from traitlets import Bool, Int, Unicode, directional_link, link, observe
+from traitlets import Bool, Dict, Int, Unicode, directional_link, link, observe
 from sepal_ui.sepalwidgets.widget import Markdown
 import ipyvuetify as v
-from sepal_ui.message import ms
+import component.parameter as cp
 
 
 from component.message import cm
@@ -26,16 +28,107 @@ from .constraint_dialog import ConstraintDialog
 from .cost_dialog import CostDialog
 
 
+class RecipeInspector(v.VuetifyTemplate):
+
+    template_file = Unicode(str(Path(__file__).parent / "vue/recipe_reader.vue")).tag(
+        sync=True
+    )
+    data_dict = Dict().tag(sync=True)
+    dialog = Bool(False).tag(sync=True)
+    recipe_name = Unicode("").tag(sync=True)
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
+    def set_data(self, data: dict, recipe_name: str):
+        self.open_dialog()
+        self.recipe_name = recipe_name
+        self.data_dict = data
+
+    def open_dialog(self, *_):
+
+        self.dialog = True
+
+    def close_dialog(self, *_):
+
+        self.dialog = False
+
+
+class RecipeInput(sw.FileInput):
+
+    load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
+    valid = Bool(False).tag(sync=True)
+
+    def __init__(self, main_recipe: Recipe = None, **kwargs):
+        super().__init__(".json", folder=cp.result_dir, root=cp.result_dir, **kwargs)
+
+        self.text_field_msg = self.children[-1]
+        self.observe(self.validate_input, "v_model")
+        self.recipe_inspector = RecipeInspector()
+
+        self.btn_view = TextBtn(cm.recipe.load.dialog.view, class_="ml-2")
+        text_field = self.children[-1]
+        text_field.class_ = "mx-2"
+
+        loading_button = self.children[2].v_slots[0]["children"]
+        loading_button.small = True
+        self.reload.small = True
+
+        if main_recipe:
+            main_recipe.observe(self.set_default_recipe, "recipe_session_path")
+            loading_button.disabled = True
+            self.reload.disabled = True
+
+        self.btn_view.on_event("click", self.view_event)
+        self.children = self.children + [self.btn_view, self.recipe_inspector]
+
+    def set_default_recipe(self, change):
+        """Set the default recipe."""
+
+        recipe_session_path = change["new"]
+
+        self.select_file(recipe_session_path)
+
+    def validate_input(self, change):
+        """Validate the recipe file."""
+
+        if not change["new"]:
+            return
+
+        # Reset any previous error messages
+        self.valid = False
+        self.text_field_msg.error_messages = []
+        self.load_recipe_path = None
+
+        # Validate the recipe file and show errors if there are
+        self.load_recipe_path = validation.validate_recipe(
+            change["new"], self.text_field_msg
+        )
+        self.valid = bool(self.load_recipe_path)
+
+    def view_event(self, *_):
+        """View the recipe in a dialog."""
+
+        if not self.load_recipe_path:
+            return
+
+        recipe_path, data = validation.read_recipe_data(self.load_recipe_path)
+        self.recipe_inspector.set_data(data, recipe_name=str(Path(recipe_path)))
+
+
 class TableIcon(sw.Icon):
     """A simple icon to be used in a table."""
 
-    def __init__(self, gliph: str, name: str):
+    def __init__(self, gliph: str, name: str, **kwargs: dict) -> None:
+        small = kwargs.pop("small", True)
+        kwargs["x_small"] = kwargs.pop("x_small", False)
         super().__init__(
             children=[gliph],
             icon=True,
-            small=True,
+            small=small,
             attributes={"data-layer": name},
             style_="font: var(--fa-font-solid);",
+            **kwargs,
         )
 
 
@@ -92,9 +185,12 @@ class ToolBar(sw.Toolbar):
         self.dialog.open_new()
 
 
-class DashToolBar(sw.Toolbar):
-    def __init__(self, model: Seplan) -> None:
+class DashToolbar(sw.Toolbar):
+    def __init__(self, model: Seplan, alert: Alert = None) -> None:
         super().__init__()
+
+        alert = alert or Alert()
+
         self.height = "48px"
         self.model = model
         self.elevation = 0
@@ -105,14 +201,23 @@ class DashToolBar(sw.Toolbar):
         ).set_tooltip(
             cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
         )
+        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+            cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
+        )
 
+        self.compare_dialog = cw.CompareScenariosDialog(type_="chart", alert=alert)
+
+        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
         self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
 
         self.children = [
             self.btn_download.with_tooltip,
             sw.Spacer(),
+            self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
             self.btn_dashboard,
+            # Dialogs
+            self.compare_dialog,
         ]
 
 
@@ -154,10 +259,6 @@ class CustomDrawerItem(sw.DrawerItem):
         super().__init__(*args, **kwargs)
 
         self.attributes = {"id": kwargs["card"]}
-
-        # Only hide the drawers that are not the main ones
-        if self.attributes["id"] not in (["recipe_tile", "about_tile"]):
-            self.viz = False
 
         self.observe(self.add_notif, "alert")
 

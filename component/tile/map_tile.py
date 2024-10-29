@@ -38,7 +38,9 @@ class MapTile(sw.Layout):
         self.map_ = SeplanMap(
             recipe.seplan_aoi, solara_basemap_tiles=solara_basemap_tiles
         )
-        self.map_toolbar = MapToolbar(recipe=self.recipe, map_=self.map_)
+        self.map_toolbar = MapToolbar(
+            recipe=self.recipe, map_=self.map_, alert=self.alert
+        )
 
         # init the final layers
         self.wlc_outputs = None
@@ -59,8 +61,6 @@ class MapTile(sw.Layout):
         # # add js behaviour
         self.map_toolbar.btn_compute.on_event("click", self._compute)
 
-        build_alert.set_state("new", "map", "done")
-
         self.recipe.seplan_aoi.observe(self._update_aoi, "updated")
 
         # This will open the info dialog when the map_tile drawer is clicked
@@ -70,24 +70,6 @@ class MapTile(sw.Layout):
         # Use reset_view trait ffrom seplan_aoi to reset the map view (remove all the layers)
 
         self.recipe.seplan_aoi.observe(lambda *_: self.map_.remove_all(), "reset_view")
-
-    # def open_info_dialog(self, change):
-    #     """Open the info dialog when the map_tile app drawer is clicked."""
-    #     if change["new"] == "map_tile":
-    #         # I just want to open the dialog once, so I remove the observer
-    #         # but only when I'm sure the user has read the content and closed the dialog.
-    #         if self.map_toolbar.info_dialog.well_read:
-    #             self.app_model.unobserve(self.open_info_dialog, "active_drawer")
-    #             return
-
-    #         self.map_toolbar.info_dialog.open_dialog()
-
-    #     else:
-    #         self.map_toolbar.info_dialog.close_dialog()
-
-    #     # This will open the info dialog when the map_tile drawer is clicked
-    #     if self.app_model:
-    #         self.app_model.observe(self.open_info_dialog, "active_drawer")
 
     def open_info_dialog(self, change):
         """Open the info dialog when the map_tile app drawer is clicked."""
@@ -117,11 +99,11 @@ class MapTile(sw.Layout):
 
         self.map_.centerObject(aoi, zoom_out=3)
         self.map_.add_ee_layer(
-            benefit_index, cp.final_viz, cm.layer.index.benefit_index.name
+            benefit_index, cp.layer_vis, cm.layer.index.benefit_index.name
         )
         self.map_.add_ee_layer(
-            benefit_cost_index, cp.final_viz, cm.layer.index.benefit_cost_index.name
+            benefit_cost_index, cp.layer_vis, cm.layer.index.benefit_cost_index.name
         )
         self.map_.add_ee_layer(
-            constraint_index, cp.final_viz, cm.layer.index.constraint_index.name
+            constraint_index, cp.layer_vis, cm.layer.index.constraint_index.name
         )

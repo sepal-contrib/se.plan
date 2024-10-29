@@ -5,24 +5,20 @@
                 "download": {"title": "Download", "tooltip": "Save dashboard statistics as .csv"},
                 "compute": {
                     "title": "Compute dashboard"
+                },
+                "compare": {
+                    "title": "Compare",
+                    "tooltip": "Compare multiple scenarios"
                 }
             }
         },
         "region": {
-            "title": "Summary of restoration suitability by region",
+            "title": "Forest restoration suitability",
             "detail": "Details",
-            "potentials": {
-                "0": "Very low",
-                "1": "Low",
-                "2": "Medium",
-                "3": "High",
-                "4": "Very High",
-                "5": "Unsuitable land"
-            },
-            "names": {
-                "0": "restoration potential",
-                "1": "surface (ha)",
-                "2": "ratio over total surface (%)"
+            "table" : {
+                "header" : {
+                    "area_name": "Area name"
+                }
             }
         },
         "theme": {
@@ -34,7 +30,7 @@
                     "0": "For each assessed benefit, the mean value over the considered AOI is displayed in its original units (for example, C tons/ha). Value will be using the SI prefixes if the value is not readable in the original unit.",
                     "1": "For any of these thematic layers, if you have used your own data in the model, make sure that you provided the correct information."
                 },
-                "details": "details"
+                "details": "Details"
             },
             "cost": {
                 "description": {

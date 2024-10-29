@@ -1,4 +1,3 @@
-import concurrent.futures
 from datetime import datetime
 from pathlib import Path
 from typing import Literal
@@ -10,19 +9,14 @@ from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
 from traitlets import Int, Unicode, directional_link
 
-import component.parameter as cp
 from component.message import cm
 from component.model.app_model import AppModel
 from component.model.recipe import Recipe
-from component.scripts import validation
-from component.tile.custom_aoi_tile import AoiTile
-from component.tile.dashboard_tile import DashboardTile
-from component.tile.map_tile import MapTile
 
 # Import types
-from component.tile.questionnaire_tile import QuestionnaireTile
-from component.widget.alert_state import AlertDialog, AlertState
+from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
+from component.widget.custom_widgets import RecipeInput
 
 _content = {
     "new": {
@@ -134,14 +128,12 @@ class RecipeView(sw.Card):
     app_model: AppModel
     """It will be used to listen the on_save trait and trigger the save button here"""
 
-    def __init__(
-        self, recipe: Recipe, app_model: AppModel = None, alert: AlertState = None
-    ):
+    def __init__(self, recipe: Recipe = None, app_model: AppModel = None):
         self.attributes = {"_metadata": "recipe_tile"}
 
         super().__init__()
-        self.recipe = recipe
-        self.alert = alert
+        self.recipe = recipe or Recipe()
+        self.alert = AlertState()
         self.alert_dialog = AlertDialog(self.alert)
 
         self.app_model = app_model
@@ -152,7 +144,7 @@ class RecipeView(sw.Card):
         self.card_load = CardLoad()
         self.card_save = CardNewSave(type_="save")
 
-        self.load_dialog = LoadDialog(self.recipe)
+        self.load_dialog = LoadDialog()
 
         self.children = [
             self.alert_dialog,
@@ -170,10 +162,6 @@ class RecipeView(sw.Card):
                 ]
             ),
         ]
-
-        directional_link(
-            (self.load_dialog, "load_recipe_path"), (self, "load_recipe_path")
-        )
 
         directional_link(
             (self, "recipe_session_path"), (self.recipe, "recipe_session_path")
@@ -196,7 +184,9 @@ class RecipeView(sw.Card):
         # Create events
         self.card_new.btn.on_event("click", self.new_event)
         self.card_load.btn.on_event("click", lambda *_: self.load_dialog.show())
+
         self.load_dialog.btn_load.on_event("click", self.load_event)
+
         self.card_save.btn.on_event("click", self.save_event)
         self.app_model.observe(self.save_event, "on_save")
 
@@ -207,12 +197,6 @@ class RecipeView(sw.Card):
 
         self.card_save.recipe_name = str(Path(change["new"]).stem)
 
-    def new_recipe(self):
-        """Initialize a new recipe."""
-
-        self.recipe.load_model()
-        self.create_view += 1
-
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
     @switch("loading", on_widgets=["card_new"])
     def new_event(self, *_):
@@ -222,21 +206,14 @@ class RecipeView(sw.Card):
         if not self.card_new.recipe_name:
             raise ValueError(cm.recipe.error.no_name)
 
-        # consider first when theres is not a recipe loaded
-        if not self.recipe.seplan_aoi:
-            print("no seplan")
-            self.new_recipe()
-        else:
-            self.alert.set_state("reset", "all", "building")
-            self.recipe.reset()
-            self.alert.set_state("reset", "all", "done")
+        self.alert.set_state("reset", "all", "building")
+        self.recipe.reset()
+        self.alert.set_state("reset", "all", "done")
 
         # update current session path
         self.recipe_session_path = self.recipe.get_recipe_path(
             self.card_new.recipe_name
         )
-
-        # self.recipe.save(self.recipe_session_path)
 
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
     @switch("loading", on_widgets=["card_load"])
@@ -253,10 +230,9 @@ class RecipeView(sw.Card):
         if not self.load_dialog.load_recipe_path:
             return
 
-        self.load_dialog.v_model = False
+        self.load_recipe_path = self.load_dialog.load_recipe_path
 
-        if not self.recipe.seplan_aoi:
-            self.new_recipe()
+        self.load_dialog.v_model = False
 
         self.alert.set_state("load", "all", "building")
 
@@ -305,17 +281,15 @@ class LoadDialog(BaseDialog):
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
 
-    def __init__(self, recipe: Recipe):
-        self.recipe = recipe
+    def __init__(self, alert: Alert = None):
+
+        self.alert = alert or Alert()
         self.load_recipe_path = None
 
         super().__init__()
 
         # Create input file widget wrapped in a layout
-        self.w_input_recipe = sw.FileInput(
-            ".json", folder=cp.result_dir, root=cp.result_dir
-        )
-        self.text_field_msg = self.w_input_recipe.children[-1]
+        self.w_input_recipe = RecipeInput()
 
         self.btn_load = TextBtn(cm.recipe.load.dialog.load)
         self.btn_cancel = TextBtn(cm.recipe.load.dialog.cancel, outlined=True)
@@ -328,7 +302,11 @@ class LoadDialog(BaseDialog):
                     sw.CardTitle(children=[cm.recipe.load.dialog.title]),
                     sw.CardText(children=[self.w_input_recipe]),
                     sw.CardActions(
-                        children=[sw.Spacer(), self.btn_load, self.btn_cancel]
+                        children=[
+                            sw.Spacer(),
+                            self.btn_load,
+                            self.btn_cancel,
+                        ]
                     ),
                 ],
             )
@@ -336,26 +314,14 @@ class LoadDialog(BaseDialog):
 
         # Create events
         self.btn_cancel.on_event("click", self.cancel)
-        self.w_input_recipe.observe(self.validate_input, "v_model")
-
-    @su.switch("loading", on_widgets=["btn_load"])
-    def validate_input(self, change):
-        """Validate the recipe file."""
-        if not change["new"]:
-            return
-
-        # Reset any previous error messages
-        self.text_field_msg.error_messages = []
-
-        # Validate the recipe file and show errors if there are
-        self.load_recipe_path = validation.validate_recipe(
-            change["new"], self.text_field_msg
+        directional_link(
+            (self.w_input_recipe, "load_recipe_path"), (self, "load_recipe_path")
         )
 
     def show(self):
         """Display the dialog and write down the text in the alert."""
         self.load_recipe_path = None
-        self.text_field_msg.error_messages = []
+        self.w_input_recipe.text_field_msg.error_messages = []
         self.w_input_recipe.reset()
         self.valid = False
         self.open_dialog()
@@ -370,30 +336,17 @@ class LoadDialog(BaseDialog):
 
 
 class RecipeTile(sw.Layout):
-    def __init__(
-        self,
-        app_model: AppModel,
-        aoi_tile: AoiTile,
-        questionnaire_tile: QuestionnaireTile,
-        map_tile: MapTile,
-        dashboard_tile: DashboardTile,
-    ):
+    def __init__(self, recipe: Recipe, app_model: AppModel):
         self._metadata = {"mount_id": "recipe_tile"}
         self.class_ = "d-block pa-2"
 
         super().__init__()
 
+        self.recipe = recipe
         self.app_model = app_model
-        self.recipe_view = RecipeView(app_model=app_model)
-
-        self.aoi_tile = aoi_tile
-        self.questionnaire_tile = questionnaire_tile
-        self.map_tile = map_tile
-        self.dashboard_tile = dashboard_tile
+        self.recipe_view = RecipeView(recipe=recipe, app_model=app_model)
 
         self.children = [self.recipe_view]
-
-        self.recipe_view.observe(self.render, "create_view")
 
         directional_link(
             (self.recipe_view, "recipe_session_path"), (self.app_model, "recipe_name")
@@ -403,48 +356,6 @@ class RecipeTile(sw.Layout):
         directional_link(
             (self.recipe_view.recipe, "new_changes"), (self.app_model, "new_changes")
         )
-
-    def render(self, *_):
-        """Render all the different tiles.
-
-        This element is intended to be used only once, when the app has to start.
-        """
-        try:
-            with concurrent.futures.ThreadPoolExecutor(max_workers=2) as executor:
-                futures = [
-                    executor.submit(
-                        self.aoi_tile.build,
-                        self.recipe_view.recipe,
-                        self.recipe_view.alert,
-                    ),
-                    executor.submit(
-                        self.questionnaire_tile.build,
-                        self.recipe_view.recipe,
-                        self.recipe_view.alert,
-                    ),
-                    executor.submit(
-                        self.map_tile.build,
-                        self.recipe_view.recipe,
-                        self.recipe_view.alert,
-                    ),
-                    executor.submit(
-                        self.dashboard_tile.build,
-                        self.recipe_view.recipe,
-                        self.recipe_view.alert,
-                    ),
-                ]
-
-                # Check if any future has raised an exception
-                for future in concurrent.futures.as_completed(futures):
-                    e = future.exception()
-                    if e:
-                        raise e  # Rethrow the first exception encountered
-
-                # concurrent.futures.wait(futures)
-        except Exception as e:
-            # If something fails, I want to return the recipe to its original state
-            self.recipe_view.recipe.__init__()
-            raise e
 
         # This trait will let know the app drawers that the app is ready to be used
         self.app_model.ready = True

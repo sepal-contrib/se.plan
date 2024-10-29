@@ -27,7 +27,9 @@
                 "draw" : "Draw a new sub area of interest (make drawing tools available)",
                 "download" : "Download current map",
                 "load" : "Load existing sub area of interest shapes",
-                "info" : "Show map information"
+                "info" : "Show map information",
+                "compare" : "Compare two different scenarios",
+                "clean" : "Clean map"
             },
             "draw_menu" : {
                 "new" : "Draw geometry",

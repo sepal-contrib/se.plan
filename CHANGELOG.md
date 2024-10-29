@@ -1,3 +1,18 @@
+## 1.6.0 (2024-08-23)
+
+### Feat
+
+- add a logger to replace prints
+- add video recording demo
+
+### Fix
+
+- improve table loading
+
+### Refactor
+
+- run the app all at once
+
 ## 1.5.1 (2024-05-09)
 
 ### Fix
