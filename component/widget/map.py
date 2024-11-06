@@ -19,7 +19,7 @@ class SeplanMap(sm.SepalMap):
     """int: either a new geometry has been drawn on the map"""
 
     def __init__(
-        self, solara_basemap_tiles, seplan_aoi: SeplanAoi = None, *args, **kwargs
+        self, seplan_aoi: SeplanAoi = None, solara_basemap_tiles=None, *args, **kwargs
     ):
         self.aoi_model = seplan_aoi if seplan_aoi else SeplanAoi()
 

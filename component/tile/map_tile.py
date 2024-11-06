@@ -15,7 +15,6 @@ class MapTile(sw.Layout):
         self,
         app_model: AppModel,
         recipe: Recipe,
-        build_alert: AlertState,
         solara_basemap_tiles: dict = None,
     ):
         """Define the map tile layout.

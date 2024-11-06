@@ -25,6 +25,8 @@ class CostRow(sw.Html):
         aoi_model: SeplanAoi,
         alert: Alert,
         preview_map: PreviewMapDialog,
+        *_,
+        **__,
     ) -> None:
         self.tag = "tr"
         self.attributes = {"layer_id": layer_id}

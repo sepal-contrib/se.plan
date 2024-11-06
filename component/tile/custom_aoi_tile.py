@@ -1,4 +1,6 @@
 import time
+from eeclient.client import EESession
+from eeclient.data import getInfo
 
 start = time.time()
 import ee
@@ -25,9 +27,12 @@ print(f"Import aoi_tile time: {end - start}")
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(self, recipe: Recipe, solara_basemap_tiles: dict = None):
+    def __init__(
+        self, ee_session: EESession, recipe: Recipe, solara_basemap_tiles: dict = None
+    ):
         self.class_ = "d-block custom_map"
         self._metadata = {"mount_id": "aoi_tile"}
+        self.ee_session = ee_session
 
         super().__init__()
 
@@ -89,9 +94,10 @@ class AoiTile(sw.Layout):
                 maxPixels=1e13,
             )
             # test if bitwiseAnd is 2 (1 is partial coverage, 0 no coverage)
-            included = ee.Algorithms.IsEqual(
-                bit_test.getNumber("constant"), 2
-            ).getInfo()
+            included = getInfo(
+                self.ee_session,
+                ee.Algorithms.IsEqual(bit_test.getNumber("constant"), 2),
+            )
 
         included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
 

@@ -1,11 +1,13 @@
 import ee
+from eeclient.client import EESession
+from eeclient.data import getInfo
 
 from component.model.recipe import Recipe
 from component.scripts.seplan import Seplan, reduce_constraints
 from component.types import RecipeStatsDict
 
 
-def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
+def get_summary_statistics(ee_session: EESession, recipe: Recipe) -> RecipeStatsDict:
     """Returns summary statistics using seplan inputs.
 
     The statistics will be later parsed to be displayed in the dashboard.
@@ -35,43 +37,52 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
     # Get the restoration suitability index
     wlc_out = seplan_model.get_constraint_index()
 
-    return (
-        ee.Dictionary(
-            {
-                recipe_name: ee.Dictionary(
-                    {
-                        aoi_name: ee.Dictionary(
-                            {
-                                "suitability": get_image_stats(
-                                    wlc_out, mask_out_areas, data["ee_feature"]
-                                ),
-                                "benefit": [
-                                    get_image_mean(
-                                        image, data["ee_feature"], mask_out_areas, name
-                                    )
-                                    for image, name in benefit_list
-                                ],
-                                "cost": [
-                                    get_image_sum(
-                                        image, data["ee_feature"], mask_out_areas, name
-                                    )
-                                    for image, name in cost_list
-                                ],
-                                "constraint": [
-                                    get_image_percent_cover_pixelarea(
-                                        image, data["ee_feature"], name
-                                    )
-                                    for image, name in constraint_list
-                                ],
-                                "color": data["color"],
-                            }
-                        )
-                        for aoi_name, data in ee_features.items()
-                    }
-                )
-            }
-        )
-    ).getInfo()
+    return getInfo(
+        ee_session,
+        (
+            ee.Dictionary(
+                {
+                    recipe_name: ee.Dictionary(
+                        {
+                            aoi_name: ee.Dictionary(
+                                {
+                                    "suitability": get_image_stats(
+                                        wlc_out, mask_out_areas, data["ee_feature"]
+                                    ),
+                                    "benefit": [
+                                        get_image_mean(
+                                            image,
+                                            data["ee_feature"],
+                                            mask_out_areas,
+                                            name,
+                                        )
+                                        for image, name in benefit_list
+                                    ],
+                                    "cost": [
+                                        get_image_sum(
+                                            image,
+                                            data["ee_feature"],
+                                            mask_out_areas,
+                                            name,
+                                        )
+                                        for image, name in cost_list
+                                    ],
+                                    "constraint": [
+                                        get_image_percent_cover_pixelarea(
+                                            image, data["ee_feature"], name
+                                        )
+                                        for image, name in constraint_list
+                                    ],
+                                    "color": data["color"],
+                                }
+                            )
+                            for aoi_name, data in ee_features.items()
+                        }
+                    )
+                }
+            )
+        ),
+    )
 
 
 def get_image_stats(image, mask, geom):

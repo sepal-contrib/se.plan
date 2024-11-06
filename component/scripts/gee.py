@@ -1,5 +1,7 @@
 from pathlib import Path
 from typing import List, Literal, Union
+from eeclient.client import EESession
+from eeclient.data import getInfo
 
 import ee
 from sepal_ui import mapping as sm
@@ -25,6 +27,7 @@ def get_layer(
 
 
 def get_limits(
+    ee_session: EESession,
     asset: str,
     data_type: Literal["binary", "continuous", "categorical"],
     aoi: Union[ee.FeatureCollection, ee.Geometry],
@@ -53,10 +56,9 @@ def get_limits(
         reducer = ee.Reducer.frequencyHistogram()
 
         def get_value(reduction):
-            return (
-                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0)))
-                .keys()
-                .getInfo()
+            return getInfo(
+                ee_session,
+                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys(),
             )
 
     ee_image = ee.Image(asset).select(0)

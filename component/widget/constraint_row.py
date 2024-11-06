@@ -1,3 +1,5 @@
+from eeclient.client import EESession
+
 from component.scripts.logger import logger
 from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
@@ -29,12 +31,15 @@ class ConstraintRow(sw.Html):
         aoi_model: SeplanAoi,
         alert: Alert,
         preview_map: PreviewMapDialog,
+        ee_session: EESession,
     ) -> None:
         # get the models as a member
 
         self.tag = "tr"
         self.layer_id = layer_id
         self.attributes = {"layer_id": layer_id}
+
+        self.ee_session = ee_session
 
         super().__init__()
 
@@ -180,7 +185,7 @@ class ConstraintRow(sw.Html):
             logger.info(f"layer_id {self.layer_id} not in model.ids")
             return
 
-        values = gee.get_limits(self.asset, self.data_type, self.aoi)
+        values = gee.get_limits(self.ee_session, self.asset, self.data_type, self.aoi)
         logger.info(f"ConstraintRow({self.layer_id}).set_limits.values:", values)
 
         if self.data_type == "binary":

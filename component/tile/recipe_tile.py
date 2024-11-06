@@ -115,7 +115,7 @@ class CardNewSave(CardAction):
             self.w_recipe_name.v_model = change["new"]
 
 
-class RecipeView(sw.Card):
+class RecipeView(sw.Layout):
     create_view = Int(0).tag(sync=True)
     """A trait to control once there is a new recipe loaded. It will be listed by RecipeTile and will build the different tiles."""
 
@@ -130,6 +130,7 @@ class RecipeView(sw.Card):
 
     def __init__(self, recipe: Recipe = None, app_model: AppModel = None):
         self.attributes = {"_metadata": "recipe_tile"}
+        self._metadata = {"mount_id": "recipe_tile"}
 
         super().__init__()
         self.recipe = recipe or Recipe()

@@ -1,5 +1,8 @@
 """Custom dialog to display individual layers from questionnaire tile."""
 
+from eeclient.client import EESession
+from eeclient.data import getInfo
+
 from typing import Literal
 
 import ee
@@ -17,9 +20,11 @@ from component.widget.legend import Legend
 
 
 class PreviewMapDialog(BaseDialog):
-    def __init__(self, solara_basemap_tiles: dict = None):
+
+    def __init__(self, ee_session: EESession, solara_basemap_tiles: dict = None):
         super().__init__(max_width="950px", min_width="950px")
 
+        self.ee_session = ee_session
         self.map_ = SepalMap(solara_basemap_tiles=solara_basemap_tiles)
         self.map_.layout.height = "60vw"
         self.map_.layout.height = "60vh"
@@ -139,7 +144,9 @@ class PreviewMapDialog(BaseDialog):
             bestEffort=True,
             tileScale=16,
         )
-        max_, min_ = [round(val, 2) for val in min_max.getInfo().values()]
+        max_, min_ = [
+            round(val, 2) for val in getInfo(self.ee_session, min_max)().values()
+        ]
 
         min_ = 0 if not min_ else min_
         max_ = 1 if not max_ else max_

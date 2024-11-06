@@ -354,6 +354,8 @@ class CustomApp(sw.App):
 
         self.appBar.save_recipe_btn.on_event("click", self.save_recipe)
 
+        self.show_tile("about_tile")
+
     def save_recipe(self, *_):
         """Save the recipe in the app model."""
         self.app_model.on_save += 1
