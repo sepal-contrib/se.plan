@@ -19,4 +19,4 @@ USER ${NB_USER}
 
 EXPOSE 8765
 
-CMD ["solara", "run", "ui.ipynb", "--host=0.0.0.0", "--production"]
+CMD ["solara", "run", "solara.py", "--host=0.0.0.0", "--production"]
