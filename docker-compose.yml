@@ -13,7 +13,8 @@ services:
     volumes:
       - "${SEPAL_DATA_DIR}/sepal/home:/sepalUsers"
     environment:
-      DEPLOY_ENVIRONMENT: "${DEPLOY_ENVIRONMENT}"
+      EE_ACCOUNT: "${EE_ACCOUNT}"
+      EE_PRIVATE_KEY: "${EE_PRIVATE_KEY}"
     networks:
       - sepal
     healthcheck:

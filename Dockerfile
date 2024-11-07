@@ -1,20 +1,14 @@
 # Taken from https://huggingface.co/spaces/giswqs/solara-template/blob/main/Dockerfile
-FROM jupyter/base-notebook:latest
+FROM continuumio/miniconda3
 
-RUN mamba install -c conda-forge geopandas localtileserver -y && \
-    fix-permissions "${CONDA_DIR}" && \
-    fix-permissions "/home/${NB_USER}"
+RUN conda create -n seplan python=3.10 pip -y
+RUN conda activate seplan
 
-COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY . /home/${NB_USER}
-
-ENV PROJ_LIB='/opt/conda/share/proj'
-
-USER root
-RUN chown -R ${NB_UID} ${HOME}
-USER ${NB_USER}
+# Create a directory for the app
+RUN mkdir /home/seplan
+COPY . /home/seplan
 
 EXPOSE 8765
 
