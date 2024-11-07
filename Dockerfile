@@ -8,8 +8,7 @@ RUN mamba install -c conda-forge geopandas localtileserver -y && \
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-RUN mkdir ./pages
-COPY /pages ./pages
+COPY . /home/${NB_USER}
 
 ENV PROJ_LIB='/opt/conda/share/proj'
 
