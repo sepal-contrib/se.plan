@@ -14,4 +14,4 @@ RUN conda init bash && \
 
 EXPOSE 8765
 
-CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0 --production"]
+CMD ["bash", "-c", "source activate seplan && solara run /home/seplan/solara.py --host=0.0.0.0 --production"]
