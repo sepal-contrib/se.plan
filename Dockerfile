@@ -5,7 +5,7 @@ COPY . /home/seplan
 
 # Create and copy credentials file
 RUN mkdir /home/seplan/.config/earthengine
-COPY /usr/local/src/sepal/modules/app-launcher/service-account-credentials.json /home/.config/earthengine/credentials.json
+COPY /var/lib/sepal/app-launcher/service-account-credentials.json /home/.config/earthengine/credentials.json
 
 WORKDIR /home/seplan
 
