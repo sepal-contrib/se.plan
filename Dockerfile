@@ -22,3 +22,6 @@ EXPOSE 8765
 #     echo 'Python version:' && python --version && \
 #     echo 'Listing installed packages:' && pip list && \
 #     solara run solara.py --host=0.0.0.0 --production"]
+
+
+CMD ["tail", "-f", "/dev/null"]
