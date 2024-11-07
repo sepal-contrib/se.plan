@@ -3,6 +3,10 @@ FROM continuumio/miniconda3
 RUN mkdir /home/seplan
 COPY . /home/seplan
 
+# Create and copy credentials file
+RUN mkdir /home/.config/earthengine
+COPY service-account-credentials.json /home/.config/earthengine/credentials.json
+
 WORKDIR /home/seplan
 
 # Initialize Conda and create the environment
@@ -14,14 +18,6 @@ RUN conda init bash && \
 
 EXPOSE 8765
 
-# # Adding debugging information to check environment variables, paths, and Conda activation status
-# CMD ["bash", "-c", "echo 'Starting in environment seplan...' && \
-#     source activate seplan && \
-#     echo 'Environment activated' && \
-#     which solara && \
-#     echo 'Python version:' && python --version && \
-#     echo 'Listing installed packages:' && pip list && \
-#     solara run solara.py --host=0.0.0.0 --production"]
+CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0 --production"]
 
-
-CMD ["tail", "-f", "/dev/null"]
+# CMD ["tail", "-f", "/dev/null"]
