@@ -14,11 +14,11 @@ RUN conda init bash && \
 
 EXPOSE 8765
 
-# Adding debugging information to check environment variables, paths, and Conda activation status
-CMD ["bash", "-c", "echo 'Starting in environment seplan...' && \
-    source activate seplan && \
-    echo 'Environment activated' && \
-    which solara && \
-    echo 'Python version:' && python --version && \
-    echo 'Listing installed packages:' && pip list && \
-    solara run solara.py --host=0.0.0.0 --production"]
+# # Adding debugging information to check environment variables, paths, and Conda activation status
+# CMD ["bash", "-c", "echo 'Starting in environment seplan...' && \
+#     source activate seplan && \
+#     echo 'Environment activated' && \
+#     which solara && \
+#     echo 'Python version:' && python --version && \
+#     echo 'Listing installed packages:' && pip list && \
+#     solara run solara.py --host=0.0.0.0 --production"]
