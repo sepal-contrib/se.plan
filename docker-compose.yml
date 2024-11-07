@@ -1,8 +1,5 @@
 services:
   seplan:
-    extends:
-      file: ../docker-compose.logger.yml
-      service: logger
     build:
       context: ./
       dockerfile: ./Dockerfile
