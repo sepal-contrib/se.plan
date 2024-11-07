@@ -1,7 +1,7 @@
 # Taken from https://huggingface.co/spaces/giswqs/solara-template/blob/main/Dockerfile
 FROM continuumio/miniconda3
 
-RUN conda create -n seplan python=3.10 pip -y
+RUN conda create -n seplan python==3.10 pip -y
 RUN conda activate seplan
 
 RUN pip install -r requirements.txt
