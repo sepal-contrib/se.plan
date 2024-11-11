@@ -17,8 +17,6 @@ services:
       - "${USERS_HOME_PATH:-/home}:/userHomes"
       - "${EE_CREDENTIALS_PATH:-${HOME}/.config/earthengine/credentials}:/root/.config/earthengine/credentials"
 
-    environment:
-      EE_CREDENTIALS_PATH
     networks:
       - sepal
     # healthcheck:
