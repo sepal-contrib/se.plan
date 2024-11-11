@@ -13,4 +13,8 @@ RUN conda init bash && \
 
 EXPOSE 8765
 
-CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0 --production"]
+# CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0 --production"]
+
+# Long running command
+# Keep the container running
+CMD ["tail", "-f", "/dev/null"]
