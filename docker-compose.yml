@@ -3,7 +3,7 @@ services:
     build:
       dockerfile: ./Dockerfile
       args:
-        - GIT_COMMIT=${GIT_COMMIT}
+        - GIT_COMMIT=${GIT_COMMIT:-""}
     image: "openforis/seplan"
     container_name: seplan
     volumes:
