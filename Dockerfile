@@ -20,7 +20,7 @@ COPY . /usr/local/lib/seplan
 EXPOSE 8765
 
 # CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0 --production"]
-CMD ["bash", "-c", "source activate seplan && solara run solara_minimun.py --host=0.0.0.0"]
+CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0"]
 
 
 
