@@ -57,7 +57,10 @@ class CostDialog(BaseDialog):
 
         # create the actions
         self.w_validate = TextBtn(
-            cm.cost.dialog.validate, gliph="fa-solid fa-check", type_="success"
+            cm.cost.dialog.validate,
+            gliph="fa-solid fa-check",
+            type_="success",
+            attributes={"id": "dialog_action"},
         )
 
         self.w_cancel = TextBtn(
@@ -104,6 +107,10 @@ class CostDialog(BaseDialog):
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
+
+        if not self.w_asset.valid:
+            raise Exception(cm.constraint.dialog.wrong_asset)
+
         # check values are set
         if not all(
             [
@@ -143,7 +150,7 @@ class CostDialog(BaseDialog):
         self.fill(*[None] * 4)
 
         # open the dialog
-        self.open_dialog()
+        self.open_dialog(type_="add")
 
     def name_change(self, *args) -> None:
         """if the selected layer is from the combo box items, select all the default informations."""

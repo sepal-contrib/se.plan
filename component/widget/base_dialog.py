@@ -1,4 +1,6 @@
+from typing import Literal, Optional
 import sepal_ui.sepalwidgets as sw
+from component.message import cm
 
 
 class BaseDialog(sw.Dialog):
@@ -9,8 +11,14 @@ class BaseDialog(sw.Dialog):
 
         super().__init__(*args, **kwargs)
 
-    def open_dialog(self, *_):
+    def open_dialog(self, *_, type_: Optional[Literal["add", "save"]] = None):
         """Open dialog."""
+
+        if type_:
+            self.get_children(attr="id", value="dialog_action")[0].msg = cm.dialog.btn[
+                type_
+            ]
+
         self.v_model = True
 
     def close_dialog(self, *_):

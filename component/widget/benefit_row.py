@@ -152,4 +152,4 @@ class BenefitRow(sw.Html):
         )
         # clean any previous errors
         self.dialog.w_alert.reset()
-        self.dialog.open_dialog()
+        self.dialog.open_dialog(type_="edit")
