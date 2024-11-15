@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="dialog" max-width="900px">
+    <v-dialog v-model="dialog" max-width="1000px">
       <v-card>
         <v-card-title>
           <v-icon color="primary_contrast" class="mr-2">mdi-chef-hat</v-icon> Recipe: {{ recipe_name }}
