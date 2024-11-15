@@ -80,6 +80,10 @@ class ImportAoiView(AoiView):
 
         # Extract the geometry from the model
 
+        if self.model.asset_json.get("column", "") == "ALL":
+            # Dissolve the geometries
+            self.model.gdf = self.model.gdf.dissolve()
+
         feature_collection = self.model.gdf.__geo_interface__
         name = self.model.name
 
