@@ -47,7 +47,7 @@
                       <td>{{ benefit.asset }}</td>
                       <td>
                         <v-chip :color="getPriorityChipColor(benefit.weight)" text-color="white">
-                          {{ benefit.weight }}
+                          {{ benefit.weight + 1 }}
                         </v-chip>
                       </td>
                     </tr>
