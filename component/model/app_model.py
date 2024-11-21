@@ -16,3 +16,6 @@ class AppModel(HasTraits):
 
     on_save = Int().tag(sync=True)
     """A counter that is incremented every time the recipe is saved. Useful to trigger the save button"""
+
+    close_all_dialogs = Int().tag(sync=True)
+    """A counter that is incremented by the drawers to close all the dialogs"""
