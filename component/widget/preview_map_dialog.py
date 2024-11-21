@@ -7,6 +7,7 @@ import sepal_ui.sepalwidgets as sw
 from sepal_ui.frontend.resize_trigger import rt
 from sepal_ui.mapping import SepalMap
 import sepal_ui.scripts.decorator as sd
+from sepal_ui.mapping import InspectorControl
 
 
 from component import parameter as cp
@@ -14,6 +15,17 @@ from component.message import cm
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import TextBtn
 from component.widget.legend import Legend
+
+
+class CustomInspectorControl(InspectorControl):
+
+    def close_menu(self, *_):
+        """Close the menu contet."""
+        self.menu.v_model = False
+
+    def open_menu(self, *_):
+        """Open the menu content."""
+        self.menu.v_model = True
 
 
 class PreviewMapDialog(BaseDialog):
@@ -30,6 +42,8 @@ class PreviewMapDialog(BaseDialog):
         self.legend = Legend()
         self.map_.add(self.legend)
         self.map_.min_zoom = 1
+        self.inspector_control = CustomInspectorControl(self.map_, position="topright")
+        self.map_.add(self.inspector_control)
 
         self.title = sw.CardTitle()
         self.btn_close = TextBtn(cm.questionnaire.map.close)
@@ -52,6 +66,14 @@ class PreviewMapDialog(BaseDialog):
         ]
 
         self.btn_close.on_event("click", self.close_dialog)
+
+    def close_dialog(self, *_):
+        """Closes the dialog."""
+
+        # Close the inspector control
+        self.inspector_control.close_menu()
+
+        super().close_dialog()
 
     def open_dialog(self):
         """Opens the dialog and creates a resize event."""
