@@ -1,10 +1,11 @@
 """SE.PLAN model to store the data related with areas of interest."""
 
+from typing import Tuple, Dict as DictType, Any as AnyType
 from sepal_ui import color, model
 from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.message import ms
 from sepal_ui.scripts import utils as su
-from traitlets import Any, Dict, Int
+from traitlets import Dict, Int, Any
 
 
 class AoiModel(AoiModel):
@@ -104,7 +105,7 @@ class SeplanAoi(model.Model):
         self.feature_collection = self.aoi_model.feature_collection
         self.updated += 1
 
-    def get_ee_features(self) -> Dict:
+    def get_ee_features(self) -> Tuple[DictType[str, AnyType], DictType[str, AnyType]]:
         """Returns a dictionary of current AOI layers, where name is the key."""
         primary_aoi = {
             self.aoi_model.name: {
@@ -121,7 +122,7 @@ class SeplanAoi(model.Model):
             for feat in self.custom_layers["features"]
         }
 
-        return {**primary_aoi, **custom_aois}
+        return (primary_aoi, custom_aois)
 
     def import_data(self, data: dict, auto_update: bool = True):
         """Set the data for each of the AOIs."""

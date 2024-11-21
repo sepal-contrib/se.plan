@@ -3,6 +3,7 @@ from component.types import (
     BenefitChartsData,
     ConstraintChartsData,
     CostChartData,
+    MeanStatsDict,
     RecipeStatsDict,
 )
 
@@ -153,7 +154,10 @@ class ThemeDashboard(sw.Card):
 
                 benefit_charts.setdefault(layer_id, [])
 
-                aoi_names, values, colors = parse_layer_data(scenario_stats, layer_id)
+                aoi_names, values, colors, min_, max_ = parse_layer_data(
+                    scenario_stats, layer_id
+                )
+
                 layer_data = recipe.seplan.benefit_model.get_layer_data(layer_id)
 
                 w_chart = get_bars_chart(
@@ -164,6 +168,8 @@ class ThemeDashboard(sw.Card):
                     series_names=[layer_data.get("name")],
                     show_legend=False,
                     bars_width=50,
+                    min_value=min_,
+                    max_value=max_,
                 )
 
                 # Get all the layers for the benefit theme
@@ -174,7 +180,9 @@ class ThemeDashboard(sw.Card):
                 constraint_charts.setdefault(layer_id, [])
 
                 layer_data = recipe.seplan.constraint_model.get_layer_data(layer_id)
-                aoi_names, values, colors = parse_layer_data(scenario_stats, layer_id)
+                aoi_names, values, colors, *_ = parse_layer_data(
+                    scenario_stats, layer_id
+                )
 
                 constraint_charts[layer_id].append(
                     (recipe_name, layer_data, values, colors)
@@ -187,7 +195,7 @@ class ThemeDashboard(sw.Card):
                 layer_data = recipe.seplan.cost_model.get_layer_data(layer_id)
 
                 layers_data.append(layer_data)
-                aoi_name, value, _ = parse_layer_data(scenario_stats, layer_id)
+                aoi_name, value, *_ = parse_layer_data(scenario_stats, layer_id)
                 aoi_names.append(aoi_name)
                 values.append(value)
                 series_names.append(layer_data["name"])

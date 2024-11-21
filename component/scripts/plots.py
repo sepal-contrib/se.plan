@@ -1,6 +1,9 @@
 """Define functions to create the plots for the dashboard tile."""
 
-from component.types import RecipeStatsDict, SummaryStatsDict
+from component.types import (
+    RecipeStatsDict,
+    SummaryStatsDict,
+)
 from sepal_ui import sepalwidgets as sw
 
 import ipyvuetify as v
@@ -8,7 +11,7 @@ from ipecharts.option import Option, Legend, Tooltip, XAxis, YAxis, Grid, Toolbo
 from ipecharts.option.series import Bar
 from ipecharts.echarts import EChartsWidget
 
-from typing import Dict, List, Tuple, Any
+from typing import Dict, List, Optional, Tuple, Any
 
 from component.parameter.gui_params import SUITABILITY_LEVELS
 from component.parameter.vis_params import SUITABILITY_COLORS
@@ -96,15 +99,20 @@ def parse_suitability_data(
 
 def parse_layer_data(
     summary_results: SummaryStatsDict, layer_id: str
-) -> Tuple[List[str], List[float], List[str]]:
+) -> Tuple[List[str], List[float], List[str], float, float]:
     """Returns a tuple of statistics for a given layer.
 
-    Returns a tuple of region names, values, and colors for the ECharts widget.
+    Returns a tuple of region names, values, and colors for the ECharts widget, and the min and max values when the theme is the benefit.
     """
 
     aoi_names = []
     values = []
     colors = []
+
+    data_type = {"benefit": "mean", "cost": "sum", "constraint": "percent"}
+
+    min_ = 0
+    max_ = 0
 
     # We know the layer_id is unique among all the themes
     for aoi_name, aoi_data in summary_results.items():
@@ -116,12 +124,18 @@ def parse_layer_data(
             for layer_dict in layers:
                 if layer_dict.get(layer_id):
                     layer_data = layer_dict[layer_id]
+                    data_values = layer_data["values"]
+
+                    # By default custom_aoi are always 0.
+                    # Means that min and max will be only the ones from the primary aoi
+                    min_ += data_values.get("min", 0)
+                    max_ += data_values.get("max", 0)
 
                     aoi_names.append(aoi_name)
-                    values.append(layer_data["values"][0])
+                    values.append(data_values[data_type[theme]])
                     colors.append(summary_results[aoi_name]["color"])
 
-    return aoi_names, values, colors
+    return aoi_names, values, colors, min_, max_
 
 
 def get_stacked_series(series_data: List[dict]) -> List[Bar]:
@@ -207,8 +221,13 @@ def get_bars_chart(
     custom_item_color: bool = False,
     bars_width: int = 30,
     show_legend: bool = True,
+    min_value: Optional[float] = None,
+    max_value: Optional[float] = None,
 ) -> EChartsWidget:
     """Create a simple, horizontal bar chart."""
+
+    if max_value:
+        max_value = round(max_value, 2)
 
     height = max(170, 50 + bars_width * len(categories))
     axis_label = {
@@ -218,7 +237,6 @@ def get_bars_chart(
         "height": 15,
         "fontSize": 12,
     }
-
     series = get_bars_series(
         values,
         series_names=series_names,
@@ -229,8 +247,12 @@ def get_bars_chart(
 
     option = Option(
         backgroundColor="#1e1e1e00",
-        yAxis=YAxis(type="category", axisLabel=axis_label, data=categories),
-        xAxis=XAxis(type="value"),
+        yAxis=YAxis(
+            type="category",
+            axisLabel=axis_label,
+            data=categories,
+        ),
+        xAxis=XAxis(type="value", max=max_value),
         series=series,
         tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
         legend=Legend() if show_legend else None,
