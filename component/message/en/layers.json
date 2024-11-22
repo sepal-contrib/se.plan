@@ -38,7 +38,7 @@
         },
         "city_access": {
             "name": "Accessibility to cities",
-            "detail": "Estimated travel time to the nearest city for the most recent available year, expressed in hours. Greater accessibility can make restoration more feasible by increasing the return earned by forest products sold in urban markets, but it can also make restoration less feasible by increasing the return earned by products from nonforest land uses."
+            "detail": "Estimated travel time to the nearest city for the most recent available year, expressed in minutes. Greater accessibility can make restoration more feasible by increasing the return earned by forest products sold in urban markets, but it can also make restoration less feasible by increasing the return earned by products from nonforest land uses."
         },
         "forest_job": {
             "name": "Forest employment",
