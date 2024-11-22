@@ -104,4 +104,4 @@ class CostRow(sw.Html):
             desc=self.model.descs[idx],
         )
 
-        self.dialog.open_dialog()
+        self.dialog.open_dialog(type_="edit")
