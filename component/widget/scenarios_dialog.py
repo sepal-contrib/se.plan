@@ -80,7 +80,6 @@ class CompareScenariosDialog(BaseDialog):
                 children=[
                     sw.CardTitle(children=["Compare Scenarios"]),
                     sw.CardText(children=[scenario_inputs_layout]),
-                    self.alert,
                     self.actions,
                 ],
             )
@@ -111,7 +110,6 @@ class CompareScenariosDialog(BaseDialog):
 
         # First validate that all of them are valid
         validate_scenarios_recipes(self.scenario_inputs.recipe_paths)
-        # TODO: set the logic to see if they are comparable
         are_comparable(self.scenario_inputs.recipe_paths)
 
     def read_recipes(self) -> List[Recipe]:

@@ -14,7 +14,7 @@ from component.model.app_model import AppModel
 from component.model.recipe import Recipe
 
 # Import types
-from component.widget.alert_state import AlertDialog, AlertState
+from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
 from component.widget.custom_widgets import RecipeInput
 
@@ -144,7 +144,7 @@ class RecipeView(sw.Card):
         self.card_load = CardLoad()
         self.card_save = CardNewSave(type_="save")
 
-        self.load_dialog = LoadDialog(self.recipe)
+        self.load_dialog = LoadDialog()
 
         self.children = [
             self.alert_dialog,
@@ -162,10 +162,6 @@ class RecipeView(sw.Card):
                 ]
             ),
         ]
-
-        directional_link(
-            (self.load_dialog, "load_recipe_path"), (self, "load_recipe_path")
-        )
 
         directional_link(
             (self, "recipe_session_path"), (self.recipe, "recipe_session_path")
@@ -188,7 +184,9 @@ class RecipeView(sw.Card):
         # Create events
         self.card_new.btn.on_event("click", self.new_event)
         self.card_load.btn.on_event("click", lambda *_: self.load_dialog.show())
+
         self.load_dialog.btn_load.on_event("click", self.load_event)
+
         self.card_save.btn.on_event("click", self.save_event)
         self.app_model.observe(self.save_event, "on_save")
 
@@ -217,8 +215,6 @@ class RecipeView(sw.Card):
             self.card_new.recipe_name
         )
 
-        # self.recipe.save(self.recipe_session_path)
-
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
     @switch("loading", on_widgets=["card_load"])
     def load_event(self, *_):
@@ -233,6 +229,8 @@ class RecipeView(sw.Card):
         # or cancel the dialog.
         if not self.load_dialog.load_recipe_path:
             return
+
+        self.load_recipe_path = self.load_dialog.load_recipe_path
 
         self.load_dialog.v_model = False
 
@@ -283,8 +281,9 @@ class LoadDialog(BaseDialog):
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
 
-    def __init__(self, recipe: Recipe):
-        self.recipe = recipe
+    def __init__(self, alert: Alert = None):
+
+        self.alert = alert or Alert()
         self.load_recipe_path = None
 
         super().__init__()
@@ -303,7 +302,11 @@ class LoadDialog(BaseDialog):
                     sw.CardTitle(children=[cm.recipe.load.dialog.title]),
                     sw.CardText(children=[self.w_input_recipe]),
                     sw.CardActions(
-                        children=[sw.Spacer(), self.btn_load, self.btn_cancel]
+                        children=[
+                            sw.Spacer(),
+                            self.btn_load,
+                            self.btn_cancel,
+                        ]
                     ),
                 ],
             )
@@ -311,7 +314,9 @@ class LoadDialog(BaseDialog):
 
         # Create events
         self.btn_cancel.on_event("click", self.cancel)
-        directional_link((self.w_input_recipe, "v_model"), (self, "load_recipe_path"))
+        directional_link(
+            (self.w_input_recipe, "load_recipe_path"), (self, "load_recipe_path")
+        )
 
     def show(self):
         """Display the dialog and write down the text in the alert."""

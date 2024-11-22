@@ -112,7 +112,10 @@ class PreviewMapDialog(BaseDialog):
             vis_params.update(min=0, max=1)
             layer = layer.unmask(0)
             if base_layer:
-                self.map_.addLayer(base_layer.clip(aoi), {}, "base_layer")
+                layer = layer.clip(aoi)
+                self.map_.addLayer(
+                    base_layer.clip(aoi), {}, "base_layer", use_map_vis=False
+                )
 
         self.map_.addLayer(layer.clip(aoi), vis_params, "layer")
 

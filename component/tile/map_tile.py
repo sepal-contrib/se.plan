@@ -30,7 +30,9 @@ class MapTile(sw.Layout):
         alert_dialog = AlertDialog(self.alert)
 
         self.map_ = SeplanMap(recipe.seplan_aoi)
-        self.map_toolbar = MapToolbar(recipe=self.recipe, map_=self.map_)
+        self.map_toolbar = MapToolbar(
+            recipe=self.recipe, map_=self.map_, alert=self.alert
+        )
 
         # init the final layers
         self.wlc_outputs = None
@@ -60,24 +62,6 @@ class MapTile(sw.Layout):
         # Use reset_view trait ffrom seplan_aoi to reset the map view (remove all the layers)
 
         self.recipe.seplan_aoi.observe(lambda *_: self.map_.remove_all(), "reset_view")
-
-    # def open_info_dialog(self, change):
-    #     """Open the info dialog when the map_tile app drawer is clicked."""
-    #     if change["new"] == "map_tile":
-    #         # I just want to open the dialog once, so I remove the observer
-    #         # but only when I'm sure the user has read the content and closed the dialog.
-    #         if self.map_toolbar.info_dialog.well_read:
-    #             self.app_model.unobserve(self.open_info_dialog, "active_drawer")
-    #             return
-
-    #         self.map_toolbar.info_dialog.open_dialog()
-
-    #     else:
-    #         self.map_toolbar.info_dialog.close_dialog()
-
-    #     # This will open the info dialog when the map_tile drawer is clicked
-    #     if self.app_model:
-    #         self.app_model.observe(self.open_info_dialog, "active_drawer")
 
     def open_info_dialog(self, change):
         """Open the info dialog when the map_tile app drawer is clicked."""

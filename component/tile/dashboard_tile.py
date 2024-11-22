@@ -38,12 +38,10 @@ class DashboardTile(sw.Layout):
         self.summary_stats = None
 
         self.recipe = recipe
-
-        dash_toolbar = DashToolbar(recipe.seplan)
-
         self.alert = Alert()
-        # wrap the alert in a dialog
         alert_dialog = AlertDialog(self.alert)
+
+        dash_toolbar = DashToolbar(recipe.seplan, alert=self.alert)
 
         # init the dashboard
         self.overall_dash = OverallDashboard()

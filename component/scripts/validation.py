@@ -114,8 +114,40 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
             "Error: To compare recipes, all the recipes must have an unique name."
         )
 
+    return True
+
 
 def are_comparable(recipe_paths: RecipePaths):
-    """Check if we can compare the recipes or not."""
+    """Check if the recipes are comparable based on their primary AOI (Area of Interest)."""
 
-    pass
+    aoi_values = set()
+
+    for _, recipe_info in recipe_paths.items():
+        with Path(recipe_info["path"]).open() as f:
+            data = json.loads(f.read())
+            remove_key(data, "updated")
+            remove_key(data, "new_changes")
+            primary_aoi = data["aoi"]["primary"]
+            aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
+
+    # Raise an error if the recipes are not comparable
+    if len(aoi_values) > 1:
+        raise Exception(
+            "Error: The recipes are not comparable. All recipes must have the same main Area of Interest."
+        )
+
+    return True
+
+
+def read_recipe_data(recipe_path: str):
+    """Read the recipe data from the recipe file."""
+
+    recipe_path = Path(validate_recipe(recipe_path))
+
+    with recipe_path.open() as f:
+        data = json.loads(f.read())
+
+    # Remove all the "updated" keys from the data in the second level
+    [remove_key(data, key) for key in ["updated", "new_changes"]]
+
+    return recipe_path, data
