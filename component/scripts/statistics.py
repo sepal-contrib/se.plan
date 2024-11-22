@@ -182,6 +182,15 @@ def get_image_mean(image, aoi, mask, name, main_aoi) -> Dict[str, MeanStatsDict]
     reducer = ee.Reducer.mean()
     image = image.updateMask(mask)
 
+    # Set the default values for the output
+    result = ee.Dictionary(
+        {
+            "image_mean": 0,
+            "image_max": 0,
+            "image_min": 0,
+        }
+    )
+
     if main_aoi:
         image = image.rename(["image"])
         reducer = reducer.combine(ee.Reducer.minMax(), sharedInputs=True)
@@ -189,16 +198,14 @@ def get_image_mean(image, aoi, mask, name, main_aoi) -> Dict[str, MeanStatsDict]
         # if it is only one reducer, I have to rename the image.
         image = image.rename(["image_mean"])
 
-    result = image.reduceRegion(
-        reducer=reducer,
-        geometry=aoi,
-        scale=100,
-        maxPixels=1e13,
+    result = result.combine(
+        image.reduceRegion(
+            reducer=reducer,
+            geometry=aoi,
+            scale=100,
+            maxPixels=1e13,
+        )
     )
-
-    if not main_aoi:
-        # Just add dummy data to be consistent with the output
-        result = result.combine({"image_max": 0, "image_min": 0}, overwrite=False)
 
     total_img = image.reduceRegion(
         reducer=ee.Reducer.mean(),
