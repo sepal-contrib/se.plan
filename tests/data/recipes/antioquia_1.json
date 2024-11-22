@@ -101,11 +101,11 @@
         ],
         "descs": [
             "Sites that have the potential for restoration. Their tree-cover fraction is less its potential and they are not in urban areas.",
-            "Estimated travel time to the nearest city for the most recent available year, expressed in hours. Greater accessibility can make restoration more feasible by increasing the return earned by forest products sold in urban markets, but it can also make restoration less feasible by increasing the return earned by products from nonforest land uses."
+            "Estimated travel time to the nearest city for the most recent available year, expressed in minutes. Greater accessibility can make restoration more feasible by increasing the return earned by forest products sold in urban markets, but it can also make restoration less feasible by increasing the return earned by products from nonforest land uses."
         ],
         "units": [
             "binary",
-            "hours"
+            "minutes"
         ],
         "values": [
             [
