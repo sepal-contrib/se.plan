@@ -92,7 +92,6 @@ class LayerPercentage(sw.Layout):
         values: List[List[float]],
         colors: List[List[str]],
     ):
-        print("*********", colors, values)
 
         detail = layer_data.get("desc")
         name = layer_data.get("name")

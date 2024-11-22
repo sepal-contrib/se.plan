@@ -64,7 +64,10 @@ class BenefitDialog(BaseDialog):
 
         # create the actions
         self.w_validate = TextBtn(
-            cm.benefit.dialog.validate, gliph="fa-solid fa-check", type_="success"
+            cm.benefit.dialog.validate,
+            gliph="fa-solid fa-check",
+            type_="success",
+            attributes={"id": "dialog_action"},
         )
         self.w_cancel = TextBtn(
             cm.benefit.dialog.cancel,
@@ -113,6 +116,10 @@ class BenefitDialog(BaseDialog):
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
+
+        if not self.w_asset.valid:
+            raise Exception(cm.constraint.dialog.wrong_asset)
+
         # check values are set
         if not all(
             [
@@ -155,7 +162,7 @@ class BenefitDialog(BaseDialog):
         # reset the fields, 6 means the number of widgets to reset
         self.fill(*[None] * 6)
 
-        self.open_dialog()
+        self.open_dialog(type_="add")
 
     def theme_change(self, *args) -> None:
         """edit the list of default theme."""

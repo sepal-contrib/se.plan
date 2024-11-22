@@ -30,8 +30,8 @@ class Table(sw.Layout):
     def __init__(
         self,
         model: Union[BenefitModel, ConstraintModel, CostModel],
-        alert: Alert,
         aoi_model: SeplanAoi,
+        alert: Optional[Alert] = None,
         preview_map: PreviewMapDialog = None,
         preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:

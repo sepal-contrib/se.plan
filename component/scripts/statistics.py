@@ -1,8 +1,20 @@
+from typing import Dict, List
 import ee
 
 from component.model.recipe import Recipe
 from component.scripts.seplan import Seplan, reduce_constraints
-from component.types import RecipeStatsDict
+from component.types import (
+    MeanStatsDict,
+    MeanStatsValues,
+    PercentageStatsDict,
+    RecipeStatsDict,
+    SumStatsDict,
+)
+
+
+def is_main_aoi(main_aoi_name, aoi_name) -> bool:
+    """Check if the aoi is the main aoi."""
+    return main_aoi_name == aoi_name
 
 
 def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
@@ -18,7 +30,10 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
     recipe_name = recipe.get_recipe_name()
 
     # Get all inputs from the model
-    ee_features = seplan_model.aoi_model.get_ee_features()
+    main_ee_features, secondary_ee_features = seplan_model.aoi_model.get_ee_features()
+    main_ee_name = list(main_ee_features.keys())[0]
+
+    ee_features = {**main_ee_features, **secondary_ee_features}
 
     # get list of benefits and names. Tihs is used to get statistics.
     benefit_list = seplan_model.get_benefits_list()
@@ -47,7 +62,11 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
                                 ),
                                 "benefit": [
                                     get_image_mean(
-                                        image, data["ee_feature"], mask_out_areas, name
+                                        image,
+                                        data["ee_feature"],
+                                        mask_out_areas,
+                                        name,
+                                        is_main_aoi(main_ee_name, aoi_name),
                                     )
                                     for image, name in benefit_list
                                 ],
@@ -112,7 +131,9 @@ def get_image_stats(image, mask, geom):
     return out_dict
 
 
-def get_image_percent_cover_pixelarea(image, aoi, name):
+def get_image_percent_cover_pixelarea(
+    image, aoi, name
+) -> Dict[str, PercentageStatsDict]:
     """Get the percentage of masked area over the total."""
     # Be sure the mask is 0
     image = image.rename("image").unmask(0)
@@ -144,18 +165,46 @@ def get_image_percent_cover_pixelarea(image, aoi, name):
 
     percent = ee.Number(count_val).divide(total_val).multiply(100)
 
-    value = ee.Dictionary({"values": [percent], "total": [total_val]})
+    value = ee.Dictionary({"values": {"percent": percent}, "total": [total_val]})
 
     return ee.Dictionary({name: value})
 
 
-def get_image_mean(image, aoi, mask, name):
-    """Computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}."""
-    mean_img = image.updateMask(mask).reduceRegion(
-        reducer=ee.Reducer.mean(),
-        geometry=aoi,
-        scale=100,
-        maxPixels=1e13,
+def get_image_mean(image, aoi, mask, name, main_aoi) -> Dict[str, MeanStatsDict]:
+    """Computes the sum of image values not masked by constraints in relation to the total aoi. returns dict name:{value:[],total:[]}.
+
+    Args:
+
+        main_aoi (bool): If the main aoi is being used, then the min and max values are also returned.
+
+    """
+
+    reducer = ee.Reducer.mean()
+    image = image.updateMask(mask)
+
+    # Set the default values for the output
+    result = ee.Dictionary(
+        {
+            "image_mean": 0,
+            "image_max": 0,
+            "image_min": 0,
+        }
+    )
+
+    if main_aoi:
+        image = image.rename(["image"])
+        reducer = reducer.combine(ee.Reducer.minMax(), sharedInputs=True)
+    else:
+        # if it is only one reducer, I have to rename the image.
+        image = image.rename(["image_mean"])
+
+    result = result.combine(
+        image.reduceRegion(
+            reducer=reducer,
+            geometry=aoi,
+            scale=100,
+            maxPixels=1e13,
+        )
     )
 
     total_img = image.reduceRegion(
@@ -165,13 +214,17 @@ def get_image_mean(image, aoi, mask, name):
         maxPixels=1e13,
     )
 
-    value = ee.Dictionary({"values": mean_img.values(), "total": total_img.values()})
+    from_ = ["image_mean", "image_max", "image_min"]
+    to_ = ["mean", "max", "min"]
 
-    # return ee.Dictionary({image.get("name").getInfo(): value})
+    values: MeanStatsValues = result.rename(from_, to_)
+
+    value = ee.Dictionary({"total": total_img.values(), "values": values})
+
     return ee.Dictionary({name: value})
 
 
-def get_image_sum(image, aoi, mask, name):
+def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
     """Computes the sum of image values not masked by constraints in relation to the total aoi.
 
     returns dict name:{value:[],total:[]}.
@@ -204,7 +257,7 @@ def get_image_sum(image, aoi, mask, name):
 
     value = ee.Dictionary(
         {
-            "values": [ee.Number(sum_img.values().get(0)).divide(area_ha)],
+            "values": {"sum": ee.Number(sum_img.values().get(0)).divide(area_ha)},
             "total": [ee.Number(total_img.values().get(0)).divide(area_ha)],
         }
     )

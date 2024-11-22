@@ -140,3 +140,9 @@ class AlertDialog(sw.Dialog):
         """Opens the dialog when there's a change in the alert chilndren state."""
         if change["new"] != [""]:
             self.v_model = True
+
+    def close_dialog(self, *_):
+        """Closes the dialog."""
+
+        self.v_model = False
+        self.w_alert.children = [""]

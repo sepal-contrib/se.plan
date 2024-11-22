@@ -144,7 +144,6 @@ class ConstraintRow(sw.Html):
         """Open the dialog and load data contained in the model."""
         idx = self.model.get_index(widget.attributes["data-layer"])
 
-        self.dialog.open_dialog()
         self.dialog.fill(
             theme=self.model.themes[idx],
             name=self.model.names[idx],
@@ -154,6 +153,7 @@ class ConstraintRow(sw.Html):
             unit=self.model.units[idx],
             data_type=self.model.data_type[idx],
         )
+        self.dialog.open_dialog(type_="edit")
 
     def update_value(self, *_):
         """Update the value of the model."""

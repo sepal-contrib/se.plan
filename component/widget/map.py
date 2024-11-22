@@ -25,7 +25,6 @@ class SeplanMap(sm.SepalMap):
         self.dc = True
         self.vinspector = True
         self.min_zoom = 1
-        self.layout.height = "700px"
 
         super().__init__(*args, **kwargs)
 
