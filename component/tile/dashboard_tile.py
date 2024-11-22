@@ -55,9 +55,9 @@ class DashboardTile(sw.Layout):
             alert_dialog,
         ]
 
-        self._dashboard = su.loading_button(self.alert, dash_toolbar.btn_dashboard)(
-            self._dashboard
-        )
+        self.create_dashboard = su.loading_button(
+            self.alert, dash_toolbar.btn_dashboard
+        )(self.create_dashboard)
         self.csv_export = su.loading_button(self.alert, dash_toolbar.btn_download)(
             self.csv_export
         )
@@ -66,10 +66,11 @@ class DashboardTile(sw.Layout):
             overall_dashboard=self.overall_dash, theme_dashboard=self.theme_dash
         )
 
-        dash_toolbar.btn_dashboard.on_event("click", self._dashboard)
+        dash_toolbar.btn_dashboard.on_event("click", self.create_dashboard)
         dash_toolbar.btn_download.on_event("click", self.csv_export)
 
         self.recipe.dash_model.observe(self.reset, "reset_count")
+        self.recipe.observe(self.reset, "recipe_session_path")
 
     def csv_export(self, *_) -> None:
         """Export the dashboard as a csv file."""
@@ -88,7 +89,7 @@ class DashboardTile(sw.Layout):
             f"File successfully saved in {session_results_path}", "success"
         )
 
-    def _dashboard(self, *_):
+    def create_dashboard(self, *_):
         """Compute the restoration plan for the self.recipe and display the dashboard."""
 
         if not self.recipe.recipe_session_path:
