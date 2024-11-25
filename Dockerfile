@@ -2,12 +2,13 @@ FROM continuumio/miniconda3
 
 WORKDIR /usr/local/lib/seplan
 
+ARG GIT_COMMIT
+
 RUN conda init bash && \
     bash -c "source ~/.bashrc && \
     conda create -n seplan python==3.10 pip -y"
 
 COPY requirements.txt /usr/local/lib/seplan/requirements.txt
-
 RUN bash -c "source ~/.bashrc && conda activate seplan && pip install -r requirements.txt"
 
 COPY . /usr/local/lib/seplan
