@@ -9,6 +9,10 @@ display(
                 height: 84vh;
                 margin: 0 !important;
             }
+            
+            .leaflet-sbs-divider, .leaflet-sbs-range {
+                z-index: 201 !important;
+            }
         </style>
         """
     )

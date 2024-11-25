@@ -3,6 +3,7 @@ from typing import Literal, Union
 
 from component.model.recipe import Recipe
 from component.scripts import validation
+from component.widget.base_dialog import BaseDialog
 from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
@@ -19,7 +20,7 @@ import component.parameter as cp
 from component.message import cm
 from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
-from component.widget.alert_state import Alert
+from component.widget.alert_state import Alert, AlertDialog
 from component.widget.preview_theme_btn import PreviewThemeBtn
 from component.widget.buttons import IconBtn, TextBtn
 
@@ -300,6 +301,9 @@ class CustomNavDrawer(sw.NavDrawer):
         # reset all others states
         [setattr(i, "input_value", False) for i in self.items if i != change["owner"]]
 
+        # Close all dialogs when a drawer item is clicked
+        self.app_model.close_all_dialogs += 1
+
         return self
 
 
@@ -351,6 +355,7 @@ class CustomApp(sw.App):
         self.app_model = app_model
         self.app_model.observe(self.update_recipe_state, "recipe_name")
         self.app_model.observe(self.update_recipe_state, "new_changes")
+        self.app_model.observe(self.close_all_dialogs, "close_all_dialogs")
 
         self.appBar.save_recipe_btn.on_event("click", self.save_recipe)
 
@@ -372,6 +377,14 @@ class CustomApp(sw.App):
             change["new"] = change["new"].split("/")[-1].replace(".json", "")
 
         self.appBar.update_recipe(element=change["name"], value=change["new"])
+
+    def close_all_dialogs(self, *args):
+        """Close all dialogs in the app."""
+
+        dialogs = self.get_children(klass=BaseDialog)
+        alert_dialogs = self.get_children(klass=AlertDialog)
+        for dialog in dialogs + alert_dialogs:
+            dialog.close_dialog()
 
 
 class CustomTileAbout(sw.Tile):

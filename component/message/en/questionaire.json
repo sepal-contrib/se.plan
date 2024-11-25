@@ -41,7 +41,8 @@
             "unit": "Unit",
             "validate": "Validate",
             "cancel": "Cancel",
-            "missing_data": "Some data are missing, please fill all of them before submitting the form"
+            "missing_data": "Some data are missing, please fill all of them before submitting the form",
+            "wrong_asset" : "Please select a valid asset"
         },
         "table": {
             "header": {
@@ -83,6 +84,13 @@
                 "action": "Action",
                 "indicator": "Indicator"
             }
+        }
+    },
+    "dialog" : {
+        "btn" : {
+            "edit" : "Save",
+            "cancel" : "Cancel",
+            "add" : "Add"
         }
     },
     "questionnaire": {

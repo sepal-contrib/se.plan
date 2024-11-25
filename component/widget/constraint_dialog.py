@@ -1,3 +1,4 @@
+from typing import Optional
 import pandas as pd
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
@@ -19,14 +20,14 @@ class ConstraintDialog(BaseDialog):
     count = 0
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: cmod.ConstraintModel, alert: Alert):
+    def __init__(self, model: cmod.ConstraintModel, alert: Optional[Alert] = None):
         super().__init__()
 
         # save the model as a member
         self.model = model
 
         # create an alert to display informations to the user
-        self.w_alert = alert
+        self.w_alert = alert or Alert()
 
         # create the title
         w_title = sw.CardTitle(children=[cm.constraint.dialog.title])
@@ -74,10 +75,13 @@ class ConstraintDialog(BaseDialog):
 
         # create the actions
         self.w_validate = TextBtn(
-            cm.constraint.dialog.validate, gliph="fa-solid fa-check", type_="success"
+            cm.constraint.dialog.validate,
+            gliph="fa-solid fa-check",
+            type_="success",
+            attributes={"id": "dialog_action"},
         )
         self.w_cancel = TextBtn(
-            cm.constraint.dialog.cancel,
+            cm.dialog.btn.cancel,
             gliph="fa-solid fa-times",
             type_="error",
             outlined=True,
@@ -131,6 +135,10 @@ class ConstraintDialog(BaseDialog):
 
     def validate(self, *args) -> None:
         """save the layer in the model (update or add)."""
+
+        if not self.w_asset.valid:
+            raise Exception(cm.constraint.dialog.wrong_asset)
+
         # check values are set
         if not all(
             [
@@ -175,7 +183,7 @@ class ConstraintDialog(BaseDialog):
         self.fill(*[None] * 7)
 
         # open the dialog
-        super().open_dialog()
+        self.open_dialog(type_="add")
 
     def theme_change(self, *args) -> None:
         """edit the list of default theme."""

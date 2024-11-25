@@ -2,11 +2,45 @@ from typing import Dict, List, Literal, Tuple, TypedDict
 from ipecharts import EChartsWidget
 
 
-class StatsDict(TypedDict):
-    """A dictionary to hold the statistics for a certain metric."""
+class MeanStatsValues(TypedDict):
+    """The values returned by get_image_mean function benefit theme."""
+
+    mean: float
+    max: float
+    min: float
+
+
+class MeanStatsDict(TypedDict):
+    """A dictionary to hold the statistics from get_image_mean function for benefit theme."""
+
+    total: float
+    values: MeanStatsValues
+
+
+class PercentageStatsValues(TypedDict):
+    """The values returned by get_image_percent_cover_pixelarea function for constraint."""
+
+    percent: float
+
+
+class PercentageStatsDict(TypedDict):
+    """A dictionary that holds the result of get_image_percent_cover_pixelarea."""
+
+    total: float
+    values: PercentageStatsValues
+
+
+class SumStatsValues(TypedDict):
+    """The values returned by get_image_sum function for costs theme."""
+
+    sum: float
+
+
+class SumStatsDict(TypedDict):
+    """The values returned by get_image_sum function for costs theme."""
 
     total: List[float]
-    values: List[float]
+    values: SumStatsValues
 
 
 class SuitabilityLevel(TypedDict):
@@ -26,9 +60,10 @@ class SuitabilityDict(TypedDict):
 class AreaStats(TypedDict):
     """The data structure for the summary statistics of a given area."""
 
-    benefit: List[Dict[str, StatsDict]]
-    constraint: List[Dict[str, StatsDict]]
-    cost: List[Dict[str, StatsDict]]
+    benefit: List[Dict[str, MeanStatsDict]]
+    constraint: List[Dict[str, PercentageStatsDict]]
+    cost: List[Dict[str, SumStatsDict]]
+
     suitability: SuitabilityDict
     color: str
 

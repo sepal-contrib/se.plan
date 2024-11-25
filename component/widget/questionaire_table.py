@@ -32,8 +32,8 @@ class Table(sw.Layout):
         self,
         ee_session: EESession,
         model: Union[BenefitModel, ConstraintModel, CostModel],
-        alert: Alert,
         aoi_model: SeplanAoi,
+        alert: Optional[Alert] = None,
         preview_map: PreviewMapDialog = None,
         preview_theme_map_btn: PreviewThemeBtn = "",
     ) -> None:
