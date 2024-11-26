@@ -69,28 +69,8 @@ solara.lab.theme.themes.light.menu = "#FFFFFF"
 @solara.component
 def Page():
 
-    access_token = str(headers.value["access_token"][0])
-    access_token_expiry_date = int(headers.value["access_token_expiry_date"][0])
-    project_id = str(headers.value["project_id"][0])
-
-    sepal_headers = {
-        "id": 1,
-        "username": "dguerrero",
-        "googleTokens": {
-            "accessToken": access_token,
-            "accessTokenExpiryDate": access_token_expiry_date,
-            "projectId": project_id,
-            "refreshToken": "",
-            "REFRESH_IF_EXPIRES_IN_MINUTES": 10,
-            "legacyProject": "",
-        },
-        "status": "ACTIVE",
-        "roles": ["USER"],
-        "systemUser": False,
-        "admin": False,
-    }
-    print(sepal_headers)
-    user_session = EESession(sepal_headers, force_refresh=True)
+    sepal_user = str(headers.value["sepal-user"][0])
+    user_session = EESession(sepal_user, force_refresh=True)
 
     app_model = AppModel()
     alert = AlertState()
