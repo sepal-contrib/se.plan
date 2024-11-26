@@ -1,7 +1,8 @@
 import solara
 from solara.lab import headers
 
-# solara.server.settings.assets.fontawesome_path = "/font-awesome/6.2.1/css/all.min.css"
+# solara.server.settings.assets.fontawesome_path = "/font-awesome/6.2.
+# 1/css/all.min.css"
 # solara.server.settings.assets.extra_locations = ["./assets/"]
 # solara.settings.assets.cdn = "https://cdnjs.cloudflare.com/ajax/libs/"
 # solara.server.settings.main.base_url = "/api/app-launcher/seplan/"
