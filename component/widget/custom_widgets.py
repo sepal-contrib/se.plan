@@ -29,6 +29,31 @@ from .constraint_dialog import ConstraintDialog
 from .cost_dialog import CostDialog
 
 
+class ResizeTrigger(v.VuetifyTemplate):
+    """Update the image source when the theme changes."""
+
+    dark = Bool(v.theme.dark, allow_none=True).tag(sync=True)
+    template = Unicode(
+        """
+        <script class='sepal-ui-script'>
+            {
+                methods: {
+                    jupyter_resize() {
+                        /* force the resize event. useful for drawer clicks*/
+                        window.dispatchEvent(new Event("resize"));
+                    }
+                }
+            }
+        </script>
+        """
+    ).tag(sync=True)
+    "Unicode: the javascript script to manually trigger the resize event"
+
+    def resize(self):
+        """trigger the template method i.e. the resize event."""
+        return self.send({"method": "resize"})
+
+
 class RecipeInspector(v.VuetifyTemplate):
 
     template_file = Unicode(str(Path(__file__).parent / "vue/recipe_reader.vue")).tag(
@@ -261,7 +286,16 @@ class CustomDrawerItem(sw.DrawerItem):
 
         self.attributes = {"id": kwargs["card"]}
 
+        self.resize_trigger = ResizeTrigger()
+
+        self.children = [self.resize_trigger] + self.children
+
         self.observe(self.add_notif, "alert")
+
+    def callback(self, *args) -> None:
+        """Callback to be executed when the item is clicked."""
+
+        self.resize_trigger.resize()
 
     def add_notif(self, change: dict) -> None:
         """Add a notification alert to drawer."""
