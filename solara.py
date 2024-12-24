@@ -12,7 +12,7 @@ def Page():
     solara.lab.theme.themes.dark.primary = "#76591e"
     solara.lab.theme.dark = color._dark_theme
 
-    v.Btn.element(
+    v.Alert.element(
         children=["this is a test", f" - theme: {headers.value}"],
         color="primary",
     )
