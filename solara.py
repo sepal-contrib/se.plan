@@ -3,15 +3,6 @@ from solara.lab import headers
 import ipyvuetify as v
 from sepal_ui import color
 
-solara_.server.settings.assets.fontawesome_path = "/font-awesome/6.2.1/css/all.min.css"
-solara_.server.settings.assets.extra_locations = ["./assets/"]
-solara_.settings.assets.cdn = "https://cdnjs.cloudflare.com/ajax/libs/"
-import ipyvuetify as v
-
-solara_.server.settings.assets.fontawesome_path = "/font-awesome/6.2.1/css/all.min.css"
-solara_.server.settings.assets.extra_locations = ["./assets/"]
-solara_.settings.assets.cdn = "https://cdnjs.cloudflare.com/ajax/libs/"
-
 
 @solara_.component
 def Page():
