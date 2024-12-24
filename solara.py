@@ -1,3 +1,4 @@
+import requests
 import solara
 from solara.lab import headers
 import ipyvuetify as v
@@ -16,3 +17,12 @@ def Page():
         children=["this is a test", f" - theme: {headers.value}"],
         color="primary",
     )
+
+    base_url = "http://danielg.sepal.io/api/user-files/download"
+    params = {"path": "/test.filelll"}
+
+    response = requests.get(base_url, params=params, headers=headers.value)
+
+    # Print out the response details
+    print("Status Code:", response.status_code)
+    print("Response Text:", response.text)
