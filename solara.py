@@ -3,6 +3,11 @@ import solara
 from solara.lab import headers
 import ipyvuetify as v
 from sepal_ui import color
+from eeclient.client import EESession
+from eeclient.data import get_info
+import ee
+
+ee.Initialize()
 
 
 @solara.component
@@ -18,11 +23,14 @@ def Page():
         color="primary",
     )
 
-    base_url = "http://danielg.sepal.io/api/user-files/download"
-    params = {"path": "/test.filelll"}
+    gee_session = EESession(sepal_headers=headers.value)
 
-    response = requests.get(base_url, params=params, headers=headers.value)
+    ee_number = ee.Number(1)
 
-    # Print out the response details
-    print("Status Code:", response.status_code)
-    print("Response Text:", response.text)
+    value = get_info(gee_session, ee_number)
+
+    solara.Markdown(
+        f"""
+        # {value}
+    """
+    )
