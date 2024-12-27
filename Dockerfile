@@ -8,7 +8,7 @@ RUN conda init bash && \
 
 COPY requirements.txt /usr/local/lib/seplan/requirements.txt
 
-RUN bash -c "source ~/.bashrc && conda activate seplan && pip install -r requirements.txt"
+RUN bash -c "source ~/.bashrc && conda activate seplan && pip install -r requirements.txt --no-cache-dir"
 
 COPY . /usr/local/lib/seplan
 
