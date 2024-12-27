@@ -6,8 +6,9 @@ from sepal_ui import color
 from eeclient.client import EESession
 from eeclient.data import get_info
 import ee
+from sepal_ui.scripts.utils import init_ee
 
-ee.Initialize()
+init_ee()
 
 
 @solara.component
