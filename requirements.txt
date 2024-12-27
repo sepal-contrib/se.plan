@@ -1,7 +1,9 @@
 # these libs are requested to build application env
 
 solara
+
 git+https://github.com/dfguerrerom/ee-client@solara
+
 
 
 toml

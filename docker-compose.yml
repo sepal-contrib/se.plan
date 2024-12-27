@@ -9,6 +9,8 @@ services:
     volumes:
       - "${USERS_HOME_PATH:-/home}:/userHomes"
       - "${EE_CREDENTIALS_PATH:-${HOME}/.config/earthengine/credentials}:/root/.config/earthengine/credentials"
+    environment:
+      SEPAL_HOST: "${SEPAL_HOST}"
     networks:
       - sepal
     restart: always
