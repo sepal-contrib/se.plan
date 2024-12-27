@@ -24,14 +24,19 @@ def Page():
         color="primary",
     )
 
-    gee_session = EESession(sepal_headers=headers.value)
+    try:
 
-    ee_number = ee.Number(1)
+        gee_session = EESession(sepal_headers=headers.value)
 
-    value = get_info(gee_session, ee_number)
+        ee_number = ee.Number(1)
 
-    solara.Markdown(
-        f"""
-        # {value}
-    """
-    )
+        value = get_info(gee_session, ee_number)
+
+        solara.Markdown(
+            f"""
+            # {value}
+        """
+        )
+
+    except Exception as e:
+        solara.Markdown(f"An error occured: {e}")
