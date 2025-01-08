@@ -4,8 +4,6 @@ solara
 
 git+https://github.com/dfguerrerom/ee-client@solara
 
-
-
 toml
 
 ipecharts>=1.0.8
