@@ -4,3 +4,5 @@ services:
       - "8765:8765"
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+    environment:
+      SEPAL_HOST: "host.docker.internal"
