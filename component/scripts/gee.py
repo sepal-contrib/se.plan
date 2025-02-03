@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import List, Literal, Union
 from eeclient.client import EESession
-from eeclient.data import getInfo
+from eeclient.data import get_info
 
 import ee
 from sepal_ui import mapping as sm
@@ -50,13 +50,13 @@ def get_limits(
         reducer = ee.Reducer.minMax()
 
         def get_value(reduction):
-            return list(reduction.getInfo().values())
+            return list(get_info(ee_session, reduction).values())
 
     else:
         reducer = ee.Reducer.frequencyHistogram()
 
         def get_value(reduction):
-            return getInfo(
+            return get_info(
                 ee_session,
                 ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys(),
             )
@@ -103,11 +103,11 @@ def get_gee_recipe_folder(recipe_name: str) -> Path:
     recipe_folder = seplan_folder / recipe_name
 
     try:
-        if not ee.data.getInfo(str(seplan_folder)):
+        if not ee.data.get_info(str(seplan_folder)):
             ee.data.createAsset({"type": "FOLDER"}, str(seplan_folder))
 
         # Create the recipe folder
-        if not ee.data.getInfo(str(recipe_folder)):
+        if not ee.data.get_info(str(recipe_folder)):
             ee.data.createAsset({"type": "FOLDER"}, str(recipe_folder))
 
         return Path(recipe_folder)

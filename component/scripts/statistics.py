@@ -1,7 +1,7 @@
 from typing import Dict, List
 import ee
 from eeclient.client import EESession
-from eeclient.data import getInfo
+from eeclient.data import get_info
 
 from component.model.recipe import Recipe
 from component.scripts.seplan import Seplan, reduce_constraints
@@ -52,7 +52,7 @@ def get_summary_statistics(ee_session: EESession, recipe: Recipe) -> RecipeStats
     # Get the restoration suitability index
     wlc_out = seplan_model.get_constraint_index()
 
-    return getInfo(
+    return get_info(
         ee_session,
         ee.Dictionary(
             {
@@ -92,7 +92,7 @@ def get_summary_statistics(ee_session: EESession, recipe: Recipe) -> RecipeStats
                 )
             }
         ),
-    ).getInfo()
+    )
 
 
 def get_image_stats(image, mask, geom):
@@ -264,5 +264,5 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
         }
     )
 
-    # return ee.Dictionary({image.get("name").getInfo(): value})
+    # return ee.Dictionary({image.get("name").get_info(): value})
     return ee.Dictionary({name: value})
