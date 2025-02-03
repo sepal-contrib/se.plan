@@ -3,6 +3,7 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from typing import List, Literal
+from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
 from component.scripts.statistics import get_summary_statistics
@@ -227,7 +228,7 @@ class ScenarioInputs(sw.Layout):
         super().__init__()
 
         # Add btn
-        btn_add = IconBtn("mdi-plus", color="primary", class_="mr-2")
+        btn_add = IconBtn(icon("plus"), color="primary", class_="mr-2")
         btn_add.on_event("click", self.add_input)
         main_recipe = self.get_input_row(trashable=trashable, main_recipe=main_recipe)
 
@@ -318,7 +319,7 @@ class ScenarioInputs(sw.Layout):
         if trashable:
 
             remove_btn = TableIcon(
-                "mdi-trash-can", name="trash", small=False, disabled=True
+                icon("trash-can"), name="trash", small=False, disabled=True
             )
             remove_btn_td = sw.Html(
                 style_="width: 65px", tag="td", children=[remove_btn]

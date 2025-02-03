@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Literal
 
 import ipyvuetify as v
+from component.frontend.icons import icon
 from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
@@ -20,19 +21,19 @@ from component.widget.custom_widgets import RecipeInput
 
 _content = {
     "new": {
-        "icon": "mdi-note-text",
+        "icon": icon("recipe-note"),
         "btn": cm.recipe.new.btn,
         "desc": cm.recipe.new.desc,
         "title": cm.recipe.new.title,
     },
     "load": {
-        "icon": "mdi-upload",
+        "icon": icon("upload"),
         "btn": cm.recipe.load.btn,
         "desc": cm.recipe.load.desc,
         "title": cm.recipe.load.title,
     },
     "save": {
-        "icon": "mdi-content-save",
+        "icon": icon("save"),
         "btn": cm.recipe.save.btn,
         "desc": cm.recipe.save.desc,
         "title": cm.recipe.save.title,

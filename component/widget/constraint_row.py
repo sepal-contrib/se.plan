@@ -1,5 +1,6 @@
 from eeclient.client import EESession
 
+from component.frontend.icons import icon
 from component.scripts.logger import logger
 from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
@@ -57,9 +58,9 @@ class ConstraintRow(sw.Html):
 
         # View
 
-        self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
-        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
-        self.show_map_btn = cw.TableIcon("mdi-map", self.layer_id)
+        self.edit_btn = cw.TableIcon(icon("pencil"), self.layer_id)
+        self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
+        self.show_map_btn = cw.TableIcon(icon("map"), self.layer_id)
 
         self.edit_btn.class_list.add("mr-2")
         self.delete_btn.class_list.add("mr-2")

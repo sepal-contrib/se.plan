@@ -1,4 +1,5 @@
 import ipyvuetify as v
+from component.frontend.icons import icon
 from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui import color
@@ -55,10 +56,10 @@ class MapToolbar(sw.Toolbar):
             gliph="fa-solid fa-circle-info",
         ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
 
-        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+        self.btn_compare = IconBtn(gliph=icon("compare")).set_tooltip(
             cm.map.toolbar.tooltip.compare, right=True, max_width="200px"
         )
-        self.btn_clean = IconBtn(gliph="mdi-broom").set_tooltip(
+        self.btn_clean = IconBtn(gliph=icon("broom")).set_tooltip(
             cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
         )
 

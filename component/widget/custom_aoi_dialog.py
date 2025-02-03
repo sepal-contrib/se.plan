@@ -2,6 +2,7 @@ from copy import deepcopy
 
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
+from component.frontend.icons import icon
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.aoi.aoi_model import AoiModel
 
@@ -24,7 +25,7 @@ class CustomAoiDialog(BaseDialog):
         self.map_ = map_
 
         # create the widgets
-        self.btn = TextBtn(cm.map.dialog.drawing.btn, gliph="mdi-check")
+        self.btn = TextBtn(cm.map.dialog.drawing.btn, gliph=icon("check"))
         title = sw.CardTitle(children=[cm.map.dialog.drawing.title])
         # Create table to show the custom geometries
         table = CustomGeometriesTable(self.map_)
@@ -231,7 +232,7 @@ class CustomGeometryRow(sw.Html):
                 name = layer["properties"]["name"]
 
         # self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
-        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
+        self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
 
         td_list = [
             sw.Html(tag="td", children=[self.delete_btn]),

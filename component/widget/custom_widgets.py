@@ -1,6 +1,7 @@
 from pathlib import Path
 from typing import Literal, Union
 
+from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import validation
 from component.widget.base_dialog import BaseDialog
@@ -183,7 +184,7 @@ class ToolBar(sw.Toolbar):
         elif isinstance(model, CostModel):
             name = "cost"
 
-        self.w_new = TextBtn(f"New {name}", gliph="mdi-plus", type_="success")
+        self.w_new = TextBtn(f"New {name}", gliph=icon("plus"), type_="success")
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
@@ -227,7 +228,7 @@ class DashToolbar(sw.Toolbar):
         ).set_tooltip(
             cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
         )
-        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+        self.btn_compare = IconBtn(gliph=icon("compare")).set_tooltip(
             cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
         )
 
@@ -343,7 +344,7 @@ class CustomNavDrawer(sw.NavDrawer):
 
 class CustomAppBar(sw.AppBar):
 
-    save_recipe_btn = IconBtn(gliph="mdi-content-save")
+    save_recipe_btn = IconBtn(gliph=icon("save"))
     save_recipe_btn.color = "#f3f3f3"
     save_recipe_btn.v_icon.left = False
 
