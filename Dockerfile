@@ -2,6 +2,9 @@ FROM continuumio/miniconda3
 
 WORKDIR /usr/local/lib/seplan
 
+# Install nano and curl
+RUN apt-get update && apt-get install -y nano curl
+
 RUN conda init bash && \
     bash -c "source ~/.bashrc && \
     conda create -n seplan python==3.10 pip -y"
