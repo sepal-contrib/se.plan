@@ -15,7 +15,7 @@ class MapTile(sw.Layout):
         self,
         app_model: AppModel,
         recipe: Recipe,
-        solara_basemap_tiles: dict = None,
+        solara_theme_obj: None,
     ):
         """Define the map tile layout.
 
@@ -24,7 +24,7 @@ class MapTile(sw.Layout):
                 map_tile with the app (like opening the info dialog when the map_tile drawer is clicked). Defaults to None.
         """
         self._metadata = {"mount_id": "map_tile"}
-        self.class_ = "d-block custom_map"
+        self.class_ = "d-block results_map"
         self.app_model = app_model
 
         super().__init__()
@@ -34,9 +34,7 @@ class MapTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        self.map_ = SeplanMap(
-            recipe.seplan_aoi, solara_basemap_tiles=solara_basemap_tiles
-        )
+        self.map_ = SeplanMap(recipe.seplan_aoi, solara_theme_obj=solara_theme_obj)
         self.map_toolbar = MapToolbar(
             recipe=self.recipe, map_=self.map_, alert=self.alert
         )

@@ -19,7 +19,7 @@ class SeplanMap(sm.SepalMap):
     """int: either a new geometry has been drawn on the map"""
 
     def __init__(
-        self, seplan_aoi: SeplanAoi = None, solara_basemap_tiles=None, *args, **kwargs
+        self, seplan_aoi: SeplanAoi = None, solara_theme_obj=None, *args, **kwargs
     ):
         self.aoi_model = seplan_aoi if seplan_aoi else SeplanAoi()
 
@@ -28,7 +28,7 @@ class SeplanMap(sm.SepalMap):
         self.vinspector = True
         self.min_zoom = 1
 
-        super().__init__(solara_basemap_tiles=solara_basemap_tiles, *args, **kwargs)
+        super().__init__(solara_theme_obj=solara_theme_obj, *args, **kwargs)
 
         self.dc.hide()
         self.add_basemap("SATELLITE")
@@ -39,13 +39,6 @@ class SeplanMap(sm.SepalMap):
         self.html = sw.Html(tag="h3", style_="margin:0em 2em 0em 2em;")
         control = WidgetControl(widget=self.html, position="bottomright")
         self.add(control)
-
-        # add cartoDB layer after everything to make sure it stays on top
-        # workaround of https://github.com/jupyter-widgets/ipyleaflet/issues/452
-        default = "Positron" if v.theme.dark is False else "DarkMatter"
-        carto = basemap_to_tiles(basemaps.CartoDB[default])
-        carto.base = True
-        self.add_layer(carto)
 
         self.dc.on_draw(self._handle_draw)
         self.observe(self.on_custom_layers, "custom_layers")

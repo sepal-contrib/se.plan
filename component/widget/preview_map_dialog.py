@@ -1,7 +1,7 @@
 """Custom dialog to display individual layers from questionnaire tile."""
 
 from eeclient.client import EESession
-from eeclient.data import getInfo
+from eeclient.data import get_info
 
 from typing import Literal
 
@@ -33,11 +33,11 @@ class CustomInspectorControl(InspectorControl):
 
 class PreviewMapDialog(BaseDialog):
 
-    def __init__(self, ee_session: EESession, solara_basemap_tiles: dict = None):
+    def __init__(self, ee_session: EESession, solara_theme_obj=None):
         super().__init__(max_width="950px", min_width="950px")
 
         self.ee_session = ee_session
-        self.map_ = SepalMap(solara_basemap_tiles=solara_basemap_tiles)
+        self.map_ = SepalMap(solara_theme_obj=solara_theme_obj)
         self.map_.layout.height = "60vw"
         self.map_.layout.height = "60vh"
         self.retain_focus = False  # To prevent on focus ipyvuetify error
@@ -167,7 +167,7 @@ class PreviewMapDialog(BaseDialog):
             tileScale=16,
         )
         max_, min_ = [
-            round(val, 2) for val in getInfo(self.ee_session, min_max)().values()
+            round(val, 2) for val in get_info(self.ee_session, min_max).values()
         ]
 
         min_ = 0 if not min_ else min_

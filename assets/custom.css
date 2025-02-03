@@ -134,3 +134,29 @@ nav.v-navigation-drawer {
 .v-content .v-content {
   padding: 0px !important;
 }
+
+.theme--dark.v-navigation-drawer {
+  background-color: #1a1a1a !important;
+}
+
+.theme--dark .solara-content-main {
+  background-color: #121212 !important;
+}
+
+.leaflet-control-container .v-application--wrap {
+  min-height: revert !important;
+}
+
+.aoi_map .jupyter-widgets.leaflet-widgets {
+  height: 92vh;
+  margin: 0 !important;
+}
+
+.results_map .jupyter-widgets.leaflet-widgets {
+  height: 89vh;
+  margin: 0 !important;
+}
+
+.leaflet-sbs-divider, .leaflet-sbs-range {
+  z-index: 201 !important;
+}

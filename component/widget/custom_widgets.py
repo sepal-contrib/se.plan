@@ -384,8 +384,8 @@ class CustomAppBar(sw.AppBar):
 
 
 class CustomApp(sw.App):
-    def __init__(self, app_model, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app_model, solara_theme_obj=None, *args, **kwargs):
+        super().__init__(*args, solara_theme_obj=solara_theme_obj, **kwargs)
 
         self.app_model = app_model
         self.app_model.observe(self.update_recipe_state, "recipe_name")
@@ -423,7 +423,9 @@ class CustomApp(sw.App):
 
 
 class CustomTileAbout(sw.Tile):
-    def __init__(self, pathname: Union[str, Path], **kwargs) -> None:
+    def __init__(
+        self, pathname: Union[str, Path], solara_theme_obj=None, **kwargs
+    ) -> None:
         """Create an about tile using a .md file.
 
         This tile will have the "about_widget" id and "About" title.
@@ -435,7 +437,7 @@ class CustomTileAbout(sw.Tile):
         text = Path(pathname).read_text()
 
         # get current stored theme
-        theme = get_theme()
+        theme = solara_theme_obj.name
 
         # Search any url in the text and look for the dark/light theme
         text = (
@@ -446,16 +448,16 @@ class CustomTileAbout(sw.Tile):
 
         content = Markdown(text)
 
-        update_script = UpdateImages(dark=True)
+        update_script = UpdateImages(solara_theme_obj)
         super().__init__("about_tile", "About", inputs=[content, update_script])
 
-        directional_link((v.theme, "dark"), (update_script, "dark"))
+        directional_link((solara_theme_obj, "dark"), (update_script, "dark"))
 
 
 class UpdateImages(v.VuetifyTemplate):
     """Update the image source when the theme changes."""
 
-    dark = Bool(v.theme.dark, allow_none=True).tag(sync=True)
+    dark = Bool(None, allow_none=True).tag(sync=True)
     template = Unicode(
         """
         <script class='sepal-ui-script'>
@@ -484,7 +486,11 @@ class UpdateImages(v.VuetifyTemplate):
     ).tag(sync=True)
     "Unicode: the javascript script to manually trigger the resize event"
 
-    @observe("dark")
+    def __init__(self, solara_theme_obj, **kwargs):
+        super().__init__(**kwargs)
+        self.dark = solara_theme_obj.dark
+        self.observe(self.update_images, "dark")
+
     def update_images(self, *_):
         """trigger the template method i.e. the resize event."""
         return self.send({"method": "updateImageSources"})

@@ -1,8 +1,7 @@
-import time
+import solara
 from eeclient.client import EESession
-from eeclient.data import getInfo
+from eeclient.data import get_info
 
-start = time.time()
 import ee
 import pandas as pd
 import pkg_resources
@@ -18,28 +17,33 @@ from component.widget.custom_aoi_view import SeplanAoiView
 from sepal_ui.scripts.utils import init_ee
 
 init_ee()
-from ipyleaflet import Map
-
-end = time.time()
-print(f"Import aoi_tile time: {end - start}")
 
 
 class AoiTile(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
     def __init__(
-        self, ee_session: EESession, recipe: Recipe, solara_basemap_tiles: dict = None
+        self,
+        ee_session: EESession,
+        recipe: Recipe,
+        layers: list = [],
+        solara_theme_obj=None,
     ):
-        self.class_ = "d-block custom_map"
+        self.class_ = "d-block aoi_map"
         self._metadata = {"mount_id": "aoi_tile"}
         self.ee_session = ee_session
 
         super().__init__()
 
-        self.map_ = SepalMap(gee=True, solara_basemap_tiles=solara_basemap_tiles)
+        # basemaps = ["CartoDB.DarkMatter"] if dark_theme else ["CartoDB.Positron"]
+        # basemaps = ["SATELLITE"] + basemaps
+
+        self.map_ = SepalMap(gee=True, layers=layers, solara_theme_obj=solara_theme_obj)
+        self.map_.add_basemap("SATELLITE")
+
         self.map_.dc.hide()
         self.map_.min_zoom = 1
-        self.map_.add_basemap("SATELLITE")
+        # self.map_.add_basemap("SATELLITE")
 
         # Build the aoi view with our custom aoi_model
         self.view = SeplanAoiView(model=recipe.seplan_aoi, map_=self.map_)
@@ -94,7 +98,7 @@ class AoiTile(sw.Layout):
                 maxPixels=1e13,
             )
             # test if bitwiseAnd is 2 (1 is partial coverage, 0 no coverage)
-            included = getInfo(
+            included = get_info(
                 self.ee_session,
                 ee.Algorithms.IsEqual(bit_test.getNumber("constant"), 2),
             )
