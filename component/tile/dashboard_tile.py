@@ -1,3 +1,4 @@
+from eeclient.client import EESession
 from typing import List, Tuple
 from component.types import (
     BenefitChartsData,
@@ -31,12 +32,13 @@ from component.widget.dashboard_layer_panels import LayerFull, LayerPercentage
 
 
 class DashboardTile(sw.Layout):
-    def __init__(self, recipe: Recipe):
+    def __init__(self, ee_session: EESession, recipe: Recipe):
         super().__init__()
 
         self._metadata = {"mount_id": "dashboard_tile"}
         self.class_ = "d-block"
         self.summary_stats = None
+        self.ee_session = ee_session
 
         self.recipe = recipe
         self.alert = Alert()
@@ -99,7 +101,7 @@ class DashboardTile(sw.Layout):
 
         if not self.summary_stats:
             logger.info("No dashboard to display")
-            self.summary_stats = get_summary_statistics(self.recipe)
+            self.summary_stats = get_summary_statistics(self.ee_session, self.recipe)
 
         # set the content of the panels
         self.overall_dash.set_summary([self.summary_stats])
