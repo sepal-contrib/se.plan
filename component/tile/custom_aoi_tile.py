@@ -1,4 +1,3 @@
-import solara
 from eeclient.client import EESession
 from eeclient.data import get_info
 
@@ -24,21 +23,26 @@ class AoiTile(sw.Layout):
 
     def __init__(
         self,
-        ee_session: EESession,
+        gee_session: EESession,
         recipe: Recipe,
         layers: list = [],
         solara_theme_obj=None,
     ):
         self.class_ = "d-block aoi_map"
         self._metadata = {"mount_id": "aoi_tile"}
-        self.ee_session = ee_session
+        self.gee_session = gee_session
 
         super().__init__()
 
         # basemaps = ["CartoDB.DarkMatter"] if dark_theme else ["CartoDB.Positron"]
         # basemaps = ["SATELLITE"] + basemaps
 
-        self.map_ = SepalMap(gee=True, layers=layers, solara_theme_obj=solara_theme_obj)
+        self.map_ = SepalMap(
+            gee=True,
+            layers=layers,
+            solara_theme_obj=solara_theme_obj,
+            gee_session=gee_session,
+        )
         self.map_.add_basemap("SATELLITE")
 
         self.map_.dc.hide()
@@ -98,8 +102,7 @@ class AoiTile(sw.Layout):
                 maxPixels=1e13,
             )
             # test if bitwiseAnd is 2 (1 is partial coverage, 0 no coverage)
-            included = get_info(
-                self.ee_session,
+            included = self.gee_session.operations.get_info(
                 ee.Algorithms.IsEqual(bit_test.getNumber("constant"), 2),
             )
 

@@ -13,7 +13,7 @@ from component.widget.questionaire_table import Table
 
 
 class QuestionnaireTile(sw.Layout):
-    def __init__(self, ee_session: EESession, recipe: Recipe, solara_theme_obj=None):
+    def __init__(self, gee_session: EESession, recipe: Recipe, solara_theme_obj=None):
         # name the tile
         self._metadata = {"mount_id": "questionnaire_tile"}
         self.class_ = "d-block"
@@ -25,11 +25,11 @@ class QuestionnaireTile(sw.Layout):
 
         # define a reusable preview map dialog
         preview_map = PreviewMapDialog(
-            ee_session=ee_session, solara_theme_obj=solara_theme_obj
+            gee_session=gee_session, solara_theme_obj=solara_theme_obj
         )
 
         benefit_table = Table(
-            ee_session=ee_session,
+            gee_session=gee_session,
             model=recipe.benefit_model,
             alert=self.alert,
             aoi_model=recipe.seplan_aoi,
@@ -43,7 +43,7 @@ class QuestionnaireTile(sw.Layout):
         )
 
         constraint_table = Table(
-            ee_session=ee_session,
+            gee_session=gee_session,
             model=recipe.constraint_model,
             alert=self.alert,
             aoi_model=recipe.seplan_aoi,
@@ -57,7 +57,7 @@ class QuestionnaireTile(sw.Layout):
         )
 
         cost_table = Table(
-            ee_session=ee_session,
+            gee_session=gee_session,
             model=recipe.cost_model,
             alert=self.alert,
             aoi_model=recipe.seplan_aoi,

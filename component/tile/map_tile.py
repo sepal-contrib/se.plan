@@ -1,3 +1,5 @@
+from eeclient.client import EESession
+
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
@@ -16,6 +18,7 @@ class MapTile(sw.Layout):
         app_model: AppModel,
         recipe: Recipe,
         solara_theme_obj: None,
+        gee_session: EESession,
     ):
         """Define the map tile layout.
 
@@ -34,7 +37,11 @@ class MapTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        self.map_ = SeplanMap(recipe.seplan_aoi, solara_theme_obj=solara_theme_obj)
+        self.map_ = SeplanMap(
+            recipe.seplan_aoi,
+            solara_theme_obj=solara_theme_obj,
+            gee_session=gee_session,
+        )
         self.map_toolbar = MapToolbar(
             recipe=self.recipe, map_=self.map_, alert=self.alert
         )

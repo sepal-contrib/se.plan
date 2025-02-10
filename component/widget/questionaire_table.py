@@ -30,7 +30,7 @@ class Table(sw.Layout):
 
     def __init__(
         self,
-        ee_session: EESession,
+        gee_session: EESession,
         model: Union[BenefitModel, ConstraintModel, CostModel],
         aoi_model: SeplanAoi,
         alert: Optional[Alert] = None,
@@ -41,7 +41,7 @@ class Table(sw.Layout):
         self.alert = alert or Alert()
         self.aoi_model = aoi_model
         self.preview_map = preview_theme_map_btn
-        self.ee_session = ee_session
+        self.gee_session = gee_session
 
         if isinstance(model, BenefitModel):
             self.type_ = "benefit"
@@ -63,7 +63,7 @@ class Table(sw.Layout):
                 f"model should be an instance of BenefitModel, ConstraintModel or CostModel, not {type(model)}"
             )
 
-        self.preview_map = preview_map or PreviewMapDialog(ee_session=ee_session)
+        self.preview_map = preview_map or PreviewMapDialog(gee_session=gee_session)
         self.toolbar = cw.ToolBar(
             model,
             self.dialog,
@@ -134,7 +134,7 @@ class Table(sw.Layout):
                         aoi_model=self.aoi_model,
                         alert=self.alert,
                         preview_map=self.preview_map,
-                        ee_session=self.ee_session,
+                        gee_session=self.gee_session,
                     )
                 except Exception as e:
                     # remove the asset from the model if it fails
@@ -183,7 +183,7 @@ class Table(sw.Layout):
                     aoi_model=self.aoi_model,
                     alert=self.alert,
                     preview_map=self.preview_map,
-                    ee_session=self.ee_session,
+                    gee_session=self.gee_session,
                 )
                 for layer_id in self.model.ids
             ]

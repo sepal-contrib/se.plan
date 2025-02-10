@@ -1,7 +1,6 @@
 from pathlib import Path
 from typing import List, Literal, Union
 from eeclient.client import EESession
-from eeclient.data import get_info
 
 import ee
 from sepal_ui import mapping as sm
@@ -11,9 +10,14 @@ from component.scripts.logger import logger
 
 
 def get_layer(
-    image: ee.Image, vis_params: dict = {}, name: str = "", visible: bool = True
+    gee_session: EESession,
+    image: ee.Image,
+    vis_params: dict = {},
+    name: str = "",
+    visible: bool = True,
 ) -> sm.layer.EELayer:
-    map_id_dict = ee.Image(image).getMapId(vis_params)
+
+    map_id_dict = gee_session.operations.get_map_id(image, vis_params)
 
     return sm.layer.EELayer(
         ee_object=image,
@@ -27,7 +31,7 @@ def get_layer(
 
 
 def get_limits(
-    ee_session: EESession,
+    gee_session: EESession,
     asset: str,
     data_type: Literal["binary", "continuous", "categorical"],
     aoi: Union[ee.FeatureCollection, ee.Geometry],
@@ -50,14 +54,13 @@ def get_limits(
         reducer = ee.Reducer.minMax()
 
         def get_value(reduction):
-            return list(get_info(ee_session, reduction).values())
+            return list(gee_session.operations.get_info(reduction).values())
 
     else:
         reducer = ee.Reducer.frequencyHistogram()
 
         def get_value(reduction):
-            return get_info(
-                ee_session,
+            return gee_session.operations.get_info(
                 ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys(),
             )
 

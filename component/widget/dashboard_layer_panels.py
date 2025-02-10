@@ -48,7 +48,7 @@ class LayerFull(sw.Layout):
         # build the internal details
         w_header = sw.ExpansionPanelHeader(
             children=[cm.dashboard.theme.benefit.details],
-            expand_icon=icon("help-circle-outline"),
+            expand_icon=icon("help-circle"),
             disable_icon_rotate=True,
         )
         w_content = sw.ExpansionPanelContent(children=[sw.Markdown(detail)])
@@ -103,7 +103,7 @@ class LayerPercentage(sw.Layout):
         # build the internal expantionpanel
         w_header = sw.ExpansionPanelHeader(
             children=[cm.dashboard.theme.benefit.details],
-            expand_icon=icon("help-circle-outline"),
+            expand_icon=icon("help-circle"),
             disable_icon_rotate=True,
         )
         w_content = sw.ExpansionPanelContent(children=[detail])

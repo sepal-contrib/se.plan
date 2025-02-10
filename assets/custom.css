@@ -160,3 +160,20 @@ nav.v-navigation-drawer {
 .leaflet-sbs-divider, .leaflet-sbs-range {
   z-index: 201 !important;
 }
+
+.leaflet-sbs-divider, .leaflet-sbs-range {
+  z-index: 201 !important;
+}
+
+.theme--light .v-toolbar {
+  background-color: #2196f3 !important;
+  border-color: #2196f3 !important;
+}
+
+header.theme--light.v-app-bar .v-btn.v-btn--icon {
+  color: white !important;
+}
+
+header.theme--light.v-app-bar.v-toolbar.v-sheet {
+  color: white !important;
+}

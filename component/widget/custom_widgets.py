@@ -1,3 +1,4 @@
+from component.scripts.logger import logger
 from pathlib import Path
 from typing import Literal, Union
 
@@ -344,38 +345,44 @@ class CustomNavDrawer(sw.NavDrawer):
 
 class CustomAppBar(sw.AppBar):
 
-    save_recipe_btn = IconBtn(gliph=icon("save"))
-    save_recipe_btn.color = "#f3f3f3"
-    save_recipe_btn.v_icon.left = False
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    recipe_holder = sw.Flex(
-        attributes={"id": "recipe_holder"},
-        class_="d-inline-flex justify-end",
-        style_="align-items: center;",
-        children=[
-            sw.Html(
-                tag="span",
-                class_="mr-1 white--text",
-                attributes={"id": "recipe_name"},
-            ),
-            sw.Html(
-                tag="span",
-                class_="font-weight-thin font-italic text-lowercase mr-2 white--text",
-                attributes={"id": "new_changes"},
-            ),
-            save_recipe_btn,
-        ],
-    )
+        self.save_recipe_btn = IconBtn(gliph=icon("save"))
+        self.save_recipe_btn.color = "#f3f3f3"
+        self.save_recipe_btn.v_icon.left = False
+
+        self.recipe_holder = sw.Flex(
+            attributes={"id": "recipe_holder"},
+            class_="d-inline-flex justify-end",
+            style_="align-items: center;",
+            children=[
+                sw.Html(
+                    tag="span",
+                    class_="mr-1 white--text",
+                    attributes={"id": "recipe_name"},
+                ),
+                sw.Html(
+                    tag="span",
+                    class_="font-weight-thin font-italic text-lowercase mr-2 white--text",
+                    attributes={"id": "new_changes"},
+                ),
+                self.save_recipe_btn,
+            ],
+        )
+
+        self.children = self.children[:3] + [self.recipe_holder] + self.children[3:]
+        self.recipe_holder.hide()
 
     def update_recipe(
         self, element: Literal["recipe_name", "new_changes"], value: str = ""
     ) -> None:
         """Update the recipe name and state in the app bar."""
+
+        self.recipe_holder.show()
+
         if not value:
             return
-
-        if not self.get_children(attr="id", value="recipe_holder"):
-            self.children = self.children[:3] + [self.recipe_holder] + self.children[3:]
 
         if element == "new_changes":
             value = cm.app.recipe_state[value]
@@ -402,6 +409,8 @@ class CustomApp(sw.App):
 
     def update_recipe_state(self, change):
         """Update the recipe state in the app bar."""
+
+        logger.debug(f"Updating recipe state: {change}")
 
         if not change["new"]:
             change["new"] = ""

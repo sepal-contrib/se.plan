@@ -1,8 +1,9 @@
+from component.scripts.logger import logger
 import json
 from pathlib import Path
 
 from sepal_ui.scripts.warning import SepalWarning
-from traitlets import HasTraits, Int, Unicode
+from traitlets import HasTraits, Int, Unicode, observe
 
 import component.parameter as cp
 from component import model as cmod
@@ -123,3 +124,7 @@ class Recipe(HasTraits):
     def get_recipe_name(self) -> str:
         """Generate the recipe name based on the aoi name."""
         return str(Path(self.recipe_session_path).stem)
+
+    @observe("new_changes")
+    def observe_changes(self, _):
+        logger.debug(f"Changes observed in recipe, {self.new_changes} changes")

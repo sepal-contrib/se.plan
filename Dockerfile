@@ -17,4 +17,4 @@ COPY . /usr/local/lib/seplan
 
 EXPOSE 8765
 
-CMD ["bash", "-c", "source activate seplan && solara run solara.py --host=0.0.0.0 --root-path=/api/app-launcher/seplan"]
+CMD ["bash", "-c", "source activate seplan && solara run solara_app.py --host=0.0.0.0 --root-path=/api/app-launcher/seplan"]

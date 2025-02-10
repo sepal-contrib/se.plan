@@ -8,7 +8,8 @@ from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
-from traitlets import Int, Unicode, directional_link
+from component.scripts.logger import logger
+from traitlets import Int, Unicode, directional_link, observe
 
 from component.message import cm
 from component.model.app_model import AppModel
@@ -126,8 +127,8 @@ class RecipeView(sw.Layout):
     recipe_session_path = Unicode(None, allow_none=True).tag(sync=True)
     """Normalized recipe path of the current session. It will come from NewCard/LoadCard"""
 
-    app_model: AppModel
-    """It will be used to listen the on_save trait and trigger the save button here"""
+    # app_model: AppModel
+    # """It will be used to listen the on_save trait and trigger the save button here"""
 
     def __init__(self, recipe: Recipe = None, app_model: AppModel = None):
         self.attributes = {"_metadata": "recipe_tile"}
@@ -191,6 +192,17 @@ class RecipeView(sw.Layout):
 
         self.card_save.btn.on_event("click", self.save_event)
         self.app_model.observe(self.save_event, "on_save")
+
+        directional_link((self, "recipe_session_path"), (self.app_model, "recipe_name"))
+
+        # link the recipe new_changes counter to the app new_changes counter
+        directional_link((self.recipe, "new_changes"), (self.app_model, "new_changes"))
+
+    @observe("recipe_session_path")
+    def test_recipe_path(self, change):
+        """Test if the recipe path is valid."""
+        print("testoutput")
+        logger.info(f"Testing recipe path: {self.recipe_session_path}")
 
     def session_path_handler(self, change):
         """handle current session path and link its value with save_card.recipe_name."""
@@ -347,6 +359,7 @@ class RecipeTile(sw.Layout):
         self.recipe = recipe
         self.app_model = app_model
         self.recipe_view = RecipeView(recipe=recipe, app_model=app_model)
+        logger.debug(f"RecipeTile: {id(self.recipe_view)}")
 
         self.children = [self.recipe_view]
 
@@ -361,3 +374,11 @@ class RecipeTile(sw.Layout):
 
         # This trait will let know the app drawers that the app is ready to be used
         self.app_model.ready = True
+
+    def _update_recipe_name(self, change):
+        logger.debug(f"Updating recipe name from recipe_view: {change['new']}")
+        self.app_model.recipe_name = change["new"]
+
+    def _update_recipe_name_from_app(self, change):
+        logger.debug(f"Updating recipe name from app_model: {change['new']}")
+        self.recipe_view.recipe_session_path = change["new"]

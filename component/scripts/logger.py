@@ -15,18 +15,22 @@ class CustomLogger:
         # Create handlers (console and file)
         log_file = str(Path.home() / "se_plan.log")
         file_handler = logging.FileHandler(log_file)
+        console_handler = logging.StreamHandler(sys.stdout)
 
         # Set log level for handlers
         file_handler.setLevel(level)
+        console_handler.setLevel(level)
 
         # Create a log format
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         )
         file_handler.setFormatter(formatter)
+        console_handler.setFormatter(formatter)
 
         # Add handlers to the logger
         self.logger.addHandler(file_handler)
+        self.logger.addHandler(console_handler)
 
     def message_to_string(self, *messages: str):
         # Transform all the messages into strings

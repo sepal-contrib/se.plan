@@ -39,8 +39,6 @@ solara.server.settings.assets.fontawesome_path = (
     "/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"
 )
 solara.server.settings.assets.extra_locations = ["./assets/"]
-solara.settings.assets.cdn = "https://cdnjs.cloudflare.com/ajax/libs/"
-
 session_storage: Dict[str, str] = {}
 
 # used only to force updating of the page
@@ -104,45 +102,12 @@ def Page():
     solara.lab.theme.themes.light.anchor = "#f3f3f3"
     solara.lab.theme.themes.light.secondary = "#2199C4"
     solara.lab.theme.themes.light.secondary_contrast = "#5d76ab"
-    # solara.lab.theme.themes.light.success = v.theme.themes.light.success
-    # solara.lab.theme.themes.light.info = v.theme.themes.light.info
-    # solara.lab.theme.themes.light.warning = v.theme.themes.light.warning
-    # solara.lab.theme.themes.light.error = v.theme.themes.light.error
     solara.lab.theme.themes.light.main = "#2196f3"
     solara.lab.theme.themes.light.darker = "#ffffff"
     solara.lab.theme.themes.light.bg = "#FFFFFF"
     solara.lab.theme.themes.light.menu = "#FFFFFF"
 
     try:
-        headers.value = {
-            "host": ["danielg.sepal.io"],
-            "user-agent": [
-                "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0"
-            ],
-            "accept": ["*/*"],
-            "accept-language": ["en-US,en;q=0.5"],
-            "accept-encoding": ["gzip, deflate, br, zstd"],
-            "sec-websocket-version": ["13"],
-            "origin": ["https://danielg.sepal.io"],
-            "sec-websocket-extensions": ["permessage-deflate"],
-            "dnt": ["1"],
-            "sec-gpc": ["1"],
-            "sec-fetch-dest": ["empty"],
-            "sec-fetch-mode": ["websocket"],
-            "sec-fetch-site": ["same-origin"],
-            "pragma": ["no-cache"],
-            "cache-control": ["no-cache"],
-            "upgrade": ["websocket"],
-            "connection": ["upgrade"],
-            "cookie": [
-                "SEPAL-SESSIONID=s:r6IgjPcYoWptww1pK8V-kQR3FOhBCg5H.UGHUcZ0+qFq4xJlVy0HJnxxuTke8wXgMPccGtWTl398"
-            ],
-            "x-forwarded-proto": ["https"],
-            "sec-websocket-key": ["nHd8XgZihRUgLzzdf4S+HA=="],
-            "sepal-user": [
-                '{"id":10001,"username":"admin","googleTokens":{"accessToken":"ya29.a0ARW5m76vOXb1QGedUdNmvNXX-rsB2sijvoT6cHUeuqG2bTgYTa25Ty0sw_LP-5NC5bgHmoDWVOn1cr3wB4Yq39IB3yIW9xjrbMzAL9r67_fHkcuf4rO8CYfE-GB32NltUC-OLD0yXYyll9qyTYaF10vG5Fn_P3ecybDdyZQIxgaCgYKAXkSARESFQHGX2MiqifEAHhTMJiIcZz3M4LoKw0177","refreshToken":"1//05CcMm_zJaqDQCgYIARAAGAUSNwF-L9IrpWivrlqyTXJMDBTC-aE9gdPYZKgXHqIgmK4rKIOr8TMNghErgggYIvQXGeMPIovPAnQ","accessTokenExpiryDate":1736425284643,"projectId":"ee-indonesia-gwl","legacyProject":false},"status":"ACTIVE","roles":["application_admin"],"systemUser":false,"admin":true}'
-            ],
-        }
         gee_session = EESession(sepal_headers=headers.value)
     except Exception as e:
         solara.Markdown(f"An error has occured: {e}")
@@ -156,11 +121,11 @@ def Page():
 
     recipe_tile = RecipeView(recipe=recipe, app_model=app_model)
     aoi_tile = AoiTile(
-        ee_session=gee_session, recipe=recipe, solara_theme_obj=solara_theme_obj
+        gee_session=gee_session, recipe=recipe, solara_theme_obj=solara_theme_obj
     )
 
     questionnaire_tile = QuestionnaireTile(
-        ee_session=gee_session,
+        gee_session=gee_session,
         recipe=recipe,
         solara_theme_obj=solara_theme_obj,
     )
@@ -169,6 +134,7 @@ def Page():
         app_model=app_model,
         recipe=recipe,
         solara_theme_obj=solara_theme_obj,
+        gee_session=gee_session,
     )
 
     link((aoi_tile.map_, "zoom"), (map_location, "zoom"))
@@ -177,7 +143,7 @@ def Page():
     link((map_tile.map_, "zoom"), (map_location, "zoom"))
     link((map_tile.map_, "center"), (map_location, "center"))
 
-    dashboard_tile = DashboardTile(ee_session=gee_session, recipe=recipe)
+    dashboard_tile = DashboardTile(gee_session=gee_session, recipe=recipe)
 
     disclaimer_tile = sw.TileDisclaimer(solara_theme_obj=solara_theme_obj)
     about_tile = CustomTileAbout(cm.app.about, solara_theme_obj=solara_theme_obj)

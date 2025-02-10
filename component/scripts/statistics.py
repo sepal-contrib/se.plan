@@ -19,7 +19,7 @@ def is_main_aoi(main_aoi_name, aoi_name) -> bool:
     return main_aoi_name == aoi_name
 
 
-def get_summary_statistics(ee_session: EESession, recipe: Recipe) -> RecipeStatsDict:
+def get_summary_statistics(gee_session: EESession, recipe: Recipe) -> RecipeStatsDict:
     """Returns summary statistics using seplan inputs.
 
     The statistics will be later parsed to be displayed in the dashboard.
@@ -52,8 +52,7 @@ def get_summary_statistics(ee_session: EESession, recipe: Recipe) -> RecipeStats
     # Get the restoration suitability index
     wlc_out = seplan_model.get_constraint_index()
 
-    return get_info(
-        ee_session,
+    return gee_session.operations.get_info(
         ee.Dictionary(
             {
                 recipe_name: ee.Dictionary(
@@ -61,14 +60,15 @@ def get_summary_statistics(ee_session: EESession, recipe: Recipe) -> RecipeStats
                         aoi_name: ee.Dictionary(
                             {
                                 "suitability": get_image_stats(
-                                    wlc_out,
-                                    mask_out_areas,
-                                    data["ee_feature"],
-                                    is_main_aoi(main_ee_name, aoi_name),
+                                    wlc_out, mask_out_areas, data["ee_feature"]
                                 ),
                                 "benefit": [
                                     get_image_mean(
-                                        image, data["ee_feature"], mask_out_areas, name
+                                        image,
+                                        data["ee_feature"],
+                                        mask_out_areas,
+                                        name,
+                                        is_main_aoi(main_ee_name, aoi_name),
                                     )
                                     for image, name in benefit_list
                                 ],

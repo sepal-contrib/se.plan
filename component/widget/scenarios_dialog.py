@@ -3,6 +3,17 @@
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from typing import List, Literal
+from eeclient.client import EESession
+
+import ipyvuetify as v
+from ipyleaflet import SplitMapControl
+from traitlets import Dict as Dict, Int
+
+from sepal_ui.scripts.decorator import loading_button
+from sepal_ui.mapping import SepalMap
+from sepal_ui import sepalwidgets as sw
+
+import component.scripts.gee as gee
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
@@ -12,16 +23,8 @@ from component.types import RecipeInfo, RecipePaths
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import IconBtn
-import ipyvuetify as v
-from sepal_ui import sepalwidgets as sw
 from component.widget.custom_widgets import RecipeInput, TableIcon, TextBtn
-from ipyleaflet import SplitMapControl
-from traitlets import Dict as Dict, Int
-from sepal_ui.mapping import SepalMap
-import component.scripts.gee as gee
 from component import parameter as cp
-from sepal_ui.scripts.decorator import loading_button
-
 from component.widget.map import SeplanMap
 
 
@@ -39,9 +42,11 @@ class CompareScenariosDialog(BaseDialog):
         limit: int = 2,
         overall_dashboard=None,
         theme_dashboard=None,
+        gee_session: EESession = None,
     ):
         super().__init__()
 
+        self.gee_session = gee_session
         self.map_ = map_
         self.alert = alert or Alert()
         self.overall_dashboard = overall_dashboard
@@ -148,9 +153,10 @@ class CompareScenariosDialog(BaseDialog):
         # Assert that there must be only two recipes
         assert len(recipes) == 2, "Only two recipes can be compared."
 
-        def process_recipe(recipe, gee, cp):
+        def process_recipe(recipe):
             layer_name = recipe.get_recipe_name()
             return gee.get_layer(
+                self.gee_session,
                 recipe.seplan.get_constraint_index()
                 .unmask(0)
                 .clip(recipe.seplan_aoi.feature_collection),
@@ -161,9 +167,7 @@ class CompareScenariosDialog(BaseDialog):
         # Create a ThreadPoolExecutor
         with ThreadPoolExecutor() as executor:
             # Submit tasks to the executor
-            futures = [
-                executor.submit(process_recipe, recipe, gee, cp) for recipe in recipes
-            ]
+            futures = [executor.submit(process_recipe, recipe) for recipe in recipes]
 
             # Collect the results
             layers = [future.result() for future in futures]
