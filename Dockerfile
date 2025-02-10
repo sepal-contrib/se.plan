@@ -3,7 +3,8 @@ FROM continuumio/miniconda3
 WORKDIR /usr/local/lib/seplan
 
 # Install nano and curl
-RUN apt-get update && apt-get install -y nano curl
+RUN apt-get update && apt-get install -y nano curl neovim
+
 
 RUN conda init bash && \
     bash -c "source ~/.bashrc && \
