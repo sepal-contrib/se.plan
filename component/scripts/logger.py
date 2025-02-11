@@ -45,7 +45,7 @@ class CustomLogger:
 
     def info(self, *messages: str):
         """Logs an info message."""
-        self.logger.info(self.message_to_string(*messages))
+        self.logger.debug(self.message_to_string(*messages))
 
     def warning(self, *messages: str):
         """Logs a warning message."""

@@ -49,7 +49,7 @@ def validate_recipe(
 
     except ValidationError as e:
         # Constructing a path string
-        logger.info(e)
+        logger.debug(e)
         path = ".".join(map(str, e.path))
 
         # Check if the error is related to the signature field

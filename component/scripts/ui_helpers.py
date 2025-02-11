@@ -41,10 +41,10 @@ def get_categorical_values(
         with open(legends_path, "r") as file:
             json_data = json.load(file)
     except FileNotFoundError:
-        logger.info("Error: The file was not found.")
+        logger.debug("Error: The file was not found.")
         return values
     except json.JSONDecodeError:
-        logger.info("Error: File is not a valid JSON.")
+        logger.debug("Error: File is not a valid JSON.")
         return values
 
     # Check if the asset exists in the json data and has a legend

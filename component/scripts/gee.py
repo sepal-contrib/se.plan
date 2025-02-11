@@ -86,7 +86,7 @@ def get_limits(
         )
     )
 
-    logger.info("get_limits_values:", values)
+    logger.debug("get_limits_values:", values)
 
     # check if values are none and if so, raise a ValueError
     if any([val is None for val in values]):
@@ -117,7 +117,7 @@ def get_gee_recipe_folder(recipe_name: str) -> Path:
 
     except Exception as e:
 
-        logger.info("Error in get_gee_recipe_folder:", e)
+        logger.debug("Error in get_gee_recipe_folder:", e)
 
     finally:
         return Path(recipe_folder)

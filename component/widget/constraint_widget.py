@@ -136,12 +136,12 @@ class ConstraintWidget(sw.Layout):
 
         # just for the first time
         self.set_message({"new": self.v_model})
-        self.observe(lambda *args: logger.info(self.v_model), "v_model")
+        self.observe(lambda *args: logger.debug(self.v_model), "v_model")
 
     def set_message(self, change):
         """Set message to the widget based on the data type."""
 
-        # logger.info(f"ConstraintWidget({self.layer_id}).set_message", change["new"])
+        # logger.debug(f"ConstraintWidget({self.layer_id}).set_message", change["new"])
 
         if not change["new"]:
             return

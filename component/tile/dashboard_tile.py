@@ -100,7 +100,7 @@ class DashboardTile(sw.Layout):
             )
 
         if not self.summary_stats:
-            logger.info("No dashboard to display")
+            logger.debug("No dashboard to display")
             self.summary_stats = get_summary_statistics(self.gee_session, self.recipe)
 
         # set the content of the panels
@@ -111,7 +111,7 @@ class DashboardTile(sw.Layout):
 
     def reset(self, *_):
         """Reset the dashboard to its initial state."""
-        logger.info("resettig the dashboard")
+        logger.debug("resettig the dashboard")
         self.summary_stats = None
         self.overall_dash.reset()
         self.theme_dash.reset()

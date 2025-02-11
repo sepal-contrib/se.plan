@@ -202,7 +202,7 @@ class RecipeView(sw.Layout):
     def test_recipe_path(self, change):
         """Test if the recipe path is valid."""
         print("testoutput")
-        logger.info(f"Testing recipe path: {self.recipe_session_path}")
+        logger.debug(f"Testing recipe path: {self.recipe_session_path}")
 
     def session_path_handler(self, change):
         """handle current session path and link its value with save_card.recipe_name."""

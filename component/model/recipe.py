@@ -99,7 +99,7 @@ class Recipe(HasTraits):
         self.constraint_model.reset()
         self.cost_model.reset()
 
-        logger.info("constraint_model.ids", self.constraint_model.ids)
+        logger.debug("constraint_model.ids", self.constraint_model.ids)
         self.seplan_aoi.reset()
 
         self.dash_model.reset()
