@@ -1,17 +1,19 @@
+from eeclient.client import EESession
+from eeclient.exceptions import EEClientError
+from component.scripts.logger import logger
 from typing import Dict
 
 from traitlets import Bool, Float, HasTraits, List, Unicode, link, observe
-from component.frontend.icons import icon
-import sepal_ui.sepalwidgets as sw
 import solara
-from eeclient.client import EESession
-from solara.lab import headers
 import solara.server.settings
 import solara.settings
+from solara.lab import headers
 from solara.lab.components.theming import theme
-from sepal_ui.frontend.resize_trigger import ResizeTrigger
+
+import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
 
+from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.tile.custom_aoi_tile import AoiTile
 from component.tile.dashboard_tile import DashboardTile
@@ -29,8 +31,6 @@ from component.tile.recipe_tile import RecipeView
 from component.model.app_model import AppModel
 from component.message import cm
 
-
-import ee
 
 init_ee()
 
@@ -79,7 +79,6 @@ def Page():
     solara_theme_obj = SolaraTheme()
     theme.dark = solara_theme_obj.dark
     map_location = MapLocation()
-    ResizeTrigger.element()
 
     solara.lab.theme.themes.dark.primary = "#76591e"
     solara.lab.theme.themes.dark.primary_contrast = "#bf8f2d"
@@ -110,8 +109,13 @@ def Page():
     try:
         gee_session = EESession(sepal_headers=headers.value)
     except Exception as e:
-        solara.Markdown(f"An error has occured: {e}")
-        raise e
+        if isinstance(e, EEClientError):
+            solara.alert.Error(
+                f"Authentication required: Please authenticate via sepal. See https://docs.sepal.io/en/latest/setup/gee.html. for more information."
+            )
+            return
+        solara.alert.Error(f"An error has occurred: {e}")
+        return
 
     app_model = AppModel()
     alert = AlertState()
