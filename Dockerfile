@@ -3,7 +3,9 @@ FROM continuumio/miniconda3
 WORKDIR /usr/local/lib/seplan
 
 # Install nano and curl
-RUN apt-get update && apt-get install -y nano curl neovim
+RUN apt-get update && apt-get install -y nano curl neovim supervisor
+
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 
 RUN conda init bash && \
@@ -18,4 +20,6 @@ COPY . /usr/local/lib/seplan
 
 EXPOSE 8765
 
-CMD ["bash", "-c", "source activate seplan && solara run solara_app.py --host=0.0.0.0 --root-path=/api/app-launcher/seplan"]
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# CMD ["bash", "-c", "source activate seplan && solara run solara_app.py --host=0.0.0.0 --root-path=/api/app-launcher/seplan"] 
+# for testing purposes
