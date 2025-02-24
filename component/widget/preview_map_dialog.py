@@ -1,9 +1,10 @@
 """Custom dialog to display individual layers from questionnaire tile."""
 
 from eeclient.client import EESession
+
 from eeclient.data import get_info
 
-from typing import Literal
+from typing import Literal, Union
 
 import ee
 import sepal_ui.sepalwidgets as sw

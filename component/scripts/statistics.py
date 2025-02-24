@@ -1,6 +1,7 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 import ee
 from eeclient.client import EESession
+
 from eeclient.data import get_info
 
 from component.model.recipe import Recipe

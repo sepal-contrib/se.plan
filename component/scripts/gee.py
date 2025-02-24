@@ -98,26 +98,29 @@ def get_limits(
     return sorted(set(int(float(val)) for val in values))
 
 
-def get_gee_recipe_folder(recipe_name: str) -> Path:
+def get_gee_recipe_folder(recipe_name: str, gee_session: EESession) -> Path:
     """Create a folder for the recipe in GEE"""
 
-    project_folder = Path(f"projects/{ee.data._cloud_api_user_project}/assets/")
-    seplan_folder = project_folder / "seplan"
-    recipe_folder = seplan_folder / recipe_name
-
     try:
-        if not ee.data.get_info(str(seplan_folder)):
-            ee.data.createAsset({"type": "FOLDER"}, str(seplan_folder))
+        if gee_session:
+            recipe_folder = Path("seplan") / recipe_name
+            recipe_folder = gee_session.operations.create_folder(recipe_folder)
 
-        # Create the recipe folder
-        if not ee.data.get_info(str(recipe_folder)):
-            ee.data.createAsset({"type": "FOLDER"}, str(recipe_folder))
+        else:
+            project_folder = Path(f"projects/{ee.data._cloud_api_user_project}/assets/")
+            seplan_folder = project_folder / "seplan"
+            recipe_folder = seplan_folder / recipe_name
 
-        return Path(recipe_folder)
+            if not ee.data.getInfo(str(seplan_folder)):
+                ee.data.createAsset({"type": "FOLDER"}, str(seplan_folder))
+
+            # Create the recipe folder
+            if not ee.data.getInfo(str(recipe_folder)):
+                ee.data.createAsset({"type": "FOLDER"}, str(recipe_folder))
+
+            return Path(recipe_folder)
 
     except Exception as e:
 
         logger.debug("Error in get_gee_recipe_folder:", e)
-
-    finally:
-        return Path(recipe_folder)
+        raise Exception("Eror in folder recipe folder creation")

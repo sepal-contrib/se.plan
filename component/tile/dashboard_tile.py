@@ -1,5 +1,6 @@
 from eeclient.client import EESession
-from typing import List, Tuple
+
+from typing import List, Tuple, Union
 from component.types import (
     BenefitChartsData,
     ConstraintChartsData,
@@ -32,10 +33,17 @@ from component.widget.dashboard_layer_panels import LayerFull, LayerPercentage
 
 
 class DashboardTile(sw.Layout):
-    def __init__(self, gee_session: EESession, recipe: Recipe):
+    def __init__(
+        self,
+        gee_session: EESession,
+        recipe: Recipe,
+        solara_theme_obj=None,
+        sepal_session=None,
+    ):
         super().__init__()
 
         self._metadata = {"mount_id": "dashboard_tile"}
+        self.solara_theme_obj = solara_theme_obj
         self.class_ = "d-block"
         self.summary_stats = None
         self.gee_session = gee_session
@@ -44,11 +52,16 @@ class DashboardTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        dash_toolbar = DashToolbar(recipe.seplan, alert=self.alert)
+        dash_toolbar = DashToolbar(
+            recipe.seplan,
+            alert=self.alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
+        )
 
         # init the dashboard
-        self.overall_dash = OverallDashboard()
-        self.theme_dash = ThemeDashboard()
+        self.overall_dash = OverallDashboard(solara_theme_obj=self.solara_theme_obj)
+        self.theme_dash = ThemeDashboard(solara_theme_obj=self.solara_theme_obj)
         self.children = [
             dash_toolbar,
             self.overall_dash,
@@ -121,8 +134,9 @@ class ThemeDashboard(sw.Card):
     seplan: Seplan
     "Seplan object used to retrieve the layer description and units"
 
-    def __init__(self):
+    def __init__(self, solara_theme_obj=None):
         super().__init__()
+        self.solara_theme_obj = solara_theme_obj
         self.title = sw.CardTitle(children=[cm.dashboard.theme.title])
         self.content = sw.CardText()
         self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
@@ -173,6 +187,7 @@ class ThemeDashboard(sw.Card):
                     bars_width=50,
                     min_value=min_,
                     max_value=max_,
+                    solara_theme_obj=self.solara_theme_obj,
                 )
 
                 # Get all the layers for the benefit theme
@@ -213,6 +228,7 @@ class ThemeDashboard(sw.Card):
                 series_names=series_names,
                 series_colors=colors,
                 bars_width=80,
+                solara_theme_obj=self.solara_theme_obj,
             )
             cost_charts["cost_layers"].append((recipe_name, layers_data, w_chart))
 
@@ -311,11 +327,12 @@ class ThemeDashboard(sw.Card):
 
     def reset(self):
         """Reset the dashboard to its initial state."""
-        self.__init__()
+        self.__init__(solara_theme_obj=self.solara_theme_obj)
 
 
 class OverallDashboard(sw.Card):
-    def __init__(self):
+    def __init__(self, solara_theme_obj=None):
+        self.solara_theme_obj = solara_theme_obj
         self.class_ = "my-2"
         super().__init__()
         self.title = sw.CardTitle(children=[cm.dashboard.region.title])
@@ -327,7 +344,12 @@ class OverallDashboard(sw.Card):
     def set_summary(self, recipes_stats: List[RecipeStatsDict]):
         """Set the summary statistics for all the summary comming from different scenarios"""
 
-        suitability_charts = get_suitability_charts(recipes_stats)
+        logger.debug(
+            f"OverallDashboard.set_summary, with solara_theme_obj: {self.solara_theme_obj}"
+        )
+        suitability_charts = get_suitability_charts(
+            recipes_stats, solara_theme_obj=self.solara_theme_obj
+        )
 
         # For the table, I need to display all of them in the same table
         suitability_table = get_summary_table(recipes_stats, "both")
@@ -338,4 +360,4 @@ class OverallDashboard(sw.Card):
 
     def reset(self):
         """Reset the dashboard to its initial state."""
-        self.__init__()
+        self.__init__(solara_theme_obj=self.solara_theme_obj)

@@ -17,6 +17,7 @@ import component.scripts.gee as gee
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
+from component.scripts.logger import logger
 from component.scripts.statistics import get_summary_statistics
 from component.scripts.validation import are_comparable, validate_scenarios_recipes
 from component.types import RecipeInfo, RecipePaths
@@ -26,6 +27,7 @@ from component.widget.buttons import IconBtn
 from component.widget.custom_widgets import RecipeInput, TableIcon, TextBtn
 from component import parameter as cp
 from component.widget.map import SeplanMap
+from sepal_ui.scripts.sepal_client import SepalClient
 
 
 class CompareScenariosDialog(BaseDialog):
@@ -43,14 +45,18 @@ class CompareScenariosDialog(BaseDialog):
         overall_dashboard=None,
         theme_dashboard=None,
         gee_session: EESession = None,
+        sepal_session: SepalClient = None,
     ):
         super().__init__()
 
         self.gee_session = gee_session
+        self.sepal_session = sepal_session
         self.map_ = map_
         self.alert = alert or Alert()
         self.overall_dashboard = overall_dashboard
         self.theme_dashboard = theme_dashboard
+
+        logger.debug("Creating a CompareScenariosDialog, ")
 
         if type_ == "chart":
             trashable = True
@@ -67,6 +73,7 @@ class CompareScenariosDialog(BaseDialog):
             limit=limit,
             trashable=trashable,
             increaseable=increaseable,
+            sepal_session=self.sepal_session,
         )
         self.btn_compare_map = TextBtn("Compare maps")
         self.btn_compare_stat = TextBtn("Compare statistics")
@@ -116,7 +123,7 @@ class CompareScenariosDialog(BaseDialog):
 
         # First validate that all of them are valid
         validate_scenarios_recipes(self.scenario_inputs.recipe_paths)
-        are_comparable(self.scenario_inputs.recipe_paths)
+        are_comparable(self.scenario_inputs.recipe_paths, self.sepal_session)
 
     def read_recipes(self) -> List[Recipe]:
         """Load the recipes from the recipe paths."""
@@ -126,7 +133,9 @@ class CompareScenariosDialog(BaseDialog):
 
         for _, recipe_data in self.scenario_inputs.recipe_paths.items():
             recipe_path = recipe_data["path"]
-            recipe = Recipe()
+            recipe = Recipe(
+                sepal_session=self.sepal_session, gee_session=self.gee_session
+            )
             recipe.load(recipe_path)
             recipes.append(recipe)
 
@@ -198,7 +207,9 @@ class CompareScenariosDialog(BaseDialog):
 
         recipes = self.read_recipes()
 
-        recipe_summary_stats = [get_summary_statistics(recipe) for recipe in recipes]
+        recipe_summary_stats = [
+            get_summary_statistics(self.gee_session, recipe) for recipe in recipes
+        ]
 
         self.overall_dashboard.set_summary(recipes_stats=recipe_summary_stats)
         self.theme_dashboard.set_summary(recipes, recipes_stats=recipe_summary_stats)
@@ -224,10 +235,12 @@ class ScenarioInputs(sw.Layout):
         limit=2,
         trashable=False,
         increaseable=False,
+        sepal_session=None,
     ):
 
         self.class_ = "d-block"
         self.recipe_limit = limit
+        self.sepal_session = sepal_session
 
         super().__init__()
 
@@ -336,7 +349,11 @@ class ScenarioInputs(sw.Layout):
                     "click", lambda *args: self.remove_input_row(row_id)
                 )
 
-        file_input = RecipeInput(attributes={"id": row_id}, default_recipe=main_recipe)
+        file_input = RecipeInput(
+            main_recipe=main_recipe,
+            sepal_session=self.sepal_session,
+            attributes={"id": row_id},
+        )
         file_input.observe(self.update_recipe_paths, ["v_model", "valid"])
         file_input_td = sw.Html(tag="td", children=[file_input])
 

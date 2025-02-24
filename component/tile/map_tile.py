@@ -1,3 +1,4 @@
+from typing import Union
 from eeclient.client import EESession
 
 from sepal_ui import sepalwidgets as sw
@@ -19,6 +20,7 @@ class MapTile(sw.Layout):
         recipe: Recipe,
         solara_theme_obj: None,
         gee_session: EESession,
+        sepal_session=None,
     ):
         """Define the map tile layout.
 
@@ -43,7 +45,11 @@ class MapTile(sw.Layout):
             gee_session=gee_session,
         )
         self.map_toolbar = MapToolbar(
-            recipe=self.recipe, map_=self.map_, alert=self.alert
+            recipe=self.recipe,
+            map_=self.map_,
+            alert=self.alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
         )
 
         # init the final layers

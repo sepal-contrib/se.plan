@@ -1,63 +1,58 @@
-from pathlib import Path
-import logging
 import sys
+import logging
+from pathlib import Path
+import colorlog  # Install via: pip install colorlog
+
+# ANSI background color codes
+BLUE_BG = "\033[44m"
+PURPLE_BG = "\033[45m"
+YELLOW_BG = "\033[43m"
+RESET = "\033[0m"
 
 
 class CustomLogger:
-    def __init__(self, name: str, level: int = logging.DEBUG):
-        """
-        Creates a custom logger with a file handler.
-        """
-        # Create a logger
+    def __init__(
+        self, name: str, level: int = logging.DEBUG, module_color: str = BLUE_BG
+    ):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)
 
-        # Create handlers (console and file)
-        log_file = str(Path.home() / "se_plan.log")
-        file_handler = logging.FileHandler(log_file)
+        # Create a colored console handler.
         console_handler = logging.StreamHandler(sys.stdout)
-
-        # Set log level for handlers
-        file_handler.setLevel(level)
         console_handler.setLevel(level)
 
-        # Create a log format
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        # Build the format string using the module_color for the logger's name.
+        format_str = f"%(log_color)s%(asctime)s - {module_color}%(name)s{RESET} - %(levelname)s - %(message)s"
+        console_formatter = colorlog.ColoredFormatter(
+            format_str,
+            log_colors={
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "bold_red",
+            },
         )
-        file_handler.setFormatter(formatter)
-        console_handler.setFormatter(formatter)
-
-        # Add handlers to the logger
-        self.logger.addHandler(file_handler)
+        console_handler.setFormatter(console_formatter)
         self.logger.addHandler(console_handler)
 
-    def message_to_string(self, *messages: str):
-        # Transform all the messages into strings
-        messages = [str(msg) for msg in messages]
-
-        # Join all the strings in message
-        return " ".join(messages)
+    def message_to_string(self, *messages: str) -> str:
+        return " ".join(str(msg) for msg in messages)
 
     def debug(self, *messages: str):
-        """Logs a debug message."""
         self.logger.debug(self.message_to_string(*messages))
 
     def info(self, *messages: str):
-        """Logs an info message."""
-        self.logger.debug(self.message_to_string(*messages))
+        self.logger.info(self.message_to_string(*messages))
 
     def warning(self, *messages: str):
-        """Logs a warning message."""
         self.logger.warning(self.message_to_string(*messages))
 
     def error(self, *messages: str):
-        """Logs an error message."""
         self.logger.error(self.message_to_string(*messages))
 
     def critical(self, *messages: str):
-        """Logs a critical message."""
         self.logger.critical(self.message_to_string(*messages))
 
 
-logger = CustomLogger("se.plan")
+logger = CustomLogger("SEPLAN", module_color=BLUE_BG)

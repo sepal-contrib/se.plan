@@ -9,6 +9,7 @@ from component.widget.base_dialog import BaseDialog
 from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.sepal_client import SepalClient
 from component import widget as cw
 
 
@@ -29,6 +30,8 @@ from component.widget.buttons import IconBtn, TextBtn
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
 from .cost_dialog import CostDialog
+
+from sepal_ui.sepalwidgets.file_input import FileInput as FileInputElement
 
 
 class ResizeTrigger(v.VuetifyTemplate):
@@ -82,40 +85,38 @@ class RecipeInspector(v.VuetifyTemplate):
         self.dialog = False
 
 
-class RecipeInput(sw.FileInput):
+class RecipeInput(sw.Layout):
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
     valid = Bool(False).tag(sync=True)
+    v_model = Unicode(None, allow_none=True).tag(sync=True)
 
-    def __init__(self, main_recipe: Recipe = None, **kwargs):
-        super().__init__(".json", folder=cp.result_dir, root=cp.result_dir, **kwargs)
-
-        self.text_field_msg = self.children[-1]
-        self.observe(self.validate_input, "v_model")
+    def __init__(
+        self,
+        main_recipe: Recipe = None,
+        sepal_session: SepalClient = None,
+        attributes={},
+    ):
+        super().__init__(attributes=attributes)
+        self.sepal_session = sepal_session
         self.recipe_inspector = RecipeInspector()
+        self.file_input = FileInputElement(
+            sepal_client=self.sepal_session,
+            extensions=[".json"],
+            initial_folder="module_results/se.plan",
+        )
+        self.file_input.observe(self.validate_input, "v_model")
 
         self.btn_view = TextBtn(cm.recipe.load.dialog.view, class_="ml-2")
-        text_field = self.children[-1]
-        text_field.class_ = "mx-2"
-
-        loading_button = self.children[2].v_slots[0]["children"]
-        loading_button.small = True
-        self.reload.small = True
-
-        if main_recipe:
-            main_recipe.observe(self.set_default_recipe, "recipe_session_path")
-            loading_button.disabled = True
-            self.reload.disabled = True
-
         self.btn_view.on_event("click", self.view_event)
-        self.children = self.children + [self.btn_view, self.recipe_inspector]
+        self.children = [
+            sw.Row(
+                children=[self.file_input, self.btn_view, self.recipe_inspector],
+                class_="flex align-center",
+            )
+        ]
 
-    def set_default_recipe(self, change):
-        """Set the default recipe."""
-
-        recipe_session_path = change["new"]
-
-        self.select_file(recipe_session_path)
+        directional_link((self.file_input, "v_model"), (self, "v_model"))
 
     def validate_input(self, change):
         """Validate the recipe file."""
@@ -125,12 +126,12 @@ class RecipeInput(sw.FileInput):
 
         # Reset any previous error messages
         self.valid = False
-        self.text_field_msg.error_messages = []
+        self.file_input.error_messages = []
         self.load_recipe_path = None
 
         # Validate the recipe file and show errors if there are
         self.load_recipe_path = validation.validate_recipe(
-            change["new"], self.text_field_msg
+            change["new"], self.file_input, self.sepal_session
         )
         self.valid = bool(self.load_recipe_path)
 
@@ -140,7 +141,9 @@ class RecipeInput(sw.FileInput):
         if not self.load_recipe_path:
             return
 
-        recipe_path, data = validation.read_recipe_data(self.load_recipe_path)
+        recipe_path, data = validation.read_recipe_data(
+            self.load_recipe_path, self.sepal_session
+        )
         self.recipe_inspector.set_data(data, recipe_name=str(Path(recipe_path)))
 
 
@@ -214,11 +217,15 @@ class ToolBar(sw.Toolbar):
 
 
 class DashToolbar(sw.Toolbar):
-    def __init__(self, model: Seplan, alert: Alert = None) -> None:
+    def __init__(
+        self, model: Seplan, alert: Alert = None, gee_session=None, sepal_session=None
+    ) -> None:
         super().__init__()
 
         alert = alert or Alert()
 
+        self.sepal_session = sepal_session
+        self.gee_session = gee_session
         self.height = "48px"
         self.model = model
         self.elevation = 0
@@ -233,7 +240,12 @@ class DashToolbar(sw.Toolbar):
             cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
         )
 
-        self.compare_dialog = cw.CompareScenariosDialog(type_="chart", alert=alert)
+        self.compare_dialog = cw.CompareScenariosDialog(
+            type_="chart",
+            alert=alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
+        )
 
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
         self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
@@ -410,7 +422,7 @@ class CustomApp(sw.App):
     def update_recipe_state(self, change):
         """Update the recipe state in the app bar."""
 
-        logger.debug(f"Updating recipe state: {change}")
+        # logger.debug(f"Updating recipe state: {change}")
 
         if not change["new"]:
             change["new"] = ""

@@ -1,5 +1,4 @@
 from sepal_ui.aoi.aoi_view import AoiView
-
 from component.model.aoi_model import SeplanAoi
 
 

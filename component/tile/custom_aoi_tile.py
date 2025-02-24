@@ -1,4 +1,6 @@
+from typing import Union
 from eeclient.client import EESession
+
 from eeclient.data import get_info
 
 import ee
@@ -50,7 +52,9 @@ class AoiTile(sw.Layout):
         # self.map_.add_basemap("SATELLITE")
 
         # Build the aoi view with our custom aoi_model
-        self.view = SeplanAoiView(model=recipe.seplan_aoi, map_=self.map_)
+        self.view = SeplanAoiView(
+            model=recipe.seplan_aoi, map_=self.map_, gee_session=gee_session
+        )
 
         aoi_control = WidgetControl(
             widget=self.view, position="topleft", transparent_bg=True

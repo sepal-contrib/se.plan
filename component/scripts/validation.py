@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Optional
 
 from jsonschema import ValidationError, validate
-from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
+from component.scripts.file_handler import read_file
 from component.scripts.logger import logger
 from component.types import RecipePaths
 
@@ -21,22 +21,20 @@ def find_missing_property(instance, schema):
 
 
 def validate_recipe(
-    recipe_path: str, text_field_msg: Optional[TextField] = None
+    recipe_path: str, file_input=None, sepal_session=None
 ) -> Optional[Path]:
     """Read user file and performs all validation and corresponding checks."""
+    logger.debug(f"Validating recipe: {recipe_path}+++{sepal_session}")
     try:
-        # open the file and load the models
-        with Path(recipe_path).open() as f:
-            data = json.loads(f.read())
-
+        data = read_file(recipe_path, sepal_session=sepal_session)
     except FileNotFoundError:
         error_msg = "The file could not be found. Please check that the file exists"
-        not text_field_msg or setattr(text_field_msg, "error_messages", error_msg)
-        raise FileNotFoundError(error_msg)
+        not file_input or setattr(file_input, "error_messages", [error_msg])
+        raise FileNotFoundError(f"{error_msg}")
 
     except json.decoder.JSONDecodeError:
         error_msg = "The file is not a valid json file. Please check that the file is a valid json file"
-        not text_field_msg or setattr(text_field_msg, "error_messages", error_msg)
+        not file_input or setattr(file_input, "error_messages", [error_msg])
         raise json.decoder.JSONDecodeError(error_msg)
 
     # Load the JSON schema
@@ -77,7 +75,7 @@ def validate_recipe(
             # Creating a detailed error error_msg for other fields
             error_msg = f"Error in field '{path}': {e.message}"
 
-        not text_field_msg or setattr(text_field_msg, "error_messages", error_msg)
+        not file_input or setattr(file_input, "error_messages", [error_msg])
 
         raise ValidationError(e)
 
@@ -109,6 +107,8 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
         Path(recipe_info["path"]).stem for recipe_info in recipe_paths.values()
     ]
 
+    logger.debug(f"Validating recipies {recipe_stems}")
+
     if len(recipe_stems) != len(set(recipe_stems)):
         raise Exception(
             "Error: To compare recipes, all the recipes must have an unique name."
@@ -117,18 +117,17 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
     return True
 
 
-def are_comparable(recipe_paths: RecipePaths):
+def are_comparable(recipe_paths: RecipePaths, sepal_session=None):
     """Check if the recipes are comparable based on their primary AOI (Area of Interest)."""
 
     aoi_values = set()
 
     for _, recipe_info in recipe_paths.items():
-        with Path(recipe_info["path"]).open() as f:
-            data = json.loads(f.read())
-            remove_key(data, "updated")
-            remove_key(data, "new_changes")
-            primary_aoi = data["aoi"]["primary"]
-            aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
+        data = read_file(recipe_info["path"], sepal_session=sepal_session)
+        remove_key(data, "updated")
+        remove_key(data, "new_changes")
+        primary_aoi = data["aoi"]["primary"]
+        aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
 
     # Raise an error if the recipes are not comparable
     if len(aoi_values) > 1:
@@ -139,13 +138,12 @@ def are_comparable(recipe_paths: RecipePaths):
     return True
 
 
-def read_recipe_data(recipe_path: str):
+def read_recipe_data(recipe_path: str, sepal_session=None):
     """Read the recipe data from the recipe file."""
 
-    recipe_path = Path(validate_recipe(recipe_path))
+    recipe_path = Path(validate_recipe(recipe_path, sepal_session=sepal_session))
 
-    with recipe_path.open() as f:
-        data = json.loads(f.read())
+    data = read_file(recipe_path, sepal_session=sepal_session)
 
     # Remove all the "updated" keys from the data in the second level
     [remove_key(data, key) for key in ["updated", "new_changes"]]

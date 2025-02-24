@@ -1,3 +1,4 @@
+from typing import Union
 from eeclient.client import EESession
 
 import sepal_ui.sepalwidgets as sw
@@ -13,7 +14,12 @@ from component.widget.questionaire_table import Table
 
 
 class QuestionnaireTile(sw.Layout):
-    def __init__(self, gee_session: EESession, recipe: Recipe, solara_theme_obj=None):
+    def __init__(
+        self,
+        gee_session: EESession,
+        recipe: Recipe,
+        solara_theme_obj=None,
+    ):
         # name the tile
         self._metadata = {"mount_id": "questionnaire_tile"}
         self.class_ = "d-block"

@@ -1,4 +1,5 @@
 from eeclient.client import EESession
+
 from eeclient.exceptions import EEClientError
 from component.scripts.logger import logger
 from typing import Dict
@@ -12,6 +13,8 @@ from solara.lab.components.theming import theme
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
+from sepal_ui.scripts.sepal_client import SepalClient
+
 
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
@@ -33,6 +36,17 @@ from component.message import cm
 
 
 init_ee()
+
+
+def parse_cookie_string(cookie_string):
+    cookies = {}
+    for pair in cookie_string.split(";"):
+        key_value = pair.strip().split("=", 1)
+        if len(key_value) == 2:
+            key, value = key_value
+            cookies[key] = value
+    return cookies
+
 
 # solara.server.settings.main.root_path = "/api/app-launcher/seplan"
 solara.server.settings.assets.fontawesome_path = (
@@ -117,13 +131,19 @@ def Page():
         solara.alert.Error(f"An error has occurred: {e}")
         return
 
+    sepal_cookies = parse_cookie_string(headers.value["cookie"][0])
+    session_id = sepal_cookies.get("SEPAL-SESSIONID")
+
+    sepal_client = SepalClient(session_id=session_id)
+
     app_model = AppModel()
-    alert = AlertState()
-    recipe = Recipe()
+    recipe = Recipe(sepal_session=sepal_client, gee_session=gee_session)
 
     app_model.ready = True
 
-    recipe_tile = RecipeView(recipe=recipe, app_model=app_model)
+    recipe_tile = RecipeView(
+        recipe=recipe, app_model=app_model, sepal_session=sepal_client
+    )
     aoi_tile = AoiTile(
         gee_session=gee_session, recipe=recipe, solara_theme_obj=solara_theme_obj
     )
@@ -139,6 +159,7 @@ def Page():
         recipe=recipe,
         solara_theme_obj=solara_theme_obj,
         gee_session=gee_session,
+        sepal_session=sepal_client,
     )
 
     link((aoi_tile.map_, "zoom"), (map_location, "zoom"))
@@ -147,7 +168,12 @@ def Page():
     link((map_tile.map_, "zoom"), (map_location, "zoom"))
     link((map_tile.map_, "center"), (map_location, "center"))
 
-    dashboard_tile = DashboardTile(gee_session=gee_session, recipe=recipe)
+    dashboard_tile = DashboardTile(
+        gee_session=gee_session,
+        recipe=recipe,
+        solara_theme_obj=solara_theme_obj,
+        sepal_session=sepal_client,
+    )
 
     disclaimer_tile = sw.TileDisclaimer(solara_theme_obj=solara_theme_obj)
     about_tile = CustomTileAbout(cm.app.about, solara_theme_obj=solara_theme_obj)

@@ -17,7 +17,14 @@ class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
     def __init__(
-        self, recipe: Recipe, map_: SeplanMap, alert: Alert, *args, **kwargs
+        self,
+        recipe: Recipe,
+        map_: SeplanMap,
+        alert: Alert,
+        sepal_session=None,
+        gee_session=None,
+        *args,
+        **kwargs,
     ) -> None:
 
         self.height = "48px"
@@ -34,7 +41,12 @@ class MapToolbar(sw.Toolbar):
         self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
         self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=alert)
         self.compare_dialog = cw.CompareScenariosDialog(
-            type_="map", map_=self.map_, main_recipe=self.recipe, alert=alert
+            type_="map",
+            map_=self.map_,
+            main_recipe=self.recipe,
+            alert=alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
         )
         self.info_dialog = MapInfoDialog()
 
