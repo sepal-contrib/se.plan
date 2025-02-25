@@ -104,7 +104,7 @@ def get_gee_recipe_folder(recipe_name: str, gee_session: EESession) -> Path:
     try:
         if gee_session:
             recipe_folder = Path("seplan") / recipe_name
-            recipe_folder = gee_session.operations.create_folder(recipe_folder)
+            return Path(gee_session.operations.create_folder(recipe_folder))
 
         else:
             project_folder = Path(f"projects/{ee.data._cloud_api_user_project}/assets/")
