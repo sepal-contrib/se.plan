@@ -5,7 +5,7 @@ ee-client>=1.2.0 # to improve error handling
 
 toml
 
-ipecharts>=1.2.0
+ipecharts>=1.2.1
 rasterio<1.3.11 # Leave it here even if it's already in the sepal_ui requirements. Check https://github.com/openforis/sepal/issues/328
 
 git+https://github.com/openforis/sepal_ui@solara
