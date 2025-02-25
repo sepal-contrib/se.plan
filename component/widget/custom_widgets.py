@@ -84,6 +84,10 @@ class RecipeInspector(v.VuetifyTemplate):
 
         self.dialog = False
 
+    def reset(self):
+        self.data_dict = {}
+        self.recipe_name = ""
+
 
 class RecipeInput(sw.Layout):
 
@@ -122,6 +126,9 @@ class RecipeInput(sw.Layout):
         """Validate the recipe file."""
 
         if not change["new"]:
+            logger.debug("validating recipe: no file selected")
+            self.load_recipe_path = None
+            self.valid = False
             return
 
         # Reset any previous error messages
