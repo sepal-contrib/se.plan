@@ -134,7 +134,7 @@ def Page():
     sepal_cookies = parse_cookie_string(headers.value["cookie"][0])
     session_id = sepal_cookies.get("SEPAL-SESSIONID")
 
-    sepal_client = SepalClient(session_id=session_id)
+    sepal_client = SepalClient(session_id=session_id, module_name="se.plan")
 
     app_model = AppModel()
     recipe = Recipe(sepal_session=sepal_client, gee_session=gee_session)
