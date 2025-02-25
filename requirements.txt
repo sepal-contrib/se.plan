@@ -28,3 +28,6 @@ pygaul
 # For testing
 pytest
 pytest-cov
+
+# for development
+colorlog
