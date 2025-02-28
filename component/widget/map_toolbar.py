@@ -30,6 +30,7 @@ class MapToolbar(sw.Toolbar):
         self.height = "48px"
         super().__init__(*args, **kwargs)
 
+        self.gee_session = gee_session
         self.attributes = {"id": "map_toolbar"}
         self.recipe = recipe
         self.map_ = map_
@@ -38,7 +39,9 @@ class MapToolbar(sw.Toolbar):
 
         # Dialogs
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
-        self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
+        self.import_aoi_dialog = cw.ImportAoiDialog(
+            self.custom_aoi_dialog, gee_session=self.gee_session
+        )
         self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=alert)
         self.compare_dialog = cw.CompareScenariosDialog(
             type_="map",

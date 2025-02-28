@@ -4,7 +4,6 @@ from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from component.frontend.icons import icon
 from sepal_ui import sepalwidgets as sw
-from sepal_ui.aoi.aoi_model import AoiModel
 
 import component.parameter as cp
 from component.message import cm
@@ -41,7 +40,7 @@ class CustomAoiDialog(BaseDialog):
             ],
         )
         text = sw.CardText(children=[table, self.save_input])
-        btn_cancel = TextBtn(cm.map.dialog.drawing.cancel)
+        btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
         action = sw.CardActions(children=[sw.Spacer(), btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 

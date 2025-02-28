@@ -6,6 +6,9 @@ from eeclient.data import get_info
 import ee
 import pandas as pd
 import pkg_resources
+from component.frontend.icons import icon
+from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
 from sepal_ui.mapping import SepalMap
@@ -25,19 +28,18 @@ class AoiTile(sw.Layout):
 
     def __init__(
         self,
-        gee_session: EESession,
-        recipe: Recipe,
+        gee_session: EESession = None,
+        recipe: Recipe = None,
         layers: list = [],
         solara_theme_obj=None,
     ):
+        if not recipe:
+            recipe = Recipe()
         self.class_ = "d-block aoi_map"
         self._metadata = {"mount_id": "aoi_tile"}
         self.gee_session = gee_session
 
         super().__init__()
-
-        # basemaps = ["CartoDB.DarkMatter"] if dark_theme else ["CartoDB.Positron"]
-        # basemaps = ["SATELLITE"] + basemaps
 
         self.map_ = SepalMap(
             gee=True,
@@ -49,21 +51,40 @@ class AoiTile(sw.Layout):
 
         self.map_.dc.hide()
         self.map_.min_zoom = 1
-        # self.map_.add_basemap("SATELLITE")
+
+        self.btn_aoi = IconBtn(gliph=icon("aoi"))
+
+        self.map_toolbar = sw.Toolbar(
+            height="48px",
+            elevation=0,
+            color="accent",
+            children=[self.btn_aoi],
+        )
 
         # Build the aoi view with our custom aoi_model
         self.view = SeplanAoiView(
             model=recipe.seplan_aoi, map_=self.map_, gee_session=gee_session
         )
 
-        aoi_control = WidgetControl(
-            widget=self.view, position="topleft", transparent_bg=True
+        title = sw.CardTitle(children=[cm.map.dialog.drawing.title])
+        text = sw.CardText(children=[self.view])
+        btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
+        action = sw.CardActions(children=[sw.Spacer(), self.view.btn, btn_cancel])
+
+        aoi_content = sw.Card(
+            class_="ma-0", children=[title, text, action], elevation=0
         )
 
-        self.map_.add(aoi_control)
-        self.children = [self.map_]
+        aoi_dialog = BaseDialog(children=[aoi_content], persistent=False)
 
-        # bind an extra js behaviour7
+        self.children = [
+            self.map_toolbar,
+            aoi_dialog,
+            self.map_,
+        ]
+
+        btn_cancel.on_event("click", lambda *_: aoi_dialog.close_dialog())
+        self.btn_aoi.on_event("click", lambda *_: aoi_dialog.open_dialog())
         self.view.observe(self._check_lmic, "updated")
 
     def _check_lmic(self, _):

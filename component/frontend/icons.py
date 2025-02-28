@@ -83,6 +83,10 @@ icons = {
         "fa": "fa-solid fa-file-circle-question",
         "mdi": "mdi-file-question",
     },
+    "aoi": {
+        "fa": "fa-solid fa-circle-down",
+        "mdi": "mdi-vector-square",
+    },
 }
 
 
