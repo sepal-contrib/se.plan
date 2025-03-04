@@ -45,6 +45,7 @@
 		}
 	},
 	"aoi": {
-		"not_lmic": "The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information"
+		"not_lmic": "The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information",
+		"aoi_title" : "Area of interest selection"
 	}
 }

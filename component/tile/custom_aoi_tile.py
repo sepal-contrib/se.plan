@@ -17,6 +17,7 @@ import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.custom_aoi_view import SeplanAoiView
+from component.scripts.logger import logger
 
 from sepal_ui.scripts.utils import init_ee
 
@@ -66,7 +67,7 @@ class AoiTile(sw.Layout):
             model=recipe.seplan_aoi, map_=self.map_, gee_session=gee_session
         )
 
-        title = sw.CardTitle(children=[cm.map.dialog.drawing.title])
+        title = sw.CardTitle(children=[cm.aoi.aoi_title])
         text = sw.CardText(children=[self.view])
         btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
         action = sw.CardActions(children=[sw.Spacer(), self.view.btn, btn_cancel])
@@ -75,22 +76,23 @@ class AoiTile(sw.Layout):
             class_="ma-0", children=[title, text, action], elevation=0
         )
 
-        aoi_dialog = BaseDialog(children=[aoi_content], persistent=False)
+        self.aoi_dialog = BaseDialog(children=[aoi_content], persistent=True)
 
         self.children = [
             self.map_toolbar,
-            aoi_dialog,
+            self.aoi_dialog,
             self.map_,
         ]
 
-        btn_cancel.on_event("click", lambda *_: aoi_dialog.close_dialog())
-        self.btn_aoi.on_event("click", lambda *_: aoi_dialog.open_dialog())
+        btn_cancel.on_event("click", lambda *_: self.aoi_dialog.close_dialog())
+        self.btn_aoi.on_event("click", lambda *_: self.aoi_dialog.open_dialog())
         self.view.observe(self._check_lmic, "updated")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""
         # check over the lmic country number
         if self.view.model.admin:
+            logger.info(f"Checking if the aoi is in the LMIC country list")
             code = self.view.model.admin
 
             # get the country code out of the admin one (that can be level 1 or 2)
@@ -110,6 +112,8 @@ class AoiTile(sw.Layout):
 
         # check if the aoi is in the LMIC
         else:
+            logger.info(f"Else....")
+
             lmic_raster = ee.Image(
                 "projects/john-ee-282116/assets/fao-restoration/misc/lmic_global_1k"
             )
@@ -132,5 +136,8 @@ class AoiTile(sw.Layout):
             )
 
         included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
+
+        if included:
+            self.aoi_dialog.close_dialog()
 
         return self
