@@ -7,6 +7,7 @@ from sepal_ui import mapping as sm
 
 from component.message import cm
 from component.scripts.logger import logger
+from component.scripts.assets import default_asset_id
 
 
 def get_layer(
@@ -49,6 +50,10 @@ def get_limits(
     Returns:
         list: A list containing either min-max values or histogram keys depending on the data_type.
     """
+
+    # We know that the treecover_with_potential asset is binary
+    if asset == default_asset_id:
+        return [0, 1]
 
     if data_type in ["binary", "continuous"]:
         reducer = ee.Reducer.minMax()
