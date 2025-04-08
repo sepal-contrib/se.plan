@@ -2,6 +2,7 @@
 
 from typing import Literal
 
+from component.frontend.icons import icon
 import sepal_ui.sepalwidgets as sw
 from ipyvuetify import Btn
 
@@ -29,9 +30,9 @@ default_state = {
 }
 
 icons = {
-    "building": "mdi-wrench",
-    "done": "mdi-checkbox-marked-circle",
-    "waiting": "mdi-clock-alert",
+    "building": icon("wrench"),
+    "done": icon("checkbox-marked-circle"),
+    "waiting": icon("clock"),
 }
 
 
@@ -96,7 +97,7 @@ class TaskMsg(sw.Flex):
         self.component_id = component_id
         self.attributes = {"id": type_ + component_id, "type_": type_}
         self.class_ = "d-flex"
-        self.icon = sw.Icon(children=["mdi-circle"], color="info")
+        self.icon = sw.Icon(children=[icon("circle")], color="info")
 
         self.children = ["", sw.Spacer(), self.icon]
 

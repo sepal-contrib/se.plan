@@ -1,5 +1,8 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 import ee
+from eeclient.client import EESession
+
+from eeclient.data import get_info
 
 from component.model.recipe import Recipe
 from component.scripts.seplan import Seplan, reduce_constraints
@@ -17,7 +20,7 @@ def is_main_aoi(main_aoi_name, aoi_name) -> bool:
     return main_aoi_name == aoi_name
 
 
-def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
+def get_summary_statistics(gee_session: EESession, recipe: Recipe) -> RecipeStatsDict:
     """Returns summary statistics using seplan inputs.
 
     The statistics will be later parsed to be displayed in the dashboard.
@@ -50,7 +53,7 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
     # Get the restoration suitability index
     wlc_out = seplan_model.get_constraint_index()
 
-    return (
+    return gee_session.operations.get_info(
         ee.Dictionary(
             {
                 recipe_name: ee.Dictionary(
@@ -89,8 +92,8 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
                     }
                 )
             }
-        )
-    ).getInfo()
+        ),
+    )
 
 
 def get_image_stats(image, mask, geom):
@@ -262,5 +265,5 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
         }
     )
 
-    # return ee.Dictionary({image.get("name").getInfo(): value})
+    # return ee.Dictionary({image.get("name").get_info(): value})
     return ee.Dictionary({name: value})

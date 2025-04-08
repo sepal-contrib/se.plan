@@ -1,3 +1,6 @@
+from typing import Union
+from eeclient.client import EESession
+
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
@@ -11,7 +14,14 @@ from component.message import cm
 
 
 class MapTile(sw.Layout):
-    def __init__(self, recipe: Recipe, app_model: AppModel = None):
+    def __init__(
+        self,
+        app_model: AppModel,
+        recipe: Recipe,
+        solara_theme_obj: None,
+        gee_session: EESession,
+        sepal_session=None,
+    ):
         """Define the map tile layout.
 
         Args:
@@ -19,7 +29,7 @@ class MapTile(sw.Layout):
                 map_tile with the app (like opening the info dialog when the map_tile drawer is clicked). Defaults to None.
         """
         self._metadata = {"mount_id": "map_tile"}
-        self.class_ = "d-block custom_map"
+        self.class_ = "d-block results_map"
         self.app_model = app_model
 
         super().__init__()
@@ -29,9 +39,17 @@ class MapTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        self.map_ = SeplanMap(recipe.seplan_aoi)
+        self.map_ = SeplanMap(
+            recipe.seplan_aoi,
+            solara_theme_obj=solara_theme_obj,
+            gee_session=gee_session,
+        )
         self.map_toolbar = MapToolbar(
-            recipe=self.recipe, map_=self.map_, alert=self.alert
+            recipe=self.recipe,
+            map_=self.map_,
+            alert=self.alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
         )
 
         # init the final layers
