@@ -32,7 +32,7 @@ class AoiTile(sw.Layout):
         gee_session: EESession = None,
         recipe: Recipe = None,
         layers: list = [],
-        solara_theme_obj=None,
+        theme_toggle=None,
     ):
         if not recipe:
             recipe = Recipe()
@@ -45,7 +45,7 @@ class AoiTile(sw.Layout):
         self.map_ = SepalMap(
             gee=True,
             layers=layers,
-            solara_theme_obj=solara_theme_obj,
+            theme_toggle=theme_toggle,
             gee_session=gee_session,
         )
         self.map_.add_basemap("SATELLITE")

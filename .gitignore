@@ -12,7 +12,7 @@ nox_ui.ipynb
 test_solara*
 # test build
 node_modules/*
-
+training/
 # Distribution / packaging
 .Python
 build/

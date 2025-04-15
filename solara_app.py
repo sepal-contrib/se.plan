@@ -14,7 +14,7 @@ from solara.lab.components.theming import theme
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
 from sepal_ui.scripts.sepal_client import SepalClient
-
+from sepal_ui.sepalwidgets.vue_app import ThemeToggle
 
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
@@ -53,15 +53,6 @@ solara.server.settings.assets.fontawesome_path = (
     "/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"
 )
 solara.server.settings.assets.extra_locations = ["./assets/"]
-session_storage: Dict[str, str] = {}
-
-# used only to force updating of the page
-force_update_counter = solara.reactive(0)
-
-
-def store_in_session_storage(value):
-    session_storage[solara.get_session_id()] = value
-    force_update_counter.value += 1
 
 
 class MapLocation(HasTraits):
@@ -69,29 +60,11 @@ class MapLocation(HasTraits):
     center = List([0, 0]).tag(sync=True)
 
 
-class SolaraTheme(HasTraits):
-    dark = Bool(session_storage.get(solara.get_session_id(), True)).tag(sync=True)
-    name = Unicode().tag(sync=True)
-
-    def __init__(self):
-        super().__init__()
-        self.name = self.get_theme_name()
-
-    @observe("dark")
-    def on_change(self, change):
-        theme.dark = self.dark
-        self.name = self.get_theme_name()
-        store_in_session_storage(self.dark)
-
-    def get_theme_name(self):
-        return "dark" if self.dark else "light"
-
-
 @solara.component
 def Page():
 
-    solara_theme_obj = SolaraTheme()
-    theme.dark = solara_theme_obj.dark
+    theme_toggle = ThemeToggle()
+    theme.dark = theme_toggle.dark
     map_location = MapLocation()
 
     solara.lab.theme.themes.dark.primary = "#76591e"
@@ -145,19 +118,19 @@ def Page():
         recipe=recipe, app_model=app_model, sepal_session=sepal_client
     )
     aoi_tile = AoiTile(
-        gee_session=gee_session, recipe=recipe, solara_theme_obj=solara_theme_obj
+        gee_session=gee_session, recipe=recipe, theme_toggle=theme_toggle
     )
 
     questionnaire_tile = QuestionnaireTile(
         gee_session=gee_session,
         recipe=recipe,
-        solara_theme_obj=solara_theme_obj,
+        theme_toggle=theme_toggle,
     )
 
     map_tile = MapTile(
         app_model=app_model,
         recipe=recipe,
-        solara_theme_obj=solara_theme_obj,
+        theme_toggle=theme_toggle,
         gee_session=gee_session,
         sepal_session=sepal_client,
     )
@@ -171,15 +144,15 @@ def Page():
     dashboard_tile = DashboardTile(
         gee_session=gee_session,
         recipe=recipe,
-        solara_theme_obj=solara_theme_obj,
+        theme_toggle=theme_toggle,
         sepal_session=sepal_client,
     )
 
-    disclaimer_tile = sw.TileDisclaimer(solara_theme_obj=solara_theme_obj)
-    about_tile = CustomTileAbout(cm.app.about, solara_theme_obj=solara_theme_obj)
+    disclaimer_tile = sw.TileDisclaimer(theme_toggle=theme_toggle)
+    about_tile = CustomTileAbout(cm.app.about, theme_toggle=theme_toggle)
     about_tile.set_title("")
 
-    app_bar = CustomAppBar(title=cm.app.title, solara_theme_obj=solara_theme_obj)
+    app_bar = CustomAppBar(title=cm.app.title, theme_toggle=theme_toggle)
     app_content = [
         about_tile,
         aoi_tile,
@@ -245,5 +218,5 @@ def Page():
         tiles=app_content,
         appBar=app_bar,
         navDrawer=app_drawer,
-        solara_theme_obj=solara_theme_obj,
+        theme_toggle=theme_toggle,
     )

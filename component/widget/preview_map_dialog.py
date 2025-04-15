@@ -34,11 +34,11 @@ class CustomInspectorControl(InspectorControl):
 
 class PreviewMapDialog(MapDialog):
 
-    def __init__(self, gee_session: EESession, solara_theme_obj=None):
+    def __init__(self, gee_session: EESession, theme_toggle=None):
         super().__init__(max_width="950px", min_width="950px")
 
         self.gee_session = gee_session
-        self.map_ = SepalMap(solara_theme_obj=solara_theme_obj, gee_session=gee_session)
+        self.map_ = SepalMap(theme_toggle=theme_toggle, gee_session=gee_session)
         self.map_.layout.height = "60vw"
         self.map_.layout.height = "60vh"
         self.retain_focus = False  # To prevent on focus ipyvuetify error

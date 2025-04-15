@@ -18,7 +18,7 @@ class QuestionnaireTile(sw.Layout):
         self,
         gee_session: EESession,
         recipe: Recipe,
-        solara_theme_obj=None,
+        theme_toggle=None,
     ):
         # name the tile
         self._metadata = {"mount_id": "questionnaire_tile"}
@@ -31,7 +31,7 @@ class QuestionnaireTile(sw.Layout):
 
         # define a reusable preview map dialog
         preview_map = PreviewMapDialog(
-            gee_session=gee_session, solara_theme_obj=solara_theme_obj
+            gee_session=gee_session, theme_toggle=theme_toggle
         )
 
         benefit_table = Table(

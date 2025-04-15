@@ -21,7 +21,7 @@ class SeplanMap(sm.SepalMap):
     def __init__(
         self,
         seplan_aoi: SeplanAoi = None,
-        solara_theme_obj=None,
+        theme_toggle=None,
         gee_session=None,
         *args,
         **kwargs
@@ -34,7 +34,7 @@ class SeplanMap(sm.SepalMap):
         self.min_zoom = 1
 
         super().__init__(
-            solara_theme_obj=solara_theme_obj, gee_session=gee_session, *args, **kwargs
+            theme_toggle=theme_toggle, gee_session=gee_session, *args, **kwargs
         )
 
         self.dc.hide()

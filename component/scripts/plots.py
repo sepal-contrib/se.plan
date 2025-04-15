@@ -29,21 +29,21 @@ def get_level_color(code: int) -> str:
 
 class EChartsWidget(EChartsWidget):
 
-    def __init__(self, solara_theme_obj=None, *args, **kwargs):
+    def __init__(self, theme_toggle=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.renderer = "svg"
-        self.solara_theme_obj = solara_theme_obj
+        self.theme_toggle = theme_toggle
         self.theme = self.get_theme()
 
-        if self.solara_theme_obj:
-            self.solara_theme_obj.observe(self.set_theme, "dark")
+        if self.theme_toggle:
+            self.theme_toggle.observe(self.set_theme, "dark")
         else:
             v.theme.observe(self.set_theme, "dark")
 
     def get_theme(self):
 
-        obj = self.solara_theme_obj if self.solara_theme_obj else v.theme
+        obj = self.theme_toggle if self.theme_toggle else v.theme
 
         return "dark" if getattr(obj, "dark") else "light"
 
@@ -233,7 +233,7 @@ def get_bars_chart(
     show_legend: bool = True,
     min_value: Optional[float] = None,
     max_value: Optional[float] = None,
-    solara_theme_obj=None,
+    theme_toggle=None,
 ) -> EChartsWidget:
     """Create a simple, horizontal bar chart."""
 
@@ -272,12 +272,12 @@ def get_bars_chart(
     return EChartsWidget(
         option=option,
         style={"height": f"{height}px"},
-        solara_theme_obj=solara_theme_obj,
+        theme_toggle=theme_toggle,
     )
 
 
 def get_stacked_bars_chart(
-    summary_results: SummaryStatsDict, show_legend: bool = True, solara_theme_obj=None
+    summary_results: SummaryStatsDict, show_legend: bool = True, theme_toggle=None
 ) -> EChartsWidget:
     """Create a stacked, horizontal bar chart with a legend.
 
@@ -317,11 +317,11 @@ def get_stacked_bars_chart(
     )
     # style={"height": f"{height}px"}
     return EChartsWidget(
-        option=option, height=height, rederer="svg", solara_theme_obj=solara_theme_obj
+        option=option, height=height, rederer="svg", theme_toggle=theme_toggle
     )
 
 
-def get_individual_charts(summary_results: SummaryStatsDict, solara_theme_obj=None):
+def get_individual_charts(summary_results: SummaryStatsDict, theme_toggle=None):
     """Create individual charts for each region with stacked, horizontal bars and no legend."""
 
     charts = []
@@ -367,7 +367,7 @@ def get_individual_charts(summary_results: SummaryStatsDict, solara_theme_obj=No
             EChartsWidget(
                 option=option,
                 style={"height": "150px"},
-                solara_theme_obj=solara_theme_obj,
+                theme_toggle=theme_toggle,
             )
         )
 
@@ -375,7 +375,7 @@ def get_individual_charts(summary_results: SummaryStatsDict, solara_theme_obj=No
 
 
 def get_suitability_charts(
-    recipes_stats: List[RecipeStatsDict], test=False, solara_theme_obj=None
+    recipes_stats: List[RecipeStatsDict], test=False, theme_toggle=None
 ) -> List[EChartsWidget]:
     """Create a list of charts for each of the recipe stats."""
     # We can do two things, either we display the summary for all the scenarios
@@ -386,7 +386,7 @@ def get_suitability_charts(
         recipe_name, summary_stats = list(recipe_stats.items())[0]
 
         # Get the summary statistics for the suitability theme
-        chart = get_stacked_bars_chart(summary_stats, solara_theme_obj=solara_theme_obj)
+        chart = get_stacked_bars_chart(summary_stats, theme_toggle=theme_toggle)
 
         charts.append(
             sw.Flex(

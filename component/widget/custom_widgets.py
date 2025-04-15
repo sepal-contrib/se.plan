@@ -410,8 +410,8 @@ class CustomAppBar(sw.AppBar):
 
 
 class CustomApp(sw.App):
-    def __init__(self, app_model, solara_theme_obj=None, *args, **kwargs):
-        super().__init__(*args, solara_theme_obj=solara_theme_obj, **kwargs)
+    def __init__(self, app_model, theme_toggle=None, *args, **kwargs):
+        super().__init__(*args, theme_toggle=theme_toggle, **kwargs)
 
         self.app_model = app_model
         self.app_model.observe(self.update_recipe_state, "recipe_name")
@@ -451,9 +451,7 @@ class CustomApp(sw.App):
 
 
 class CustomTileAbout(sw.Tile):
-    def __init__(
-        self, pathname: Union[str, Path], solara_theme_obj=None, **kwargs
-    ) -> None:
+    def __init__(self, pathname: Union[str, Path], theme_toggle=None, **kwargs) -> None:
         """Create an about tile using a .md file.
 
         This tile will have the "about_widget" id and "About" title.
@@ -464,22 +462,19 @@ class CustomTileAbout(sw.Tile):
 
         text = Path(pathname).read_text()
 
-        # get current stored theme
-        theme = solara_theme_obj.name
-
         # Search any url in the text and look for the dark/light theme
         text = (
             text.replace("/light/", "/dark/")
-            if theme == "dark"
+            if theme_toggle.dark
             else text.replace("/dark/", "/light/")
         )
 
         content = Markdown(text)
 
-        update_script = UpdateImages(solara_theme_obj)
+        update_script = UpdateImages(theme_toggle)
         super().__init__("about_tile", "About", inputs=[content, update_script])
 
-        directional_link((solara_theme_obj, "dark"), (update_script, "dark"))
+        directional_link((theme_toggle, "dark"), (update_script, "dark"))
 
 
 class UpdateImages(v.VuetifyTemplate):
@@ -514,9 +509,9 @@ class UpdateImages(v.VuetifyTemplate):
     ).tag(sync=True)
     "Unicode: the javascript script to manually trigger the resize event"
 
-    def __init__(self, solara_theme_obj, **kwargs):
+    def __init__(self, theme_toggle, **kwargs):
         super().__init__(**kwargs)
-        self.dark = solara_theme_obj.dark
+        self.dark = theme_toggle.dark
         self.observe(self.update_images, "dark")
 
     def update_images(self, *_):

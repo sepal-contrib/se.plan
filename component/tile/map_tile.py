@@ -18,7 +18,7 @@ class MapTile(sw.Layout):
         self,
         app_model: AppModel,
         recipe: Recipe,
-        solara_theme_obj: None,
+        theme_toggle: None,
         gee_session: EESession,
         sepal_session=None,
     ):
@@ -41,7 +41,7 @@ class MapTile(sw.Layout):
 
         self.map_ = SeplanMap(
             recipe.seplan_aoi,
-            solara_theme_obj=solara_theme_obj,
+            theme_toggle=theme_toggle,
             gee_session=gee_session,
         )
         self.map_toolbar = MapToolbar(
