@@ -48,7 +48,7 @@ def parse_cookie_string(cookie_string):
     return cookies
 
 
-# solara.server.settings.main.root_path = "/api/app-launcher/seplan"
+solara.server.settings.main.root_path = "/api/app-launcher/seplan"
 solara.server.settings.assets.fontawesome_path = (
     "/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"
 )
