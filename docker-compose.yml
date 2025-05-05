@@ -11,7 +11,7 @@ services:
       - "${EE_CREDENTIALS_PATH:-${HOME}/.config/earthengine/credentials}:/root/.config/earthengine/credentials"
     environment:
       SEPAL_HOST: "${SEPAL_HOST}"
-      FORWARDED_ALLOW_IPS: "172.20.0.1"
+      FORWARDED_ALLOW_IPS: "*"
     networks:
       - sepal
     restart: always
