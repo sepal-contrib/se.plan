@@ -1,4 +1,3 @@
-from component.scripts.logger import logger
 from pathlib import Path
 from typing import Literal, Union
 
@@ -32,6 +31,9 @@ from .constraint_dialog import ConstraintDialog
 from .cost_dialog import CostDialog
 
 from sepal_ui.sepalwidgets.file_input import FileInput as FileInputElement
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class ResizeTrigger(v.VuetifyTemplate):

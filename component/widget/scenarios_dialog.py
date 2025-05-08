@@ -17,7 +17,6 @@ import component.scripts.gee as gee
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
-from component.scripts.logger import logger
 from component.scripts.statistics import get_summary_statistics
 from component.scripts.validation import are_comparable, validate_scenarios_recipes
 from component.types import RecipeInfo, RecipePaths
@@ -28,6 +27,9 @@ from component.widget.custom_widgets import RecipeInput, TableIcon, TextBtn
 from component import parameter as cp
 from component.widget.map import SeplanMap
 from sepal_ui.scripts.sepal_client import SepalClient
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class CompareScenariosDialog(BaseDialog):

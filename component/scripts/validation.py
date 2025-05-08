@@ -8,8 +8,10 @@ from jsonschema import ValidationError, validate
 
 from component.parameter import recipe_schema_path
 from component.scripts.file_handler import read_file
-from component.scripts.logger import logger
 from component.types import RecipePaths
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 def find_missing_property(instance, schema):

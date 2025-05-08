@@ -2,7 +2,6 @@ from typing import Union
 from eeclient.client import EESession
 
 from component.frontend.icons import icon
-from component.scripts.logger import logger
 from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
@@ -19,6 +18,9 @@ from component.widget.alert_state import Alert
 from .constraint_dialog import ConstraintDialog
 from .constraint_widget import ConstraintWidget
 from .preview_map_dialog import PreviewMapDialog
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class ConstraintRow(sw.Html):

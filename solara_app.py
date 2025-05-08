@@ -1,13 +1,15 @@
+from component.scripts.logger import setup_logging
+
+setup_logging()
+import os
 from eeclient.client import EESession
+from eeclient.helpers import get_sepal_headers_from_auth
 
 from eeclient.exceptions import EEClientError
-from component.scripts.logger import logger
-from typing import Dict
 
-from traitlets import Bool, Float, HasTraits, List, Unicode, link, observe
+from traitlets import Float, HasTraits, List, link
 import solara
 import solara.server.settings
-import solara.settings
 from solara.lab import headers
 from solara.lab.components.theming import theme
 
@@ -34,6 +36,10 @@ from component.tile.recipe_tile import RecipeView
 from component.model.app_model import AppModel
 from component.message import cm
 
+import logging
+
+logger = logging.getLogger("SEPLAN")
+logger.info("Ready to rock in Python 3.10 with TOML!")
 
 init_ee()
 
@@ -48,7 +54,6 @@ def parse_cookie_string(cookie_string):
     return cookies
 
 
-solara.server.settings.main.root_path = "/api/app-launcher/seplan"
 solara.server.settings.assets.fontawesome_path = (
     "/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"
 )
@@ -93,8 +98,17 @@ def Page():
     solara.lab.theme.themes.light.bg = "#FFFFFF"
     solara.lab.theme.themes.light.menu = "#FFFFFF"
 
+    from eeclient.typing import SepalHeaders, SepalUser
+
+    sepal_headers = (
+        get_sepal_headers_from_auth()
+        if os.getenv("SEPLAN_TEST", "false").lower() == "true"
+        else SepalHeaders.model_validate(headers.value)
+    )
+
+    logger.debug(f"SEPAL-HEADERS: {sepal_headers}")
     try:
-        gee_session = EESession(sepal_headers=headers.value)
+        gee_session = EESession(sepal_headers=sepal_headers)
     except Exception as e:
         if isinstance(e, EEClientError):
             solara.alert.Error(
@@ -104,8 +118,10 @@ def Page():
         solara.alert.Error(f"An error has occurred: {e}")
         return
 
-    sepal_cookies = parse_cookie_string(headers.value["cookie"][0])
-    session_id = sepal_cookies.get("SEPAL-SESSIONID")
+    # sepal_cookies = parse_cookie_string(headers.value["cookie"][0])
+    session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
+
+    logger.debug(f"SEPAL-SESSIONID: {session_id}")
 
     sepal_client = SepalClient(session_id=session_id, module_name="se.plan")
 

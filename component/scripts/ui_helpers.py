@@ -4,7 +4,9 @@ from typing import Dict, List, Union
 from component.message import cm
 from sepal_ui.scripts import utils as su
 from component.parameter.file_params import legends_path
-from component.scripts.logger import logger
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 def set_default_asset(w_asset_items: list, asset: str) -> list:

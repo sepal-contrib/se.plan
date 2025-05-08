@@ -4,7 +4,6 @@ from typing import Literal
 import ee
 import rasterio as rio
 from matplotlib.colors import to_rgba
-from component.scripts.logger import logger
 from component.scripts.gee import get_gee_recipe_folder
 from component.scripts.ui_helpers import parse_export_name
 from component.widget.buttons import TextBtn
@@ -19,6 +18,9 @@ from component.model.recipe import Recipe
 from component.scripts.seplan import asset_to_image, mask_image, quintiles
 from component.widget.base_dialog import BaseDialog
 from component.widget.alert_state import Alert
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 su.init_ee()
 
@@ -247,7 +249,7 @@ class ExportMapDialog(BaseDialog):
             recipe_gee_folder = get_gee_recipe_folder(
                 recipe_name, self.recipe.gee_session
             )
-            logger.debug("recipe_gee_folder>>>>>>>>>>>>", recipe_gee_folder)
+            logger.debug(f"recipe_gee_folder>>>>>>>>>>>> {recipe_gee_folder}")
             export_params.update(
                 asset_id=str(recipe_gee_folder / name), description=f"{name}"
             )

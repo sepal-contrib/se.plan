@@ -4,8 +4,11 @@ from traitlets import List, observe
 from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
-from component.scripts.logger import logger
 from component.types import ConstraintLayerData
+
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class ConstraintModel(QuestionnaireModel):

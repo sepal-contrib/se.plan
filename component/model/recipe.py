@@ -3,8 +3,6 @@ from eeclient.client import EESession
 
 from typing import Union
 from component.scripts.file_handler import save_file
-from component.scripts.logger import logger
-import json
 from pathlib import Path
 
 from sepal_ui.scripts.warning import SepalWarning
@@ -14,9 +12,12 @@ import component.parameter as cp
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
-from component.scripts.logger import logger
 from component.scripts import validation
 from component.scripts.seplan import Seplan
+
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class Recipe(HasTraits):
@@ -59,7 +60,9 @@ class Recipe(HasTraits):
         self.constraint_model.observe(self.update_changes, "new_changes")
         self.cost_model.observe(self.update_changes, "new_changes")
 
-        logger.debug("sepal_session----", sepal_session)
+        logger.debug(
+            f"sepal_session----{str(sepal_session)}",
+        )
 
     def update_changes(self, change):
         """Increment the new_changes counter by 1."""
@@ -145,6 +148,6 @@ class Recipe(HasTraits):
         """Generate the recipe name based on the aoi name."""
         return str(Path(self.recipe_session_path).stem)
 
-    # @observe("new_changes")
-    # def observe_changes(self, _):
-    #     logger.debug(f"Changes observed in recipe, {self.new_changes} changes")
+    @observe("new_changes")
+    def observe_changes(self, _):
+        logger.debug(f"Changes observed in recipe, {self.new_changes} changes")

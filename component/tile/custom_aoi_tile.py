@@ -17,9 +17,11 @@ import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.custom_aoi_view import SeplanAoiView
-from component.scripts.logger import logger
 
 from sepal_ui.scripts.utils import init_ee
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 init_ee()
 
@@ -112,8 +114,6 @@ class AoiTile(sw.Layout):
 
         # check if the aoi is in the LMIC
         else:
-            logger.info(f"Else....")
-
             lmic_raster = ee.Image(
                 "projects/john-ee-282116/assets/fao-restoration/misc/lmic_global_1k"
             )

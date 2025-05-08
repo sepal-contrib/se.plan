@@ -7,7 +7,6 @@ from sepal_ui.scripts import decorator as sd
 import component.parameter as cp
 from component.model import BenefitModel, ConstraintModel, CostModel
 from component.model.aoi_model import SeplanAoi
-from component.scripts.logger import logger
 from component.widget import custom_widgets as cw
 from component.widget.alert_state import Alert
 from component.widget.preview_theme_btn import PreviewThemeBtn
@@ -19,6 +18,10 @@ from .constraint_row import ConstraintRow
 from .cost_dialog import CostDialog
 from .cost_row import CostRow
 from .preview_map_dialog import PreviewMapDialog
+
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 __all__ = ["Table"]
 

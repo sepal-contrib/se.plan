@@ -17,7 +17,6 @@ from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
 from component.parameter.vis_params import PLOT_COLORS
-from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
 from component.scripts.plots import (
     get_bars_chart,
@@ -30,6 +29,9 @@ from component.widget.alert_state import Alert, AlertDialog
 from component.widget.suitability_table import get_summary_table
 from component.widget.custom_widgets import DashToolbar
 from component.widget.dashboard_layer_panels import LayerFull, LayerPercentage
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class DashboardTile(sw.Layout):

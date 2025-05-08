@@ -8,7 +8,7 @@ from apiclient import discovery
 from googleapiclient.http import MediaIoBaseDownload
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
-from component.scripts.logger import logger
+logger = logging.getLogger("SEPLAN")
 
 
 class gdrive(object):

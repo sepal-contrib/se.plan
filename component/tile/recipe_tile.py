@@ -8,7 +8,6 @@ from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
-from component.scripts.logger import logger
 from traitlets import Int, Unicode, directional_link, observe
 
 from component.message import cm
@@ -19,6 +18,9 @@ from component.model.recipe import Recipe
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
 from component.widget.custom_widgets import RecipeInput
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 _content = {
     "new": {

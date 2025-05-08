@@ -7,7 +7,9 @@ from sepal_ui.frontend.styles import get_theme
 from traitlets import Any, Int, List, directional_link, link, observe
 
 from component.message import cm
-from component.scripts.logger import logger
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class CustomNumber(Any):

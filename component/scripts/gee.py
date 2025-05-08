@@ -6,8 +6,10 @@ import ee
 from sepal_ui import mapping as sm
 
 from component.message import cm
-from component.scripts.logger import logger
 from component.scripts.assets import default_asset_id
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 def get_layer(
@@ -91,7 +93,7 @@ def get_limits(
         )
     )
 
-    logger.debug("get_limits_values:", values)
+    logger.debug(f"get_limits_values: {values}")
 
     # check if values are none and if so, raise a ValueError
     if any([val is None for val in values]):
@@ -127,5 +129,5 @@ def get_gee_recipe_folder(recipe_name: str, gee_session: EESession) -> Path:
 
     except Exception as e:
 
-        logger.debug("Error in get_gee_recipe_folder:", e)
+        logger.debug(f"Error in get_gee_recipe_folder: {e}")
         raise Exception("Eror in folder recipe folder creation")

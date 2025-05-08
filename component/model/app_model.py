@@ -1,5 +1,7 @@
-from component.scripts.logger import logger
 from traitlets import Bool, HasTraits, Int, Unicode, observe
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class AppModel(HasTraits):
@@ -21,15 +23,15 @@ class AppModel(HasTraits):
     close_all_dialogs = Int().tag(sync=True)
     """A counter that is incremented by the drawers to close all the dialogs"""
 
-    # @observe(
-    #     "new_changes",
-    #     "ready",
-    #     "active_drawer",
-    #     "recipe_name",
-    #     "on_save",
-    #     "close_all_dialogs",
-    # )
-    # def log_changes(self, _):
-    #     logger.debug(
-    #         f"AppModel changes: {self.new_changes}, {self.ready}, {self.active_drawer}, {self.recipe_name}, {self.on_save}, {self.close_all_dialogs}"
-    #     )
+    @observe(
+        "new_changes",
+        "ready",
+        "active_drawer",
+        "recipe_name",
+        "on_save",
+        "close_all_dialogs",
+    )
+    def log_changes(self, _):
+        logger.debug(
+            f"AppModel changes: {self.new_changes}, {self.ready}, {self.active_drawer}, {self.recipe_name}, {self.on_save}, {self.close_all_dialogs}"
+        )

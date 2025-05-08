@@ -16,7 +16,9 @@ from typing import Dict, List, Optional, Tuple, Any
 from component.parameter.gui_params import SUITABILITY_LEVELS
 from component.parameter.vis_params import SUITABILITY_COLORS
 from component.types import SummaryStatsDict
-from component.scripts.logger import logger
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 def get_level_name(code: int) -> str:
