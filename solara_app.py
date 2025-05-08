@@ -6,6 +6,7 @@ from eeclient.client import EESession
 from eeclient.helpers import get_sepal_headers_from_auth
 
 from eeclient.exceptions import EEClientError
+from eeclient.models import SepalHeaders
 
 from traitlets import Float, HasTraits, List, link
 import solara
@@ -97,8 +98,6 @@ def Page():
     solara.lab.theme.themes.light.darker = "#ffffff"
     solara.lab.theme.themes.light.bg = "#FFFFFF"
     solara.lab.theme.themes.light.menu = "#FFFFFF"
-
-    from eeclient.typing import SepalHeaders, SepalUser
 
     sepal_headers = (
         get_sepal_headers_from_auth()

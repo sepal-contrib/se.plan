@@ -21,5 +21,3 @@ COPY . /usr/local/lib/seplan
 EXPOSE 8765
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
-# CMD ["bash", "-c", "source activate seplan && solara run solara_app.py --host=0.0.0.0 --root-path=/api/app-launcher/seplan"] 
-# for testing purposes
