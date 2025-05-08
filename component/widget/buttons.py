@@ -1,4 +1,5 @@
 import ipyvuetify as v
+from component.frontend.icons import icon
 import sepal_ui.sepalwidgets as sw
 
 btn_color = "primary"
@@ -37,7 +38,7 @@ class DrawMenuBtn(v.Btn):
         self.v_on = "menuData.on"
         self.small = True
         self.children = [
-            v.Icon(children=["mdi-draw"], small=True, color="white"),
+            v.Icon(children=[icon("draw")], small=True, color="white"),
             v.Icon(
                 children=["fa fa-caret-down"],
                 small=True,
@@ -60,5 +61,5 @@ class CompareBtn(v.Flex):
         super().__init__()
 
         self.color = "primary"
-        self.btn = IconBtn("mdi-map")
+        self.btn = IconBtn(icon("map"))
         self.children = [self.btn]

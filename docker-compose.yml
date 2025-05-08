@@ -1,0 +1,20 @@
+services:
+  seplan:
+    build:
+      dockerfile: ./Dockerfile
+      args:
+        - GIT_COMMIT=${GIT_COMMIT:-""}
+    image: "openforis/seplan"
+    container_name: seplan
+    volumes:
+      - "${USERS_HOME_PATH:-/home}:/userHomes"
+      - "${EE_CREDENTIALS_PATH:-${HOME}/.config/earthengine/credentials}:/root/.config/earthengine/credentials"
+    environment:
+      SEPAL_HOST: "${SEPAL_HOST}"
+      FORWARDED_ALLOW_IPS: "*"
+    networks:
+      - sepal
+    restart: always
+networks:
+  sepal:
+    external: true
