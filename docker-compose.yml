@@ -5,7 +5,7 @@ services:
       args:
         - GIT_COMMIT=${GIT_COMMIT:-""}
     image: "openforis/seplan"
-    container_name: seplan
+    container_name: se.plan
     volumes:
       - "${USERS_HOME_PATH:-/home}:/userHomes"
       - "${EE_CREDENTIALS_PATH:-${HOME}/.config/earthengine/credentials}:/root/.config/earthengine/credentials"

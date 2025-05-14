@@ -1,5 +1,5 @@
 services:
-  seplan:
+  se.plan:
     ports:
       - "8765:8765"
     extra_hosts:
