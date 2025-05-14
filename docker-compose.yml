@@ -1,5 +1,5 @@
 services:
-  seplan:
+  se.plan:
     build:
       dockerfile: ./Dockerfile
       args:
