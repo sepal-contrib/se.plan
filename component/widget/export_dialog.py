@@ -18,6 +18,9 @@ from component.model.recipe import Recipe
 from component.scripts.seplan import asset_to_image, mask_image, quintiles
 from component.widget.base_dialog import BaseDialog
 from component.widget.alert_state import Alert
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 su.init_ee()
 
@@ -237,24 +240,27 @@ class ExportMapDialog(BaseDialog):
             "description": name,
             "scale": self.w_scale.v_model,
             "region": aoi.geometry(),
-            "maxPixels": 1e13,
+            "max_pixels": 1e13,
         }
 
         # launch the task
         if self.w_method.v_model == "gee":
 
-            recipe_gee_folder = get_gee_recipe_folder(recipe_name)
-            export_params.update(
-                assetId=str(recipe_gee_folder / name), description=f"{name}"
+            recipe_gee_folder = get_gee_recipe_folder(
+                recipe_name, self.recipe.gee_session
             )
-            task = ee.batch.Export.image.toAsset(**export_params)
-            task.start()
+            logger.debug(f"recipe_gee_folder>>>>>>>>>>>> {recipe_gee_folder}")
+            export_params.update(
+                asset_id=str(recipe_gee_folder / name), description=f"{name}"
+            )
+            self.recipe.gee_session.export.image_to_asset(**export_params)
+
             msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "gdrive":
-            task = ee.batch.Export.image.toDrive(**export_params)
-            task.start()
+
+            self.recipe.gee_session.export.image_to_drive(**export_params)
             msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
             self.alert.add_msg(msg, "success")
 

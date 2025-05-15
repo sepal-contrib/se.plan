@@ -1,6 +1,7 @@
 import ipyvuetify as v
 from ipywidgets import Output, HTMLMath
 from collections import defaultdict
+from component.frontend.icons import icon
 from component.model.benefit_model import BenefitModel
 from component.frontend.remath import remath
 from component.widget.buttons import IconBtn
@@ -50,7 +51,7 @@ class ExpressionDialog(v.Dialog):
         weights = benefit_model.weights
         self.wabi_expanded_expression = Expression(expand_wabi(benefits, weights))
 
-        btn_close = IconBtn(gliph="mdi-close")
+        btn_close = IconBtn(gliph=icon("close"))
         self.children = [
             v.Card(
                 width=780,

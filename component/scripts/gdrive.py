@@ -8,7 +8,7 @@ from apiclient import discovery
 from googleapiclient.http import MediaIoBaseDownload
 
 logging.getLogger("googleapiclient.discovery_cache").setLevel(logging.ERROR)
-from component.scripts.logger import logger
+logger = logging.getLogger("SEPLAN")
 
 
 class gdrive(object):
@@ -28,7 +28,7 @@ class gdrive(object):
         tasks = service.tasks().list(tasklist="@default", q="trashed = false").execute()
 
         for task in tasks["items"]:
-            logger.info(task["title"])
+            logger.debug(task["title"])
 
     def print_file_list(self):
         """for debugging purpose, print the list of all the file in the Gdrive."""
@@ -41,11 +41,11 @@ class gdrive(object):
         )
         items = results.get("files", [])
         if not items:
-            logger.info("No files found.")
+            logger.debug("No files found.")
         else:
-            logger.info("Files:")
+            logger.debug("Files:")
             for item in items:
-                logger.info("{0} ({1})".format(item["name"], item["id"]))
+                logger.debug("{0} ({1})".format(item["name"], item["id"]))
 
     def get_items(self, mimeType="image/tiff"):
         """get all the items in the Gdrive, items will have 2 columns, 'name' and 'id'."""
@@ -90,7 +90,7 @@ class gdrive(object):
             done = False
             while done is False:
                 status, done = downloader.next_chunk()
-                # logger.info('Download %d%%.' % int(status.progress() * 100))
+                # logger.debug('Download %d%%.' % int(status.progress() * 100))
 
             local_file = local_path / fId["name"]
             with local_file.open("wb") as fo:

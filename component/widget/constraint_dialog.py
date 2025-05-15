@@ -1,4 +1,7 @@
-from typing import Optional
+from eeclient.client import EESession
+
+from typing import Union, Optional
+
 import pandas as pd
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
@@ -20,7 +23,12 @@ class ConstraintDialog(BaseDialog):
     count = 0
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: cmod.ConstraintModel, alert: Optional[Alert] = None):
+    def __init__(
+        self,
+        model: cmod.ConstraintModel,
+        alert: Optional[Alert] = None,
+        gee_session: EESession = None,
+    ):
         super().__init__()
 
         # save the model as a member
@@ -48,7 +56,7 @@ class ConstraintDialog(BaseDialog):
             label=cm.constraint.dialog.name, items=[], v_model=None
         )
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect(types=["IMAGE"])
+        self.w_asset = sw.AssetSelect(types=["IMAGE"], gee_session=gee_session)
         self.w_desc = sw.Textarea(label=cm.constraint.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
             label=cm.constraint.dialog.unit, v_model=None, class_="mr-2"
