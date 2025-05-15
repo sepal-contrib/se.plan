@@ -3,7 +3,7 @@ FROM continuumio/miniconda3
 WORKDIR /usr/local/lib/seplan
 
 # Install nano and curl
-RUN apt-get update && apt-get install -y nano curl neovim supervisor netcat-openbsd
+RUN apt-get update && apt-get install -y nano curl neovim supervisor netcat-openbsd net-tools
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
