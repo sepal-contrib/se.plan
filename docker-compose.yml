@@ -12,6 +12,11 @@ services:
     environment:
       SEPAL_HOST: "${SEPAL_HOST}"
       FORWARDED_ALLOW_IPS: "*"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "80"]
+      timeout: 60s
+      interval: 1s
+      retries: 60
     networks:
       - sepal
     restart: always
