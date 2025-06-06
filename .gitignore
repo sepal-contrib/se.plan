@@ -9,6 +9,7 @@ nox_ui.ipynb
 # C extensions
 *.so
 99*
+.env
 test_solara*
 # test build
 node_modules/*
