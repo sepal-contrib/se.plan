@@ -25,7 +25,6 @@ from component.tile.custom_aoi_tile import AoiTile
 from component.tile.dashboard_tile import DashboardTile
 from component.tile.map_tile import MapTile
 from component.tile.questionnaire_tile import QuestionnaireTile
-from component.widget.alert_state import AlertState
 from component.widget.custom_widgets import (
     CustomApp,
     CustomAppBar,
@@ -70,7 +69,8 @@ class MapLocation(HasTraits):
 def Page():
 
     theme_toggle = ThemeToggle()
-    theme.dark = theme_toggle.dark
+    theme_toggle.observe(lambda e: setattr(theme, "dark", e["new"]), "dark")
+
     map_location = MapLocation()
 
     solara.lab.theme.themes.dark.primary = "#76591e"

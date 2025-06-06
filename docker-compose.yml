@@ -7,7 +7,6 @@ services:
     image: "openforis/seplan"
     container_name: se.plan
     volumes:
-      - "${USERS_HOME_PATH:-/home}:/userHomes"
       - "${EE_CREDENTIALS_PATH:-${HOME}/.config/earthengine/credentials}:/root/.config/earthengine/credentials"
     environment:
       SEPAL_HOST: "${SEPAL_HOST}"
