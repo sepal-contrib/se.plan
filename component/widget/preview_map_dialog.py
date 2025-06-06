@@ -1,6 +1,10 @@
 """Custom dialog to display individual layers from questionnaire tile."""
 
-from typing import Literal
+from eeclient.client import EESession
+
+from eeclient.data import get_info
+
+from typing import Literal, Union
 
 import ee
 import sepal_ui.sepalwidgets as sw
@@ -12,7 +16,7 @@ from sepal_ui.mapping import InspectorControl
 
 from component import parameter as cp
 from component.message import cm
-from component.widget.base_dialog import BaseDialog
+from component.widget.base_dialog import BaseDialog, MapDialog
 from component.widget.buttons import TextBtn
 from component.widget.legend import Legend
 
@@ -28,17 +32,16 @@ class CustomInspectorControl(InspectorControl):
         self.menu.v_model = True
 
 
-class PreviewMapDialog(BaseDialog):
-    def __init__(self):
+class PreviewMapDialog(MapDialog):
+
+    def __init__(self, gee_session: EESession, theme_toggle=None):
         super().__init__(max_width="950px", min_width="950px")
 
-        self.map_ = SepalMap()
+        self.gee_session = gee_session
+        self.map_ = SepalMap(theme_toggle=theme_toggle, gee_session=gee_session)
         self.map_.layout.height = "60vw"
         self.map_.layout.height = "60vh"
         self.retain_focus = False  # To prevent on focus ipyvuetify error
-
-        self.rt = rt
-
         self.legend = Legend()
         self.map_.add(self.legend)
         self.map_.min_zoom = 1
@@ -60,10 +63,7 @@ class PreviewMapDialog(BaseDialog):
             ],
         )
 
-        self.children = [
-            self.rt,
-            self.map_card,
-        ]
+        self.children = [self.map_card]
 
         self.btn_close.on_event("click", self.close_dialog)
 
@@ -78,7 +78,6 @@ class PreviewMapDialog(BaseDialog):
     def open_dialog(self):
         """Opens the dialog and creates a resize event."""
         super().open_dialog()
-        self.rt.resize()
 
     @sd.switch("loading", on_widgets=["map_card"])
     def show_layer(
@@ -161,7 +160,10 @@ class PreviewMapDialog(BaseDialog):
             bestEffort=True,
             tileScale=16,
         )
-        max_, min_ = [round(val, 2) for val in min_max.getInfo().values()]
+        max_, min_ = [
+            round(val, 2)
+            for val in self.gee_session.operations.get_info(min_max).values()
+        ]
 
         min_ = 0 if not min_ else min_
         max_ = 1 if not max_ else max_

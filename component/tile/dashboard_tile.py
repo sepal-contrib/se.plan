@@ -1,4 +1,6 @@
-from typing import List, Tuple
+from eeclient.client import EESession
+
+from typing import List, Tuple, Union
 from component.types import (
     BenefitChartsData,
     ConstraintChartsData,
@@ -15,7 +17,6 @@ from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
 from component.parameter.vis_params import PLOT_COLORS
-from component.scripts.logger import logger
 from component.scripts.compute import export_as_csv
 from component.scripts.plots import (
     get_bars_chart,
@@ -28,25 +29,41 @@ from component.widget.alert_state import Alert, AlertDialog
 from component.widget.suitability_table import get_summary_table
 from component.widget.custom_widgets import DashToolbar
 from component.widget.dashboard_layer_panels import LayerFull, LayerPercentage
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class DashboardTile(sw.Layout):
-    def __init__(self, recipe: Recipe):
+    def __init__(
+        self,
+        gee_session: EESession,
+        recipe: Recipe,
+        theme_toggle=None,
+        sepal_session=None,
+    ):
         super().__init__()
 
         self._metadata = {"mount_id": "dashboard_tile"}
+        self.theme_toggle = theme_toggle
         self.class_ = "d-block"
         self.summary_stats = None
+        self.gee_session = gee_session
 
         self.recipe = recipe
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        dash_toolbar = DashToolbar(recipe.seplan, alert=self.alert)
+        dash_toolbar = DashToolbar(
+            recipe.seplan,
+            alert=self.alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
+        )
 
         # init the dashboard
-        self.overall_dash = OverallDashboard()
-        self.theme_dash = ThemeDashboard()
+        self.overall_dash = OverallDashboard(theme_toggle=self.theme_toggle)
+        self.theme_dash = ThemeDashboard(theme_toggle=self.theme_toggle)
         self.children = [
             dash_toolbar,
             self.overall_dash,
@@ -80,7 +97,7 @@ class DashboardTile(sw.Layout):
                 "You can only export the dashboard data for the current recipe, load or create a recipe first in the recipe section"
             )
 
-        self.summary_stats = get_summary_statistics(self.recipe)
+        self.summary_stats = get_summary_statistics(self.gee_session, self.recipe)
 
         # save the dashboard as a csv
         session_results_path = export_as_csv(self.summary_stats)
@@ -98,8 +115,8 @@ class DashboardTile(sw.Layout):
             )
 
         if not self.summary_stats:
-            logger.info("No dashboard to display")
-            self.summary_stats = get_summary_statistics(self.recipe)
+            logger.debug("No dashboard to display")
+            self.summary_stats = get_summary_statistics(self.gee_session, self.recipe)
 
         # set the content of the panels
         self.overall_dash.set_summary([self.summary_stats])
@@ -109,7 +126,7 @@ class DashboardTile(sw.Layout):
 
     def reset(self, *_):
         """Reset the dashboard to its initial state."""
-        logger.info("resettig the dashboard")
+        logger.debug("resettig the dashboard")
         self.summary_stats = None
         self.overall_dash.reset()
         self.theme_dash.reset()
@@ -119,8 +136,9 @@ class ThemeDashboard(sw.Card):
     seplan: Seplan
     "Seplan object used to retrieve the layer description and units"
 
-    def __init__(self):
+    def __init__(self, theme_toggle=None):
         super().__init__()
+        self.theme_toggle = theme_toggle
         self.title = sw.CardTitle(children=[cm.dashboard.theme.title])
         self.content = sw.CardText()
         self.alert = sw.Alert().add_msg(cm.dashboard.theme.disclaimer, "warning")
@@ -171,6 +189,7 @@ class ThemeDashboard(sw.Card):
                     bars_width=50,
                     min_value=min_,
                     max_value=max_,
+                    theme_toggle=self.theme_toggle,
                 )
 
                 # Get all the layers for the benefit theme
@@ -211,6 +230,7 @@ class ThemeDashboard(sw.Card):
                 series_names=series_names,
                 series_colors=colors,
                 bars_width=80,
+                theme_toggle=self.theme_toggle,
             )
             cost_charts["cost_layers"].append((recipe_name, layers_data, w_chart))
 
@@ -309,11 +329,12 @@ class ThemeDashboard(sw.Card):
 
     def reset(self):
         """Reset the dashboard to its initial state."""
-        self.__init__()
+        self.__init__(theme_toggle=self.theme_toggle)
 
 
 class OverallDashboard(sw.Card):
-    def __init__(self):
+    def __init__(self, theme_toggle=None):
+        self.theme_toggle = theme_toggle
         self.class_ = "my-2"
         super().__init__()
         self.title = sw.CardTitle(children=[cm.dashboard.region.title])
@@ -325,7 +346,12 @@ class OverallDashboard(sw.Card):
     def set_summary(self, recipes_stats: List[RecipeStatsDict]):
         """Set the summary statistics for all the summary comming from different scenarios"""
 
-        suitability_charts = get_suitability_charts(recipes_stats)
+        logger.debug(
+            f"OverallDashboard.set_summary, with theme_toggle: {self.theme_toggle}"
+        )
+        suitability_charts = get_suitability_charts(
+            recipes_stats, theme_toggle=self.theme_toggle
+        )
 
         # For the table, I need to display all of them in the same table
         suitability_table = get_summary_table(recipes_stats, "both")
@@ -336,4 +362,4 @@ class OverallDashboard(sw.Card):
 
     def reset(self):
         """Reset the dashboard to its initial state."""
-        self.__init__()
+        self.__init__(theme_toggle=self.theme_toggle)
