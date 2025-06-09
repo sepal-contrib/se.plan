@@ -11,6 +11,9 @@ nox_ui.ipynb
 99*
 .env
 test_solara*
+# Docker compose override for local development
+docker-compose.override.yml
+_docker-compose.override.yml
 # test build
 node_modules/*
 training/
