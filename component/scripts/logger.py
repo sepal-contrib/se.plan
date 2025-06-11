@@ -13,7 +13,6 @@ from pathlib import Path
 
 import tomli
 
-# Create a logger for the SEPLAN module
 logger = logging.getLogger("SEPLAN")
 
 
@@ -47,5 +46,4 @@ def setup_logging():
     logging.config.dictConfig(cfg)
 
 
-# Call setup_logging to configure the logger when this module is imported
 setup_logging()
