@@ -39,8 +39,6 @@ from component.message import cm
 import logging
 
 logger = logging.getLogger("SEPLAN")
-logger.info("Ready to rock in Python 3.10 with TOML!")
-
 init_ee()
 
 
