@@ -1,4 +1,4 @@
-"""Logging configuration for the Seplan project.
+"""Logging configuration for the SEPLAN project.
 
 To use this logging configuration, set the environment variable
 SEPLAN_LOG_CFG to the path of the logging configuration file.
@@ -6,23 +6,46 @@ The repo has a sample configuration file in the root directory.
 
 """
 
-import os
 import logging
 import logging.config
+import os
 from pathlib import Path
+
 import tomli
+
+# Create a logger for the SEPLAN module
+logger = logging.getLogger("SEPLAN")
 
 
 def setup_logging():
-    cfg_path = os.getenv("SEPLAN_LOG_CFG")
-    if not cfg_path:
-        return  # or call basicConfig()
+    """Set up logging configuration from a TOML file.
 
-    cfg_file = Path(cfg_path).expanduser()
-    if not cfg_file.is_file():
-        raise FileNotFoundError(f"Logging config not found at {cfg_file}")
+    The configuration file path can be set using the SEPLAN_LOG_CFG environment variable.
+    If the file does not exist, a NullHandler is added to the logger.
+    If the file exists, it is loaded and the logging configuration is applied.
+    """
+    cfg_path = (
+        os.getenv("SEPLAN_LOG_CFG")
+        or Path(__file__).parent.parent.parent / "logging_config.toml"
+    )
 
-    with cfg_file.open("rb") as f:
+    cfg_path = Path(cfg_path)
+
+    if not cfg_path.exists():
+        SEPLAN_logger = logging.getLogger("SEPLAN")
+        for handler in SEPLAN_logger.handlers[:]:
+            SEPLAN_logger.removeHandler(handler)
+        SEPLAN_logger.addHandler(logging.NullHandler())
+        return
+
+    if not cfg_path.is_file():
+        raise FileNotFoundError(f"Logging config not found at {cfg_path}")
+
+    with cfg_path.open("rb") as f:
         cfg = tomli.load(f)
 
     logging.config.dictConfig(cfg)
+
+
+# Call setup_logging to configure the logger when this module is imported
+setup_logging()
