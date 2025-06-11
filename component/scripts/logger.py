@@ -27,9 +27,7 @@ def setup_logging():
         os.getenv("SEPLAN_LOG_CFG")
         or Path(__file__).parent.parent.parent / "logging_config.toml"
     )
-
     cfg_path = Path(cfg_path)
-
     if not cfg_path.exists():
         SEPLAN_logger = logging.getLogger("SEPLAN")
         for handler in SEPLAN_logger.handlers[:]:
