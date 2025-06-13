@@ -1,59 +1,47 @@
-from pathlib import Path
+"""Logging configuration for the SEPLAN project.
+
+To use this logging configuration, set the environment variable
+SEPLAN_LOG_CFG to the path of the logging configuration file.
+The repo has a sample configuration file in the root directory.
+
+"""
+
 import logging
-import sys
+import logging.config
+import os
+from pathlib import Path
+
+import tomli
+
+logger = logging.getLogger("SEPLAN")
 
 
-class CustomLogger:
-    def __init__(self, name: str, level: int = logging.DEBUG):
-        """
-        Creates a custom logger with a file handler.
-        """
-        # Create a logger
-        self.logger = logging.getLogger(name)
-        self.logger.setLevel(level)
+def setup_logging():
+    """Set up logging configuration from a TOML file.
 
-        # Create handlers (console and file)
-        log_file = str(Path.home() / "se_plan.log")
-        file_handler = logging.FileHandler(log_file)
+    The configuration file path can be set using the SEPLAN_LOG_CFG environment variable.
+    If the file does not exist, a NullHandler is added to the logger.
+    If the file exists, it is loaded and the logging configuration is applied.
+    """
+    cfg_path = (
+        os.getenv("SEPLAN_LOG_CFG")
+        or Path(__file__).parent.parent.parent / "logging_config.toml"
+    )
+    cfg_path = Path(cfg_path)
+    if not cfg_path.exists():
+        SEPLAN_logger = logging.getLogger("SEPLAN")
+        for handler in SEPLAN_logger.handlers[:]:
+            SEPLAN_logger.removeHandler(handler)
+        SEPLAN_logger.addHandler(logging.NullHandler())
+        return
 
-        # Set log level for handlers
-        file_handler.setLevel(level)
+    if not cfg_path.is_file():
+        raise FileNotFoundError(f"Logging config not found at {cfg_path}")
 
-        # Create a log format
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
-        file_handler.setFormatter(formatter)
+    with cfg_path.open("rb") as f:
+        cfg = tomli.load(f)
 
-        # Add handlers to the logger
-        self.logger.addHandler(file_handler)
-
-    def message_to_string(self, *messages: str):
-        # Transform all the messages into strings
-        messages = [str(msg) for msg in messages]
-
-        # Join all the strings in message
-        return " ".join(messages)
-
-    def debug(self, *messages: str):
-        """Logs a debug message."""
-        self.logger.debug(self.message_to_string(*messages))
-
-    def info(self, *messages: str):
-        """Logs an info message."""
-        self.logger.info(self.message_to_string(*messages))
-
-    def warning(self, *messages: str):
-        """Logs a warning message."""
-        self.logger.warning(self.message_to_string(*messages))
-
-    def error(self, *messages: str):
-        """Logs an error message."""
-        self.logger.error(self.message_to_string(*messages))
-
-    def critical(self, *messages: str):
-        """Logs a critical message."""
-        self.logger.critical(self.message_to_string(*messages))
+    logging.config.dictConfig(cfg)
 
 
-logger = CustomLogger("se.plan")
+setup_logging()

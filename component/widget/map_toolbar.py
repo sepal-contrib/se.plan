@@ -1,4 +1,5 @@
 import ipyvuetify as v
+from component.frontend.icons import icon
 from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui import color
@@ -16,12 +17,20 @@ class MapToolbar(sw.Toolbar):
     aoi_tools = Bool(False).tag(sync=True)
 
     def __init__(
-        self, recipe: Recipe, map_: SeplanMap, alert: Alert, *args, **kwargs
+        self,
+        recipe: Recipe,
+        map_: SeplanMap,
+        alert: Alert,
+        sepal_session=None,
+        gee_session=None,
+        *args,
+        **kwargs,
     ) -> None:
 
         self.height = "48px"
         super().__init__(*args, **kwargs)
 
+        self.gee_session = gee_session
         self.attributes = {"id": "map_toolbar"}
         self.recipe = recipe
         self.map_ = map_
@@ -30,10 +39,17 @@ class MapToolbar(sw.Toolbar):
 
         # Dialogs
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
-        self.import_aoi_dialog = cw.ImportAoiDialog(self.custom_aoi_dialog)
+        self.import_aoi_dialog = cw.ImportAoiDialog(
+            self.custom_aoi_dialog, gee_session=self.gee_session
+        )
         self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=alert)
         self.compare_dialog = cw.CompareScenariosDialog(
-            type_="map", map_=self.map_, main_recipe=self.recipe, alert=alert
+            type_="map",
+            map_=self.map_,
+            main_recipe=self.recipe,
+            alert=alert,
+            sepal_session=sepal_session,
+            gee_session=gee_session,
         )
         self.info_dialog = MapInfoDialog()
 
@@ -55,10 +71,10 @@ class MapToolbar(sw.Toolbar):
             gliph="fa-solid fa-circle-info",
         ).set_tooltip(cm.map.toolbar.tooltip.info, right=True, max_width="200px")
 
-        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
+        self.btn_compare = IconBtn(gliph=icon("compare")).set_tooltip(
             cm.map.toolbar.tooltip.compare, right=True, max_width="200px"
         )
-        self.btn_clean = IconBtn(gliph="mdi-broom").set_tooltip(
+        self.btn_clean = IconBtn(gliph=icon("broom")).set_tooltip(
             cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
         )
 
