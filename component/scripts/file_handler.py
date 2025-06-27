@@ -6,7 +6,7 @@ import json
 def read_file(file_path: str, sepal_session) -> Optional[Path]:
     if sepal_session:
         # Read the file from the sepal session
-        data = sepal_session.get_file(file_path)
+        data = sepal_session.get_file(file_path, parse_json=True)
     else:
         # Read the file from the local system
         with Path(file_path).open() as f:

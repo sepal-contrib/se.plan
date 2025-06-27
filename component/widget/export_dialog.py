@@ -224,6 +224,9 @@ class ExportMapDialog(BaseDialog):
         if not aoi:
             raise Exception(cm.questionnaire.error.no_aoi_on_map)
 
+        if not self.recipe.recipe_session_path:
+            raise Exception(cm.map.dialog.export.error.no_recipe)
+
         # The value from the w_asset is a tuple with (theme, id_)
         ee_image = self.get_ee_image(*self.w_asset.v_model)
 

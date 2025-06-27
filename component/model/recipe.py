@@ -129,7 +129,9 @@ class Recipe(HasTraits):
         """generate full recipe path."""
 
         if self.sepal_session:
-            recipe_dir = self.sepal_session.get_remote_dir("recipes")
+            recipe_dir = self.sepal_session.get_remote_dir(
+                "module_results/se.plan/recipes"
+            )
 
         else:
             recipe_dir = cp.result_dir / "recipes"

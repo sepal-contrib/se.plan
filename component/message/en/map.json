@@ -50,8 +50,10 @@
                 },
                 "export": "Export",
                 "cancel": "Cancel",
-                "gee_task_success" : "The task <i>'{}'</i> have been tasked in your <u><a class='success--text' href='https://code.earthengine.google.com/tasks'>GEE account</a></u>. "
-
+                "gee_task_success" : "The task <i>'{}'</i> have been tasked in your <u><a class='success--text' href='https://code.earthengine.google.com/tasks'>GEE account</a></u>. ",
+                "error": {
+                    "no_recipe" : "Before exporting the map, you need to save the recipe."
+                }
             },
             "drawing": {
                 "title": "Custom geometries",
