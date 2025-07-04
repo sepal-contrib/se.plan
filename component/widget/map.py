@@ -5,6 +5,7 @@ import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
 from sepal_ui import mapping as sm
 from traitlets import Dict, Int, link
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.model.aoi_model import SeplanAoi
 from component.widget.legend import SuitabilityLegend
@@ -22,7 +23,7 @@ class SeplanMap(sm.SepalMap):
         self,
         seplan_aoi: SeplanAoi = None,
         theme_toggle=None,
-        gee_session=None,
+        gee_interface: GEEInterface = None,
         *args,
         **kwargs
     ):
@@ -34,7 +35,7 @@ class SeplanMap(sm.SepalMap):
         self.min_zoom = 1
 
         super().__init__(
-            theme_toggle=theme_toggle, gee_session=gee_session, *args, **kwargs
+            theme_toggle=theme_toggle, gee_interface=gee_interface, *args, **kwargs
         )
 
         self.dc.hide()

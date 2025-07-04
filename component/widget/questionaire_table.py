@@ -1,8 +1,8 @@
 from typing import Optional, Union
-from eeclient.client import EESession
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 import component.parameter as cp
 from component.model import BenefitModel, ConstraintModel, CostModel
@@ -33,7 +33,7 @@ class Table(sw.Layout):
 
     def __init__(
         self,
-        gee_session: EESession,
+        gee_interface: GEEInterface,
         model: Union[BenefitModel, ConstraintModel, CostModel],
         aoi_model: SeplanAoi,
         alert: Optional[Alert] = None,
@@ -44,27 +44,27 @@ class Table(sw.Layout):
         self.alert = alert or Alert()
         self.aoi_model = aoi_model
         self.preview_map = preview_theme_map_btn
-        self.gee_session = gee_session
+        self.gee_interface = gee_interface
 
         if isinstance(model, BenefitModel):
             self.type_ = "benefit"
             self.Row = BenefitRow
             self.dialog = BenefitDialog(
-                model=model, alert=self.alert, gee_session=gee_session
+                model=model, alert=self.alert, gee_interface=gee_interface
             )
 
         elif isinstance(model, ConstraintModel):
             self.type_ = "constraint"
             self.Row = ConstraintRow
             self.dialog = ConstraintDialog(
-                model=model, alert=self.alert, gee_session=gee_session
+                model=model, alert=self.alert, gee_interface=gee_interface
             )
 
         elif isinstance(model, CostModel):
             self.type_ = "cost"
             self.Row = CostRow
             self.dialog = CostDialog(
-                model=model, alert=self.alert, gee_session=gee_session
+                model=model, alert=self.alert, gee_interface=gee_interface
             )
 
         else:
@@ -72,7 +72,7 @@ class Table(sw.Layout):
                 f"model should be an instance of BenefitModel, ConstraintModel or CostModel, not {type(model)}"
             )
 
-        self.preview_map = preview_map or PreviewMapDialog(gee_session=gee_session)
+        self.preview_map = preview_map or PreviewMapDialog(gee_interface=gee_interface)
         self.toolbar = cw.ToolBar(
             model,
             self.dialog,
@@ -136,7 +136,7 @@ class Table(sw.Layout):
                         aoi_model=self.aoi_model,
                         alert=self.alert,
                         preview_map=self.preview_map,
-                        gee_session=self.gee_session,
+                        gee_interface=self.gee_interface,
                     )
                 except Exception as e:
                     # remove the asset from the model if it fails
@@ -181,7 +181,7 @@ class Table(sw.Layout):
                     aoi_model=self.aoi_model,
                     alert=self.alert,
                     preview_map=self.preview_map,
-                    gee_session=self.gee_session,
+                    gee_interface=self.gee_interface,
                 )
                 for layer_id in self.model.ids
             ]

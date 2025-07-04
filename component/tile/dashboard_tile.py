@@ -1,5 +1,3 @@
-from eeclient.client import EESession
-
 from typing import List, Tuple, Union
 from component.types import (
     BenefitChartsData,
@@ -12,6 +10,7 @@ from component.types import (
 import ipyvuetify as v
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component import widget as cw
 from component.message import cm
@@ -24,7 +23,10 @@ from component.scripts.plots import (
     parse_layer_data,
 )
 from component.scripts.seplan import Seplan
-from component.scripts.statistics import get_summary_statistics
+from component.scripts.statistics import (
+    get_summary_statistics,
+    get_summary_statistics_async,
+)
 from component.widget.alert_state import Alert, AlertDialog
 from component.widget.suitability_table import get_summary_table
 from component.widget.custom_widgets import DashToolbar
@@ -37,7 +39,7 @@ logger = logging.getLogger("SEPLAN")
 class DashboardTile(sw.Layout):
     def __init__(
         self,
-        gee_session: EESession,
+        gee_interface: GEEInterface,
         recipe: Recipe,
         theme_toggle=None,
         sepal_session=None,
@@ -48,85 +50,107 @@ class DashboardTile(sw.Layout):
         self.theme_toggle = theme_toggle
         self.class_ = "d-block"
         self.summary_stats = None
-        self.gee_session = gee_session
-
         self.recipe = recipe
+        self.gee_interface = gee_interface
         self.alert = Alert()
+        self.sepal_session = sepal_session
+
         alert_dialog = AlertDialog(self.alert)
 
-        dash_toolbar = DashToolbar(
+        self.dash_toolbar = DashToolbar(
             recipe.seplan,
             alert=self.alert,
             sepal_session=sepal_session,
-            gee_session=gee_session,
+            gee_interface=gee_interface,
         )
 
         # init the dashboard
         self.overall_dash = OverallDashboard(theme_toggle=self.theme_toggle)
         self.theme_dash = ThemeDashboard(theme_toggle=self.theme_toggle)
         self.children = [
-            dash_toolbar,
+            self.dash_toolbar,
             self.overall_dash,
             self.theme_dash,
             # Dialogs
             alert_dialog,
         ]
 
-        self.create_dashboard = su.loading_button(
-            self.alert, dash_toolbar.btn_dashboard
-        )(self.create_dashboard)
-        self.csv_export = su.loading_button(self.alert, dash_toolbar.btn_download)(
-            self.csv_export
-        )
-
-        dash_toolbar.compare_dialog.set_stats_content(
+        self.dash_toolbar.compare_dialog.set_stats_content(
             overall_dashboard=self.overall_dash, theme_dashboard=self.theme_dash
         )
-
-        dash_toolbar.btn_dashboard.on_event("click", self.create_dashboard)
-        dash_toolbar.btn_download.on_event("click", self.csv_export)
 
         self.recipe.dash_model.observe(self.reset, "reset_count")
         self.recipe.observe(self.reset, "recipe_session_path")
 
-    def csv_export(self, *_) -> None:
+        self._configure_csv_export()
+        self._configure_dashboard()
+
+    def _configure_csv_export(self, *_) -> None:
         """Export the dashboard as a csv file."""
 
-        if not self.recipe.recipe_session_path:
-            raise ValueError(
-                "You can only export the dashboard data for the current recipe, load or create a recipe first in the recipe section"
+        def create_csv_task():
+            def callback(*_):
+
+                task = self.dash_toolbar.btn_download._task
+
+                if task:
+                    self.summary_stats = task.result
+
+                    session_results_path = export_as_csv(self.summary_stats)
+
+                    self.alert.add_msg(
+                        f"File successfully saved in {session_results_path}", "success"
+                    )
+
+            return self.gee_interface.create_task(
+                func=get_summary_statistics_async,
+                key="create_csv_task",
+                on_done=callback,
+                on_error=lambda e: self.alert.add_msg(str(e), type_="error"),
             )
 
-        self.summary_stats = get_summary_statistics(self.gee_session, self.recipe)
-
-        # save the dashboard as a csv
-        session_results_path = export_as_csv(self.summary_stats)
-
-        self.alert.add_msg(
-            f"File successfully saved in {session_results_path}", "success"
+        self.dash_toolbar.btn_download.configure(
+            task_factory=create_csv_task,
+            start_args=(
+                self.gee_interface,
+                self.recipe,
+            ),
         )
 
-    def create_dashboard(self, *_):
+    def _configure_dashboard(self, *_):
         """Compute the restoration plan for the self.recipe and display the dashboard."""
 
-        if not self.recipe.recipe_session_path:
-            raise ValueError(
-                "You can only display the dashboard for the current recipe, load or create a recipe first in the recipe section"
+        def create_dashboard_task():
+            def callback(*_):
+
+                task = self.dash_toolbar.btn_dashboard._task
+                if task:
+                    self.summary_stats = task.result
+
+                    # set the content of the panels
+                    self.overall_dash.set_summary([self.summary_stats])
+
+                    # For the theme we need to extract the metadata from the seplan models
+                    self.theme_dash.set_summary([self.recipe], [self.summary_stats])
+
+            return self.gee_interface.create_task(
+                func=get_summary_statistics_async,
+                key="create_daskboard_task",
+                on_done=callback,
+                on_error=lambda e: self.alert.add_msg(str(e), type_="error"),
             )
 
-        if not self.summary_stats:
-            logger.debug("No dashboard to display")
-            self.summary_stats = get_summary_statistics(self.gee_session, self.recipe)
-
-        # set the content of the panels
-        self.overall_dash.set_summary([self.summary_stats])
-
-        # For the theme we need to extract the metadata from the seplan models
-        self.theme_dash.set_summary([self.recipe], [self.summary_stats])
+        self.dash_toolbar.btn_dashboard.configure(
+            task_factory=create_dashboard_task,
+            start_args=(
+                self.gee_interface,
+                self.recipe,
+            ),
+        )
 
     def reset(self, *_):
         """Reset the dashboard to its initial state."""
-        logger.debug("resettig the dashboard")
+        logger.debug("resetting the dashboard")
         self.summary_stats = None
         self.overall_dash.reset()
         self.theme_dash.reset()

@@ -1,9 +1,12 @@
 from pathlib import Path
 from typing import List, Literal, Union
-from eeclient.client import EESession
 
 import ee
+
+from ipyleaflet import TileLayer
+
 from sepal_ui import mapping as sm
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.message import cm
 from component.scripts.assets import default_asset_id
@@ -12,15 +15,27 @@ import logging
 logger = logging.getLogger("SEPLAN")
 
 
+def create_layer(
+    map_id_dict: dict, name: str = "", visible: bool = True
+) -> sm.layer.EELayer:
+
+    return TileLayer(
+        url=map_id_dict["tile_fetcher"].url_format,
+        attribution="Google Earth Engine",
+        name=name,
+        max_zoom=24,
+    )
+
+
 def get_layer(
-    gee_session: EESession,
+    gee_interface: GEEInterface,
     image: ee.Image,
     vis_params: dict = {},
     name: str = "",
     visible: bool = True,
 ) -> sm.layer.EELayer:
 
-    map_id_dict = gee_session.operations.get_map_id(image, vis_params)
+    map_id_dict = gee_interface.get_map_id(image, vis_params)
 
     return sm.layer.EELayer(
         ee_object=image,
@@ -34,7 +49,7 @@ def get_layer(
 
 
 def get_limits(
-    gee_session: EESession,
+    gee_interface: GEEInterface,
     asset: str,
     data_type: Literal["binary", "continuous", "categorical"],
     aoi: Union[ee.FeatureCollection, ee.Geometry],
@@ -61,13 +76,13 @@ def get_limits(
         reducer = ee.Reducer.minMax()
 
         def get_value(reduction):
-            return list(gee_session.operations.get_info(reduction).values())
+            return list(gee_interface.get_info(reduction).values())
 
     else:
         reducer = ee.Reducer.frequencyHistogram()
 
         def get_value(reduction):
-            return gee_session.operations.get_info(
+            return gee_interface.get_info(
                 ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys(),
             )
 
@@ -105,29 +120,8 @@ def get_limits(
     return sorted(set(int(float(val)) for val in values))
 
 
-def get_gee_recipe_folder(recipe_name: str, gee_session: EESession) -> Path:
+def get_gee_recipe_folder(recipe_name: str, gee_interface: GEEInterface) -> Path:
     """Create a folder for the recipe in GEE"""
 
-    try:
-        if gee_session:
-            recipe_folder = Path("seplan") / recipe_name
-            return Path(gee_session.operations.create_folder(recipe_folder))
-
-        else:
-            project_folder = Path(f"projects/{ee.data._cloud_api_user_project}/assets/")
-            seplan_folder = project_folder / "seplan"
-            recipe_folder = seplan_folder / recipe_name
-
-            if not ee.data.getInfo(str(seplan_folder)):
-                ee.data.createAsset({"type": "FOLDER"}, str(seplan_folder))
-
-            # Create the recipe folder
-            if not ee.data.getInfo(str(recipe_folder)):
-                ee.data.createAsset({"type": "FOLDER"}, str(recipe_folder))
-
-            return Path(recipe_folder)
-
-    except Exception as e:
-
-        logger.debug(f"Error in get_gee_recipe_folder: {e}")
-        raise Exception("Eror in folder recipe folder creation")
+    recipe_folder = Path("seplan") / recipe_name
+    return Path(gee_interface.create_folder(recipe_folder))

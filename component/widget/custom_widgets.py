@@ -9,6 +9,8 @@ from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 from sepal_ui.scripts.sepal_client import SepalClient
+from sepal_ui.sepalwidgets.btn import TaskButton
+
 from component import widget as cw
 
 
@@ -227,24 +229,26 @@ class ToolBar(sw.Toolbar):
 
 class DashToolbar(sw.Toolbar):
     def __init__(
-        self, model: Seplan, alert: Alert = None, gee_session=None, sepal_session=None
+        self, model: Seplan, alert: Alert = None, gee_interface=None, sepal_session=None
     ) -> None:
         super().__init__()
 
         alert = alert or Alert()
 
         self.sepal_session = sepal_session
-        self.gee_session = gee_session
+        self.gee_interface = gee_interface
         self.height = "48px"
         self.model = model
         self.elevation = 0
         self.color = "accent"
 
-        self.btn_download = IconBtn(
-            gliph="fa-solid fa-circle-down",
-        ).set_tooltip(
-            cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
+        self.btn_download = TaskButton(
+            cm.dashboard.toolbar.btn.download.title, small=True
         )
+        self.btn_dashboard = TaskButton(
+            cm.dashboard.toolbar.btn.compute.title, small=True
+        )
+
         self.btn_compare = IconBtn(gliph=icon("compare")).set_tooltip(
             cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
         )
@@ -253,18 +257,17 @@ class DashToolbar(sw.Toolbar):
             type_="chart",
             alert=alert,
             sepal_session=sepal_session,
-            gee_session=gee_session,
+            gee_interface=self.gee_interface,
         )
 
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
-        self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
 
         self.children = [
-            self.btn_download.with_tooltip,
+            self.btn_download.children,
             sw.Spacer(),
             self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_dashboard,
+            self.btn_dashboard.children,
             # Dialogs
             self.compare_dialog,
         ]

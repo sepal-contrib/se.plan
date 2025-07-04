@@ -239,7 +239,7 @@ class ExportMapDialog(BaseDialog):
         name = parse_export_name(name)
 
         export_params = {
-            "image": ee_image,
+            # "image": ee_image,
             "description": name,
             "scale": self.w_scale.v_model,
             "region": aoi.geometry(),
@@ -250,20 +250,20 @@ class ExportMapDialog(BaseDialog):
         if self.w_method.v_model == "gee":
 
             recipe_gee_folder = get_gee_recipe_folder(
-                recipe_name, self.recipe.gee_session
+                recipe_name, self.recipe.gee_interface
             )
             logger.debug(f"recipe_gee_folder>>>>>>>>>>>> {recipe_gee_folder}")
             export_params.update(
                 asset_id=str(recipe_gee_folder / name), description=f"{name}"
             )
-            self.recipe.gee_session.export.image_to_asset(**export_params)
+            self.recipe.gee_interface.export_image_to_asset(ee_image, **export_params)
 
             msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "gdrive":
 
-            self.recipe.gee_session.export.image_to_drive(**export_params)
+            self.recipe.gee_interface.export_image_to_drive(ee_image, **export_params)
             msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
             self.alert.add_msg(msg, "success")
 

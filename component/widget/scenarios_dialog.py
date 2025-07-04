@@ -1,23 +1,26 @@
 """UI component widget to compare different scenarios."""
 
-from concurrent.futures import ThreadPoolExecutor
+import asyncio
 from copy import deepcopy
 from typing import List, Literal
-from eeclient.client import EESession
 
 import ipyvuetify as v
 from ipyleaflet import SplitMapControl
 from traitlets import Dict as Dict, Int
+from ipyleaflet import TileLayer
+import ee
 
 from sepal_ui.scripts.decorator import loading_button
 from sepal_ui.mapping import SepalMap
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.scripts.gee_interface import GEEInterface
+from sepal_ui.scripts.gee_task import GEETask
 
 import component.scripts.gee as gee
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
-from component.scripts.statistics import get_summary_statistics
+from component.scripts.statistics import get_summary_statistics_async
 from component.scripts.validation import are_comparable, validate_scenarios_recipes
 from component.types import RecipeInfo, RecipePaths
 from component.widget.alert_state import Alert
@@ -29,7 +32,7 @@ from component.widget.map import SeplanMap
 from sepal_ui.scripts.sepal_client import SepalClient
 import logging
 
-logger = logging.getLogger("SEPLAN")
+log = logging.getLogger("SEPLAN.scenarios_dialog")
 
 
 class CompareScenariosDialog(BaseDialog):
@@ -46,19 +49,20 @@ class CompareScenariosDialog(BaseDialog):
         limit: int = 2,
         overall_dashboard=None,
         theme_dashboard=None,
-        gee_session: EESession = None,
+        gee_interface: GEEInterface = None,
         sepal_session: SepalClient = None,
     ):
         super().__init__()
 
-        self.gee_session = gee_session
+        self._tasks: dict[str, GEETask] = {}
+        self.gee_interface = gee_interface
         self.sepal_session = sepal_session
         self.map_ = map_
         self.alert = alert or Alert()
         self.overall_dashboard = overall_dashboard
         self.theme_dashboard = theme_dashboard
 
-        logger.debug("Creating a CompareScenariosDialog, ")
+        log.debug("Creating a CompareScenariosDialog, ")
 
         if type_ == "chart":
             trashable = True
@@ -102,17 +106,17 @@ class CompareScenariosDialog(BaseDialog):
 
         self.set_actions(type_)
 
-        self.compare_layers = loading_button(self.alert, self.btn_compare_map)(
-            self.compare_layers
-        )
-
-        self.compare_statistics = loading_button(self.alert, self.btn_compare_stat)(
-            self.compare_statistics
-        )
-
         self.btn_compare_map.on_event("click", self.compare_layers)
         self.btn_compare_stat.on_event("click", self.compare_statistics)
         self.btn_cancel.on_event("click", self.close_dialog)
+
+    def close_dialog(self, *args):
+        """Close the dialog and cancel any running tasks."""
+        # Cancel all running tasks
+        for task in self._tasks.values():
+            task.cancel()
+
+        super().close_dialog()
 
     def set_actions(self, type_: Literal["map", "chart"]):
         """Set the actions for the dialog based on the type of comparison."""
@@ -136,15 +140,55 @@ class CompareScenariosDialog(BaseDialog):
         for _, recipe_data in self.scenario_inputs.recipe_paths.items():
             recipe_path = recipe_data["path"]
             recipe = Recipe(
-                sepal_session=self.sepal_session, gee_session=self.gee_session
+                sepal_session=self.sepal_session, gee_interface=self.gee_interface
             )
             recipe.load(recipe_path)
             recipes.append(recipe)
 
         return recipes
 
+    async def get_maps(self, recipes):
+        """Get map IDs for the recipes asynchronously."""
+        # Get map IDs for both recipes
+        map_tasks = [
+            self.gee_interface.get_map_id_async(
+                recipe.seplan.get_constraint_index()
+                .unmask(0)
+                .clip(recipe.seplan_aoi.feature_collection),
+                cp.layer_vis,
+            )
+            for recipe in recipes
+        ]
+
+        # Get the bounds for centering the map (using the first recipe's AOI)
+        bounds_task = self.gee_interface.get_info_async(
+            recipes[0].seplan_aoi.feature_collection.bounds().coordinates().get(0)
+        )
+
+        # Combine all tasks
+        all_tasks = map_tasks + [bounds_task]
+
+        results = await asyncio.gather(*all_tasks, return_exceptions=True)
+
+        # Separate map results from bounds result
+        map_results = results[:-1]
+        bounds_result = results[-1]
+
+        return map_results, bounds_result
+
+    async def get_all_summary_statistics(self, recipes):
+        """Get summary statistics for all recipes asynchronously."""
+        tasks = [
+            get_summary_statistics_async(self.gee_interface, recipe)
+            for recipe in recipes
+        ]
+
+        return await asyncio.gather(*tasks, return_exceptions=True)
+
     def compare_layers(self, widget, event, data, map_: SeplanMap = None):
         """Add suitability indices as layers to the map."""
+
+        self.btn_compare_map.loading = True
 
         map_ = map_ or self.map_
 
@@ -164,29 +208,35 @@ class CompareScenariosDialog(BaseDialog):
         # Assert that there must be only two recipes
         assert len(recipes) == 2, "Only two recipes can be compared."
 
-        def process_recipe(recipe):
-            layer_name = recipe.get_recipe_name()
-            return gee.get_layer(
-                self.gee_session,
-                recipe.seplan.get_constraint_index()
-                .unmask(0)
-                .clip(recipe.seplan_aoi.feature_collection),
-                cp.layer_vis,
-                layer_name,
-            )
+        def maps_callback(_):
+            map_results, bounds_result = self._tasks["maps"].result
 
-        # Create a ThreadPoolExecutor
-        with ThreadPoolExecutor() as executor:
-            # Submit tasks to the executor
-            futures = [executor.submit(process_recipe, recipe) for recipe in recipes]
+            # Use the bounds to center the map
+            coords = bounds_result
+            map_.zoom_bounds((*coords[0], *coords[2]))
 
-            # Collect the results
-            layers = [future.result() for future in futures]
+            layers = []
 
-        map_.centerObject(recipes[0].seplan_aoi.feature_collection)
-        layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
-        map_.add(layer_control)
-        self.close_dialog()
+            for i, map_id_dict in enumerate(map_results):
+                map_name = recipes[i].get_recipe_name()
+                log.debug(f"Map ID dict: {map_id_dict}")
+                layers.append(gee.create_layer(map_id_dict, map_name, True))
+
+            layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
+            map_.add(layer_control)
+            self.close_dialog()
+
+        self._tasks["maps"] = self.gee_interface.create_task(
+            func=self.get_maps,
+            key="compare_maps",
+            on_done=maps_callback,
+            on_error=lambda x: self.alert.add_msg(
+                f"Failed to add layer. {x}", type_="error"
+            ),
+            on_finally=lambda: setattr(self.btn_compare_map, "loading", False),
+        )
+
+        self._tasks["maps"].start(recipes)
 
     def set_stats_content(self, overall_dashboard=None, theme_dashboard=None):
         """Set the content of the statistics dashboard."""
@@ -196,6 +246,8 @@ class CompareScenariosDialog(BaseDialog):
 
     def compare_statistics(self, *args):
         """Compute and display summary statistics."""
+
+        self.btn_compare_stat.loading = True
 
         if not self.overall_dashboard or not self.theme_dashboard:
 
@@ -209,15 +261,28 @@ class CompareScenariosDialog(BaseDialog):
 
         recipes = self.read_recipes()
 
-        recipe_summary_stats = [
-            get_summary_statistics(self.gee_session, recipe) for recipe in recipes
-        ]
+        def stats_callback(_):
+            recipe_summary_stats = self._tasks["stats"].result
 
-        self.overall_dashboard.set_summary(recipes_stats=recipe_summary_stats)
-        self.theme_dashboard.set_summary(recipes, recipes_stats=recipe_summary_stats)
+            self.overall_dashboard.set_summary(recipes_stats=recipe_summary_stats)
+            self.theme_dashboard.set_summary(
+                recipes, recipes_stats=recipe_summary_stats
+            )
 
-        # Close the dialog
-        self.close_dialog()
+            # Close the dialog
+            self.close_dialog()
+
+        self._tasks["stats"] = self.gee_interface.create_task(
+            func=self.get_all_summary_statistics,
+            key="compare_statistics",
+            on_done=stats_callback,
+            on_error=lambda x: self.alert.add_msg(
+                f"Failed to compute statistics. {x}", type_="error"
+            ),
+            on_finally=lambda: setattr(self.btn_compare_stat, "loading", False),
+        )
+
+        self._tasks["stats"].start(recipes)
 
 
 class ScenarioInputs(sw.Layout):

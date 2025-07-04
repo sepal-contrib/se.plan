@@ -2,11 +2,14 @@ import ipyvuetify as v
 from component.frontend.icons import icon
 from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
+from sepal_ui.sepalwidgets.btn import TaskButton
+
 from sepal_ui import color
 from traitlets import Bool
 
 from component import widget as cw
 from component.message import cm
+from sepal_ui.scripts.gee_interface import GEEInterface
 from component.model.recipe import Recipe
 from component.widget.base_dialog import BaseDialog
 from component.widget.map import SeplanMap
@@ -22,7 +25,7 @@ class MapToolbar(sw.Toolbar):
         map_: SeplanMap,
         alert: Alert,
         sepal_session=None,
-        gee_session=None,
+        gee_interface: GEEInterface = None,
         *args,
         **kwargs,
     ) -> None:
@@ -30,7 +33,7 @@ class MapToolbar(sw.Toolbar):
         self.height = "48px"
         super().__init__(*args, **kwargs)
 
-        self.gee_session = gee_session
+        self.gee_interface = gee_interface
         self.attributes = {"id": "map_toolbar"}
         self.recipe = recipe
         self.map_ = map_
@@ -40,7 +43,7 @@ class MapToolbar(sw.Toolbar):
         # Dialogs
         self.custom_aoi_dialog = cw.CustomAoiDialog(self.map_)
         self.import_aoi_dialog = cw.ImportAoiDialog(
-            self.custom_aoi_dialog, gee_session=self.gee_session
+            self.custom_aoi_dialog, gee_interface=self.gee_interface
         )
         self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=alert)
         self.compare_dialog = cw.CompareScenariosDialog(
@@ -49,12 +52,12 @@ class MapToolbar(sw.Toolbar):
             main_recipe=self.recipe,
             alert=alert,
             sepal_session=sepal_session,
-            gee_session=gee_session,
+            gee_interface=gee_interface,
         )
         self.info_dialog = MapInfoDialog()
 
         # Main buttons
-        self.btn_compute = TextBtn(cm.compute.btn)
+        self.btn_compute = TaskButton(cm.compute.btn, small=True)
 
         # Auxiliar buttons
         self.btn_draw = DrawMenu(
@@ -88,7 +91,7 @@ class MapToolbar(sw.Toolbar):
             self.btn_clean.with_tooltip,
             self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_compute,
+            self.btn_compute.children,
             # Auxiliar buttons
             # Dialogs - not visible on the toolbar
             self.custom_aoi_dialog,

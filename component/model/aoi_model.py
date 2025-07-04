@@ -5,16 +5,16 @@ from sepal_ui import color, model
 from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.message import ms
 from sepal_ui.scripts import utils as su
+from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import Dict, Int, Any
-from eeclient.client import EESession
 
 
 class AoiModel(AoiModel):
     updated = Int(0).tag(sync=True)
     """announces when the model is updated"""
 
-    def __init__(self, gee_session: EESession = None, **kwargs):
-        super().__init__(gee_session=gee_session, **kwargs)
+    def __init__(self, gee_interface: GEEInterface = None, **kwargs):
+        super().__init__(gee_interface=gee_interface, **kwargs)
 
         # set the default
         self.set_default(self.default_vector, self.default_admin, self.default_asset)
@@ -92,12 +92,12 @@ class SeplanAoi(model.Model):
     updated = Int(0).tag(sync=True)
     """int: this trait will be updated every time the aoi_model is updated"""
 
-    def __init__(self, gee_session=None, **kwargs):
+    def __init__(self, gee_interface=None, **kwargs):
         # test_countries:
         # Multiple polygon country: 220
         # Small department: 959 (risaralda)
         # Medium department: 935 (Antioquia)
-        self.aoi_model = AoiModel(gee_session=gee_session, **kwargs)
+        self.aoi_model = AoiModel(gee_interface=gee_interface, **kwargs)
 
         self.aoi_model.observe(self.on_aoi_change, "updated")
 

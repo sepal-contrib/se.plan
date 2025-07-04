@@ -1,10 +1,10 @@
 from typing import Union
-from eeclient.client import EESession
 
 from component.frontend.icons import icon
 from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 import component.parameter.gui_params as cp
 import component.scripts.gee as gee
@@ -35,7 +35,7 @@ class ConstraintRow(sw.Html):
         aoi_model: SeplanAoi,
         alert: Alert,
         preview_map: PreviewMapDialog,
-        gee_session: EESession,
+        gee_interface: GEEInterface,
     ) -> None:
         # get the models as a member
 
@@ -43,7 +43,7 @@ class ConstraintRow(sw.Html):
         self.layer_id = layer_id
         self.attributes = {"layer_id": layer_id}
 
-        self.gee_session = gee_session
+        self.gee_interface = gee_interface
 
         super().__init__()
 
@@ -182,7 +182,9 @@ class ConstraintRow(sw.Html):
 
             return
 
-        values = gee.get_limits(self.gee_session, self.asset, self.data_type, self.aoi)
+        values = gee.get_limits(
+            self.gee_interface, self.asset, self.data_type, self.aoi
+        )
 
         if self.data_type == "binary":
             if not all(val in values for val in [0, 1]):

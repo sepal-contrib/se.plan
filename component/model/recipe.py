@@ -1,11 +1,9 @@
-from eeclient.client import EESession
-
-
 from typing import Union
 from component.scripts.file_handler import save_file
 from pathlib import Path
 
 from sepal_ui.scripts.warning import SepalWarning
+from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import HasTraits, Int, Unicode, observe
 
 import component.parameter as cp
@@ -13,6 +11,11 @@ from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.scripts import validation
+from component.scripts.seplan import Seplan
+
+import logging
+
+logger = logging.getLogger("SEPLAN")
 from component.scripts.seplan import Seplan
 
 import logging
@@ -36,18 +39,18 @@ class Recipe(HasTraits):
     def __init__(
         self,
         sepal_session=None,
-        gee_session: EESession = None,
+        gee_interface: GEEInterface = None,
         **delete_aoi,
     ):
         super().__init__()
 
-        self.seplan_aoi = SeplanAoi(gee_session=gee_session, **delete_aoi)
+        self.seplan_aoi = SeplanAoi(gee_interface=gee_interface, **delete_aoi)
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
         self.dash_model = cmod.DashboardModel()
         self.sepal_session = sepal_session
-        self.gee_session = gee_session
+        self.gee_interface = gee_interface
         self.seplan = Seplan(
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )

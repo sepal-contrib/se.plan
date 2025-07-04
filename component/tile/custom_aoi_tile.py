@@ -1,7 +1,4 @@
 from typing import Union
-from eeclient.client import EESession
-
-from eeclient.data import get_info
 
 import ee
 import pandas as pd
@@ -12,6 +9,7 @@ from component.widget.buttons import IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
 from sepal_ui.mapping import SepalMap
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 import component.parameter as cp
 from component.message import cm
@@ -31,7 +29,7 @@ class AoiTile(sw.Layout):
 
     def __init__(
         self,
-        gee_session: EESession = None,
+        gee_interface: GEEInterface = None,
         recipe: Recipe = None,
         layers: list = [],
         theme_toggle=None,
@@ -40,7 +38,7 @@ class AoiTile(sw.Layout):
             recipe = Recipe()
         self.class_ = "d-block aoi_map"
         self._metadata = {"mount_id": "aoi_tile"}
-        self.gee_session = gee_session
+        self.gee_interface = gee_interface
 
         super().__init__()
 
@@ -48,7 +46,7 @@ class AoiTile(sw.Layout):
             gee=True,
             layers=layers,
             theme_toggle=theme_toggle,
-            gee_session=gee_session,
+            gee_interface=gee_interface,
         )
         self.map_.add_basemap("SATELLITE")
 
@@ -66,7 +64,7 @@ class AoiTile(sw.Layout):
 
         # Build the aoi view with our custom aoi_model
         self.view = SeplanAoiView(
-            model=recipe.seplan_aoi, map_=self.map_, gee_session=gee_session
+            model=recipe.seplan_aoi, map_=self.map_, gee_interface=gee_interface
         )
 
         title = sw.CardTitle(children=[cm.aoi.aoi_title])
@@ -131,7 +129,7 @@ class AoiTile(sw.Layout):
                 maxPixels=1e13,
             )
             # test if bitwiseAnd is 2 (1 is partial coverage, 0 no coverage)
-            included = self.gee_session.operations.get_info(
+            included = self.gee_interface.get_info(
                 ee.Algorithms.IsEqual(bit_test.getNumber("constant"), 2),
             )
 

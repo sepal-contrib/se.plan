@@ -17,6 +17,7 @@ from solara.lab.components.theming import theme
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
 from sepal_ui.scripts.sepal_client import SepalClient
+from sepal_ui.scripts.gee_interface import GEEInterface
 from sepal_ui.sepalwidgets.vue_app import ThemeToggle
 
 from component.frontend.icons import icon
@@ -39,17 +40,56 @@ from component.message import cm
 import logging
 
 logger = logging.getLogger("SEPLAN")
+import logging
+
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+logging.getLogger("httpcore").setLevel(logging.DEBUG)
+logging.getLogger("eeclient").setLevel(logging.DEBUG)
+
 init_ee()
 
+sessions = {}
 
-def parse_cookie_string(cookie_string):
-    cookies = {}
-    for pair in cookie_string.split(";"):
-        key_value = pair.strip().split("=", 1)
-        if len(key_value) == 2:
-            key, value = key_value
-            cookies[key] = value
-    return cookies
+
+@solara.lab.on_kernel_start
+def setup_gee_interface():
+
+    session_id = solara.get_session_id()
+    logger.debug(f"Session ID: {session_id}")
+
+    sepal_headers = (
+        get_sepal_headers_from_auth()
+        if os.getenv("SEPLAN_TEST", "false").lower() == "true"
+        else SepalHeaders.model_validate(headers.value)
+    )
+    logger.debug(f"SEPAL-HEADERS: {sepal_headers}")
+
+    sepal_session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
+    logger.debug(f"SEPAL-SESSIONID: {sepal_session_id}")
+
+    try:
+        gee_session = EESession(sepal_headers=sepal_headers)
+        sessions[session_id] = (
+            GEEInterface(gee_session),
+            sepal_session_id,
+        )
+    except Exception as e:
+        raise e
+        if isinstance(e, EEClientError):
+            solara.alert.Error(
+                f"Authentication required: Please authenticate via sepal. See https://docs.sepal.io/en/latest/setup/gee.html. for more information."
+            )
+            return
+        solara.alert.Error(f"An error has occurred: {e}")
+        return
+
+    # def cleanup():
+    #     if session_id in sessions:
+    #         gee_interface, _ = sessions[session_id]
+    #         gee_interface.close()
+    #         del sessions[session_id]
+
+    # return cleanup
 
 
 solara.server.settings.assets.fontawesome_path = (
@@ -66,11 +106,6 @@ class MapLocation(HasTraits):
 @solara.component
 def Page():
 
-    theme_toggle = ThemeToggle()
-    theme_toggle.observe(lambda e: setattr(theme, "dark", e["new"]), "dark")
-
-    map_location = MapLocation()
-
     solara.lab.theme.themes.dark.primary = "#76591e"
     solara.lab.theme.themes.dark.primary_contrast = "#bf8f2d"
     solara.lab.theme.themes.dark.secondary = "#363e4f"
@@ -85,7 +120,6 @@ def Page():
     solara.lab.theme.themes.dark.darker = "#1a1a1a"
     solara.lab.theme.themes.dark.bg = "#121212"
     solara.lab.theme.themes.dark.menu = "#424242"
-
     solara.lab.theme.themes.light.primary = "#5BB624"
     solara.lab.theme.themes.light.primary_contrast = "#76b353"
     solara.lab.theme.themes.light.accent = "#f3f3f3"
@@ -97,33 +131,22 @@ def Page():
     solara.lab.theme.themes.light.bg = "#FFFFFF"
     solara.lab.theme.themes.light.menu = "#FFFFFF"
 
-    sepal_headers = (
-        get_sepal_headers_from_auth()
-        if os.getenv("SEPLAN_TEST", "false").lower() == "true"
-        else SepalHeaders.model_validate(headers.value)
+    theme_toggle = ThemeToggle()
+    theme_toggle.observe(lambda e: setattr(theme, "dark", e["new"]), "dark")
+
+    map_location = MapLocation()
+
+    session_id = solara.get_session_id()
+
+    logger.debug(f"sessions {sessions}")
+    gee_interface, sepal_session_id = sessions.get(session_id, (None, None))
+    logger.debug(
+        f"gee_interface: {gee_interface}, sepal_session_id: {sepal_session_id}"
     )
-
-    logger.debug(f"SEPAL-HEADERS: {sepal_headers}")
-    try:
-        gee_session = EESession(sepal_headers=sepal_headers)
-    except Exception as e:
-        if isinstance(e, EEClientError):
-            solara.alert.Error(
-                f"Authentication required: Please authenticate via sepal. See https://docs.sepal.io/en/latest/setup/gee.html. for more information."
-            )
-            return
-        solara.alert.Error(f"An error has occurred: {e}")
-        return
-
-    # sepal_cookies = parse_cookie_string(headers.value["cookie"][0])
-    session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
-
-    logger.debug(f"SEPAL-SESSIONID: {session_id}")
-
-    sepal_client = SepalClient(session_id=session_id, module_name="se.plan")
+    sepal_client = SepalClient(session_id=sepal_session_id, module_name="se.plan")
 
     app_model = AppModel()
-    recipe = Recipe(sepal_session=sepal_client, gee_session=gee_session)
+    recipe = Recipe(sepal_session=sepal_client, gee_interface=gee_interface)
 
     app_model.ready = True
 
@@ -131,11 +154,11 @@ def Page():
         recipe=recipe, app_model=app_model, sepal_session=sepal_client
     )
     aoi_tile = AoiTile(
-        gee_session=gee_session, recipe=recipe, theme_toggle=theme_toggle
+        gee_interface=gee_interface, recipe=recipe, theme_toggle=theme_toggle
     )
 
     questionnaire_tile = QuestionnaireTile(
-        gee_session=gee_session,
+        gee_interface=gee_interface,
         recipe=recipe,
         theme_toggle=theme_toggle,
     )
@@ -144,7 +167,7 @@ def Page():
         app_model=app_model,
         recipe=recipe,
         theme_toggle=theme_toggle,
-        gee_session=gee_session,
+        gee_interface=gee_interface,
         sepal_session=sepal_client,
     )
 
@@ -155,7 +178,7 @@ def Page():
     link((map_tile.map_, "center"), (map_location, "center"))
 
     dashboard_tile = DashboardTile(
-        gee_session=gee_session,
+        gee_interface=gee_interface,
         recipe=recipe,
         theme_toggle=theme_toggle,
         sepal_session=sepal_client,
