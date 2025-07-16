@@ -23,10 +23,7 @@ from component.scripts.plots import (
     parse_layer_data,
 )
 from component.scripts.seplan import Seplan
-from component.scripts.statistics import (
-    get_summary_statistics,
-    get_summary_statistics_async,
-)
+from component.scripts.statistics import get_summary_statistics_async
 from component.widget.alert_state import Alert, AlertDialog
 from component.widget.suitability_table import get_summary_table
 from component.widget.custom_widgets import DashToolbar
