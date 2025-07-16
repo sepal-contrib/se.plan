@@ -1,6 +1,6 @@
 # these libs are requested to build application env
 
-solara>=1.50.0
+solara>=1.50.0 
 ee-client>=1.6.0
 
 toml
@@ -31,3 +31,4 @@ pytest-cov
 
 # for development
 colorlog
+
