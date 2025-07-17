@@ -53,43 +53,66 @@ sessions = {}
 
 @solara.lab.on_kernel_start
 def setup_gee_interface():
-
     session_id = solara.get_session_id()
     logger.debug(f"Session ID: {session_id}")
 
-    sepal_headers = (
-        get_sepal_headers_from_auth()
-        if os.getenv("SEPLAN_TEST", "false").lower() == "true"
-        else SepalHeaders.model_validate(headers.value)
-    )
-    logger.debug(f"SEPAL-HEADERS: {sepal_headers}")
+    # Wait for headers to be available, then create session
+    def create_session():
+        try:
+            current_headers = headers.value
+            if current_headers is None:
+                logger.warning(f"Headers not available yet for session {session_id}")
+                return None
 
-    sepal_session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
-    logger.debug(f"SEPAL-SESSIONID: {sepal_session_id}")
+            logger.debug(f"Headers available: {current_headers}")
 
-    try:
-        gee_session = EESession(sepal_headers=sepal_headers)
-        sessions[session_id] = (
-            GEEInterface(gee_session),
-            sepal_session_id,
-        )
-    except Exception as e:
-        raise e
-        if isinstance(e, EEClientError):
-            solara.alert.Error(
-                f"Authentication required: Please authenticate via sepal. See https://docs.sepal.io/en/latest/setup/gee.html. for more information."
+            sepal_headers = (
+                get_sepal_headers_from_auth()
+                if os.getenv("SEPLAN_TEST", "false").lower() == "true"
+                else SepalHeaders.model_validate(current_headers)
             )
-            return
-        solara.alert.Error(f"An error has occurred: {e}")
-        return
+            logger.debug(f"SEPAL-HEADERS: {sepal_headers}")
 
-    # def cleanup():
-    #     if session_id in sessions:
-    #         gee_interface, _ = sessions[session_id]
-    #         gee_interface.close()
-    #         del sessions[session_id]
+            sepal_session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
+            logger.debug(f"SEPAL-SESSIONID: {sepal_session_id}")
 
-    # return cleanup
+            gee_session = EESession(sepal_headers=sepal_headers)
+            sessions[session_id] = (
+                GEEInterface(gee_session),
+                sepal_session_id,
+            )
+            logger.debug(f"Session {session_id} created successfully")
+            return sessions[session_id]
+
+        except Exception as e:
+            logger.error(f"Error creating session {session_id}: {e}")
+            if isinstance(e, EEClientError):
+                logger.error("Authentication required: Please authenticate via sepal.")
+            raise e
+
+    # Try to create session immediately
+    try:
+        result = create_session()
+        if result is None:
+            logger.debug(
+                f"Session {session_id} will be created when headers become available"
+            )
+    except Exception as e:
+        logger.error(f"Failed to create session {session_id}: {e}")
+
+    # Return cleanup function
+    def cleanup():
+        logger.debug(f"Cleaning up session {session_id}")
+        if session_id in sessions:
+            gee_interface, _ = sessions[session_id]
+            try:
+                gee_interface.close()
+            except Exception as e:
+                logger.error(f"Error closing GEE interface: {e}")
+            del sessions[session_id]
+            logger.debug(f"Session {session_id} cleaned up")
+
+    return cleanup
 
 
 solara.server.settings.assets.fontawesome_path = (
@@ -139,10 +162,45 @@ def Page():
     session_id = solara.get_session_id()
 
     logger.debug(f"sessions {sessions}")
+
+    # Watch for headers and create session if not exists
+    current_headers = headers.value
+    if current_headers and session_id not in sessions:
+        try:
+            sepal_headers = (
+                get_sepal_headers_from_auth()
+                if os.getenv("SEPLAN_TEST", "false").lower() == "true"
+                else SepalHeaders.model_validate(current_headers)
+            )
+            sepal_session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
+            gee_session = EESession(sepal_headers=sepal_headers)
+            sessions[session_id] = (
+                GEEInterface(gee_session),
+                sepal_session_id,
+            )
+            logger.debug(f"Session {session_id} created in Page component")
+        except Exception as e:
+            logger.error(f"Error creating session in Page component: {e}")
+            if isinstance(e, EEClientError):
+                solara.Error(
+                    f"Authentication required: Please authenticate via sepal. See https://docs.sepal.io/en/latest/setup/gee.html. for more information."
+                )
+                return
+            solara.Error(f"An error has occurred: {e}")
+            return
+
     gee_interface, sepal_session_id = sessions.get(session_id, (None, None))
     logger.debug(
         f"gee_interface: {gee_interface}, sepal_session_id: {sepal_session_id}"
     )
+
+    # Show loading state if session is not ready
+    if gee_interface is None or sepal_session_id is None:
+        if current_headers is None:
+            solara.Info("Waiting for authentication headers...")
+        else:
+            solara.Info("Initializing session...")
+        return
     sepal_client = SepalClient(session_id=sepal_session_id, module_name="se.plan")
 
     app_model = AppModel()
