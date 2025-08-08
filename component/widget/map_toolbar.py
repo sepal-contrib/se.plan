@@ -91,7 +91,7 @@ class MapToolbar(sw.Toolbar):
             self.btn_clean.with_tooltip,
             self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_compute.children,
+            self.btn_compute,
             # Auxiliar buttons
             # Dialogs - not visible on the toolbar
             self.custom_aoi_dialog,

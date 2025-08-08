@@ -7,10 +7,7 @@ from typing import List, Literal
 import ipyvuetify as v
 from ipyleaflet import SplitMapControl
 from traitlets import Dict as Dict, Int
-from ipyleaflet import TileLayer
-import ee
 
-from sepal_ui.scripts.decorator import loading_button
 from sepal_ui.mapping import SepalMap
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts.gee_interface import GEEInterface

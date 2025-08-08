@@ -15,10 +15,7 @@ import logging
 logger = logging.getLogger("SEPLAN")
 
 
-def create_layer(
-    map_id_dict: dict, name: str = "", visible: bool = True
-) -> sm.layer.EELayer:
-
+def create_layer(map_id_dict: dict, name: str = "", visible: bool = True) -> TileLayer:
     return TileLayer(
         url=map_id_dict["tile_fetcher"].url_format,
         attribution="Google Earth Engine",

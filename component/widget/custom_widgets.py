@@ -263,11 +263,11 @@ class DashToolbar(sw.Toolbar):
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
 
         self.children = [
-            self.btn_download.children,
+            self.btn_download,
             sw.Spacer(),
             self.btn_compare.with_tooltip,
             sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_dashboard.children,
+            self.btn_dashboard,
             # Dialogs
             self.compare_dialog,
         ]
