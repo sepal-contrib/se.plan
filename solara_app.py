@@ -2,11 +2,7 @@ from component.scripts.logger import setup_logging
 
 setup_logging()
 import os
-from eeclient.client import EESession
-from eeclient.helpers import get_sepal_headers_from_auth
 
-from eeclient.exceptions import EEClientError
-from eeclient.models import SepalHeaders
 
 from traitlets import Float, HasTraits, List, link
 import solara
@@ -16,8 +12,6 @@ from solara.lab.components.theming import theme
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
-from sepal_ui.scripts.sepal_client import SepalClient
-from sepal_ui.scripts.gee_interface import GEEInterface
 from sepal_ui.sepalwidgets.vue_app import ThemeToggle
 
 from component.frontend.icons import icon
@@ -40,38 +34,25 @@ from component.message import cm
 import logging
 
 logger = logging.getLogger("SEPLAN")
-
-# logging.getLogger("httpx").setLevel(logging.DEBUG)
-# logging.getLogger("httpcore").setLevel(logging.DEBUG)
-# logging.getLogger("eeclient").setLevel(logging.DEBUG)
-
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("sepalui").setLevel(logging.DEBUG)
 
+from sepal_ui.solara import (
+    setup_sessions,
+    with_sepal_sessions,
+    get_current_gee_interface,
+    get_current_sepal_client,
+    setup_theme_colors,
+    get_session_info,
+)
 
 init_ee()
 
-kernel_sessions = {}
-
 
 @solara.lab.on_kernel_start
-def setup_gee_interface():
-
-    kernel_id = id(solara.server.kernel_context.get_current_context().kernel)
-    logger.debug(f"kernel_id: {kernel_id}")
-
-    def cleanup():
-        logger.debug(f"Cleaning up kernel_id {kernel_id}")
-        if kernel_id in kernel_sessions:
-            gee_interface, _ = kernel_sessions[kernel_id]
-            try:
-                gee_interface.close()
-            except Exception as e:
-                logger.error(f"Error closing GEE interface: {e}")
-            del kernel_sessions[kernel_id]
-            logger.debug(f"GEEInterface in {kernel_id} cleaned up")
-
-    return cleanup
+def init_gee():
+    return setup_sessions()
 
 
 solara.server.settings.assets.fontawesome_path = (
@@ -87,81 +68,17 @@ class MapLocation(HasTraits):
 
 
 @solara.component
+@with_sepal_sessions(module_name="se.plan")
 def Page():
 
-    solara.lab.theme.themes.dark.primary = "#76591e"
-    solara.lab.theme.themes.dark.primary_contrast = "#bf8f2d"
-    solara.lab.theme.themes.dark.secondary = "#363e4f"
-    solara.lab.theme.themes.dark.secondary_contrast = "#5d76ab"
-    solara.lab.theme.themes.dark.error = "#a63228"
-    solara.lab.theme.themes.dark.info = "#c5c6c9"
-    solara.lab.theme.themes.dark.success = "#3f802a"
-    solara.lab.theme.themes.dark.warning = "#b8721d"
-    solara.lab.theme.themes.dark.accent = "#272727"
-    solara.lab.theme.themes.dark.anchor = "#f3f3f3"
-    solara.lab.theme.themes.dark.main = "#24221f"
-    solara.lab.theme.themes.dark.darker = "#1a1a1a"
-    solara.lab.theme.themes.dark.bg = "#121212"
-    solara.lab.theme.themes.dark.menu = "#424242"
-    solara.lab.theme.themes.light.primary = "#5BB624"
-    solara.lab.theme.themes.light.primary_contrast = "#76b353"
-    solara.lab.theme.themes.light.accent = "#f3f3f3"
-    solara.lab.theme.themes.light.anchor = "#f3f3f3"
-    solara.lab.theme.themes.light.secondary = "#2199C4"
-    solara.lab.theme.themes.light.secondary_contrast = "#5d76ab"
-    solara.lab.theme.themes.light.main = "#2196f3"
-    solara.lab.theme.themes.light.darker = "#ffffff"
-    solara.lab.theme.themes.light.bg = "#FFFFFF"
-    solara.lab.theme.themes.light.menu = "#FFFFFF"
-
+    setup_theme_colors()
     theme_toggle = ThemeToggle()
     theme_toggle.observe(lambda e: setattr(theme, "dark", e["new"]), "dark")
 
     map_location = MapLocation()
 
-    kernel_id = id(solara.server.kernel_context.get_current_context().kernel)
-    current_headers = headers.value
-
-    logger.debug(f"Current headers: {kernel_sessions}")
-
-    try:
-        sepal_headers = (
-            get_sepal_headers_from_auth()
-            if os.getenv("SEPLAN_TEST", "false").lower() == "true"
-            else SepalHeaders.model_validate(current_headers)
-        )
-        sepal_session_id = sepal_headers.cookies["SEPAL-SESSIONID"]
-        gee_session = EESession(sepal_headers=sepal_headers)
-        kernel_sessions[kernel_id] = (
-            GEEInterface(gee_session),
-            sepal_session_id,
-        )
-        logger.debug(
-            f"EESession created in kernel {kernel_id} created in Page component"
-        )
-    except Exception as e:
-        logger.error(f"Error creating session in Page component: {e}")
-        if isinstance(e, EEClientError):
-            solara.Error(
-                f"Authentication required: Please authenticate via sepal. See https://docs.sepal.io/en/latest/setup/gee.html. for more information."
-            )
-            return
-        solara.Error(f"An error has occurred: {e}")
-        return
-
-    gee_interface, sepal_session_id = kernel_sessions.get(kernel_id, (None, None))
-    logger.debug(
-        f"gee_interface: {gee_interface}, sepal_session_id: {sepal_session_id}"
-    )
-
-    # Show loading state if session is not ready
-    if gee_interface is None or sepal_session_id is None:
-        if current_headers is None:
-            solara.Info("Waiting for authentication headers...")
-        else:
-            solara.Info("Initializing session...")
-        return
-    sepal_client = SepalClient(session_id=sepal_session_id, module_name="se.plan")
+    gee_interface = get_current_gee_interface()
+    sepal_client = get_current_sepal_client()
 
     app_model = AppModel()
     recipe = Recipe(sepal_session=sepal_client, gee_interface=gee_interface)
@@ -274,3 +191,6 @@ def Page():
         navDrawer=app_drawer,
         theme_toggle=theme_toggle,
     )
+
+    sessions = get_session_info()
+    logger.debug(f"Current sessions: {sessions}")
