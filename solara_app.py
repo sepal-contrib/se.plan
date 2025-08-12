@@ -1,18 +1,25 @@
-from component.scripts.logger import setup_logging
+from sepal_ui.logger import setup_logging
 
-setup_logging()
-import os
+logger = setup_logging(logger_name="SEPLAN")
+logger.debug("Setting up SEPLAN application...")
 
-
+import logging
 from traitlets import Float, HasTraits, List, link
+
 import solara
-import solara.server.settings
-from solara.lab import headers
 from solara.lab.components.theming import theme
 
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
 from sepal_ui.sepalwidgets.vue_app import ThemeToggle
+from sepal_ui.solara import (
+    setup_sessions,
+    with_sepal_sessions,
+    get_current_gee_interface,
+    get_current_sepal_client,
+    setup_theme_colors,
+    setup_solara_server,
+)
 
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
@@ -20,6 +27,9 @@ from component.tile.custom_aoi_tile import AoiTile
 from component.tile.dashboard_tile import DashboardTile
 from component.tile.map_tile import MapTile
 from component.tile.questionnaire_tile import QuestionnaireTile
+from component.tile.recipe_tile import RecipeView
+from component.model.app_model import AppModel
+from component.message import cm
 from component.widget.custom_widgets import (
     CustomApp,
     CustomAppBar,
@@ -27,39 +37,19 @@ from component.widget.custom_widgets import (
     CustomNavDrawer,
     CustomTileAbout,
 )
-from component.tile.recipe_tile import RecipeView
-from component.model.app_model import AppModel
-from component.message import cm
 
-import logging
-
-logger = logging.getLogger("SEPLAN")
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
 logging.getLogger("sepalui").setLevel(logging.DEBUG)
 
-from sepal_ui.solara import (
-    setup_sessions,
-    with_sepal_sessions,
-    get_current_gee_interface,
-    get_current_sepal_client,
-    setup_theme_colors,
-    get_session_info,
-)
 
 init_ee()
+setup_solara_server()
 
 
 @solara.lab.on_kernel_start
 def init_gee():
     return setup_sessions()
-
-
-solara.server.settings.assets.fontawesome_path = (
-    "/@fortawesome/fontawesome-free@6.7.2/css/all.min.css"
-)
-solara.server.settings.assets.extra_locations = ["./assets/"]
-solara.server.settings.kernel.cull_timeout = "0s"
 
 
 class MapLocation(HasTraits):
@@ -191,6 +181,3 @@ def Page():
         navDrawer=app_drawer,
         theme_toggle=theme_toggle,
     )
-
-    sessions = get_session_info()
-    logger.debug(f"Current sessions: {sessions}")

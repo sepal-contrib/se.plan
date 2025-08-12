@@ -16,11 +16,6 @@ from component.scripts.seplan import Seplan
 import logging
 
 logger = logging.getLogger("SEPLAN")
-from component.scripts.seplan import Seplan
-
-import logging
-
-logger = logging.getLogger("SEPLAN")
 
 
 class Recipe(HasTraits):
