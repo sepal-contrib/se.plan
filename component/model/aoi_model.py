@@ -1,6 +1,11 @@
 """SE.PLAN model to store the data related with areas of interest."""
 
-from typing import Tuple, Dict as DictType, Any as AnyType, Union
+import json
+from pathlib import Path
+from typing import Tuple, Dict as DictType, Any as AnyType
+
+import geopandas as gpd
+import pygaul
 from sepal_ui import color, model
 from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.message import ms
@@ -50,6 +55,35 @@ class AoiModel(AoiModel):
 
         return self
 
+    async def set_object_async(self, method: str = ""):
+        """Set the object (gdf/featurecollection) based on the model inputs.
+
+        The method can be manually overwritten by setting the ``method`` parameter.
+
+        Args:
+            method: a model loading method
+        """
+        # clear the model output if existing
+        self.clear_output()
+
+        # overwrite self.method
+        self.method = method or self.method
+
+        if self.method in ["ADMIN0", "ADMIN1", "ADMIN2"]:
+            await self._from_admin_async(self.admin)
+        elif self.method == "SHAPE":
+            await self._from_vector_async(self.vector_json)
+        elif self.method == "DRAW":
+            await self._from_geo_json_async(self.geo_json)
+        elif self.method == "ASSET":
+            self._from_asset(self.asset_json)
+        else:
+            raise Exception(ms.aoi_sel.exception.no_inputs)
+
+        self.updated += 1
+
+        return self
+
     def clear_attributes(self):
         """Return all attributes to their default state.
 
@@ -76,6 +110,108 @@ class AoiModel(AoiModel):
 
         # Tell seplan_aoi to update their linked traits (feature collecction)
         self.updated += 1
+
+        return self
+
+    async def _from_vector_async(self, vector_json: dict):
+        """Set the object output from a vector json.
+
+        Args:
+            vector_json: the dict describing the vector file, and column filter
+        """
+        if not (vector_json["pathname"]):
+            raise Exception(ms.aoi_sel.exception.no_file)
+
+        if vector_json["column"] != "ALL":
+            if vector_json["value"] is None:
+                raise Exception(ms.aoi_sel.exception.no_value)
+
+        # cast the pathname to pathlib Path
+        vector_file = Path(vector_json["pathname"])
+
+        # create the gdf
+        self.gdf = gpd.read_file(vector_file).to_crs("EPSG:4326")
+
+        # set the name using the file stem
+        self.name = vector_file.stem
+
+        # filter it if necessary
+        if vector_json["value"] is not None:
+            self.gdf = self.gdf[self.gdf[vector_json["column"]] == vector_json["value"]]
+            self.name = f"{self.name}_{vector_json['column']}_{vector_json['value']}"
+
+        if self.gee:
+            # transform the gdf to ee.FeatureCollection
+            self.feature_collection = su.geojson_to_ee(self.gdf.__geo_interface__)
+
+            # export as a GEE asset
+            await self.export_to_asset_async()
+
+        return self
+
+    async def _from_geo_json_async(self, geo_json: dict):
+        """Set the gdf output from a geo_json.
+
+        Args:
+            geo_json: the __geo_interface__ dict of a geometry drawn on the map
+        """
+        if not geo_json:
+            raise Exception(ms.aoi_sel.exception.no_draw)
+
+        # remove the style property from geojson as it's not recognize by geopandas and gee
+        for feat in geo_json["features"]:
+            if "style" in feat["properties"]:
+                del feat["properties"]["style"]
+
+        # create the gdf
+        self.gdf = gpd.GeoDataFrame.from_features(geo_json).set_crs(epsg=4326)
+
+        # normalize the name
+        self.name = su.normalize_str(self.name)
+
+        if self.gee:
+            # transform the gdf to ee.FeatureCollection
+            self.feature_collection = su.geojson_to_ee(self.gdf.__geo_interface__)
+
+            # export as a GEE asset
+            await self.export_to_asset_async()
+        else:
+            # save the geojson in downloads
+            path = Path("~", "downloads", "aoi").expanduser()
+            path.mkdir(
+                exist_ok=True, parents=True
+            )  # if nothing have been run the downloads folder doesn't exist
+            self.gdf.to_file(path / f"{self.name}.geojson", driver="GeoJSON")
+
+        return self
+
+    async def _from_admin_async(self, admin: str):
+        """Set the object according to the given an administrative code in the GADM/GAUL codes.
+
+        Args:
+            admin: the admin code corresponding to FAO GAUl (if gee) or GADM
+        """
+        if not admin:
+            raise Exception(ms.aoi_sel.exception.no_admlyr)
+
+        # get the data from either the pygaul or the pygadm libs
+        # pygaul needs extra work as ISO codes are not included in the GEE dataset
+        self.feature_collection = pygaul.AdmItems(admin=admin)
+
+        # get the ADM0_CODE to get the ISO code
+        feature = self.feature_collection.first()
+        properties = await self.gee_interface.get_info_async(
+            feature.toDictionary(feature.propertyNames())
+        )
+
+        iso = json.loads(self.MAPPING.read_text())[str(properties.get("ADM0_CODE"))]
+        names = [value for prop, value in properties.items() if "NAME" in prop]
+
+        # generate the name from the columns
+        names = [su.normalize_str(name) for name in names]
+        names[0] = iso
+
+        self.name = "_".join(names)
 
         return self
 
@@ -147,6 +283,20 @@ class SeplanAoi(model.Model):
 
         if auto_update:
             self.aoi_model.set_object()
+
+    async def import_data_async(self, data: dict, auto_update: bool = True):
+        self.aoi_model.import_data(data["primary"])
+        self.custom_layers = data["custom"]
+
+        # if there's no aoi we just need to reset the map
+        if not data["primary"]["method"]:
+            self.reset_view += 1
+            return
+
+        self.set_map += 1
+
+        if auto_update:
+            await self.aoi_model.set_object_async()
 
     def export_data(self):
         """Save the data from each of the AOIs."""

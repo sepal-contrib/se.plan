@@ -24,68 +24,31 @@ logger = logging.getLogger("SEPLAN")
 init_ee()
 
 
-class AoiTile(sw.Layout):
+class AoiView(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
     def __init__(
         self,
+        map_: SepalMap,
         gee_interface: GEEInterface = None,
         recipe: Recipe = None,
-        layers: list = [],
-        theme_toggle=None,
     ):
         if not recipe:
             recipe = Recipe()
         self.class_ = "d-block aoi_map"
         self._metadata = {"mount_id": "aoi_tile"}
         self.gee_interface = gee_interface
+        self.map_ = map_
 
         super().__init__()
-
-        self.map_ = SepalMap(
-            gee=True,
-            layers=layers,
-            theme_toggle=theme_toggle,
-            gee_interface=gee_interface,
-        )
-        self.map_.add_basemap("SATELLITE")
-
-        self.map_.dc.hide()
-        self.map_.min_zoom = 1
-
-        self.btn_aoi = IconBtn(gliph=icon("aoi"))
-
-        self.map_toolbar = sw.Toolbar(
-            height="48px",
-            elevation=0,
-            color="accent",
-            children=[self.btn_aoi],
-        )
 
         # Build the aoi view with our custom aoi_model
         self.view = SeplanAoiView(
             model=recipe.seplan_aoi, map_=self.map_, gee_interface=gee_interface
         )
 
-        title = sw.CardTitle(children=[cm.aoi.aoi_title])
-        text = sw.CardText(children=[self.view])
-        btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
-        action = sw.CardActions(children=[sw.Spacer(), self.view.btn, btn_cancel])
+        self.children = [self.view]
 
-        aoi_content = sw.Card(
-            class_="ma-0", children=[title, text, action], elevation=0
-        )
-
-        self.aoi_dialog = BaseDialog(children=[aoi_content], persistent=True)
-
-        self.children = [
-            self.map_toolbar,
-            self.aoi_dialog,
-            self.map_,
-        ]
-
-        btn_cancel.on_event("click", lambda *_: self.aoi_dialog.close_dialog())
-        self.btn_aoi.on_event("click", lambda *_: self.aoi_dialog.open_dialog())
         self.view.observe(self._check_lmic, "updated")
 
     def _check_lmic(self, _):
@@ -135,7 +98,7 @@ class AoiTile(sw.Layout):
 
         included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
 
-        if included:
-            self.aoi_dialog.close_dialog()
+        # if included:
+        #     self.aoi_dialog.close_dialog()
 
         return self

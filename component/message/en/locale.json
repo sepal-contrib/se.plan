@@ -3,11 +3,11 @@
 		"title": "se.plan",
 		"drawer": {
 			"about": "About",
-			"recipe": "Recipe",
-			"aoi": "Area of interest selection",
-			"question": "Questionnaire",
+			"recipe": "1.Recipe",
+			"aoi": "2. Area of interest",
+			"question": "3. Questionnaire",
 			"map": "Results map",
-			"dashboard": "Restoration dashboard"
+			"dashboard": "4. Compute results"
 		},
 		"about": "utils/ABOUT_en.md",
 		"recipe_state" : {

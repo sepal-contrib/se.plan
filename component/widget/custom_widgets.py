@@ -26,7 +26,7 @@ from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert, AlertDialog
 from component.widget.preview_theme_btn import PreviewThemeBtn
-from component.widget.buttons import IconBtn, TextBtn
+from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
@@ -227,52 +227,6 @@ class ToolBar(sw.Toolbar):
         self.dialog.open_new()
 
 
-class DashToolbar(sw.Toolbar):
-    def __init__(
-        self, model: Seplan, alert: Alert = None, gee_interface=None, sepal_session=None
-    ) -> None:
-        super().__init__()
-
-        alert = alert or Alert()
-
-        self.sepal_session = sepal_session
-        self.gee_interface = gee_interface
-        self.height = "48px"
-        self.model = model
-        self.elevation = 0
-        self.color = "accent"
-
-        self.btn_download = TaskButton(
-            cm.dashboard.toolbar.btn.download.title, small=True
-        )
-        self.btn_dashboard = TaskButton(
-            cm.dashboard.toolbar.btn.compute.title, small=True
-        )
-
-        self.btn_compare = IconBtn(gliph=icon("compare")).set_tooltip(
-            cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
-        )
-
-        self.compare_dialog = cw.CompareScenariosDialog(
-            type_="chart",
-            alert=alert,
-            sepal_session=sepal_session,
-            gee_interface=self.gee_interface,
-        )
-
-        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
-
-        self.children = [
-            self.btn_download,
-            sw.Spacer(),
-            self.btn_compare.with_tooltip,
-            sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_dashboard,
-            # Dialogs
-            self.compare_dialog,
-        ]
-
-
 class Tabs(sw.Card):
     current = Int(0).tag(sync=True)
 
@@ -455,7 +409,7 @@ class CustomApp(sw.App):
             dialog.close_dialog()
 
 
-class CustomTileAbout(sw.Tile):
+class CustomTileAbout(sw.Layout):
     def __init__(self, pathname: Union[str, Path], theme_toggle=None, **kwargs) -> None:
         """Create an about tile using a .md file.
 
@@ -477,7 +431,8 @@ class CustomTileAbout(sw.Tile):
         content = Markdown(text)
 
         update_script = UpdateImages(theme_toggle)
-        super().__init__("about_tile", "About", inputs=[content, update_script])
+        self.children = [content, update_script]
+        super().__init__()
 
         directional_link((theme_toggle, "dark"), (update_script, "dark"))
 
@@ -522,3 +477,71 @@ class UpdateImages(v.VuetifyTemplate):
     def update_images(self, *_):
         """trigger the template method i.e. the resize event."""
         return self.send({"method": "updateImageSources"})
+
+
+class DrawMenu(sw.Menu):
+    def __init__(self, *args, **kwargs):
+        self.offset_x = True
+        self.v_model = False
+
+        super().__init__(*args, **kwargs)
+
+        btn_draw = DrawMenuBtn()
+
+        self.v_slots = [
+            {
+                "name": "activator",
+                "variable": "menuData",
+                "children": btn_draw,
+            }
+        ]
+
+        self.items = [
+            v.ListItem(
+                attributes={"id": title},
+                children=[
+                    v.ListItemTitle(children=[cm.map.toolbar.draw_menu[title]]),
+                ],
+            )
+            for title in ["show", "import", "new"]
+        ]
+
+        self.children = [
+            v.List(
+                dense=True,
+                children=self.items,
+            ),
+        ]
+
+    def on_event(self, item_name, event):
+        """Define an event based on the item name."""
+        for item in self.items:
+            if item.attributes["id"] == item_name:
+                item.on_event("click", event)
+
+
+class MapInfoDialog(BaseDialog):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.well_read = False
+
+        description = sw.Markdown("  \n".join(cm.map.txt))
+        btn_close = TextBtn("Close", outlined=True)
+
+        self.children = [
+            v.Card(
+                children=[
+                    sw.CardTitle(children=[cm.map.title]),
+                    sw.CardText(children=[description]),
+                    sw.CardActions(children=[sw.Spacer(), btn_close]),
+                ],
+            ),
+        ]
+
+        btn_close.on_event("click", self.manual_close_dialog)
+
+    def manual_close_dialog(self, *args):
+        """Close the dialog and also update a trait so we can know that user already saw the info."""
+        self.well_read = True
+        self.close_dialog()

@@ -122,17 +122,36 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
 def are_comparable(recipe_paths: RecipePaths, sepal_session=None):
     """Check if the recipes are comparable based on their primary AOI (Area of Interest)."""
 
+    logger.debug(f"are_comparable called with recipe_paths: {recipe_paths}")
     aoi_values = set()
 
-    for _, recipe_info in recipe_paths.items():
+    for recipe_id, recipe_info in recipe_paths.items():
+        logger.debug(f"Processing recipe {recipe_id}: {recipe_info}")
         data = read_file(recipe_info["path"], sepal_session=sepal_session)
+        logger.debug(f"Raw data for recipe {recipe_id}: {data}")
+
         remove_key(data, "updated")
         remove_key(data, "new_changes")
+        remove_key(data, "object_set")
+
+        logger.debug(f"Data after removing keys for recipe {recipe_id}: {data}")
+
         primary_aoi = data["aoi"]["primary"]
-        aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
+        logger.debug(f"Primary AOI for recipe {recipe_id}: {primary_aoi}")
+
+        aoi_json = json.dumps(primary_aoi, sort_keys=True)
+        logger.debug(f"AOI JSON for recipe {recipe_id}: {aoi_json}")
+
+        aoi_values.add(aoi_json)
+        logger.debug(f"Current AOI values set: {aoi_values}")
+
+    logger.debug(f"Final AOI values set (length: {len(aoi_values)}): {aoi_values}")
 
     # Raise an error if the recipes are not comparable
     if len(aoi_values) > 1:
+        logger.error(
+            f"Recipes are not comparable. Found {len(aoi_values)} different AOIs: {aoi_values}"
+        )
         raise Exception(
             "Error: The recipes are not comparable. All recipes must have the same main Area of Interest."
         )
@@ -148,6 +167,6 @@ def read_recipe_data(recipe_path: str, sepal_session=None):
     data = read_file(recipe_path, sepal_session=sepal_session)
 
     # Remove all the "updated" keys from the data in the second level
-    [remove_key(data, key) for key in ["updated", "new_changes"]]
+    [remove_key(data, key) for key in ["updated", "new_changes", "object_set"]]
 
     return recipe_path, data

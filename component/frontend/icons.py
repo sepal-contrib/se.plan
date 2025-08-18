@@ -87,6 +87,10 @@ icons = {
         "fa": "fa-solid fa-circle-down",
         "mdi": "mdi-vector-square",
     },
+    "information": {
+        "fa": "fa-solid fa-circle-info",
+        "mdi": "mdi-information",
+    },
 }
 
 

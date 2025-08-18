@@ -1,11 +1,17 @@
 from copy import deepcopy
 
 import ipyvuetify as v
+from component.frontend.icons import icon
+from component.widget.buttons import IconBtn
+from component.widget.custom_widgets import DrawMenu
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
 from sepal_ui import mapping as sm
 from traitlets import Dict, Int, link
 from sepal_ui.scripts.gee_interface import GEEInterface
+from sepal_ui import color
+from component.message import cm
+from component import widget as cw
 
 from component.model.aoi_model import SeplanAoi
 from component.widget.legend import SuitabilityLegend
@@ -25,21 +31,39 @@ class SeplanMap(sm.SepalMap):
         theme_toggle=None,
         gee_interface: GEEInterface = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         self.aoi_model = seplan_aoi if seplan_aoi else SeplanAoi()
 
         self.attributes = {"id": "map"}
-        self.dc = True
-        self.vinspector = True
-        self.min_zoom = 1
 
         super().__init__(
-            theme_toggle=theme_toggle, gee_interface=gee_interface, *args, **kwargs
+            theme_toggle=theme_toggle,
+            gee_interface=gee_interface,
+            fullscreen=True,
+            *args,
+            **kwargs,
+        )
+        # self.dc = True
+        self.vinspector = True
+        self.min_zoom = 3
+        self.add_basemap("SATELLITE")
+        self.dc.hide()
+
+        self.btn_draw = DrawMenu(
+            gliph="fa-solid fa-draw-polygon",
+            icon=True,
+            small=True,
         )
 
-        self.dc.hide()
-        self.add_basemap("SATELLITE")
+        self.btn_clean = IconBtn(gliph=icon("broom")).set_tooltip(
+            cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
+        )
+
+        self.custom_aoi_dialog = cw.CustomAoiDialog(self)
+        self.import_aoi_dialog = cw.ImportAoiDialog(
+            self.custom_aoi_dialog, gee_interface=self.gee_interface
+        )
 
         self.add(SuitabilityLegend())
 
@@ -48,6 +72,11 @@ class SeplanMap(sm.SepalMap):
         control = WidgetControl(widget=self.html, position="bottomright")
         self.add(control)
 
+        self.add(WidgetControl(widget=self.btn_draw, position="topleft"))
+        self.add(WidgetControl(widget=self.btn_clean, position="topright"))
+        self.add(WidgetControl(widget=self.custom_aoi_dialog, position="topright"))
+        self.add(WidgetControl(widget=self.import_aoi_dialog, position="topright"))
+
         self.dc.on_draw(self._handle_draw)
         self.observe(self.on_custom_layers, "custom_layers")
 
@@ -55,6 +84,32 @@ class SeplanMap(sm.SepalMap):
         link((self, "custom_layers"), (self.aoi_model, "custom_layers"))
 
         self.aoi_model.observe(self.reset, "reset_view")
+
+        self.btn_draw.on_event("new", self.on_draw)
+        self.btn_draw.on_event("show", self.on_draw)
+        self.btn_draw.on_event("import", self.on_draw)
+        self.btn_clean.on_event("click", self.clean_map)
+
+    def on_draw(self, widget, event, data):
+        """Show or hide drawing control on the map."""
+
+        if widget.attributes["id"] == "new":
+            if not self.aoi_tools:
+                widget.style_ = f"background-color: {color.menu};"
+                self.dc.show()
+            else:
+                widget.style_ = f"background-color: {color.main};"
+                self.dc.hide()
+
+            self.aoi_tools = not self.aoi_tools
+
+        elif widget.attributes["id"] == "import":
+            self.dc.hide()
+            self.import_aoi_dialog.open_dialog()
+
+        elif widget.attributes["id"] == "show":
+            self.dc.hide()
+            self.custom_aoi_dialog.open_dialog(new_geom=False)
 
     def clean_map(self, *args):
         """Remove control for split and all layers"""

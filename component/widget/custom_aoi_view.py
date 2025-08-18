@@ -8,8 +8,6 @@ class SeplanAoiView(AoiView):
             {
                 "methods": ["-POINTS"],
                 "class_": "d-block pa-2 py-4",
-                # "min_width": "462px",
-                # "max_width": "462px",
                 "model": model.aoi_model,
                 "elevation": 0,
             }
@@ -19,7 +17,7 @@ class SeplanAoiView(AoiView):
 
         self.btn.small = True
 
-        self.children = [x for x in self.children if x != self.btn]
+        # self.children = [x for x in self.children if x != self.btn]
 
         model.observe(self.update_view, "set_map")
         model.observe(self.reset_view, "reset_view")

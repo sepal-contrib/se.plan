@@ -35,11 +35,14 @@ class Recipe(HasTraits):
         self,
         sepal_session=None,
         gee_interface: GEEInterface = None,
+        folder=None,
         **delete_aoi,
     ):
         super().__init__()
 
-        self.seplan_aoi = SeplanAoi(gee_interface=gee_interface, **delete_aoi)
+        self.seplan_aoi = SeplanAoi(
+            gee_interface=gee_interface, folder=folder, **delete_aoi
+        )
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
@@ -85,6 +88,25 @@ class Recipe(HasTraits):
 
         return self
 
+    async def load_async(self, recipe_path: str):
+        """Load the recipe element in the different element of the app."""
+        logger.debug(f"Loading recipe: {recipe_path}....{self.sepal_session}")
+
+        recipe_path, data = validation.read_recipe_data(
+            recipe_path, sepal_session=self.sepal_session
+        )
+        self.recipe_session_path = str(recipe_path)
+
+        # load the aoi_model
+        await self.seplan_aoi.import_data_async(data["aoi"])
+        self.benefit_model.import_data(data["benefits"])
+        self.constraint_model.import_data(data["constraints"])
+        self.cost_model.import_data(data["costs"])
+
+        self.new_changes = 0
+
+        return self
+
     def save(self, full_recipe_path: str):
         """Save the recipe in a json file with a timestamp."""
         # Raise a sepal_ui.warning if there is no loaded models
@@ -99,7 +121,10 @@ class Recipe(HasTraits):
             "costs": self.cost_model.export_data(),
         }
 
-        [validation.remove_key(data, key) for key in ["updated", "new_changes"]]
+        [
+            validation.remove_key(data, key)
+            for key in ["updated", "new_changes", "object_set"]
+        ]
 
         save_file(full_recipe_path, data, self.sepal_session)
 

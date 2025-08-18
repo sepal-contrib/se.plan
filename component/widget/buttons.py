@@ -23,7 +23,7 @@ class TextBtn(sw.Btn):
     def __init__(self, text: str, *args, **kwargs):
 
         kwargs["small"] = True
-        kwargs["class_"] = "mr-2"
+        kwargs["class_"] = kwargs.get("class_", "mr-2")
 
         super().__init__(msg=text, *args, **kwargs)
 
@@ -48,7 +48,6 @@ class DrawMenuBtn(v.Btn):
         ]
 
         super().__init__(*args, **kwargs)
-        self.class_ = "mr-2"
         self.color = btn_color
 
 

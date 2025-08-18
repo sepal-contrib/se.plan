@@ -8,10 +8,12 @@ import ipyvuetify as v
 from ipyleaflet import SplitMapControl
 from traitlets import Dict as Dict, Int
 
+from component.tile.dashboard_components import DashboardDialog
 from sepal_ui.mapping import SepalMap
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts.gee_interface import GEEInterface
 from sepal_ui.scripts.gee_task import GEETask
+from sepal_ui.scripts.sepal_client import SepalClient
 
 import component.scripts.gee as gee
 from component.frontend.icons import icon
@@ -25,8 +27,6 @@ from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import IconBtn
 from component.widget.custom_widgets import RecipeInput, TableIcon, TextBtn
 from component import parameter as cp
-from component.widget.map import SeplanMap
-from sepal_ui.scripts.sepal_client import SepalClient
 import logging
 
 log = logging.getLogger("SEPLAN.scenarios_dialog")
@@ -44,10 +44,9 @@ class CompareScenariosDialog(BaseDialog):
         trashable: bool = False,
         increaseable: bool = False,
         limit: int = 2,
-        overall_dashboard=None,
-        theme_dashboard=None,
         gee_interface: GEEInterface = None,
         sepal_session: SepalClient = None,
+        dashboard_dialog: DashboardDialog = None,
     ):
         super().__init__()
 
@@ -56,19 +55,18 @@ class CompareScenariosDialog(BaseDialog):
         self.sepal_session = sepal_session
         self.map_ = map_
         self.alert = alert or Alert()
-        self.overall_dashboard = overall_dashboard
-        self.theme_dashboard = theme_dashboard
+        self.dashboard_dialog = dashboard_dialog
 
-        log.debug("Creating a CompareScenariosDialog, ")
+        log.debug("Creating a CompareScenariosDialog")
 
         if type_ == "chart":
             trashable = True
             increaseable = True
             limit = 5
 
-        else:
-            if not map_:
-                raise ValueError("A map must be provided to compare maps.")
+        # Map comparison requires a map
+        if type_ == "map" and not map_:
+            raise ValueError("A map must be provided to compare maps.")
 
         # Create UI elements for up to 2 scenario inputs
         self.scenario_inputs = ScenarioInputs(
@@ -78,8 +76,8 @@ class CompareScenariosDialog(BaseDialog):
             increaseable=increaseable,
             sepal_session=self.sepal_session,
         )
-        self.btn_compare_map = TextBtn("Compare maps")
-        self.btn_compare_stat = TextBtn("Compare statistics")
+        self.btn_compare_map = sw.TaskButton("Compare maps", small=True)
+        self.btn_compare_stat = sw.TaskButton("Compare statistics", small=True)
 
         self.btn_cancel = TextBtn("Cancel", outlined=True)
 
@@ -101,25 +99,109 @@ class CompareScenariosDialog(BaseDialog):
             )
         ]
 
-        self.set_actions(type_)
+        # Always show both buttons
+        self.actions.children = [
+            sw.Spacer(),
+            self.btn_compare_map,
+            self.btn_compare_stat,
+            self.btn_cancel,
+        ]
 
-        self.btn_compare_map.on_event("click", self.compare_layers)
-        self.btn_compare_stat.on_event("click", self.compare_statistics)
+        # Disable map comparison if no map is provided
+        if not self.map_:
+            self.btn_compare_map.disabled = True
+
+        # Configure TaskButtons
+        self._configure_map_comparison()
+        self._configure_statistics_comparison()
         self.btn_cancel.on_event("click", self.close_dialog)
 
     def close_dialog(self, *args):
         """Close the dialog and cancel any running tasks."""
-        # Cancel all running tasks
-        for task in self._tasks.values():
-            task.cancel()
+
+        self.btn_compare_map._on_cancel()
+        self.btn_compare_stat._on_cancel()
 
         super().close_dialog()
 
-    def set_actions(self, type_: Literal["map", "chart"]):
-        """Set the actions for the dialog based on the type of comparison."""
+    def _configure_map_comparison(self):
+        """Configure the map comparison TaskButton."""
 
-        btn = self.btn_compare_map if type_ == "map" else self.btn_compare_stat
-        self.actions.children = [sw.Spacer(), btn, self.btn_cancel]
+        def create_map_comparison_task():
+            return self.gee_interface.create_task(
+                func=self._get_maps_with_recipes,
+                key="compare_maps",
+                on_error=lambda x: self.alert.add_msg(
+                    f"Failed to add layer. {x}", type_="error"
+                ),
+            )
+
+        self.btn_compare_map.configure(task_factory=create_map_comparison_task)
+
+    async def _get_maps_with_recipes(self):
+        """Get maps for comparison by first reading recipes."""
+
+        folder = await self.gee_interface.get_folder_async()
+        recipes = await self.read_recipes_async(folder=folder)
+        # Assert that there must be only two recipes for map comparison
+        assert len(recipes) == 2, "Only two recipes can be compared on maps."
+        map_results, bounds_result = await self.get_maps(recipes)
+
+        map_ = self.map_
+
+        # Remove all layers from the map
+        map_.remove_all()
+
+        # Remove previous layer controls
+        map_.controls = [
+            control
+            for control in map_.controls
+            if not isinstance(control, SplitMapControl)
+        ]
+
+        # Read the recipes for layer names
+        recipes = await self.read_recipes_async()
+
+        # Use the bounds to center the map
+        coords = bounds_result
+        map_.zoom_bounds((*coords[0], *coords[2]))
+
+        layers = []
+
+        for i, map_id_dict in enumerate(map_results):
+            map_name = recipes[i].get_recipe_name()
+            log.debug(f"Map ID dict: {map_id_dict}")
+            layers.append(gee.create_layer(map_id_dict, map_name, True))
+
+        layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
+        map_.add(layer_control)
+        self.close_dialog()
+
+    def _configure_statistics_comparison(self):
+        """Configure the statistics comparison TaskButton."""
+
+        def create_statistics_comparison_task():
+            return self.gee_interface.create_task(
+                func=self._get_statistics_with_recipes,
+                key="compare_statistics",
+                on_error=lambda x: self.alert.add_msg(
+                    f"Failed to compute statistics. {x}", type_="error"
+                ),
+            )
+
+        self.btn_compare_stat.configure(
+            task_factory=create_statistics_comparison_task,
+        )
+
+    async def _get_statistics_with_recipes(self):
+        """Get statistics for comparison by first reading recipes."""
+        recipes = await self.read_recipes_async()
+        recipe_summary_stats = await self.get_all_summary_statistics(recipes)
+
+        self.dashboard_dialog.set_results(recipe_summary_stats, recipes)
+
+        # Close the dialog
+        self.close_dialog()
 
     def validate_scenarios(self):
         """Validate that all selected scenarios have the same AOI."""
@@ -128,7 +210,7 @@ class CompareScenariosDialog(BaseDialog):
         validate_scenarios_recipes(self.scenario_inputs.recipe_paths)
         are_comparable(self.scenario_inputs.recipe_paths, self.sepal_session)
 
-    def read_recipes(self) -> List[Recipe]:
+    async def read_recipes_async(self, folder=None) -> List[Recipe]:
         """Load the recipes from the recipe paths."""
 
         recipes = []
@@ -137,7 +219,26 @@ class CompareScenariosDialog(BaseDialog):
         for _, recipe_data in self.scenario_inputs.recipe_paths.items():
             recipe_path = recipe_data["path"]
             recipe = Recipe(
-                sepal_session=self.sepal_session, gee_interface=self.gee_interface
+                sepal_session=self.sepal_session,
+                gee_interface=self.gee_interface,
+                folder=folder,
+            )
+            await recipe.load_async(recipe_path)
+            recipes.append(recipe)
+
+        return recipes
+
+    def read_recipes(self, folder=None) -> List[Recipe]:
+        """Load the recipes from the recipe paths."""
+        recipes = []
+        self.validate_scenarios()
+
+        for _, recipe_data in self.scenario_inputs.recipe_paths.items():
+            recipe_path = recipe_data["path"]
+            recipe = Recipe(
+                sepal_session=self.sepal_session,
+                gee_interface=self.gee_interface,
+                folder=folder,
             )
             recipe.load(recipe_path)
             recipes.append(recipe)
@@ -182,104 +283,11 @@ class CompareScenariosDialog(BaseDialog):
 
         return await asyncio.gather(*tasks, return_exceptions=True)
 
-    def compare_layers(self, widget, event, data, map_: SeplanMap = None):
-        """Add suitability indices as layers to the map."""
-
-        self.btn_compare_map.loading = True
-
-        map_ = map_ or self.map_
-
-        # Remove all layers from the map
-        map_.remove_all()
-
-        # Remove previous layer controls
-        map_.controls = [
-            control
-            for control in map_.controls
-            if not isinstance(control, SplitMapControl)
-        ]
-
-        # Read the recipes
-        recipes = self.read_recipes()
-
-        # Assert that there must be only two recipes
-        assert len(recipes) == 2, "Only two recipes can be compared."
-
-        def maps_callback(_):
-            map_results, bounds_result = self._tasks["maps"].result
-
-            # Use the bounds to center the map
-            coords = bounds_result
-            map_.zoom_bounds((*coords[0], *coords[2]))
-
-            layers = []
-
-            for i, map_id_dict in enumerate(map_results):
-                map_name = recipes[i].get_recipe_name()
-                log.debug(f"Map ID dict: {map_id_dict}")
-                layers.append(gee.create_layer(map_id_dict, map_name, True))
-
-            layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
-            map_.add(layer_control)
-            self.close_dialog()
-
-        self._tasks["maps"] = self.gee_interface.create_task(
-            func=self.get_maps,
-            key="compare_maps",
-            on_done=maps_callback,
-            on_error=lambda x: self.alert.add_msg(
-                f"Failed to add layer. {x}", type_="error"
-            ),
-            on_finally=lambda: setattr(self.btn_compare_map, "loading", False),
-        )
-
-        self._tasks["maps"].start(recipes)
-
     def set_stats_content(self, overall_dashboard=None, theme_dashboard=None):
         """Set the content of the statistics dashboard."""
 
         self.overall_dashboard = overall_dashboard
         self.theme_dashboard = theme_dashboard
-
-    def compare_statistics(self, *args):
-        """Compute and display summary statistics."""
-
-        self.btn_compare_stat.loading = True
-
-        if not self.overall_dashboard or not self.theme_dashboard:
-
-            self.overall_dashboard = sw.Card()
-            self.theme_dashboard = sw.Card()
-
-            self.children = self.children + [
-                self.overall_dashboard,
-                self.theme_dashboard,
-            ]
-
-        recipes = self.read_recipes()
-
-        def stats_callback(_):
-            recipe_summary_stats = self._tasks["stats"].result
-
-            self.overall_dashboard.set_summary(recipes_stats=recipe_summary_stats)
-            self.theme_dashboard.set_summary(
-                recipes, recipes_stats=recipe_summary_stats
-            )
-
-            # Close the dialog
-            self.close_dialog()
-
-        self._tasks["stats"] = self.gee_interface.create_task(
-            func=self.get_all_summary_statistics,
-            key="compare_statistics",
-            on_done=stats_callback,
-            on_error=lambda x: self.alert.add_msg(
-                f"Failed to compute statistics. {x}", type_="error"
-            ),
-            on_finally=lambda: setattr(self.btn_compare_stat, "loading", False),
-        )
-
-        self._tasks["stats"].start(recipes)
 
 
 class ScenarioInputs(sw.Layout):
