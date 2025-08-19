@@ -22,7 +22,6 @@ from sepal_ui.solara import (
     get_current_sepal_client,
     setup_theme_colors,
     setup_solara_server,
-    get_current_session_info,
 )
 
 from component.frontend.icons import icon
@@ -67,11 +66,9 @@ def Page():
 
     gee_interface = get_current_gee_interface()
     sepal_client = get_current_sepal_client()
-    username = get_current_session_info()["username"]
 
     app_model = AppModel()
     recipe = Recipe(sepal_session=sepal_client, gee_interface=gee_interface)
-    solara_admin = AdminButton(username)
 
     map_ = SeplanMap(
         recipe.seplan_aoi,
@@ -148,67 +145,13 @@ def Page():
         },
     ]
 
-    # Create the right panel with all dashboard components
-    right_panel = get_right_panel_content(
+    right_panel_config, right_panel_content = get_right_panel_content(
         gee_interface=gee_interface,
         recipe=recipe,
         sepal_session=sepal_client,
         map_=map_,
         theme_toggle=theme_toggle,
     )
-    # aux_drawers = {
-    #     "about_tile": {
-    #         "title": cm.app.drawer.about,
-    #         "icon": icon("help-circle"),
-    #     },
-    #     "recipe_tile": {
-    #         "title": cm.app.drawer.recipe,
-    #         "icon": icon("question-file"),
-    #     },
-    # }
-
-    # app_drawers = {
-    #     "aoi_tile": {
-    #         "title": cm.app.drawer.aoi,
-    #         "icon": icon("location"),
-    #     },
-    #     "questionnaire_tile": {
-    #         "title": cm.app.drawer.question,
-    #         "icon": icon("help-circle"),
-    #     },
-    #     "map_tile": {
-    #         "title": cm.app.drawer.map,
-    #         "icon": icon("map"),
-    #     },
-    #     "dashboard_tile": {
-    #         "title": cm.app.drawer.dashboard,
-    #         "icon": icon("dashboard"),
-    #     },
-    # }
-    # aux_items = [
-    #     CustomDrawerItem(**aux_drawers[key], card=key) for key in aux_drawers.keys()
-    # ]
-
-    # app_items = [
-    #     CustomDrawerItem(
-    #         **app_drawers[key], card=key, model=app_model, bind_var="ready"
-    #     )
-    #     for key in app_drawers.keys()
-    # ]
-
-    # items = aux_items + app_items
-
-    # app_drawer = CustomNavDrawer(
-    #     items, code=code_link, wiki=wiki_link, issue=issue_link, app_model=app_model
-    # )
-    # build the Html final app by gathering everything
-    # CustomApp.element(
-    #     app_model=app_model,
-    #     tiles=app_content,
-    #     appBar=app_bar,
-    #     navDrawer=app_drawer,
-    #     theme_toggle=theme_toggle,
-    # )
 
     MapApp.element(
         app_title="SEPLAN",
@@ -218,7 +161,8 @@ def Page():
         initial_step=1,
         theme_toggle=[theme_toggle],
         dialog_width=860,
-        right_panel=[right_panel],
+        right_panel_config=right_panel_config,
+        right_panel_content=right_panel_content,
         repo_url="https://github.com/sepal-contrib/se.plan",
         docs_url="https://docs.sepal.io/en/latest/modules/dwn/seplan.html",
     )
