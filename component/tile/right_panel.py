@@ -1,8 +1,7 @@
-from sepal_ui.sepalwidgets.vue_app import RightPanel
 from sepal_ui.scripts.gee_interface import GEEInterface
+from sepal_ui.solara.components.admin import AdminButton
 
 from component.model.recipe import Recipe
-from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
 from component.tile.dashboard_components import (
     DashboardDialog,
     DownloadComponent,
@@ -20,7 +19,6 @@ def get_right_panel_content(
     sepal_session,
     map_,
     theme_toggle=None,
-    solara_admin=None,
 ):
 
     dashboard_dialog = DashboardDialog(theme_toggle=theme_toggle, recipe=recipe)
@@ -65,6 +63,7 @@ def get_right_panel_content(
 
     # Add dashboard components
     content_data = [
+        {"content": [AdminButton()]},
         {
             "title": "Compute Restoration Map",
             "icon": "mdi-map-marker",
@@ -97,16 +96,8 @@ def get_right_panel_content(
             "title": "Compare Scenarios",
             "icon": "mdi-compare",
             "content": [compare_component],
-            "divider": True,
             "description": "Compare results from different restoration scenarios side by side.",
-        },
-        {
-            "title": "Admin",
-            "icon": "mdi-shield-account",
-            "content": [solara_admin],
-            "divider": True,
-            "description": "Admin controls for managing the application.",
         },
     ]
 
-    return RightPanel(config=config, content_data=content_data)
+    return config, content_data
