@@ -1,17 +1,29 @@
+import asyncio
+from typing import Union
+
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
+from sepal_ui.scripts.gee_interface import GEEInterface
 
-from component import parameter as cp
 from component.model.app_model import AppModel
 from component.model.recipe import Recipe
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.map import SeplanMap
-from component.widget.map_toolbar import MapToolbar
-from component.message import cm
+
+import logging
+
+log = logging.getLogger("SEPLAN.map_tile")
 
 
 class MapTile(sw.Layout):
-    def __init__(self, recipe: Recipe, app_model: AppModel = None):
+    def __init__(
+        self,
+        map_: SeplanMap,
+        app_model: AppModel,
+        recipe: Recipe,
+        gee_interface: GEEInterface,
+        sepal_session=None,
+    ):
         """Define the map tile layout.
 
         Args:
@@ -19,8 +31,9 @@ class MapTile(sw.Layout):
                 map_tile with the app (like opening the info dialog when the map_tile drawer is clicked). Defaults to None.
         """
         self._metadata = {"mount_id": "map_tile"}
-        self.class_ = "d-block custom_map"
+        self.class_ = "d-block results_map"
         self.app_model = app_model
+        self.map_ = map_
 
         super().__init__()
 
@@ -29,29 +42,11 @@ class MapTile(sw.Layout):
         self.alert = Alert()
         alert_dialog = AlertDialog(self.alert)
 
-        self.map_ = SeplanMap(recipe.seplan_aoi)
-        self.map_toolbar = MapToolbar(
-            recipe=self.recipe, map_=self.map_, alert=self.alert
-        )
-
-        # init the final layers
-        self.wlc_outputs = None
-        self.area_dashboard = None
-        self.theme_dashboard = None
+        self.gee_interface = gee_interface
 
         self.children = [
             alert_dialog,
-            self.map_toolbar,
-            self.map_,
         ]
-
-        # decorate compute indicator and dashboard
-        self._compute = su.loading_button(self.alert, self.map_toolbar.btn_compute)(
-            self._compute
-        )
-
-        # # add js behaviour
-        self.map_toolbar.btn_compute.on_event("click", self._compute)
 
         self.recipe.seplan_aoi.observe(self._update_aoi, "updated")
 
@@ -76,26 +71,3 @@ class MapTile(sw.Layout):
         aoi = self.recipe.seplan_aoi.feature_collection
         if aoi:
             self.map_.add_ee_layer(self.recipe.seplan_aoi.feature_collection, {}, "aoi")
-
-    def _compute(self, *_):
-        """Compute the restoration plan and display the map."""
-
-        aoi = self.recipe.seplan_aoi.feature_collection
-
-        benefit_index = self.recipe.seplan.get_benefit_index(clip=True)
-        benefit_cost_index = (
-            self.recipe.seplan.get_benefit_cost_index(clip=True).multiply(4).add(1)
-        )
-
-        constraint_index = self.recipe.seplan.get_constraint_index().unmask(0).clip(aoi)
-
-        self.map_.centerObject(aoi, zoom_out=3)
-        self.map_.add_ee_layer(
-            benefit_index, cp.layer_vis, cm.layer.index.benefit_index.name
-        )
-        self.map_.add_ee_layer(
-            benefit_cost_index, cp.layer_vis, cm.layer.index.benefit_cost_index.name
-        )
-        self.map_.add_ee_layer(
-            constraint_index, cp.layer_vis, cm.layer.index.constraint_index.name
-        )

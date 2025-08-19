@@ -1,16 +1,21 @@
-import json
+from typing import Union
+from component.scripts.file_handler import save_file
 from pathlib import Path
 
 from sepal_ui.scripts.warning import SepalWarning
-from traitlets import HasTraits, Int, Unicode
+from sepal_ui.scripts.gee_interface import GEEInterface
+from traitlets import HasTraits, Int, Unicode, observe
 
 import component.parameter as cp
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
-from component.scripts.logger import logger
 from component.scripts import validation
 from component.scripts.seplan import Seplan
+
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class Recipe(HasTraits):
@@ -26,14 +31,24 @@ class Recipe(HasTraits):
     recipe_session_path = Unicode("", allow_none=True).tag(sync=True)
     """The path to the recipe session file. This value will come from the recipe view, it will be used by the export csv function and to create the names of the assets to export"""
 
-    def __init__(self, **delete_aoi):
+    def __init__(
+        self,
+        sepal_session=None,
+        gee_interface: GEEInterface = None,
+        folder=None,
+        **delete_aoi,
+    ):
         super().__init__()
 
-        self.seplan_aoi = SeplanAoi(**delete_aoi)
+        self.seplan_aoi = SeplanAoi(
+            gee_interface=gee_interface, folder=folder, **delete_aoi
+        )
         self.benefit_model = cmod.BenefitModel()
         self.constraint_model = cmod.ConstraintModel()
         self.cost_model = cmod.CostModel()
         self.dash_model = cmod.DashboardModel()
+        self.sepal_session = sepal_session
+        self.gee_interface = gee_interface
         self.seplan = Seplan(
             self.seplan_aoi, self.benefit_model, self.constraint_model, self.cost_model
         )
@@ -46,18 +61,44 @@ class Recipe(HasTraits):
         self.constraint_model.observe(self.update_changes, "new_changes")
         self.cost_model.observe(self.update_changes, "new_changes")
 
+        logger.debug(
+            f"sepal_session----{str(sepal_session)}",
+        )
+
     def update_changes(self, change):
         """Increment the new_changes counter by 1."""
         self.new_changes += 1
 
     def load(self, recipe_path: str):
         """Load the recipe element in the different element of the app."""
+        logger.debug(f"Loading recipe: {recipe_path}....{self.sepal_session}")
 
-        recipe_path, data = validation.read_recipe_data(recipe_path)
+        recipe_path, data = validation.read_recipe_data(
+            recipe_path, sepal_session=self.sepal_session
+        )
         self.recipe_session_path = str(recipe_path)
 
         # load the aoi_model
         self.seplan_aoi.import_data(data["aoi"])
+        self.benefit_model.import_data(data["benefits"])
+        self.constraint_model.import_data(data["constraints"])
+        self.cost_model.import_data(data["costs"])
+
+        self.new_changes = 0
+
+        return self
+
+    async def load_async(self, recipe_path: str):
+        """Load the recipe element in the different element of the app."""
+        logger.debug(f"Loading recipe: {recipe_path}....{self.sepal_session}")
+
+        recipe_path, data = validation.read_recipe_data(
+            recipe_path, sepal_session=self.sepal_session
+        )
+        self.recipe_session_path = str(recipe_path)
+
+        # load the aoi_model
+        await self.seplan_aoi.import_data_async(data["aoi"])
         self.benefit_model.import_data(data["benefits"])
         self.constraint_model.import_data(data["constraints"])
         self.cost_model.import_data(data["costs"])
@@ -72,18 +113,20 @@ class Recipe(HasTraits):
         if not self.seplan:
             raise SepalWarning(cm.recipe.error.no_seplan)
 
-        with Path(full_recipe_path).open("w") as f:
-            data = {
-                "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
-                "aoi": self.seplan_aoi.export_data(),
-                "benefits": self.benefit_model.export_data(),
-                "constraints": self.constraint_model.export_data(),
-                "costs": self.cost_model.export_data(),
-            }
+        data = {
+            "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
+            "aoi": self.seplan_aoi.export_data(),
+            "benefits": self.benefit_model.export_data(),
+            "constraints": self.constraint_model.export_data(),
+            "costs": self.cost_model.export_data(),
+        }
 
-            [validation.remove_key(data, key) for key in ["updated", "new_changes"]]
+        [
+            validation.remove_key(data, key)
+            for key in ["updated", "new_changes", "object_set"]
+        ]
 
-            json.dump(data, f, indent=4)
+        save_file(full_recipe_path, data, self.sepal_session)
 
         self.new_changes = 0
 
@@ -98,18 +141,24 @@ class Recipe(HasTraits):
         self.constraint_model.reset()
         self.cost_model.reset()
 
-        logger.info("constraint_model.ids", self.constraint_model.ids)
+        logger.debug("constraint_model.ids", self.constraint_model.ids)
         self.seplan_aoi.reset()
 
         self.dash_model.reset()
 
         self.new_changes = 0
 
-    @staticmethod
-    def get_recipe_path(recipe_name: str):
+    def get_recipe_path(self, recipe_name: str):
         """generate full recipe path."""
-        res_dir = cp.result_dir / "recipes"
-        res_dir.mkdir(exist_ok=True)
+
+        if self.sepal_session:
+            recipe_dir = self.sepal_session.get_remote_dir(
+                "module_results/se.plan/recipes"
+            )
+
+        else:
+            recipe_dir = cp.result_dir / "recipes"
+            recipe_dir.mkdir(exist_ok=True)
 
         recipe_path = Path(recipe_name)
 
@@ -118,8 +167,12 @@ class Recipe(HasTraits):
             recipe_path = recipe_path.with_suffix(".json")
 
         # create the json file
-        return str(res_dir / recipe_path)
+        return str(recipe_dir / recipe_path)
 
     def get_recipe_name(self) -> str:
         """Generate the recipe name based on the aoi name."""
         return str(Path(self.recipe_session_path).stem)
+
+    @observe("new_changes")
+    def observe_changes(self, _):
+        logger.debug(f"Changes observed in recipe, {self.new_changes} changes")

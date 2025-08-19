@@ -5,11 +5,13 @@ from pathlib import Path
 from typing import Optional
 
 from jsonschema import ValidationError, validate
-from sepal_ui.sepalwidgets import TextField
 
 from component.parameter import recipe_schema_path
-from component.scripts.logger import logger
+from component.scripts.file_handler import read_file
 from component.types import RecipePaths
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 def find_missing_property(instance, schema):
@@ -21,22 +23,20 @@ def find_missing_property(instance, schema):
 
 
 def validate_recipe(
-    recipe_path: str, text_field_msg: Optional[TextField] = None
+    recipe_path: str, file_input=None, sepal_session=None
 ) -> Optional[Path]:
     """Read user file and performs all validation and corresponding checks."""
+    logger.debug(f"Validating recipe: {recipe_path}+++{sepal_session}")
     try:
-        # open the file and load the models
-        with Path(recipe_path).open() as f:
-            data = json.loads(f.read())
-
+        data = read_file(recipe_path, sepal_session=sepal_session)
     except FileNotFoundError:
         error_msg = "The file could not be found. Please check that the file exists"
-        not text_field_msg or setattr(text_field_msg, "error_messages", error_msg)
-        raise FileNotFoundError(error_msg)
+        not file_input or setattr(file_input, "error_messages", [error_msg])
+        raise FileNotFoundError(f"{error_msg}")
 
     except json.decoder.JSONDecodeError:
         error_msg = "The file is not a valid json file. Please check that the file is a valid json file"
-        not text_field_msg or setattr(text_field_msg, "error_messages", error_msg)
+        not file_input or setattr(file_input, "error_messages", [error_msg])
         raise json.decoder.JSONDecodeError(error_msg)
 
     # Load the JSON schema
@@ -49,7 +49,7 @@ def validate_recipe(
 
     except ValidationError as e:
         # Constructing a path string
-        logger.info(e)
+        logger.debug(e)
         path = ".".join(map(str, e.path))
 
         # Check if the error is related to the signature field
@@ -77,7 +77,7 @@ def validate_recipe(
             # Creating a detailed error error_msg for other fields
             error_msg = f"Error in field '{path}': {e.message}"
 
-        not text_field_msg or setattr(text_field_msg, "error_messages", error_msg)
+        not file_input or setattr(file_input, "error_messages", [error_msg])
 
         raise ValidationError(e)
 
@@ -109,6 +109,8 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
         Path(recipe_info["path"]).stem for recipe_info in recipe_paths.values()
     ]
 
+    logger.debug(f"Validating recipies {recipe_stems}")
+
     if len(recipe_stems) != len(set(recipe_stems)):
         raise Exception(
             "Error: To compare recipes, all the recipes must have an unique name."
@@ -117,21 +119,39 @@ def validate_scenarios_recipes(recipe_paths: RecipePaths):
     return True
 
 
-def are_comparable(recipe_paths: RecipePaths):
+def are_comparable(recipe_paths: RecipePaths, sepal_session=None):
     """Check if the recipes are comparable based on their primary AOI (Area of Interest)."""
 
+    logger.debug(f"are_comparable called with recipe_paths: {recipe_paths}")
     aoi_values = set()
 
-    for _, recipe_info in recipe_paths.items():
-        with Path(recipe_info["path"]).open() as f:
-            data = json.loads(f.read())
-            remove_key(data, "updated")
-            remove_key(data, "new_changes")
-            primary_aoi = data["aoi"]["primary"]
-            aoi_values.add(json.dumps(primary_aoi, sort_keys=True))
+    for recipe_id, recipe_info in recipe_paths.items():
+        logger.debug(f"Processing recipe {recipe_id}: {recipe_info}")
+        data = read_file(recipe_info["path"], sepal_session=sepal_session)
+        logger.debug(f"Raw data for recipe {recipe_id}: {data}")
+
+        remove_key(data, "updated")
+        remove_key(data, "new_changes")
+        remove_key(data, "object_set")
+
+        logger.debug(f"Data after removing keys for recipe {recipe_id}: {data}")
+
+        primary_aoi = data["aoi"]["primary"]
+        logger.debug(f"Primary AOI for recipe {recipe_id}: {primary_aoi}")
+
+        aoi_json = json.dumps(primary_aoi, sort_keys=True)
+        logger.debug(f"AOI JSON for recipe {recipe_id}: {aoi_json}")
+
+        aoi_values.add(aoi_json)
+        logger.debug(f"Current AOI values set: {aoi_values}")
+
+    logger.debug(f"Final AOI values set (length: {len(aoi_values)}): {aoi_values}")
 
     # Raise an error if the recipes are not comparable
     if len(aoi_values) > 1:
+        logger.error(
+            f"Recipes are not comparable. Found {len(aoi_values)} different AOIs: {aoi_values}"
+        )
         raise Exception(
             "Error: The recipes are not comparable. All recipes must have the same main Area of Interest."
         )
@@ -139,15 +159,14 @@ def are_comparable(recipe_paths: RecipePaths):
     return True
 
 
-def read_recipe_data(recipe_path: str):
+def read_recipe_data(recipe_path: str, sepal_session=None):
     """Read the recipe data from the recipe file."""
 
-    recipe_path = Path(validate_recipe(recipe_path))
+    recipe_path = Path(validate_recipe(recipe_path, sepal_session=sepal_session))
 
-    with recipe_path.open() as f:
-        data = json.loads(f.read())
+    data = read_file(recipe_path, sepal_session=sepal_session)
 
     # Remove all the "updated" keys from the data in the second level
-    [remove_key(data, key) for key in ["updated", "new_changes"]]
+    [remove_key(data, key) for key in ["updated", "new_changes", "object_set"]]
 
     return recipe_path, data

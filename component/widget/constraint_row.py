@@ -1,7 +1,10 @@
-from component.scripts.logger import logger
+from typing import Union
+
+from component.frontend.icons import icon
 from component.scripts.ui_helpers import get_categorical_values
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 import component.parameter.gui_params as cp
 import component.scripts.gee as gee
@@ -15,6 +18,9 @@ from component.widget.alert_state import Alert
 from .constraint_dialog import ConstraintDialog
 from .constraint_widget import ConstraintWidget
 from .preview_map_dialog import PreviewMapDialog
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class ConstraintRow(sw.Html):
@@ -29,12 +35,15 @@ class ConstraintRow(sw.Html):
         aoi_model: SeplanAoi,
         alert: Alert,
         preview_map: PreviewMapDialog,
+        gee_interface: GEEInterface,
     ) -> None:
         # get the models as a member
 
         self.tag = "tr"
         self.layer_id = layer_id
         self.attributes = {"layer_id": layer_id}
+
+        self.gee_interface = gee_interface
 
         super().__init__()
 
@@ -46,15 +55,11 @@ class ConstraintRow(sw.Html):
         self.alert = alert
 
         self.get_model_data()
-        logger.info(
-            f"ConstraintRow.{self.name}.{self.aoi_model.aoi_model.name}__init__"
-        )
-
         # View
 
-        self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
-        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
-        self.show_map_btn = cw.TableIcon("mdi-map", self.layer_id)
+        self.edit_btn = cw.TableIcon(icon("pencil"), self.layer_id)
+        self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
+        self.show_map_btn = cw.TableIcon(icon("map"), self.layer_id)
 
         self.edit_btn.class_list.add("mr-2")
         self.delete_btn.class_list.add("mr-2")
@@ -78,7 +83,6 @@ class ConstraintRow(sw.Html):
     @sd.catch_errors()
     def on_show_map(self, *_):
         """Mask constraint with map values and add it to the map."""
-        logger.info(f"ConstraintRow({self.layer_id}).on_show_map()_{self.data_type}")
         masked_layer = mask_image(self.asset, self.data_type, self.value)
         base_layer = (
             asset_to_image(self.asset)
@@ -96,8 +100,6 @@ class ConstraintRow(sw.Html):
 
     def update_view(self):
         """Create the view of the widget based on the model."""
-
-        logger.info(f"ConstraintRow({self.layer_id}).update_view()")
 
         # create Maskout widget
         self.w_maskout = ConstraintWidget(
@@ -136,7 +138,7 @@ class ConstraintRow(sw.Html):
             self.w_maskout.unobserve(self.update_value, "v_model")
             self.aoi_model.unobserve(self.set_limits, "updated")
         except Exception as e:
-            logger.info("Error: unloading the constraint row")
+
             pass
 
     @sd.switch("loading", on_widgets=["dialog"])
@@ -169,7 +171,7 @@ class ConstraintRow(sw.Html):
         # if there's no AOI we'll assume we are in the default constraint
         # and we will return the default value
         if not self.aoi:
-            logger.info(f"theres no aoi {id(self)}xx")
+
             self.w_maskout.v_model = [0]
             self.update_value()
             return
@@ -177,11 +179,12 @@ class ConstraintRow(sw.Html):
         # before updating the limits, check if this layer is in the model
 
         if self.layer_id not in self.model.ids:
-            logger.info(f"layer_id {self.layer_id} not in model.ids")
+
             return
 
-        values = gee.get_limits(self.asset, self.data_type, self.aoi)
-        logger.info(f"ConstraintRow({self.layer_id}).set_limits.values:", values)
+        values = gee.get_limits(
+            self.gee_interface, self.asset, self.data_type, self.aoi
+        )
 
         if self.data_type == "binary":
             if not all(val in values for val in [0, 1]):
@@ -214,7 +217,5 @@ class ConstraintRow(sw.Html):
                 self.w_maskout.widget.step = 0
             else:
                 self.w_maskout.widget.step = 1
-
-        logger.info("lims:", self.w_maskout.v_model)
 
         self.update_value()

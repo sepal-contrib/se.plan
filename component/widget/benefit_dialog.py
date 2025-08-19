@@ -1,6 +1,9 @@
+from typing import Union
+
 import pandas as pd
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import Bool, link
 
 from component import parameter as cp
@@ -24,6 +27,7 @@ class BenefitDialog(BaseDialog):
         self,
         model: BenefitModel,
         alert: Alert,
+        gee_interface: GEEInterface = None,
     ):
         # save the model as a member
         self.model = model
@@ -48,7 +52,7 @@ class BenefitDialog(BaseDialog):
         )
         self.w_name = sw.Combobox(label=cm.benefit.dialog.name, items=[], v_model=None)
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect(types=["IMAGE"])
+        self.w_asset = sw.AssetSelect(types=["IMAGE"], gee_interface=gee_interface)
         self.w_desc = sw.Textarea(label=cm.benefit.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(label=cm.benefit.dialog.unit, v_model=None)
         w_content = sw.CardText(

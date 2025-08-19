@@ -1,5 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 import ee
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.model.recipe import Recipe
 from component.scripts.seplan import Seplan, reduce_constraints
@@ -17,7 +18,9 @@ def is_main_aoi(main_aoi_name, aoi_name) -> bool:
     return main_aoi_name == aoi_name
 
 
-def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
+async def get_summary_statistics_async(
+    gee_interface: GEEInterface, recipe: Recipe
+) -> RecipeStatsDict:
     """Returns summary statistics using seplan inputs.
 
     The statistics will be later parsed to be displayed in the dashboard.
@@ -25,6 +28,11 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
 
     if not recipe:
         raise ValueError("There is no recipe to get statistics from.")
+
+    if not recipe.recipe_session_path:
+        raise ValueError(
+            "You can only export the dashboard data for the current recipe, load or create a recipe first in the recipe section"
+        )
 
     seplan_model = recipe.seplan
     recipe_name = recipe.get_recipe_name()
@@ -50,7 +58,7 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
     # Get the restoration suitability index
     wlc_out = seplan_model.get_constraint_index()
 
-    return (
+    return await gee_interface.get_info_async(
         ee.Dictionary(
             {
                 recipe_name: ee.Dictionary(
@@ -89,8 +97,8 @@ def get_summary_statistics(recipe: Recipe) -> RecipeStatsDict:
                     }
                 )
             }
-        )
-    ).getInfo()
+        ),
+    )
 
 
 def get_image_stats(image, mask, geom):
@@ -262,5 +270,5 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
         }
     )
 
-    # return ee.Dictionary({image.get("name").getInfo(): value})
+    # return ee.Dictionary({image.get("name").get_info(): value})
     return ee.Dictionary({name: value})

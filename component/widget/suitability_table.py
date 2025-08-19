@@ -1,5 +1,6 @@
 from typing import List, Literal, Tuple
 import ipyvuetify as v
+from component.frontend.icons import icon
 from component.parameter.gui_params import SUITABILITY_LEVELS
 from component.parameter.vis_params import SUITABILITY_COLORS
 from component.types import SummaryStatsDict, RecipeStatsDict
@@ -85,7 +86,7 @@ def get_summary_table(
     recipe_stats_list: List[RecipeStatsDict],
     display_type: Literal["absolute", "percentage", "both"] = "both",
 ):
-    btn_switch = IconBtn("mdi-swap-horizontal", class_="ml-2")
+    btn_switch = IconBtn(icon("swap-horizontal"), class_="ml-2")
 
     # Pre-sort the suitability levels
     suitability_levels = sorted(SUITABILITY_LEVELS.keys())

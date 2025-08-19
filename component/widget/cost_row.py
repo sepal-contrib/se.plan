@@ -1,4 +1,5 @@
 import pandas as pd
+from component.frontend.icons import icon
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
 
@@ -25,6 +26,8 @@ class CostRow(sw.Html):
         aoi_model: SeplanAoi,
         alert: Alert,
         preview_map: PreviewMapDialog,
+        *_,
+        **__,
     ) -> None:
         self.tag = "tr"
         self.attributes = {"layer_id": layer_id}
@@ -43,9 +46,9 @@ class CostRow(sw.Html):
 
         # extract information from the model
 
-        self.edit_btn = cw.TableIcon("mdi-pencil", self.layer_id)
-        self.delete_btn = cw.TableIcon("mdi-trash-can", self.layer_id)
-        self.show_map_btn = cw.TableIcon("mdi-map", self.layer_id)
+        self.edit_btn = cw.TableIcon(icon("pencil"), self.layer_id)
+        self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
+        self.show_map_btn = cw.TableIcon(icon("map"), self.layer_id)
 
         self.edit_btn.class_list.add("mr-2")
         self.delete_btn.class_list.add("mr-2")

@@ -4,8 +4,11 @@ from traitlets import List, observe
 from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
-from component.scripts.logger import logger
 from component.types import ConstraintLayerData
+
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 
 class ConstraintModel(QuestionnaireModel):
@@ -56,7 +59,7 @@ class ConstraintModel(QuestionnaireModel):
         del self.data_type[idx]
 
         if update:
-            logger.info("updating from remove")
+            logger.debug("updating from remove")
             self.updated += 1
         self.new_changes += 1
 
@@ -79,7 +82,7 @@ class ConstraintModel(QuestionnaireModel):
         self.units.append(unit)
         self.values.append([])
         self.data_type.append(data_type)
-        logger.info("updating from add")
+        logger.debug("updating from add")
         self.updated += 1
         self.new_changes += 1
 
@@ -103,7 +106,7 @@ class ConstraintModel(QuestionnaireModel):
         self.descs[idx] = desc
         self.units[idx] = unit
         self.data_type[idx] = data_type
-        logger.info("updating from update")
+        logger.debug("updating from update")
         self.updated += 1
         self.new_changes += 1
 
@@ -126,13 +129,13 @@ class ConstraintModel(QuestionnaireModel):
         self.data_type = []
 
         self.__init__()
-        logger.info("updating from reset")
+        logger.debug("updating from reset")
         self.updated += 1
         self.new_changes = 0
 
     @observe("updated")
     def _on_update(self, *_):
-        logger.info("######## updated ########")
+        logger.debug("######## updated ########")
 
     def get_layer_data(self, layer_id: str) -> ConstraintLayerData:
         """Return the data of a specific layer."""

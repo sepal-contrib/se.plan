@@ -3,11 +3,12 @@ from pathlib import Path
 from typing import Literal
 
 import ipyvuetify as v
+from component.frontend.icons import icon
 from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.decorator import loading_button, switch
-from traitlets import Int, Unicode, directional_link
+from traitlets import Int, Unicode, directional_link, observe
 
 from component.message import cm
 from component.model.app_model import AppModel
@@ -17,22 +18,25 @@ from component.model.recipe import Recipe
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
 from component.widget.custom_widgets import RecipeInput
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 _content = {
     "new": {
-        "icon": "mdi-note-text",
+        "icon": icon("recipe-note"),
         "btn": cm.recipe.new.btn,
         "desc": cm.recipe.new.desc,
         "title": cm.recipe.new.title,
     },
     "load": {
-        "icon": "mdi-upload",
+        "icon": icon("upload"),
         "btn": cm.recipe.load.btn,
         "desc": cm.recipe.load.desc,
         "title": cm.recipe.load.title,
     },
     "save": {
-        "icon": "mdi-content-save",
+        "icon": icon("save"),
         "btn": cm.recipe.save.btn,
         "desc": cm.recipe.save.desc,
         "title": cm.recipe.save.title,
@@ -115,7 +119,7 @@ class CardNewSave(CardAction):
             self.w_recipe_name.v_model = change["new"]
 
 
-class RecipeView(sw.Card):
+class RecipeView(sw.Layout):
     create_view = Int(0).tag(sync=True)
     """A trait to control once there is a new recipe loaded. It will be listed by RecipeTile and will build the different tiles."""
 
@@ -125,14 +129,17 @@ class RecipeView(sw.Card):
     recipe_session_path = Unicode(None, allow_none=True).tag(sync=True)
     """Normalized recipe path of the current session. It will come from NewCard/LoadCard"""
 
-    app_model: AppModel
-    """It will be used to listen the on_save trait and trigger the save button here"""
+    # app_model: AppModel
+    # """It will be used to listen the on_save trait and trigger the save button here"""
 
-    def __init__(self, recipe: Recipe = None, app_model: AppModel = None):
+    def __init__(
+        self, recipe: Recipe = None, app_model: AppModel = None, sepal_session=None
+    ):
         self.attributes = {"_metadata": "recipe_tile"}
+        self._metadata = {"mount_id": "recipe_tile"}
 
         super().__init__()
-        self.recipe = recipe or Recipe()
+        self.recipe = recipe
         self.alert = AlertState()
         self.alert_dialog = AlertDialog(self.alert)
 
@@ -144,7 +151,7 @@ class RecipeView(sw.Card):
         self.card_load = CardLoad()
         self.card_save = CardNewSave(type_="save")
 
-        self.load_dialog = LoadDialog()
+        self.load_dialog = LoadDialog(sepal_session=sepal_session)
 
         self.children = [
             self.alert_dialog,
@@ -189,6 +196,17 @@ class RecipeView(sw.Card):
 
         self.card_save.btn.on_event("click", self.save_event)
         self.app_model.observe(self.save_event, "on_save")
+
+        directional_link((self, "recipe_session_path"), (self.app_model, "recipe_name"))
+
+        # link the recipe new_changes counter to the app new_changes counter
+        directional_link((self.recipe, "new_changes"), (self.app_model, "new_changes"))
+
+    @observe("recipe_session_path")
+    def test_recipe_path(self, change):
+        """Test if the recipe path is valid."""
+        print("testoutput")
+        logger.debug(f"Testing recipe path: {self.recipe_session_path}")
 
     def session_path_handler(self, change):
         """handle current session path and link its value with save_card.recipe_name."""
@@ -236,6 +254,8 @@ class RecipeView(sw.Card):
 
         self.alert.set_state("load", "all", "building")
 
+        logger.debug(f"Recipe session {self.recipe.sepal_session}")
+
         self.recipe.load(recipe_path=self.load_dialog.load_recipe_path)
 
         # Assign the recipe path to the current session path
@@ -281,7 +301,7 @@ class LoadDialog(BaseDialog):
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
 
-    def __init__(self, alert: Alert = None):
+    def __init__(self, alert: Alert = None, sepal_session=None):
 
         self.alert = alert or Alert()
         self.load_recipe_path = None
@@ -289,7 +309,7 @@ class LoadDialog(BaseDialog):
         super().__init__()
 
         # Create input file widget wrapped in a layout
-        self.w_input_recipe = RecipeInput()
+        self.w_input_recipe = RecipeInput(sepal_session=sepal_session)
 
         self.btn_load = TextBtn(cm.recipe.load.dialog.load)
         self.btn_cancel = TextBtn(cm.recipe.load.dialog.cancel, outlined=True)
@@ -321,8 +341,8 @@ class LoadDialog(BaseDialog):
     def show(self):
         """Display the dialog and write down the text in the alert."""
         self.load_recipe_path = None
-        self.w_input_recipe.text_field_msg.error_messages = []
-        self.w_input_recipe.reset()
+        self.w_input_recipe.file_input.error_messages = []
+        self.w_input_recipe.file_input.reset()
         self.valid = False
         self.open_dialog()
 
@@ -333,29 +353,3 @@ class LoadDialog(BaseDialog):
         self.close_dialog()
 
         return
-
-
-class RecipeTile(sw.Layout):
-    def __init__(self, recipe: Recipe, app_model: AppModel):
-        self._metadata = {"mount_id": "recipe_tile"}
-        self.class_ = "d-block pa-2"
-
-        super().__init__()
-
-        self.recipe = recipe
-        self.app_model = app_model
-        self.recipe_view = RecipeView(recipe=recipe, app_model=app_model)
-
-        self.children = [self.recipe_view]
-
-        directional_link(
-            (self.recipe_view, "recipe_session_path"), (self.app_model, "recipe_name")
-        )
-
-        # link the recipe new_changes counter to the app new_changes counter
-        directional_link(
-            (self.recipe_view.recipe, "new_changes"), (self.app_model, "new_changes")
-        )
-
-        # This trait will let know the app drawers that the app is ready to be used
-        self.app_model.ready = True

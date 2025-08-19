@@ -1,12 +1,16 @@
 from pathlib import Path
 from typing import Literal, Union
 
+from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import validation
 from component.widget.base_dialog import BaseDialog
 from component.widget.expression import ExpressionBtn
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.sepal_client import SepalClient
+from sepal_ui.sepalwidgets.btn import TaskButton
+
 from component import widget as cw
 
 
@@ -22,11 +26,41 @@ from component.model import BenefitModel, ConstraintModel, CostModel, SeplanAoi
 from component.scripts.seplan import Seplan
 from component.widget.alert_state import Alert, AlertDialog
 from component.widget.preview_theme_btn import PreviewThemeBtn
-from component.widget.buttons import IconBtn, TextBtn
+from component.widget.buttons import DrawMenuBtn, IconBtn, TextBtn
 
 from .benefit_dialog import BenefitDialog
 from .constraint_dialog import ConstraintDialog
 from .cost_dialog import CostDialog
+
+from sepal_ui.sepalwidgets.file_input import FileInput as FileInputElement
+import logging
+
+logger = logging.getLogger("SEPLAN")
+
+
+class ResizeTrigger(v.VuetifyTemplate):
+    """Update the image source when the theme changes."""
+
+    dark = Bool(v.theme.dark, allow_none=True).tag(sync=True)
+    template = Unicode(
+        """
+        <script class='sepal-ui-script'>
+            {
+                methods: {
+                    jupyter_resize() {
+                        /* force the resize event. useful for drawer clicks*/
+                        window.dispatchEvent(new Event("resize"));
+                    }
+                }
+            }
+        </script>
+        """
+    ).tag(sync=True)
+    "Unicode: the javascript script to manually trigger the resize event"
+
+    def resize(self):
+        """trigger the template method i.e. the resize event."""
+        return self.send({"method": "resize"})
 
 
 class RecipeInspector(v.VuetifyTemplate):
@@ -54,56 +88,61 @@ class RecipeInspector(v.VuetifyTemplate):
 
         self.dialog = False
 
+    def reset(self):
+        self.data_dict = {}
+        self.recipe_name = ""
 
-class RecipeInput(sw.FileInput):
+
+class RecipeInput(sw.Layout):
 
     load_recipe_path = Unicode(None, allow_none=True).tag(sync=True)
     valid = Bool(False).tag(sync=True)
+    v_model = Unicode(None, allow_none=True).tag(sync=True)
 
-    def __init__(self, main_recipe: Recipe = None, **kwargs):
-        super().__init__(".json", folder=cp.result_dir, root=cp.result_dir, **kwargs)
-
-        self.text_field_msg = self.children[-1]
-        self.observe(self.validate_input, "v_model")
+    def __init__(
+        self,
+        main_recipe: Recipe = None,
+        sepal_session: SepalClient = None,
+        attributes={},
+    ):
+        super().__init__(attributes=attributes)
+        self.sepal_session = sepal_session
         self.recipe_inspector = RecipeInspector()
+        self.file_input = FileInputElement(
+            sepal_client=self.sepal_session,
+            extensions=[".json"],
+            initial_folder="module_results/se.plan",
+        )
+        self.file_input.observe(self.validate_input, "v_model")
 
         self.btn_view = TextBtn(cm.recipe.load.dialog.view, class_="ml-2")
-        text_field = self.children[-1]
-        text_field.class_ = "mx-2"
-
-        loading_button = self.children[2].v_slots[0]["children"]
-        loading_button.small = True
-        self.reload.small = True
-
-        if main_recipe:
-            main_recipe.observe(self.set_default_recipe, "recipe_session_path")
-            loading_button.disabled = True
-            self.reload.disabled = True
-
         self.btn_view.on_event("click", self.view_event)
-        self.children = self.children + [self.btn_view, self.recipe_inspector]
+        self.children = [
+            sw.Row(
+                children=[self.file_input, self.btn_view, self.recipe_inspector],
+                class_="flex align-center",
+            )
+        ]
 
-    def set_default_recipe(self, change):
-        """Set the default recipe."""
-
-        recipe_session_path = change["new"]
-
-        self.select_file(recipe_session_path)
+        directional_link((self.file_input, "v_model"), (self, "v_model"))
 
     def validate_input(self, change):
         """Validate the recipe file."""
 
         if not change["new"]:
+            logger.debug("validating recipe: no file selected")
+            self.load_recipe_path = None
+            self.valid = False
             return
 
         # Reset any previous error messages
         self.valid = False
-        self.text_field_msg.error_messages = []
+        self.file_input.error_messages = []
         self.load_recipe_path = None
 
         # Validate the recipe file and show errors if there are
         self.load_recipe_path = validation.validate_recipe(
-            change["new"], self.text_field_msg
+            change["new"], self.file_input, self.sepal_session
         )
         self.valid = bool(self.load_recipe_path)
 
@@ -113,7 +152,9 @@ class RecipeInput(sw.FileInput):
         if not self.load_recipe_path:
             return
 
-        recipe_path, data = validation.read_recipe_data(self.load_recipe_path)
+        recipe_path, data = validation.read_recipe_data(
+            self.load_recipe_path, self.sepal_session
+        )
         self.recipe_inspector.set_data(data, recipe_name=str(Path(recipe_path)))
 
 
@@ -158,7 +199,7 @@ class ToolBar(sw.Toolbar):
         elif isinstance(model, CostModel):
             name = "cost"
 
-        self.w_new = TextBtn(f"New {name}", gliph="mdi-plus", type_="success")
+        self.w_new = TextBtn(f"New {name}", gliph=icon("plus"), type_="success")
 
         # add js behaviour
         self.w_new.on_event("click", self.open_new_dialog)
@@ -184,42 +225,6 @@ class ToolBar(sw.Toolbar):
             raise Exception(cm.questionnaire.error.no_aoi)
 
         self.dialog.open_new()
-
-
-class DashToolbar(sw.Toolbar):
-    def __init__(self, model: Seplan, alert: Alert = None) -> None:
-        super().__init__()
-
-        alert = alert or Alert()
-
-        self.height = "48px"
-        self.model = model
-        self.elevation = 0
-        self.color = "accent"
-
-        self.btn_download = IconBtn(
-            gliph="fa-solid fa-circle-down",
-        ).set_tooltip(
-            cm.dashboard.toolbar.btn.download.tooltip, right=True, max_width="200px"
-        )
-        self.btn_compare = IconBtn(gliph="mdi-compare").set_tooltip(
-            cm.dashboard.toolbar.btn.compare.tooltip, right=True, max_width="200px"
-        )
-
-        self.compare_dialog = cw.CompareScenariosDialog(type_="chart", alert=alert)
-
-        self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
-        self.btn_dashboard = TextBtn(cm.dashboard.toolbar.btn.compute.title)
-
-        self.children = [
-            self.btn_download.with_tooltip,
-            sw.Spacer(),
-            self.btn_compare.with_tooltip,
-            sw.Divider(vertical=True, class_="mr-2"),
-            self.btn_dashboard,
-            # Dialogs
-            self.compare_dialog,
-        ]
 
 
 class Tabs(sw.Card):
@@ -261,7 +266,16 @@ class CustomDrawerItem(sw.DrawerItem):
 
         self.attributes = {"id": kwargs["card"]}
 
+        self.resize_trigger = ResizeTrigger()
+
+        self.children = [self.resize_trigger] + self.children
+
         self.observe(self.add_notif, "alert")
+
+    def callback(self, *args) -> None:
+        """Callback to be executed when the item is clicked."""
+
+        self.resize_trigger.resize()
 
     def add_notif(self, change: dict) -> None:
         """Add a notification alert to drawer."""
@@ -309,38 +323,44 @@ class CustomNavDrawer(sw.NavDrawer):
 
 class CustomAppBar(sw.AppBar):
 
-    save_recipe_btn = IconBtn(gliph="mdi-content-save")
-    save_recipe_btn.color = "#f3f3f3"
-    save_recipe_btn.v_icon.left = False
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
-    recipe_holder = sw.Flex(
-        attributes={"id": "recipe_holder"},
-        class_="d-inline-flex justify-end",
-        style_="align-items: center;",
-        children=[
-            sw.Html(
-                tag="span",
-                class_="mr-1 white--text",
-                attributes={"id": "recipe_name"},
-            ),
-            sw.Html(
-                tag="span",
-                class_="font-weight-thin font-italic text-lowercase mr-2 white--text",
-                attributes={"id": "new_changes"},
-            ),
-            save_recipe_btn,
-        ],
-    )
+        self.save_recipe_btn = IconBtn(gliph=icon("save"))
+        self.save_recipe_btn.color = "#f3f3f3"
+        self.save_recipe_btn.v_icon.left = False
+
+        self.recipe_holder = sw.Flex(
+            attributes={"id": "recipe_holder"},
+            class_="d-inline-flex justify-end",
+            style_="align-items: center;",
+            children=[
+                sw.Html(
+                    tag="span",
+                    class_="mr-1 white--text",
+                    attributes={"id": "recipe_name"},
+                ),
+                sw.Html(
+                    tag="span",
+                    class_="font-weight-thin font-italic text-lowercase mr-2 white--text",
+                    attributes={"id": "new_changes"},
+                ),
+                self.save_recipe_btn,
+            ],
+        )
+
+        self.children = self.children[:3] + [self.recipe_holder] + self.children[3:]
+        self.recipe_holder.hide()
 
     def update_recipe(
         self, element: Literal["recipe_name", "new_changes"], value: str = ""
     ) -> None:
         """Update the recipe name and state in the app bar."""
+
+        self.recipe_holder.show()
+
         if not value:
             return
-
-        if not self.get_children(attr="id", value="recipe_holder"):
-            self.children = self.children[:3] + [self.recipe_holder] + self.children[3:]
 
         if element == "new_changes":
             value = cm.app.recipe_state[value]
@@ -349,8 +369,8 @@ class CustomAppBar(sw.AppBar):
 
 
 class CustomApp(sw.App):
-    def __init__(self, app_model, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, app_model, theme_toggle=None, *args, **kwargs):
+        super().__init__(*args, theme_toggle=theme_toggle, **kwargs)
 
         self.app_model = app_model
         self.app_model.observe(self.update_recipe_state, "recipe_name")
@@ -359,12 +379,16 @@ class CustomApp(sw.App):
 
         self.appBar.save_recipe_btn.on_event("click", self.save_recipe)
 
+        self.show_tile("about_tile")
+
     def save_recipe(self, *_):
         """Save the recipe in the app model."""
         self.app_model.on_save += 1
 
     def update_recipe_state(self, change):
         """Update the recipe state in the app bar."""
+
+        # logger.debug(f"Updating recipe state: {change}")
 
         if not change["new"]:
             change["new"] = ""
@@ -385,8 +409,8 @@ class CustomApp(sw.App):
             dialog.close_dialog()
 
 
-class CustomTileAbout(sw.Tile):
-    def __init__(self, pathname: Union[str, Path], **kwargs) -> None:
+class CustomTileAbout(sw.Layout):
+    def __init__(self, pathname: Union[str, Path], theme_toggle=None, **kwargs) -> None:
         """Create an about tile using a .md file.
 
         This tile will have the "about_widget" id and "About" title.
@@ -397,28 +421,26 @@ class CustomTileAbout(sw.Tile):
 
         text = Path(pathname).read_text()
 
-        # get current stored theme
-        theme = get_theme()
-
         # Search any url in the text and look for the dark/light theme
         text = (
             text.replace("/light/", "/dark/")
-            if theme == "dark"
+            if theme_toggle.dark
             else text.replace("/dark/", "/light/")
         )
 
         content = Markdown(text)
 
-        update_script = UpdateImages(dark=True)
-        super().__init__("about_tile", "About", inputs=[content, update_script])
+        update_script = UpdateImages(theme_toggle)
+        self.children = [content, update_script]
+        super().__init__()
 
-        directional_link((v.theme, "dark"), (update_script, "dark"))
+        directional_link((theme_toggle, "dark"), (update_script, "dark"))
 
 
 class UpdateImages(v.VuetifyTemplate):
     """Update the image source when the theme changes."""
 
-    dark = Bool(v.theme.dark, allow_none=True).tag(sync=True)
+    dark = Bool(None, allow_none=True).tag(sync=True)
     template = Unicode(
         """
         <script class='sepal-ui-script'>
@@ -447,7 +469,79 @@ class UpdateImages(v.VuetifyTemplate):
     ).tag(sync=True)
     "Unicode: the javascript script to manually trigger the resize event"
 
-    @observe("dark")
+    def __init__(self, theme_toggle, **kwargs):
+        super().__init__(**kwargs)
+        self.dark = theme_toggle.dark
+        self.observe(self.update_images, "dark")
+
     def update_images(self, *_):
         """trigger the template method i.e. the resize event."""
         return self.send({"method": "updateImageSources"})
+
+
+class DrawMenu(sw.Menu):
+    def __init__(self, *args, **kwargs):
+        self.offset_x = True
+        self.v_model = False
+
+        super().__init__(*args, **kwargs)
+
+        btn_draw = DrawMenuBtn()
+
+        self.v_slots = [
+            {
+                "name": "activator",
+                "variable": "menuData",
+                "children": btn_draw,
+            }
+        ]
+
+        self.items = [
+            v.ListItem(
+                attributes={"id": title},
+                children=[
+                    v.ListItemTitle(children=[cm.map.toolbar.draw_menu[title]]),
+                ],
+            )
+            for title in ["show", "import", "new"]
+        ]
+
+        self.children = [
+            v.List(
+                dense=True,
+                children=self.items,
+            ),
+        ]
+
+    def on_event(self, item_name, event):
+        """Define an event based on the item name."""
+        for item in self.items:
+            if item.attributes["id"] == item_name:
+                item.on_event("click", event)
+
+
+class MapInfoDialog(BaseDialog):
+    def __init__(self) -> None:
+        super().__init__()
+
+        self.well_read = False
+
+        description = sw.Markdown("  \n".join(cm.map.txt))
+        btn_close = TextBtn("Close", outlined=True)
+
+        self.children = [
+            v.Card(
+                children=[
+                    sw.CardTitle(children=[cm.map.title]),
+                    sw.CardText(children=[description]),
+                    sw.CardActions(children=[sw.Spacer(), btn_close]),
+                ],
+            ),
+        ]
+
+        btn_close.on_event("click", self.manual_close_dialog)
+
+    def manual_close_dialog(self, *args):
+        """Close the dialog and also update a trait so we can know that user already saw the info."""
+        self.well_read = True
+        self.close_dialog()
