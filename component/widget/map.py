@@ -10,6 +10,8 @@ from sepal_ui import mapping as sm
 from traitlets import Dict, Int, link
 from sepal_ui.scripts.gee_interface import GEEInterface
 from sepal_ui import color
+from sepal_ui.mapping.map_btn import MapBtn
+
 from component.message import cm
 from component import widget as cw
 
@@ -56,9 +58,7 @@ class SeplanMap(sm.SepalMap):
             small=True,
         )
 
-        self.btn_clean = IconBtn(gliph=icon("broom")).set_tooltip(
-            cm.map.toolbar.tooltip.clean, right=True, max_width="200px"
-        )
+        self.btn_clean = MapBtn(icon("broom"))
 
         self.custom_aoi_dialog = cw.CustomAoiDialog(self)
         self.import_aoi_dialog = cw.ImportAoiDialog(

@@ -141,23 +141,14 @@ class CompareScenariosDialog(BaseDialog):
     async def _get_maps_with_recipes(self):
         """Get maps for comparison by first reading recipes."""
 
+        map_ = self.map_
+        map_.clean_map()
+
         folder = await self.gee_interface.get_folder_async()
         recipes = await self.read_recipes_async(folder=folder)
         # Assert that there must be only two recipes for map comparison
         assert len(recipes) == 2, "Only two recipes can be compared on maps."
         map_results, bounds_result = await self.get_maps(recipes)
-
-        map_ = self.map_
-
-        # Remove all layers from the map
-        map_.remove_all()
-
-        # Remove previous layer controls
-        map_.controls = [
-            control
-            for control in map_.controls
-            if not isinstance(control, SplitMapControl)
-        ]
 
         # Read the recipes for layer names
         recipes = await self.read_recipes_async()
