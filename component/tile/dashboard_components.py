@@ -110,15 +110,14 @@ class MapComputeComponent(sw.Card):
                 on_error=lambda e: self.alert.add_msg(str(e), type_="error"),
             )
 
-        self.btn_compute.configure(
-            task_factory=create_compute_maps_task,
-            start_args=(),
-        )
+        self.btn_compute.configure(task_factory=create_compute_maps_task)
 
     async def _get_maps(self):
         """Compute the restoration maps."""
         import asyncio
         from component import parameter as cp
+
+        self.map_.clean_map()
 
         aoi = self.recipe.seplan_aoi.feature_collection
 
@@ -178,7 +177,7 @@ class DashboardDialog(BaseDialog):
     """Dialog to display the dashboard results"""
 
     def __init__(self, recipe, theme_toggle, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(persistent=False, **kwargs)
         self.max_width = "90vw"
         self.height = "80vh"
         self.recipe = recipe
