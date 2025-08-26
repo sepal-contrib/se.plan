@@ -45,7 +45,7 @@ class BenefitRow(sw.Html):
 
         # create the crud interface
         self.edit_btn = cw.TableIcon(icon("pencil"), self.layer_id)
-        self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
+        self.delete_btn = cw.TableIcon(icon("close"), self.layer_id)
         self.show_map_btn = cw.TableIcon(icon("map"), self.layer_id)
         self.edit_btn.class_list.add("mr-2")
         self.delete_btn.class_list.add("mr-2")
@@ -87,7 +87,7 @@ class BenefitRow(sw.Html):
 
         td_list = [
             sw.Html(
-                tag="td", children=[self.edit_btn, self.delete_btn, self.show_map_btn]
+                tag="td", children=[self.edit_btn, self.show_map_btn, self.delete_btn]
             ),
             sw.Html(tag="td", children=[cm.subtheme[self.theme]]),
             sw.Html(tag="td", children=[self.name]),

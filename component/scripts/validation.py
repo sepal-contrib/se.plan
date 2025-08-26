@@ -3,6 +3,7 @@
 import json
 from pathlib import Path
 from typing import Optional
+from typing import List, Literal, Tuple
 
 from jsonschema import ValidationError, validate
 
@@ -170,3 +171,160 @@ def read_recipe_data(recipe_path: str, sepal_session=None):
     [remove_key(data, key) for key in ["updated", "new_changes", "object_set"]]
 
     return recipe_path, data
+
+
+def validate_constraint_values(
+    values: list,
+    data_type: Literal["binary", "categorical", "continuous"],
+    layer_name: str = "constraint",
+) -> Tuple[bool, str]:
+    """
+    Validate constraint values based on data type.
+
+    Args:
+        values: List of constraint values to validate
+        data_type: Type of constraint data (binary, categorical, continuous)
+        layer_name: Name of the layer for error messages
+
+    Returns:
+        Tuple of (is_valid, error_message)
+    """
+    if not values or len(values) == 0:
+        if data_type == "categorical":
+            return False, f"Please select at least one category to exclude"
+        elif data_type == "binary":
+            return False, f"Please select a value (0 or 1)"
+        else:
+            return False, f"Please configure constraint values"
+
+    if data_type == "binary":
+        if len(values) != 1:
+            return False, f"Please select exactly one value (0 or 1)"
+        if values[0] is None:
+            return False, f"Please select a valid value (0 or 1)"
+
+    elif data_type == "categorical":
+        if any(val is None for val in values):
+            return False, f"Please select valid categories to exclude"
+        if len(values) == 0:
+            return False, f"Please select at least one category to exclude"
+
+    elif data_type == "continuous":
+        if len(values) != 2:
+            return False, f"Please set a valid range (min and max values)"
+        if any(val is None for val in values):
+            return False, f"Please set valid min and max values"
+        min_val, max_val = values
+        if min_val >= max_val:
+            return (
+                False,
+                f"Min value ({min_val}) must be less than max value ({max_val})",
+            )
+
+    else:
+        return (
+            False,
+            f"Unknown data type '{data_type}'. Supported types: binary, categorical, continuous.",
+        )
+
+    return True, ""
+
+
+def validate_mask_image_parameters(
+    asset_id: str,
+    data_type: Literal["binary", "categorical", "continuous"],
+    maskout_values: list,
+) -> None:
+    """
+    Validate parameters for mask_image function.
+
+    Args:
+        asset_id: ID of the asset to mask
+        data_type: Type of constraint data
+        maskout_values: Values to use for masking
+
+    Raises:
+        ValueError: If validation fails with descriptive error message
+    """
+    # Check for empty or None values
+    if not maskout_values or len(maskout_values) == 0:
+        raise ValueError(
+            f"No values provided for constraint layer, please select at least one value to exclude."
+        )
+
+    # Data type specific validation
+    if data_type == "binary":
+        if len(maskout_values) != 1:
+            raise ValueError(
+                f"Binary constraint layer requires exactly 1 value, got {len(maskout_values)} values."
+            )
+        if maskout_values[0] is None:
+            raise ValueError(
+                f"Binary constraint layer has invalid value, please select a valid value."
+            )
+
+    elif data_type == "categorical":
+        if any(val is None for val in maskout_values):
+            raise ValueError(
+                f"Categorical constraint layer contains invalid values, please select valid categories."
+            )
+        if len(maskout_values) == 0:
+            raise ValueError(
+                f"Categorical constraint layer requires at least 1 category to be selected."
+            )
+
+    elif data_type == "continuous":
+        if len(maskout_values) != 2:
+            raise ValueError(
+                f"Continuous constraint layer requires exactly 2 values (min, max), got {len(maskout_values)} values."
+            )
+        if any(val is None for val in maskout_values):
+            raise ValueError(
+                f"Continuous constraint layer has invalid range values, please set valid min/max values."
+            )
+        min_val, max_val = maskout_values
+        if min_val >= max_val:
+            raise ValueError(
+                f"Continuous constraint layer has invalid range: min ({min_val}) must be less than max ({max_val})."
+            )
+
+    else:
+        raise ValueError(
+            f"Unknown data type '{data_type}' for constraint layer. Supported types: binary, categorical, continuous."
+        )
+
+
+def validate_constraint_model_data(
+    names: List[str],
+    ids: List[str],
+    values: List[list],
+    data_types: List[str],
+) -> Tuple[bool, List[str]]:
+    """
+    Validate all constraints in a constraint model for use in calculations.
+
+    Args:
+        names: List of constraint layer names
+        ids: List of constraint layer IDs
+        values: List of constraint values
+        data_types: List of constraint data types
+
+    Returns:
+        Tuple of (all_valid, list_of_error_messages)
+    """
+    errors = []
+
+    for i, layer_id in enumerate(ids):
+        layer_name = names[i] if i < len(names) else layer_id
+        layer_values = values[i] if i < len(values) else []
+        data_type = data_types[i] if i < len(data_types) else "unknown"
+
+        # Use the constraint values validation
+        is_valid, error_msg = validate_constraint_values(
+            layer_values, data_type, layer_name
+        )
+        if not is_valid:
+            # Add layer name context for model-level validation
+            errors.append(f"'{layer_name}': {error_msg}")
+
+    return len(errors) == 0, errors

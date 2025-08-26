@@ -4,7 +4,7 @@ from typing import Literal
 # from sepal_ui import mapping as sm
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.frontend.styles import get_theme
-from traitlets import Any, Int, List, directional_link, link, observe
+from traitlets import Any, Bool, Int, List, directional_link, link, observe
 
 from component.message import cm
 import logging
@@ -62,6 +62,9 @@ class ConstraintWidget(sw.Layout):
     step = Int(1).tag(sync=True)
     """int: step of the slider. When the data type is continuous."""
 
+    has_error = Bool(False).tag(sync=True)
+    """bool: whether the widget is in error state."""
+
     def __init__(
         self,
         data_type: Literal["continuous", "binary", "categorical"],
@@ -74,6 +77,7 @@ class ConstraintWidget(sw.Layout):
         self.attributes = {"data-layer": layer_id, "id": f"{layer_id}_widget"}
         self.v_model = []
 
+        # Create message container
         self.message = sw.Html(tag="div", children=[""], class_=f"v-messages my-2")
 
         super().__init__()
@@ -120,7 +124,11 @@ class ConstraintWidget(sw.Layout):
                 items=[],
                 v_model=None,
                 hide_details=True,
-                style_="max-width: 750px",
+                style_="width: 100%;",
+                chips=True,
+                deletable_chips=True,
+                small_chips=True,
+                class_="constraint-select-widget",
             )
 
             # before linking set the default v_model
@@ -131,7 +139,16 @@ class ConstraintWidget(sw.Layout):
         self.v_model = v_model
 
         self.children = [
-            sw.Flex(class_="d-block", children=[self.widget, self.message])
+            sw.Flex(
+                class_="d-block position-relative",
+                children=[
+                    sw.Flex(
+                        class_="d-flex align-center",
+                        children=[self.widget],
+                    ),
+                    self.message,
+                ],
+            )
         ]
 
         self.observe(self.set_message, "v_model")
@@ -140,28 +157,136 @@ class ConstraintWidget(sw.Layout):
         self.set_message({"new": self.v_model})
         self.observe(lambda *args: logger.debug(self.v_model), "v_model")
 
-    def set_message(self, change):
+    def set_message(self, change=None):
         """Set message to the widget based on the data type."""
 
-        # logger.debug(f"ConstraintWidget({self.layer_id}).set_message", change["new"])
+        # Use either the change data or the current value
+        value = change["new"] if change else self.v_model
 
-        if not change["new"]:
+        logger.debug(
+            f"Widget {self.layer_id} set_message called. value: {value}, data_type: {self.data_type}"
+        )
+
+        # For categorical widgets, always show the hint message regardless of v_model
+        if self.data_type == "categorical":
+            message_text = cm.constraint.widget.categorical.hint
+            self.message.children = [message_text]
+            logger.debug(
+                f"Widget {self.layer_id} set categorical message: {message_text}"
+            )
+            return
+
+        # Skip if no value (empty list or None) for binary and continuous
+        if not value or (isinstance(value, list) and len(value) == 0):
+            logger.debug(
+                f"Widget {self.layer_id} set_message: no value, returning early"
+            )
             return
 
         if self.data_type == "continuous":
-            self.message.children = [
-                cm.constraint.widget.continuous.hint.format(
-                    change["new"][0], change["new"][1]
-                )
-            ]
+            message_text = cm.constraint.widget.continuous.hint.format(
+                value[0], value[1]
+            )
+            self.message.children = [message_text]
+            logger.debug(
+                f"Widget {self.layer_id} set continuous message: {message_text}"
+            )
 
         elif self.data_type == "binary":
-            self.message.children = [
-                cm.constraint.widget.binary.hint[f"mask_{change['new'][0]}"]
-            ]
+            # For binary, value[0] can be 0 or 1, both are valid
+            if len(value) > 0:
+                message_text = cm.constraint.widget.binary.hint[f"mask_{value[0]}"]
+                self.message.children = [message_text]
+                logger.debug(
+                    f"Widget {self.layer_id} set binary message: {message_text}"
+                )
 
-        elif self.data_type == "categorical":
-            self.message.children = [cm.constraint.widget.categorical.hint]
+    def set_loading(self, loading: bool):
+        """Set the loading state of the widget.
+
+        This method disables the widget components during loading.
+
+        Args:
+            loading: Whether the widget should be in loading state
+        """
+        # Disable the widget based on data type
+        if self.data_type in ["binary", "categorical"]:
+            # Only enable if not in error state
+            self.widget.disabled = loading or self.has_error
+        elif self.data_type == "continuous":
+            # Only enable if not in error state
+            self.widget.disabled = loading or self.has_error
+
+        # Update message during loading
+        if loading:
+            self.message.children = ["Getting layer data... (may take several minutes)"]
+            self.message.class_ = "v-messages my-2 info--text"
+        else:
+            # When loading finishes, reset to normal hint message only if no error
+            if not self.has_error:
+                logger.debug(
+                    f"Widget {self.layer_id} loading finished, setting message. Current v_model: {self.v_model}, data_type: {self.data_type}"
+                )
+                self.set_message()
+                self.message.class_ = "v-messages my-2"
+            else:
+                logger.debug(
+                    f"Widget {self.layer_id} loading finished but has error, keeping error message"
+                )
+
+    def set_error(
+        self, has_error: bool, error_message: str = None, disable_widget: bool = True
+    ):
+        """Set the error state and message of the widget.
+
+        Args:
+            has_error: Whether the widget is in error state
+            error_message: Error message to display
+            disable_widget: Whether to disable the widget (True for computation errors, False for validation errors)
+        """
+        logger.debug(
+            f"Widget {self.layer_id} set_error called: has_error={has_error}, message={error_message}, disable={disable_widget}"
+        )
+
+        # Update the error state first
+        self.has_error = has_error
+
+        if has_error:
+            if error_message:
+                self.message.children = [error_message]
+            else:
+                self.message.children = ["Please configure this constraint"]
+            self.message.class_ = "v-messages my-2 error--text"
+
+            # Only disable the widget if requested (computation errors, not validation errors)
+            if disable_widget:
+                if self.data_type in ["binary", "categorical"]:
+                    self.widget.disabled = True
+                    logger.debug(
+                        f"Widget {self.layer_id} ({self.data_type}): disabled main widget"
+                    )
+                elif self.data_type == "continuous":
+                    self.widget.disabled = True
+                    logger.debug(
+                        f"Widget {self.layer_id} (continuous): disabled entire slider component"
+                    )
+
+        elif not has_error:
+            # Reset message if no error
+            self.set_message()
+            self.message.class_ = "v-messages my-2"
+
+            # Re-enable the widget when error is cleared
+            if self.data_type in ["binary", "categorical"]:
+                self.widget.disabled = False
+                logger.debug(
+                    f"Widget {self.layer_id} ({self.data_type}): enabled main widget"
+                )
+            elif self.data_type == "continuous":
+                self.widget.disabled = False
+                logger.debug(
+                    f"Widget {self.layer_id} (continuous): enabled entire slider component"
+                )
 
     @observe("items")
     def update_items(self, change):
@@ -192,6 +317,12 @@ class CustomSlider(sw.Layout):
 
     step = Int(1).tag(sync=True)
     "int: step of the slider"
+
+    disabled = Bool(False).tag(sync=True)
+    "bool: whether the entire slider component is disabled"
+
+    has_error = Bool(False).tag(sync=True)
+    "bool: whether the widget is in error state"
 
     def __init__(self, **kwargs):
         self.class_ = "align-center"
@@ -229,6 +360,15 @@ class CustomSlider(sw.Layout):
         self.w_min.observe(self.set_v_model, "v_model")
         self.w_max.observe(self.set_v_model, "v_model")
         self.observe(self.set_slider, "v_model")
+        self.observe(self.update_disabled_state, "disabled")
+
+    @observe("disabled")
+    def update_disabled_state(self, change):
+        """Update disabled state for all child widgets."""
+        disabled = change["new"]
+        self.slider.disabled = disabled
+        self.w_min.disabled = disabled
+        self.w_max.disabled = disabled
 
     def set_slider(self, change):
         """Set slider v_model based on self.v_model."""

@@ -4,6 +4,7 @@ from traitlets import List, observe
 from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
+from component.scripts.validation import validate_constraint_model_data
 from component.types import ConstraintLayerData
 
 import logging
@@ -149,3 +150,18 @@ class ConstraintModel(QuestionnaireModel):
             "value": self.values[idx],
             "data_type": self.data_type[idx],
         }
+
+    def validate_constraints_for_calculation(self) -> tuple[bool, list[str]]:
+        """Validate all constraints for use in calculations.
+
+        Returns:
+            tuple: (all_valid, list_of_error_messages)
+        """
+        return validate_constraint_model_data(
+            self.names, self.ids, self.values, self.data_type
+        )
+
+    def get_invalid_constraints(self) -> list[str]:
+        """Get a list of constraint names that have validation errors."""
+        _, errors = self.validate_constraints_for_calculation()
+        return errors

@@ -1,4 +1,5 @@
 from copy import deepcopy
+from typing import Optional
 
 import ipyvuetify as v
 from component.frontend.icons import icon
@@ -111,10 +112,10 @@ class SeplanMap(sm.SepalMap):
             self.dc.hide()
             self.custom_aoi_dialog.open_dialog(new_geom=False)
 
-    def clean_map(self, *args):
+    def clean_map(self, keep_aoi: bool = True, *args):
         """Remove control for split and all layers"""
 
-        self.remove_all()
+        self.remove_all(keep_names=["aoi"] if keep_aoi else [])
         self.controls = [
             control
             for control in self.controls
