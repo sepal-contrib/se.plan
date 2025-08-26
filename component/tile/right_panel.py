@@ -63,7 +63,7 @@ def get_right_panel_content(
 
     # Add dashboard components
     content_data = [
-        {"content": [AdminButton()]},
+        {"content": [AdminButton(models=recipe.models)]},
         {
             "title": "Compute Restoration Map",
             "icon": "mdi-map-marker",
@@ -72,23 +72,16 @@ def get_right_panel_content(
             "description": "Generate the restoration suitability map based on the benefits, constraints and costs layers and configuration.",
         },
         {
-            "title": "Export Map",
-            "icon": "mdi-download-box",
-            "content": [map_download_component],
-            "divider": True,
-            "description": "Export the computed restoration map layers.",
-        },
-        {
             "title": "Export Results",
             "icon": "mdi-download",
-            "content": [download_component],
+            "content": [map_download_component, download_component],
             "divider": True,
-            "description": "Download analysis results as CSV files for external processing.",
+            "description": "Export layers and download results as CSV files for external processing.",
         },
         {
             "title": "Dashboard Generation",
             "icon": "mdi-chart-line",
-            "content": [dashboard_compute_component],
+            "content": [dashboard_compute_component, dashboard_dialog],
             "divider": True,
             "description": "Generate detailed dashboard analysis with charts and visualizations.",
         },

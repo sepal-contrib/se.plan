@@ -7,6 +7,7 @@ import ee
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
+from component.scripts.validation import validate_mask_image_parameters
 
 
 class Seplan:
@@ -70,6 +71,15 @@ class Seplan:
 
     def get_constraint_index(self, clip: bool = True) -> ee.Image:
         """Get suitability index masked with constraints."""
+        # Validate constraints before calculation
+        is_valid, errors = self.constraint_model.validate_constraints_for_calculation()
+        if not is_valid:
+            error_msg = (
+                "Cannot calculate constraint index due to invalid constraints. Please go to the questionnaire and fix the following issues:\n"
+                + "\n".join(errors)
+            )
+            raise ValueError(error_msg)
+
         aoi = self.aoi_model.feature_collection
         mask_out_areas = reduce_constraints(self.get_masked_constraints_list())
 
@@ -105,13 +115,18 @@ class Seplan:
 
             data_type = self.constraint_model.data_type[i]
             values = self.constraint_model.values[i]
+            layer_id = self.constraint_model.ids[i]
+            layer_name = self.constraint_model.names[i]
 
-            masked_image = mask_image(asset, data_type, values)
-
-            # set the name of the image as a property of the image
-            masked_data.append(
-                [masked_image.rename("mask"), self.constraint_model.ids[i]]
-            )
+            try:
+                masked_image = mask_image(asset, data_type, values)
+                # set the name of the image as a property of the image
+                masked_data.append([masked_image.rename("mask"), layer_id])
+            except Exception as e:
+                # Provide context about which constraint failed
+                raise Exception(
+                    f"Error processing constraint '{layer_name}' ({layer_id}): {str(e)}"
+                ) from e
 
         return masked_data
 
@@ -127,6 +142,11 @@ def mask_image(
     maskout_values: list,
 ) -> ee.Image:
     """Mask out an image based on its data type and input values."""
+
+    # Validate parameters using centralized validation
+    validate_mask_image_parameters(asset_id, data_type, maskout_values)
+
+    # Proceed with masking if validation passes
     image = ee.Image(asset_id).select(0).unmask()
 
     if data_type == "binary":

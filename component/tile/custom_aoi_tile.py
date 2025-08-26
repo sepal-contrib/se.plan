@@ -97,8 +97,4 @@ class AoiView(sw.Layout):
             )
 
         included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
-
-        # if included:
-        #     self.aoi_dialog.close_dialog()
-
         return self

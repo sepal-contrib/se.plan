@@ -4,25 +4,28 @@ These replace the monolithic DashboardTile approach.
 """
 
 import logging
+import asyncio
 
 from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
 from component.widget.custom_widgets import MapInfoDialog
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.gee_interface import GEEInterface
 
+from component import parameter as cp
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
 from component.scripts.compute import export_as_csv
 from component.scripts.statistics import get_summary_statistics_async
 from component.widget.alert_state import Alert
-from component.widget.base_dialog import BaseDialog
+from component.widget.base_dialog import BaseDialog, MapDialog
 from component.widget.buttons import IconBtn, TextBtn
+from component.scripts.gee import create_layer
 
 logger = logging.getLogger("SEPLAN")
 
 
-class MapComputeComponent(sw.Card):
+class MapComputeComponent(sw.Layout):
     """Component for map computation functionality"""
 
     def __init__(
@@ -45,20 +48,10 @@ class MapComputeComponent(sw.Card):
             ]
         )
 
-        self.content = sw.CardText(
-            children=[
-                sw.Html(
-                    tag="p",
-                    children=[
-                        "Generate the restoration suitability map based on your configuration."
-                    ],
-                ),
-                self.info_dialog,
-                self.btn_compute,
-            ]
-        )
-
-        self.children = [self.title, self.content]
+        self.children = [
+            self.info_dialog,
+            self.btn_compute,
+        ]
 
         self.btn_info.on_event("click", lambda *_: self.info_dialog.open_dialog())
 
@@ -67,9 +60,6 @@ class MapComputeComponent(sw.Card):
 
     def _configure_compute_task(self):
         """Configure the TaskButton instance with the task factory for computing all maps."""
-
-        from component.scripts.gee import create_layer
-        from component.message import cm
 
         def create_compute_maps_task():
             def callback(result):
@@ -114,8 +104,6 @@ class MapComputeComponent(sw.Card):
 
     async def _get_maps(self):
         """Compute the restoration maps."""
-        import asyncio
-        from component import parameter as cp
 
         self.map_.clean_map()
 
@@ -141,7 +129,7 @@ class MapComputeComponent(sw.Card):
         return bounds, (benef_idx_id, cost_idx_id, const_id)
 
 
-class MapDownloadComponent(sw.Card):
+class MapDownloadComponent(sw.Layout):
     """Component for map download functionality"""
 
     def __init__(self, recipe: Recipe, alert: Alert, **kwargs):
@@ -149,9 +137,7 @@ class MapDownloadComponent(sw.Card):
         self.recipe = recipe
         self.alert = alert
 
-        self.title = sw.CardTitle(children=["Export Map"])
-
-        self.btn_download = TextBtn("Download Map", block=True)
+        self.btn_download = TextBtn("Export Map", block=True)
 
         # Create download dialog
         self.download_map_dialog = cw.ExportMapDialog(self.recipe, alert=self.alert)
@@ -159,21 +145,13 @@ class MapDownloadComponent(sw.Card):
         self.btn_download.on_event(
             "click", lambda *_: self.download_map_dialog.open_dialog()
         )
-
-        self.content = sw.CardText(
-            children=[
-                sw.Html(
-                    tag="p", children=["Export the computed restoration map layers."]
-                ),
-                self.btn_download,
-                self.download_map_dialog,
-            ]
-        )
-
-        self.children = [self.title, self.content]
+        self.children = [
+            self.btn_download,
+            self.download_map_dialog,
+        ]
 
 
-class DashboardDialog(BaseDialog):
+class DashboardDialog(MapDialog):
     """Dialog to display the dashboard results"""
 
     def __init__(self, recipe, theme_toggle, **kwargs):
@@ -219,10 +197,11 @@ class DashboardDialog(BaseDialog):
             self.overall_dash.set_summary(summary_stats)
             self.theme_dash.set_summary(recipes, summary_stats)
 
+        logger.debug("Opening dialog")
         self.open_dialog()
 
 
-class DownloadComponent(sw.Card):
+class DownloadComponent(sw.Layout):
     """Component for CSV export functionality"""
 
     def __init__(
@@ -234,22 +213,11 @@ class DownloadComponent(sw.Card):
         self.alert = alert
         self.summary_stats = None
 
-        self.title = sw.CardTitle(children=["Export Data"])
-
         self.btn_download = sw.TaskButton(
             cm.dashboard.toolbar.btn.download.title, small=True, block=True
         )
 
-        self.content = sw.CardText(
-            children=[
-                sw.Html(
-                    tag="p", children=["Download the analysis results as a CSV file."]
-                ),
-                self.btn_download,
-            ]
-        )
-
-        self.children = [self.title, self.content]
+        self.children = [self.btn_download]
 
         self._configure_csv_export()
 
@@ -279,7 +247,7 @@ class DownloadComponent(sw.Card):
         )
 
 
-class DashboardComputeComponent(sw.Card):
+class DashboardComputeComponent(sw.Layout):
     """Component for dashboard computation and viewing"""
 
     def __init__(
@@ -307,23 +275,17 @@ class DashboardComputeComponent(sw.Card):
         )
 
         # View button (initially disabled)
-        self.btn_view_dashboard = TextBtn("View Dashboard", block=True, class_="ml-2")
+        self.btn_view_dashboard = TextBtn("View Dashboard", block=True)
         self.btn_view_dashboard.on_event("click", self._open_existing_dashboard)
 
-        self.content = sw.CardText(
-            children=[
-                sw.Html(tag="p", children=["Generate and view dashboard analysis."]),
-                sw.Row(
-                    children=[
-                        sw.Col(children=[self.btn_dashboard], cols=6),
-                        sw.Col(children=[self.btn_view_dashboard], cols=6),
-                    ]
-                ),
-                self.dashboard_dialog,
-            ]
-        )
-
-        self.children = [self.title, self.content]
+        self.children = [
+            sw.Row(
+                children=[
+                    sw.Col(children=[self.btn_dashboard], cols=6),
+                    sw.Col(children=[self.btn_view_dashboard], cols=6),
+                ]
+            ),
+        ]
 
         self._configure_dashboard()
 
@@ -368,7 +330,7 @@ class DashboardComputeComponent(sw.Card):
         self.dashboard_dialog.close_dialog()
 
 
-class CompareComponent(sw.Card):
+class CompareComponent(sw.Layout):
     """Component for scenario comparison"""
 
     def __init__(
@@ -404,12 +366,7 @@ class CompareComponent(sw.Card):
 
         self.btn_compare.on_event("click", lambda *_: self.compare_dialog.open_dialog())
 
-        self.content = sw.CardText(
-            children=[
-                sw.Html(tag="p", children=["Compare different scenario results."]),
-                self.btn_compare,
-                self.compare_dialog,
-            ]
-        )
-
-        self.children = [self.title, self.content]
+        self.children = [
+            self.btn_compare,
+            self.compare_dialog,
+        ]

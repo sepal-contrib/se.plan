@@ -18,6 +18,9 @@ from .constraint_row import ConstraintRow
 from .cost_dialog import CostDialog
 from .cost_row import CostRow
 from .preview_map_dialog import PreviewMapDialog
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 import logging
 
@@ -147,22 +150,36 @@ class Table(sw.Layout):
         # Remove rows
         if old_ids:
             for old_id in old_ids:
-                row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
-                    0
-                ]
-                # unobserve the row to avoid ghost listeners
-                if self.type_ == "constraint":
-                    row_to_remove.unobserve_all()
+                # Find row by layer_id property (works with VuetifyTemplate)
+                row_to_remove = None
+                for row in self.tbody.children:
+                    if hasattr(row, "layer_id") and row.layer_id == old_id:
+                        row_to_remove = row
+                        break
 
-                self.tbody.children = [
-                    row for row in self.tbody.children if row != row_to_remove
-                ]
+                if row_to_remove:
+                    # unobserve the row to avoid ghost listeners
+                    if self.type_ == "constraint":
+                        row_to_remove.unobserve_all()
+
+                    self.tbody.children = [
+                        row for row in self.tbody.children if row != row_to_remove
+                    ]
         if edited_id:
             if edited_id:
-                row_to_edit = self.tbody.get_children(attr="layer_id", value=edited_id)[
-                    0
-                ]
-                row_to_edit.update_view()
+                # Find row by layer_id property (works with VuetifyTemplate)
+                row_to_edit = None
+                for row in self.tbody.children:
+                    if hasattr(row, "layer_id") and row.layer_id == edited_id:
+                        row_to_edit = row
+                        break
+
+                if row_to_edit:  # Check if the row still exists
+                    row_to_edit.update_view()
+                else:
+                    logger.debug(
+                        f"Row with layer_id {edited_id} not found for editing - may have been removed"
+                    )
 
         # This will be triggered the first time and every time update is modified
         # without a real change.

@@ -176,3 +176,13 @@ class Recipe(HasTraits):
     @observe("new_changes")
     def observe_changes(self, _):
         logger.debug(f"Changes observed in recipe, {self.new_changes} changes")
+
+    @property
+    def models(self):
+        """Return all models in the recipe."""
+        return [
+            self.seplan_aoi,
+            self.benefit_model,
+            self.constraint_model,
+            self.cost_model,
+        ]

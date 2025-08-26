@@ -117,6 +117,82 @@ def get_limits(
     return sorted(set(int(float(val)) for val in values))
 
 
+async def get_limits_async(
+    gee_interface: GEEInterface,
+    asset: str,
+    data_type: Literal["binary", "continuous", "categorical"],
+    aoi: Union[ee.FeatureCollection, ee.Geometry],
+    factor: int = 2,
+) -> List[int]:
+    """Async version of get_limits function.
+
+    Computes limits or histogram keys for the given Earth Engine image based on the specified data type.
+
+    Args:
+        gee_interface (GEEInterface): The GEE interface for async operations.
+        asset (str): Google Earth Engine asset ID.
+        data_type (str): Either 'binary', 'continuous', or any other type indicating the type of data processing.
+        aoi (ee.Geometry): Area of interest.
+        factor (int, optional): Factor to multiply the nominal scale of the image. Defaults to 2.
+
+    Returns:
+        list: A list containing either min-max values or histogram keys depending on the data_type.
+    """
+
+    # We know that the treecover_with_potential asset is binary
+    if asset == default_asset_id:
+        return [0, 1]
+
+    if data_type in ["binary", "continuous"]:
+        reducer = ee.Reducer.minMax()
+
+        async def get_value_async(reduction):
+            result = await gee_interface.get_info_async(reduction)
+            return list(result.values())
+
+    else:
+        reducer = ee.Reducer.frequencyHistogram()
+
+        async def get_value_async(reduction):
+            keys = await gee_interface.get_info_async(
+                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys()
+            )
+            return keys
+
+    ee_image = ee.Image(asset).select(0)
+    # Multiply the nominal scale by 2 in case the nominal scale is finer than 45
+    scale = ee.Number(
+        ee.Algorithms.If(
+            ee_image.projection().nominalScale().lt(30),
+            ee_image.projection().nominalScale().multiply(2),
+            ee_image.projection().nominalScale(),
+        )
+    )
+
+    # If scale is less than 30, set it to 30
+    scale = ee.Algorithms.If(scale.lt(30), 30, scale)
+
+    reduction = ee_image.reduceRegion(
+        reducer=reducer,
+        geometry=aoi,
+        scale=scale,
+        maxPixels=1e13,
+    )
+
+    values = await get_value_async(reduction)
+
+    logger.debug(f"get_limits_async_values: {values}")
+
+    # check if values are none and if so, raise a ValueError
+    if any([val is None for val in values]):
+        raise ValueError(cm.questionnaire.error.no_limits)
+
+    # depending on the scale, values from the histogram can be floats, we'll
+    # convert them to integers... sometimes we'll show more values than the
+    # asset really has
+    return sorted(set(int(float(val)) for val in values))
+
+
 def get_gee_recipe_folder(recipe_name: str, gee_interface: GEEInterface) -> Path:
     """Create a folder for the recipe in GEE"""
 
