@@ -10,7 +10,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN conda init bash && \
     bash -c "source ~/.bashrc && \
-    conda create -n seplan python==3.10 pip -y"
+    conda create -n seplan python==3.10 pip -y --no-cache"
 
 COPY requirements.txt /usr/local/lib/seplan/requirements.txt
 
