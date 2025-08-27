@@ -8,7 +8,7 @@ toml
 ipecharts>=1.2.0
 rasterio<1.3.11 # Leave it here even if it's already in the sepal_ui requirements. Check https://github.com/openforis/sepal/issues/328
 
-git+https://github.com/openforis/sepal_ui@v3.0.0.beta-0
+git+https://github.com/openforis/sepal_ui@1bdce9877c1a9ee2418b9fb35171b9b6053e204f
 
 https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/jupyter_leaflet-0.19.2-py3-none-any.whl
 https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/ipyleaflet-0.19.2-py3-none-any.whl
