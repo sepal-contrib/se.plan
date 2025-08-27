@@ -1,3 +1,4 @@
+# Force rebuild: 2025-08-27-14:30
 FROM continuumio/miniconda3
 
 WORKDIR /usr/local/lib/seplan
