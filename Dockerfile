@@ -1,4 +1,3 @@
-# Force rebuild: 2025-08-27-14:30
 FROM continuumio/miniconda3
 
 WORKDIR /usr/local/lib/seplan
@@ -11,7 +10,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 RUN conda init bash && \
     bash -c "source ~/.bashrc && \
-    conda create -n seplan python==3.10 pip -y --no-cache"
+    conda create -n seplan python==3.10 pip -y"
 
 COPY requirements.txt /usr/local/lib/seplan/requirements.txt
 
