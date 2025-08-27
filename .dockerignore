@@ -148,3 +148,30 @@ ui-tests/jlab_root
 
 .yarn/
 yarn.lock
+
+# Large training data and media files
+training/
+utils/video/
+*.tif
+*.tiff
+*.mp4
+*.gif
+*.mov
+*.avi
+*.mkv
+
+# Large datasets and documentation
+doc/
+docs/
+
+# Test data that shouldn't be in production
+tests/data/
+ui_tests/data/
+
+# Jupyter notebooks (except production ones)
+*.ipynb
+!solara_app.ipynb
+
+# Yarn and npm caches
+.yarn/cache/
+node_modules/
