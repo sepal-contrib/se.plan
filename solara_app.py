@@ -13,7 +13,6 @@ from solara.lab.components.theming import theme
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.utils import init_ee
 from sepal_ui.sepalwidgets.vue_app import MapApp, ThemeToggle
-from sepal_ui.solara.components.admin import AdminButton
 
 from sepal_ui.solara import (
     setup_sessions,
@@ -35,8 +34,8 @@ from component.model.app_model import AppModel
 from component.message import cm
 from component.widget.custom_widgets import CustomAppBar, CustomTileAbout
 
-logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.DEBUG)
+logging.getLogger("httpcore").setLevel(logging.DEBUG)
 logging.getLogger("sepalui").setLevel(logging.DEBUG)
 
 
