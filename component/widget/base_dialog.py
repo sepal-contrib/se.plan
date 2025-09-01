@@ -26,11 +26,7 @@ class BaseDialog(sw.Dialog):
                 type_
             ]
 
-        self.v_model = True
-
-    def close_dialog(self, *_):
-        """Close dialog."""
-        self.v_model = False
+        super().open_dialog()
 
 
 class MapDialog(v.VuetifyTemplate):

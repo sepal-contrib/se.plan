@@ -19,6 +19,7 @@ def get_right_panel_content(
     sepal_session,
     map_,
     theme_toggle=None,
+    no_admin=False,
 ):
 
     dashboard_dialog = DashboardDialog(theme_toggle=theme_toggle, recipe=recipe)
@@ -63,7 +64,7 @@ def get_right_panel_content(
 
     # Add dashboard components
     content_data = [
-        {"content": [AdminButton(models=recipe.models)]},
+        {"content": [AdminButton(models=recipe.models) if not no_admin else None]},
         {
             "title": "Compute Restoration Map",
             "icon": "mdi-map-marker",
