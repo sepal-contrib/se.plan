@@ -190,7 +190,7 @@ class RecipeView(sw.Layout):
 
         # Create events
         self.card_new.btn.on_event("click", self.new_event)
-        self.card_load.btn.on_event("click", lambda *_: self.load_dialog.show())
+        self.card_load.btn.on_event("click", lambda *_: self.load_dialog._show())
 
         self.load_dialog.btn_load.on_event("click", self.load_event)
 
@@ -250,7 +250,7 @@ class RecipeView(sw.Layout):
 
         self.load_recipe_path = self.load_dialog.load_recipe_path
 
-        self.load_dialog.v_model = False
+        self.load_dialog.close_dialog()
 
         self.alert.set_state("load", "all", "building")
 
@@ -338,13 +338,19 @@ class LoadDialog(BaseDialog):
             (self.w_input_recipe, "load_recipe_path"), (self, "load_recipe_path")
         )
 
-    def show(self):
-        """Display the dialog and write down the text in the alert."""
+    def open_dialog(self, *args, **kwargs):
+        """Prepare and open the dialog without calling super().show()."""
+        # Reset selection and validation state before opening
         self.load_recipe_path = None
         self.w_input_recipe.file_input.error_messages = []
         self.w_input_recipe.file_input.reset()
         self.valid = False
-        self.open_dialog()
+        # Open via BaseDialog's open_dialog (not super().show())
+        super().open_dialog()
+
+    def _show(self, *args, **kwargs):
+        """Override show to route to open_dialog with custom prep."""
+        return self.open_dialog(*args, **kwargs)
 
     def cancel(self, *args):
         """Hide the widget and reset the selected file."""

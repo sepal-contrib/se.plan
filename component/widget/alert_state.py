@@ -114,11 +114,11 @@ class TaskMsg(sw.Flex):
 class AlertDialog(sw.Dialog):
     def __init__(self, w_alert: AlertState):
         self.max_width = 650
-        self.persistent = True
+        self.persistent = False
         super().__init__()
 
-        self.v_model = False
         self.w_alert = w_alert
+        self.close_dialog()
 
         btn_close = Btn(
             color="primary",
@@ -134,16 +134,16 @@ class AlertDialog(sw.Dialog):
                 ],
             )
         ]
-        btn_close.on_event("click", lambda *_: setattr(self, "v_model", False))
+        btn_close.on_event("click", self.close_dialog)
         self.w_alert.observe(self.open_dialog, "children")
 
     def open_dialog(self, change):
         """Opens the dialog when there's a change in the alert chilndren state."""
         if change["new"] != [""]:
-            self.v_model = True
+            super().open_dialog()
 
     def close_dialog(self, *_):
         """Closes the dialog."""
 
-        self.v_model = False
         self.w_alert.children = [""]
+        super().close_dialog()
