@@ -61,7 +61,11 @@ class AoiModel(AoiModel):
         asset = self.default_asset
 
         # delete all the traits but the updated one (to avoid triggering the event)
-        [setattr(self, attr, None) for attr in self.trait_names() if attr != "updated"]
+        [
+            setattr(self, attr, None)
+            for attr in self.trait_names()
+            if attr not in ["updated", "object_set"]
+        ]
 
         # reset the outputs
         self.clear_output()
