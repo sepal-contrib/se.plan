@@ -15,7 +15,7 @@ https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/jupyter_l
 https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/ipyleaflet-0.20.0-py3-none-any.whl
 
 # custom libs
-earthengine-api
+earthengine-api<1.6
 pandas
 Shapely
 matplotlib
