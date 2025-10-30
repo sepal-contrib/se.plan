@@ -1,4 +1,5 @@
 from pathlib import Path
+import traceback
 from typing import Union
 
 import ipyvuetify as v
@@ -18,7 +19,11 @@ from component.model.aoi_model import SeplanAoi
 from component.model.constraint_model import ConstraintModel
 from component.scripts.seplan import asset_to_image, mask_image
 from component.scripts.ui_helpers import get_categorical_values
-from component.scripts.validation import validate_constraint_values
+from component.scripts.validation import (
+    extract_task_error,
+    get_short_traceback,
+    validate_constraint_values,
+)
 from component.widget.alert_state import Alert
 from component.widget.constraint_widget import ConstraintWidget
 
@@ -102,29 +107,21 @@ class ConstraintRow(v.VuetifyTemplate):
             self.has_error = True
             self.error_message = error_msg
             self.error_type = "validation"
-            logger.debug(f"Initial validation error for {self.layer_id}: {error_msg}")
 
     def validate_current_values(self):
         """Validate current constraint values and update error state."""
         is_valid, error_msg = self.validate_constraint_values()
-        logger.debug(
-            f"Validating current values for {self.layer_id}: valid={is_valid}, msg='{error_msg}', current_value={self.value}"
-        )
         if not is_valid:
             # Set validation error state but don't disable widget
             self.has_error = True
             self.error_message = error_msg
             self.error_type = "validation"
-            logger.debug(
-                f"Setting validation error for {self.layer_id}: has_error={self.has_error}, error_message='{self.error_message}', error_type='{self.error_type}'"
-            )
         else:
             # Clear validation error state only if it was a validation error
             if self.error_type == "validation":
                 self.has_error = False
                 self.error_message = ""
                 self.error_type = ""
-                logger.debug(f"Validation cleared for {self.layer_id}")
 
     def get_model_data(self):
         """Get and set the data of the given layer_id to the row."""
@@ -145,24 +142,16 @@ class ConstraintRow(v.VuetifyTemplate):
     def _on_loading_change(self, change):
         """Observer for loading state changes."""
         loading = change["new"]
-        logger.debug(f"Loading state changed for {self.layer_id}: {loading}")
-
         self.w_maskout.set_loading(loading)
 
     @observe("has_error")
     def _on_error_change(self, change):
         """Observer for error state changes."""
-        has_error = change["new"]
-        logger.debug(f"Error state changed for {self.layer_id}: {has_error}")
         self._update_widget_error_state()
 
     @observe("error_message", "error_type")
     def _on_error_details_change(self, change):
         """Observer for error message and type changes."""
-        logger.debug(
-            f"Error details changed for {self.layer_id}: {change['name']}={change['new']}"
-        )
-        # Update widget error state when error details change
         self._update_widget_error_state()
 
     def _update_widget_error_state(self):
@@ -172,16 +161,12 @@ class ConstraintRow(v.VuetifyTemplate):
                 error_text = self.error_message
                 # Determine if widget should be disabled based on error type
                 disable_widget = self.error_type == "computation"
-                logger.debug(
-                    f"Updating widget error for {self.layer_id}: message='{error_text}', type='{self.error_type}', disable={disable_widget}"
-                )
                 self.w_maskout.set_error(
                     self.has_error,
                     error_message=error_text,
                     disable_widget=disable_widget,
                 )
             else:
-                logger.debug(f"Clearing widget error for {self.layer_id}")
                 self.w_maskout.set_error(False, error_message="", disable_widget=False)
 
     def vue_on_edit(self, *_):
@@ -310,28 +295,55 @@ class ConstraintRow(v.VuetifyTemplate):
         self.is_loading = loading
         self.has_error = error
 
+    def _get_user_friendly_error(self, error_msg: str) -> str:
+        """Convert technical error message to user-friendly message."""
+        error_lower = error_msg.lower()
+
+        # Check for access/permission errors
+        if "not found" in error_lower and (
+            "does not exist" in error_lower
+            or "caller does not have access" in error_lower
+        ):
+            return f"The layer '{self.layer_name}' could not be accessed. Please verify the asset exists and you have permission to access it, or remove it from the questionnaire"
+        elif (
+            "permission" in error_lower
+            or "access" in error_lower
+            or "forbidden" in error_lower
+        ):
+            return f"The layer '{self.layer_name}' requires access permissions. Please check your Earth Engine permissions or remove it from the questionnaire"
+        # Check for timeout errors
+        elif "timeout" in error_lower or "timed out" in error_lower:
+            return f"The layer '{self.layer_name}' couldn't be computed (timeout), please remove it from the questionnaire or try a new one"
+        # Check for invalid data errors
+        elif "invalid_argument" in error_lower or "invalid argument" in error_lower:
+            return f"The layer '{self.layer_name}' couldn't be computed (invalid data), please remove it from the questionnaire or try a new one"
+        # Generic error
+        else:
+            return f"The layer '{self.layer_name}' couldn't be computed, please remove it from the questionnaire or try a new one"
+
     def _create_limits_task(self):
         """Create the reusable limits task once."""
 
         def limits_callback(_):
             """Callback when limits are computed."""
-            logger.debug(f"Limits callback triggered for {self.layer_id}")
             try:
                 # Check if task has an error state before processing result
                 if self._limits_task.state.value == "error":
-                    logger.error(
-                        f"Task is in error state, calling error callback manually"
-                    )
                     limits_error_callback(self._limits_task)
                     return
 
                 values = self._limits_task.result
-                logger.debug(f"Got limits values for {self.layer_id}: {values}")
 
                 if self.data_type == "binary":
-                    if not all(val in values for val in [0, 1]):
-                        raise Exception("Binary asset must have only 0 and 1 values")
-                    self.w_maskout.v_model = [values[0]]
+                    # Validate that all values are either 0 or 1 (subset of {0, 1})
+                    if not all(val in [0, 1] for val in values):
+                        raise Exception(
+                            f"Binary asset must contain only 0 and/or 1 values, got {values}"
+                        )
+                    # Set default to the first available value
+                    # Prefer masking out 0 if available (keeping 1s), otherwise mask out 1
+                    default_maskout = 0 if 0 in values else 1
+                    self.w_maskout.v_model = [default_maskout]
 
                 elif self.data_type == "categorical":
                     if len(values) > 256:
@@ -356,11 +368,27 @@ class ConstraintRow(v.VuetifyTemplate):
 
                 self.update_value()
                 self._set_limits_state(completed=True, error=False)
-                logger.debug(f"Limits processing completed for {self.layer_id}")
 
             except Exception as e:
-                logger.error(f"Error setting limits for {self.layer_id}: {e}")
-                error_msg = f"The layer '{self.layer_name}' couldn't be computed, please remove it from the questionnaire or try a new one"
+
+                tb = traceback.format_exc()
+                logger.error(f"Error setting limits for {self.layer_id}: {e}\n{tb}")
+
+                # Check if this is a known validation error
+                error_str = str(e)
+                is_validation_error = (
+                    "Binary asset must contain only" in error_str
+                    or "Categorical asset must have less than" in error_str
+                )
+
+                if is_validation_error:
+                    # For validation errors, include the exception message in error_msg
+                    error_msg = f"The layer '{self.layer_name}' couldn't be computed: {error_str}"
+                else:
+                    # For other errors, use generic message with short traceback
+                    short_tb_msg = get_short_traceback(tb)
+                    error_msg = f"The layer '{self.layer_name}' couldn't be computed, please remove it from the questionnaire or try a new one. {short_tb_msg}"
+
                 self._set_limits_state(
                     completed=False,
                     error=True,
@@ -368,49 +396,27 @@ class ConstraintRow(v.VuetifyTemplate):
                     error_type="computation",
                 )
 
-                self.alert.add_msg(str(e), "error")
-
         def limits_error_callback(task):
             """Callback when limits computation fails."""
-            logger.error(f"ERROR CALLBACK TRIGGERED for {self.layer_id}")
 
-            error_msg = ""
-            if task.message:
-                error_msg = str(task.message)
-            elif task.error:
-                error_msg = str(task.error)
-            else:
-                error_msg = f"Task failed with state: {task.state}"
-
+            # Extract error message from task
+            error_msg = extract_task_error(task)
             logger.error(f"Failed to get limits for {self.layer_id}: {error_msg}")
 
-            # Check if it's a timeout error
-            if "timeout" in error_msg.lower() or "timed out" in error_msg.lower():
-                self.error_message = f"The layer '{self.layer_name}' couldn't be computed (timeout), please remove it from the questionnaire or try a new one"
-            elif "invalid_argument" in error_msg.lower():
-                self.error_message = f"The layer '{self.layer_name}' couldn't be computed (invalid data), please remove it from the questionnaire or try a new one"
-            else:
-                self.error_message = f"The layer '{self.layer_name}' couldn't be computed, please remove it from the questionnaire or try a new one"
+            # Convert to user-friendly message
+            user_msg = self._get_user_friendly_error(error_msg)
 
             self._set_limits_state(
                 completed=False,
                 error=True,
-                error_message=self.error_message,
+                error_message=user_msg,
                 error_type="computation",
             )
 
-            # Also show in alert if available
-            self.alert.add_msg(f"{self.layer_name}: {self.error_message}", "error")
-
         def limits_finally_callback():
             """Callback that always runs after limits computation."""
-            logger.debug(f"Limits finally callback for {self.layer_id}")
-
             # Check if we're in an error state but the error callback wasn't triggered
             if self._limits_task.state.value == "error" and not self.limits_error:
-                logger.error(
-                    f"Task is in error state but error callback wasn't triggered"
-                )
                 limits_error_callback(self._limits_task)
 
             self.is_loading = False
@@ -418,9 +424,6 @@ class ConstraintRow(v.VuetifyTemplate):
 
             # Perform validation after loading completes (only if no computation error)
             if not self.limits_error:
-                logger.debug(
-                    f"Calling validation for {self.layer_id} with value: {self.value}"
-                )
                 self.validate_current_values()
 
         # Create the task once

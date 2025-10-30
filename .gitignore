@@ -6,6 +6,7 @@ __pycache__/
 *[Uu]ntitled*
 nox_ui.ipynb
 ,nox
+issues/
 # C extensions
 *.so
 99*

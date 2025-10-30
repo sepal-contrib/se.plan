@@ -4,7 +4,7 @@ from pathlib import Path
 
 from sepal_ui.scripts.warning import SepalWarning
 from sepal_ui.scripts.gee_interface import GEEInterface
-from traitlets import HasTraits, Int, Unicode, observe
+from traitlets import HasTraits, Int, Unicode, observe, List as TraitsList
 
 import component.parameter as cp
 from component import model as cmod
@@ -30,6 +30,9 @@ class Recipe(HasTraits):
 
     recipe_session_path = Unicode("", allow_none=True).tag(sync=True)
     """The path to the recipe session file. This value will come from the recipe view, it will be used by the export csv function and to create the names of the assets to export"""
+
+    invalid_constraints = TraitsList([]).tag(sync=True)
+    """List of invalid constraints that were removed during recipe loading. Each item contains: index, id, name, data_type, values, error"""
 
     def __init__(
         self,
@@ -81,7 +84,20 @@ class Recipe(HasTraits):
         # load the aoi_model
         self.seplan_aoi.import_data(data["aoi"])
         self.benefit_model.import_data(data["benefits"])
-        self.constraint_model.import_data(data["constraints"])
+
+        # Use safe import for constraints to handle invalid data
+        removed_constraints = self.constraint_model.import_data_safe(
+            data["constraints"]
+        )
+
+        # Store invalid constraints info for UI to display
+        self.invalid_constraints = removed_constraints
+
+        if removed_constraints:
+            logger.warning(
+                f"Recipe loaded with {len(removed_constraints)} invalid constraints removed"
+            )
+
         self.cost_model.import_data(data["costs"])
 
         self.new_changes = 0
@@ -100,7 +116,20 @@ class Recipe(HasTraits):
         # load the aoi_model
         await self.seplan_aoi.import_data_async(data["aoi"])
         self.benefit_model.import_data(data["benefits"])
-        self.constraint_model.import_data(data["constraints"])
+
+        # Use safe import for constraints to handle invalid data
+        removed_constraints = self.constraint_model.import_data_safe(
+            data["constraints"]
+        )
+
+        # Store invalid constraints info for UI to display
+        self.invalid_constraints = removed_constraints
+
+        if removed_constraints:
+            logger.warning(
+                f"Recipe loaded with {len(removed_constraints)} invalid constraints removed"
+            )
+
         self.cost_model.import_data(data["costs"])
 
         self.new_changes = 0

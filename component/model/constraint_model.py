@@ -1,10 +1,14 @@
 import pandas as pd
 from traitlets import List, observe
+from typing import Tuple
 
 from component import parameter as cp
 from component.message import cm
 from component.model.questionnaire_model import QuestionnaireModel
-from component.scripts.validation import validate_constraint_model_data
+from component.scripts.validation import (
+    validate_constraint_model_data,
+    filter_invalid_constraints,
+)
 from component.types import ConstraintLayerData
 
 import logging
@@ -165,3 +169,36 @@ class ConstraintModel(QuestionnaireModel):
         """Get a list of constraint names that have validation errors."""
         _, errors = self.validate_constraints_for_calculation()
         return errors
+
+    def import_data_safe(self, data: dict) -> list[dict]:
+        """
+        Import constraint data with validation, filtering out invalid entries.
+
+        This method validates constraints before importing and removes any invalid
+        ones, allowing the rest of the recipe to load successfully.
+
+        Args:
+            data: Dictionary containing constraint data
+
+        Returns:
+            List of removed constraints, each containing:
+                - index: Original index in the data
+                - id: Constraint ID
+                - name: Constraint name
+                - data_type: Expected data type
+                - values: Invalid values
+                - error: Error message explaining why it's invalid
+        """
+        filtered_data, removed_constraints = filter_invalid_constraints(data)
+
+        super().import_data(filtered_data)
+
+        if removed_constraints:
+            logger.warning(
+                f"Removed {len(removed_constraints)} invalid constraints during import:\n"
+                + "\n".join(
+                    [f"  - {c['name']}: {c['error']}" for c in removed_constraints]
+                )
+            )
+
+        return removed_constraints

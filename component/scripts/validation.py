@@ -11,6 +11,8 @@ from component.parameter import recipe_schema_path
 from component.scripts.file_handler import read_file
 from component.types import RecipePaths
 import logging
+from sepal_ui.scripts.gee_task import GEETask
+
 
 logger = logging.getLogger("SEPLAN")
 
@@ -202,6 +204,8 @@ def validate_constraint_values(
             return False, f"Please select exactly one value (0 or 1)"
         if values[0] is None:
             return False, f"Please select a valid value (0 or 1)"
+        if values[0] not in [0, 1]:
+            return False, f"Please select a valid value (0 or 1)"
 
     elif data_type == "categorical":
         if any(val is None for val in values):
@@ -328,3 +332,185 @@ def validate_constraint_model_data(
             errors.append(f"'{layer_name}': {error_msg}")
 
     return len(errors) == 0, errors
+
+
+def validate_constraint_data(constraints_data: dict) -> Tuple[bool, List[dict]]:
+    """
+    Validate constraints data before loading into model.
+
+    Checks:
+    - All constraint arrays have matching lengths
+    - Each constraint has valid values for its data_type
+
+    Args:
+        constraints_data: Dictionary containing constraint arrays
+
+    Returns:
+        Tuple of (is_valid, list_of_invalid_constraints)
+        Each invalid constraint is a dict with keys: index, id, name, data_type, values, error
+    """
+    invalid_constraints = []
+
+    # Check if constraints data exists and has required keys
+    required_keys = [
+        "names",
+        "ids",
+        "values",
+        "data_type",
+        "themes",
+        "assets",
+        "descs",
+        "units",
+    ]
+
+    for key in required_keys:
+        if key not in constraints_data:
+            logger.error(f"Missing required key in constraints: {key}")
+            return False, [{"error": f"Missing required field: {key}", "index": -1}]
+
+    # Check array lengths match
+    lengths = {k: len(constraints_data.get(k, [])) for k in required_keys}
+    unique_lengths = set(lengths.values())
+
+    if len(unique_lengths) > 1:
+        logger.error(f"Constraint arrays have mismatched lengths: {lengths}")
+        return False, [{"error": f"Array length mismatch: {lengths}", "index": -1}]
+
+    # Validate each constraint
+    num_constraints = len(constraints_data.get("ids", []))
+
+    for i in range(num_constraints):
+        try:
+            constraint_id = constraints_data["ids"][i]
+            name = constraints_data["names"][i]
+            data_type = constraints_data["data_type"][i]
+            values = constraints_data["values"][i]
+
+            # Validate the values for this constraint
+            is_valid, error_msg = validate_constraint_values(values, data_type, name)
+
+            if not is_valid:
+                invalid_constraints.append(
+                    {
+                        "index": i,
+                        "id": constraint_id,
+                        "name": name,
+                        "data_type": data_type,
+                        "values": values,
+                        "error": error_msg,
+                    }
+                )
+                logger.warning(f"Invalid constraint '{name}' (index {i}): {error_msg}")
+
+        except (IndexError, KeyError) as e:
+            logger.error(f"Malformed constraint at index {i}: {e}")
+            invalid_constraints.append(
+                {
+                    "index": i,
+                    "id": (
+                        constraints_data["ids"][i]
+                        if i < len(constraints_data.get("ids", []))
+                        else "unknown"
+                    ),
+                    "name": (
+                        constraints_data["names"][i]
+                        if i < len(constraints_data.get("names", []))
+                        else "unknown"
+                    ),
+                    "data_type": "unknown",
+                    "values": [],
+                    "error": f"Malformed data: {str(e)}",
+                }
+            )
+
+    return len(invalid_constraints) == 0, invalid_constraints
+
+
+def filter_invalid_constraints(constraints_data: dict) -> Tuple[dict, List[dict]]:
+    """
+    Filter out invalid constraints from constraints data.
+
+    Args:
+        constraints_data: Dictionary containing constraint arrays
+
+    Returns:
+        Tuple of (filtered_data, list_of_removed_constraints)
+        Each removed constraint contains: index, id, name, data_type, values, error
+    """
+    is_valid, invalid_constraints = validate_constraint_data(constraints_data)
+
+    # If all valid, return as-is
+    if is_valid:
+        return constraints_data, []
+
+    # Get indices of invalid constraints
+    invalid_indices = set(c["index"] for c in invalid_constraints if c["index"] >= 0)
+
+    # If there's a structural error (index -1), we can't filter safely
+    if any(c["index"] == -1 for c in invalid_constraints):
+        logger.error("Cannot filter constraints due to structural errors")
+        return constraints_data, invalid_constraints
+
+    # Filter out invalid constraints
+    filtered_data = {}
+    required_keys = [
+        "names",
+        "ids",
+        "values",
+        "data_type",
+        "themes",
+        "assets",
+        "descs",
+        "units",
+    ]
+
+    for key in required_keys:
+        filtered_data[key] = [
+            constraints_data[key][i]
+            for i in range(len(constraints_data[key]))
+            if i not in invalid_indices
+        ]
+
+    # Preserve other keys that might exist
+    for key in constraints_data:
+        if key not in required_keys:
+            filtered_data[key] = constraints_data[key]
+
+    logger.info(
+        f"Filtered out {len(invalid_indices)} invalid constraints from {len(constraints_data['ids'])} total"
+    )
+
+    return filtered_data, invalid_constraints
+
+
+def get_short_traceback(tb_string: str, num_lines: int = 3) -> str:
+    """Extract a short traceback snippet from a full traceback string."""
+    short_tb = tb_string.splitlines()[-num_lines:]
+    return " | ".join([line.strip() for line in short_tb if line.strip()])
+
+
+def extract_task_error(task: GEETask) -> str:
+    """Extract error message from a failed task, checking multiple sources."""
+
+    # Try to get error message from various task attributes
+    error_msg = ""
+    if getattr(task, "message", None):
+        error_msg = str(task.message)
+    if not error_msg and getattr(task, "error", None):
+        error_msg = str(task.error)
+
+    # Log full traceback if exception is available
+    if getattr(task, "exception", None):
+        exc = task.exception
+        if not error_msg:
+            error_msg = str(exc)
+
+    # Check for traceback attribute
+    if not error_msg and getattr(task, "traceback", None):
+        error_msg = str(task.traceback)
+
+    # Fallback to task state
+    if not error_msg:
+        error_msg = f"Task failed with state: {task.state}"
+
+    return error_msg

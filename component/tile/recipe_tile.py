@@ -18,6 +18,7 @@ from component.model.recipe import Recipe
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
 from component.widget.custom_widgets import RecipeInput
+from component.widget.invalid_constraints_dialog import InvalidConstraintsDialog
 import logging
 
 logger = logging.getLogger("SEPLAN")
@@ -153,9 +154,15 @@ class RecipeView(sw.Layout):
 
         self.load_dialog = LoadDialog(sepal_session=sepal_session)
 
+        # Create the invalid constraints dialog with fix callback
+        self.invalid_constraints_dialog = InvalidConstraintsDialog(
+            on_fix_callback=self._fix_recipe
+        )
+
         self.children = [
             self.alert_dialog,
             self.load_dialog,
+            self.invalid_constraints_dialog,
             sw.Container(
                 children=[
                     sw.Row(
@@ -263,6 +270,13 @@ class RecipeView(sw.Layout):
 
         self.alert.set_state("load", "all", "done")
 
+        # Check if there were invalid constraints and show dialog
+        if self.recipe.invalid_constraints:
+            logger.info(
+                f"Found {len(self.recipe.invalid_constraints)} invalid constraints"
+            )
+            self.invalid_constraints_dialog.show(self.recipe.invalid_constraints)
+
     def save_event(self, *_):
         """Saves the current state of the recipe."""
         self.alert.reset()
@@ -294,6 +308,33 @@ class RecipeView(sw.Layout):
         self.recipe_session_path = str(recipe_path)
 
         self.alert.add_msg(cm.recipe.states.save.format(recipe_path), type_="success")
+
+    def _fix_recipe(self):
+        """
+        Fix the recipe by saving it without the invalid constraints.
+
+        This is called when the user clicks "Fix Recipe" in the invalid constraints dialog.
+        """
+        try:
+            logger.info("Fixing recipe by removing invalid constraints")
+
+            # The invalid constraints have already been removed from the model
+            # by import_data_safe(), so we just need to save the current state
+
+            if not self.recipe_session_path:
+                raise ValueError("No recipe path available - cannot fix recipe")
+
+            # Save to the same path (overwrite)
+            self.recipe.save(self.recipe_session_path)
+
+            # Clear the invalid constraints list
+            self.recipe.invalid_constraints = []
+
+            logger.info(f"Recipe fixed and saved to {self.recipe_session_path}")
+
+        except Exception as e:
+            logger.exception(f"Error fixing recipe: {e}")
+            raise  # Re-raise so dialog can show error
 
 
 class LoadDialog(BaseDialog):
