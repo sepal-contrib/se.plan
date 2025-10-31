@@ -13,12 +13,13 @@ from traitlets import Int, Unicode, directional_link, observe
 from component.message import cm
 from component.model.app_model import AppModel
 from component.model.recipe import Recipe
+from component.scripts.validation import ValidationResult, sanitize_recipe_data
 
 # Import types
 from component.widget.alert_state import Alert, AlertDialog, AlertState
 from component.widget.base_dialog import BaseDialog
 from component.widget.custom_widgets import RecipeInput
-from component.widget.invalid_constraints_dialog import InvalidConstraintsDialog
+from component.widget.invalid_data_dialog import InvalidDataDialog
 import logging
 
 logger = logging.getLogger("SEPLAN")
@@ -144,6 +145,9 @@ class RecipeView(sw.Layout):
         self.alert = AlertState()
         self.alert_dialog = AlertDialog(self.alert)
 
+        # Store pending validation result for dialog callbacks
+        self._pending_validation = None
+
         self.app_model = app_model
         if not app_model:
             self.app_model = AppModel()
@@ -154,15 +158,16 @@ class RecipeView(sw.Layout):
 
         self.load_dialog = LoadDialog(sepal_session=sepal_session)
 
-        # Create the invalid constraints dialog with fix callback
-        self.invalid_constraints_dialog = InvalidConstraintsDialog(
-            on_fix_callback=self._fix_recipe
+        # Create the invalid data dialog with callbacks
+        self.invalid_data_dialog = InvalidDataDialog(
+            on_continue_callback=self._continue_with_cleaned_data,
+            on_cancel_callback=self._cancel_recipe_load,
         )
 
         self.children = [
             self.alert_dialog,
             self.load_dialog,
-            self.invalid_constraints_dialog,
+            self.invalid_data_dialog,
             sw.Container(
                 children=[
                     sw.Row(
@@ -263,19 +268,38 @@ class RecipeView(sw.Layout):
 
         logger.debug(f"Recipe session {self.recipe.sepal_session}")
 
-        self.recipe.load(recipe_path=self.load_dialog.load_recipe_path)
+        # Load recipe - returns ValidationResult if errors found
+        result = self.recipe.load(recipe_path=self.load_dialog.load_recipe_path)
+
+        # Check if validation failed
+        if isinstance(result, ValidationResult):
+            logger.warning(
+                f"Recipe validation failed with {result.total_errors} errors"
+            )
+
+            # Store for callbacks to use
+            self._pending_validation = result
+
+            # Clear the building state
+            self.alert.set_state("load", "all", "done")
+
+            # Show dialog with all error types
+            self.invalid_data_dialog.show_errors(
+                benefits_errors=result.benefits_errors,
+                constraints_errors=result.constraints_errors,
+                costs_errors=result.costs_errors,
+            )
+
+            # Don't set recipe_session_path yet - wait for user decision
+            return
+
+        # Success - recipe loaded normally
+        self._pending_validation = None
 
         # Assign the recipe path to the current session path
         self.recipe_session_path = self.load_dialog.load_recipe_path
 
         self.alert.set_state("load", "all", "done")
-
-        # Check if there were invalid constraints and show dialog
-        if self.recipe.invalid_constraints:
-            logger.info(
-                f"Found {len(self.recipe.invalid_constraints)} invalid constraints"
-            )
-            self.invalid_constraints_dialog.show(self.recipe.invalid_constraints)
 
     def save_event(self, *_):
         """Saves the current state of the recipe."""
@@ -309,32 +333,80 @@ class RecipeView(sw.Layout):
 
         self.alert.add_msg(cm.recipe.states.save.format(recipe_path), type_="success")
 
-    def _fix_recipe(self):
+    def _continue_with_cleaned_data(self):
         """
-        Fix the recipe by saving it without the invalid constraints.
+        Continue working with the cleaned data after user accepts.
 
-        This is called when the user clicks "Fix Recipe" in the invalid constraints dialog.
+        This is called when the user clicks "Continue" in the invalid data dialog.
+        The data will be sanitized and loaded into the models.
         """
+        if not self._pending_validation:
+            logger.error("No pending validation to continue")
+            return
+
         try:
-            logger.info("Fixing recipe by removing invalid constraints")
+            logger.info("User chose to continue - sanitizing and loading data")
 
-            # The invalid constraints have already been removed from the model
-            # by import_data_safe(), so we just need to save the current state
+            # Sanitize the data (clears invalid values)
+            sanitized_data = sanitize_recipe_data(
+                self._pending_validation.raw_data, self._pending_validation
+            )
 
-            if not self.recipe_session_path:
-                raise ValueError("No recipe path available - cannot fix recipe")
+            # Load the sanitized data
+            self.recipe.load_sanitized(
+                sanitized_data, self._pending_validation.recipe_path
+            )
 
-            # Save to the same path (overwrite)
-            self.recipe.save(self.recipe_session_path)
+            # Assign the recipe path to the current session path
+            self.recipe_session_path = self._pending_validation.recipe_path
 
-            # Clear the invalid constraints list
-            self.recipe.invalid_constraints = []
+            # Show success message with error count
+            error_count = self._pending_validation.total_errors
+            self.alert.add_msg(
+                f"Recipe loaded with {error_count} invalid item(s) sanitized (values cleared)",
+                type_="warning",
+            )
 
-            logger.info(f"Recipe fixed and saved to {self.recipe_session_path}")
+            # Clear pending validation
+            self._pending_validation = None
 
         except Exception as e:
-            logger.exception(f"Error fixing recipe: {e}")
-            raise  # Re-raise so dialog can show error
+            logger.exception(f"Error loading sanitized recipe: {e}")
+            self.alert.add_msg(f"Error loading recipe: {str(e)}", type_="error")
+            # Keep pending validation in case user wants to retry
+            raise
+
+    def _cancel_recipe_load(self):
+        """
+        Cancel the recipe load and reset to default values.
+
+        This is called when the user clicks "Cancel" in the invalid data dialog.
+        """
+        if not self._pending_validation:
+            logger.error("No pending validation to cancel")
+            return
+
+        logger.info("User cancelled recipe load - resetting to defaults")
+
+        # Always clear pending validation first
+        self._pending_validation = None
+
+        try:
+            # Reset all models to default state
+            self.recipe.reset()
+
+            # Clear recipe path
+            self.recipe_session_path = ""
+
+            # Update the alert
+            self.alert.add_msg(
+                "Recipe load cancelled - reset to defaults", type_="info"
+            )
+
+        except Exception as e:
+            logger.exception(f"Error resetting recipe: {e}")
+            self.alert.add_msg(f"Error resetting recipe: {str(e)}", type_="error")
+            # Don't re-raise - dialog is already closed
 
 
 class LoadDialog(BaseDialog):
