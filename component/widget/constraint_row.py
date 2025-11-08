@@ -297,6 +297,9 @@ class ConstraintRow(v.VuetifyTemplate):
 
     def _get_user_friendly_error(self, error_msg: str) -> str:
         """Convert technical error message to user-friendly message."""
+        # Log the full error for debugging
+        logger.error(f"Full error for layer '{self.layer_name}': {error_msg}")
+
         error_lower = error_msg.lower()
 
         # Check for access/permission errors
