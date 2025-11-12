@@ -108,7 +108,7 @@ def Page():
         {
             "id": 2,
             "name": cm.app.drawer.recipe,
-            "icon": icon("question-file"),
+            "icon": icon("recipe-note"),
             "display": "dialog",
             "content": recipe_tile,
         },
