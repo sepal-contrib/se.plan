@@ -493,11 +493,15 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
         .get("area")
     )
 
-    sum_img = image.updateMask(mask).reduceRegion(
-        reducer=ee.Reducer.sum(),
-        geometry=aoi,
-        scale=100,
-        maxPixels=1e13,
+    sum_img = (
+        image.reproject("EPSG:4326")
+        .updateMask(mask)
+        .reduceRegion(
+            reducer=ee.Reducer.sum(),
+            geometry=aoi,
+            scale=100,
+            maxPixels=1e13,
+        )
     )
 
     total_img = image.reduceRegion(
@@ -509,8 +513,8 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
 
     value = ee.Dictionary(
         {
-            "values": {"sum": ee.Number(sum_img.values().get(0)).divide(area_ha)},
             "total": [ee.Number(total_img.values().get(0)).divide(area_ha)],
+            "values": {"sum": ee.Number(sum_img.values().get(0)).divide(area_ha)},
         }
     )
 
