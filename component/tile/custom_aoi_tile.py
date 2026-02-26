@@ -2,7 +2,7 @@ from typing import Union
 
 import ee
 import pandas as pd
-import pkg_resources
+import pygaul
 from component.frontend.icons import icon
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import IconBtn, TextBtn
@@ -56,18 +56,24 @@ class AoiView(sw.Layout):
         # check over the lmic country number
         if self.view.model.admin:
             logger.info(f"Checking if the aoi is in the LMIC country list")
-            code = self.view.model.admin
+            code = str(self.view.model.admin)
 
             # get the country code out of the admin one (that can be level 1 or 2)
+            # Follow pygaul issue #45 guidance: use the private dataframe accessor.
+            df = pygaul._df().astype(str)
 
-            # Access to the parquet file in the package data (required with sepal_ui>2.16.4)
-            resource_path = "data/gaul_database.parquet"
-            content = pkg_resources.resource_filename("pygaul", resource_path)
+            if {"ADM0_CODE", "ADM1_CODE", "ADM2_CODE"}.issubset(df.columns):
+                level_0_col, level_1_col, level_2_col = "ADM0_CODE", "ADM1_CODE", "ADM2_CODE"
+            else:
+                level_0_col, level_1_col, level_2_col = (
+                    "gaul0_code",
+                    "gaul1_code",
+                    "gaul2_code",
+                )
 
-            df = pd.read_parquet(content).astype(str)
             level_0_code = df[
-                (df.ADM0_CODE == code) | (df.ADM1_CODE == code) | (df.ADM2_CODE == code)
-            ].ADM0_CODE.iloc[0]
+                (df[level_0_col] == code) | (df[level_1_col] == code) | (df[level_2_col] == code)
+            ][level_0_col].iloc[0]
 
             # read the country file
             country_codes = pd.read_csv(cp.country_list).GAUL.astype(str)
