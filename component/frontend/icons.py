@@ -65,7 +65,7 @@ icons = {
     },
     "recipe-note": {
         "fa": "fa-solid fa-file-lines",
-        "mdi": "mdi-note-text",
+        "mdi": "mdi-chef-hat",
     },
     "upload": {
         "fa": "fa-solid fa-upload",

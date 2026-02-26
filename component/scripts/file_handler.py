@@ -22,7 +22,7 @@ def save_file(file_path: str, json_data, sepal_session=None) -> Optional[Path]:
 
     if sepal_session:
         # Save the file to the sepal session
-        return sepal_session.set_file(file_path, json_data)
+        return sepal_session.set_file(file_path, json_data, overwrite=True)
     else:
         # Save the file to the local system
         with Path(file_path).open("w") as f:

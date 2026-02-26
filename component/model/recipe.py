@@ -4,7 +4,7 @@ from pathlib import Path
 
 from sepal_ui.scripts.warning import SepalWarning
 from sepal_ui.scripts.gee_interface import GEEInterface
-from traitlets import HasTraits, Int, Unicode, observe
+from traitlets import HasTraits, Int, Unicode, observe, List as TraitsList
 
 import component.parameter as cp
 from component import model as cmod
@@ -70,12 +70,35 @@ class Recipe(HasTraits):
         self.new_changes += 1
 
     def load(self, recipe_path: str):
-        """Load the recipe element in the different element of the app."""
+        """Load the recipe element in the different element of the app.
+
+        Returns:
+            self if successful, or ValidationResult if validation errors found
+        """
         logger.debug(f"Loading recipe: {recipe_path}....{self.sepal_session}")
 
         recipe_path, data = validation.read_recipe_data(
             recipe_path, sepal_session=self.sepal_session
         )
+
+        # Validate all data types BEFORE importing to models
+        validation_result = validation.validate_recipe_data(
+            benefits=data["benefits"],
+            constraints=data["constraints"],
+            costs=data["costs"],
+        )
+
+        # If validation found errors, return the result WITHOUT loading
+        if validation_result.has_errors:
+            logger.warning(
+                f"Recipe validation failed with {validation_result.total_errors} errors"
+            )
+            # Store the raw data and validation result for UI to handle
+            validation_result.raw_data = data
+            validation_result.recipe_path = str(recipe_path)  # Convert to string
+            return validation_result
+
+        # Only load if validation passed
         self.recipe_session_path = str(recipe_path)
 
         # load the aoi_model
@@ -89,12 +112,35 @@ class Recipe(HasTraits):
         return self
 
     async def load_async(self, recipe_path: str):
-        """Load the recipe element in the different element of the app."""
+        """Load the recipe element in the different element of the app.
+
+        Returns:
+            self if successful, or ValidationResult if validation errors found
+        """
         logger.debug(f"Loading recipe: {recipe_path}....{self.sepal_session}")
 
         recipe_path, data = validation.read_recipe_data(
             recipe_path, sepal_session=self.sepal_session
         )
+
+        # Validate all data types BEFORE importing to models
+        validation_result = validation.validate_recipe_data(
+            benefits=data["benefits"],
+            constraints=data["constraints"],
+            costs=data["costs"],
+        )
+
+        # If validation found errors, return the result WITHOUT loading
+        if validation_result.has_errors:
+            logger.warning(
+                f"Recipe validation failed with {validation_result.total_errors} errors"
+            )
+            # Store the raw data and validation result for UI to handle
+            validation_result.raw_data = data
+            validation_result.recipe_path = str(recipe_path)  # Convert to string
+            return validation_result
+
+        # Only load if validation passed
         self.recipe_session_path = str(recipe_path)
 
         # load the aoi_model
@@ -105,6 +151,31 @@ class Recipe(HasTraits):
 
         self.new_changes = 0
 
+        return self
+
+    def load_sanitized(self, data: dict, recipe_path: str):
+        """Load sanitized recipe data after user accepts fixes.
+
+        This is called after validation found errors and the user chose to continue
+        with sanitized data.
+
+        Args:
+            data: Sanitized recipe data dictionary
+            recipe_path: Path to the recipe file
+        """
+        logger.debug(f"Loading sanitized recipe data from: {recipe_path}")
+
+        self.recipe_session_path = str(recipe_path)
+
+        # Load all the data (already sanitized)
+        self.seplan_aoi.import_data(data["aoi"])
+        self.benefit_model.import_data(data["benefits"])
+        self.constraint_model.import_data(data["constraints"])
+        self.cost_model.import_data(data["costs"])
+
+        self.new_changes = 0
+
+        logger.info("Sanitized recipe loaded successfully")
         return self
 
     def save(self, full_recipe_path: str):

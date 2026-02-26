@@ -13,7 +13,6 @@ from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
 from component.parameter.vis_params import PLOT_COLORS
-from component.scripts.compute import export_as_csv
 from component.scripts.plots import (
     get_bars_chart,
     get_suitability_charts,

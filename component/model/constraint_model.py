@@ -1,5 +1,6 @@
 import pandas as pd
 from traitlets import List, observe
+from typing import Tuple
 
 from component import parameter as cp
 from component.message import cm

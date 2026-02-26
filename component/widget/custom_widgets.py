@@ -111,7 +111,7 @@ class RecipeInput(sw.Layout):
         self.file_input = FileInputElement(
             sepal_client=self.sepal_session,
             extensions=[".json"],
-            initial_folder="module_results/se.plan",
+            initial_folder="module_results/se.plan/recipes",
         )
         self.file_input.observe(self.validate_input, "v_model")
 

@@ -34,10 +34,10 @@ from component.model.app_model import AppModel
 from component.message import cm
 from component.widget.custom_widgets import CustomAppBar, CustomTileAbout
 
-logging.getLogger("httpx").setLevel(logging.DEBUG)
-logging.getLogger("httpcore").setLevel(logging.DEBUG)
-logging.getLogger("sepalui").setLevel(logging.DEBUG)
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+# logging.getLogger("sepalui").setLevel(logging.DEBUG)
 
 init_ee()
 setup_solara_server(extra_asset_locations=[str(Path(__file__).parent / "assets")])
@@ -108,7 +108,7 @@ def Page():
         {
             "id": 2,
             "name": cm.app.drawer.recipe,
-            "icon": icon("question-file"),
+            "icon": icon("recipe-note"),
             "display": "dialog",
             "content": recipe_tile,
         },
