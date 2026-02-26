@@ -42,7 +42,7 @@ To run the server (on a test environment), you need to define the environment va
     export LOCAL_SEPAL_USER=localusername
     export LOCAL_SEPAL_PASSWORD="localusername"
     export SEPAL_HOST="sepalhost.io"
-    export SEPLAN_TEST=true
+    export SOLARA_TEST=true
 
 The main process of the container is a supervisor that runs the following processes:
 
