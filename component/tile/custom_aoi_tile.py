@@ -58,26 +58,30 @@ class AoiView(sw.Layout):
             logger.info(f"Checking if the aoi is in the LMIC country list")
             code = str(self.view.model.admin)
 
-            # get the country code out of the admin one (that can be level 1 or 2)
-            # Follow pygaul issue #45 guidance: use the private dataframe accessor.
+            # Resolve the admin code (level 0, 1, or 2) to its ISO3 country code
+            # via pygaul. Match on ISO3 instead of GAUL numeric codes because
+            # pygaul 0.4+ uses GAUL 2024 codes that differ from the old codes
+            # stored in the LMIC CSV.
             df = pygaul._df().astype(str)
 
             if {"ADM0_CODE", "ADM1_CODE", "ADM2_CODE"}.issubset(df.columns):
                 level_0_col, level_1_col, level_2_col = "ADM0_CODE", "ADM1_CODE", "ADM2_CODE"
+                iso3_col = "ISO3_CODE" if "ISO3_CODE" in df.columns else "iso3_code"
             else:
                 level_0_col, level_1_col, level_2_col = (
                     "gaul0_code",
                     "gaul1_code",
                     "gaul2_code",
                 )
+                iso3_col = "iso3_code"
 
-            level_0_code = df[
+            iso3_code = df[
                 (df[level_0_col] == code) | (df[level_1_col] == code) | (df[level_2_col] == code)
-            ][level_0_col].iloc[0]
+            ][iso3_col].iloc[0]
 
-            # read the country file
-            country_codes = pd.read_csv(cp.country_list).GAUL.astype(str)
-            included = (country_codes == level_0_code).any()
+            # read the country file and match by ISO3
+            lmic_iso3 = pd.read_csv(cp.country_list).ISO3.astype(str)
+            included = (lmic_iso3 == iso3_code).any()
 
         # check if the aoi is in the LMIC
         else:
