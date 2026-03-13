@@ -5,7 +5,7 @@
 # If no port is provided, defaults to 8900
 
 SOLARA_FILE="${1:-solara_app.py}"
-PORT="${2:-8900}"
+PORT="${2:-8901}"
 
 while IFS= read -r line; do
   [[ $line =~ ^#.*$ || -z $line ]] && continue
@@ -24,5 +24,5 @@ while IFS= read -r line; do
   fi
 done < .env
 
-# solara run "$SOLARA_FILE" --port 8900 --no-open
-solara run "$SOLARA_FILE" --port $PORT --no-open --log-level debug
+solara run "$SOLARA_FILE" --port 8900 --no-open
+# solara run "$SOLARA_FILE" --port $PORT --no-open --log-level debug
