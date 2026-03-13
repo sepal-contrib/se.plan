@@ -7,6 +7,7 @@ from sepal_ui.message import ms
 
 from component.message import cm
 from component.widget.base_dialog import BaseDialog
+from sepal_ui.scripts.gee_interface import GEEInterface
 from component.widget.buttons import TextBtn
 
 
@@ -14,7 +15,7 @@ class ImportAoiDialog(BaseDialog):
     """Dialog wrapper for AoiView used on the map to import a custom AOI from
     the user's assets."""
 
-    def __init__(self, custom_aoi_dialog):
+    def __init__(self, custom_aoi_dialog, gee_interface=None):
         super().__init__()
         self.attributes = {"id": "import_aoi_dialog"}
 
@@ -22,7 +23,9 @@ class ImportAoiDialog(BaseDialog):
         title = sw.CardTitle(children=[cm.map.dialog.import_.title])
 
         # Create table to show the custom geometries
-        self.aoi_view = ImportAoiView(custom_aoi_dialog=custom_aoi_dialog)
+        self.aoi_view = ImportAoiView(
+            custom_aoi_dialog=custom_aoi_dialog, gee_interface=gee_interface
+        )
 
         text = sw.CardText(children=[self.aoi_view])
         btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
@@ -47,12 +50,12 @@ class ImportAoiView(AoiView):
     """This class is a wrapper of the AoiModel that aims to not generate
     the client geometry when the aoi is selected"""
 
-    def __init__(self, custom_aoi_dialog, **kwargs):
+    def __init__(self, custom_aoi_dialog, gee_interface, **kwargs):
 
         methods = ["-POINTS"]
         self.elevation = False
 
-        super().__init__(methods=methods, **kwargs)
+        super().__init__(methods=methods, gee_interface=gee_interface, **kwargs)
 
         self.custom_aoi_dialog = custom_aoi_dialog
 

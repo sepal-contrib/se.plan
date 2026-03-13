@@ -1,9 +1,15 @@
+from typing import Union
+
 import ee
 import pandas as pd
-import pkg_resources
+import pygaul
+from component.frontend.icons import icon
+from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
 from sepal_ui.mapping import SepalMap
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 import component.parameter as cp
 from component.message import cm
@@ -11,57 +17,71 @@ from component.model.recipe import Recipe
 from component.widget.custom_aoi_view import SeplanAoiView
 
 from sepal_ui.scripts.utils import init_ee
+import logging
+
+logger = logging.getLogger("SEPLAN")
 
 init_ee()
 
 
-class AoiTile(sw.Layout):
+class AoiView(sw.Layout):
     """Overwrite the map of the tile to replace it with a customMap."""
 
-    def __init__(self, recipe: Recipe):
-        self.class_ = "d-block custom_map"
+    def __init__(
+        self,
+        map_: SepalMap,
+        gee_interface: GEEInterface = None,
+        recipe: Recipe = None,
+    ):
+        if not recipe:
+            recipe = Recipe()
+        self.class_ = "d-block aoi_map"
         self._metadata = {"mount_id": "aoi_tile"}
+        self.gee_interface = gee_interface
+        self.map_ = map_
 
         super().__init__()
 
-        self.map_ = SepalMap(gee=True)
-        self.map_.dc.hide()
-        self.map_.min_zoom = 1
-        self.map_.add_basemap("SATELLITE")
-
         # Build the aoi view with our custom aoi_model
-        self.view = SeplanAoiView(model=recipe.seplan_aoi, map_=self.map_)
-
-        aoi_control = WidgetControl(
-            widget=self.view, position="topleft", transparent_bg=True
+        self.view = SeplanAoiView(
+            model=recipe.seplan_aoi, map_=self.map_, gee_interface=gee_interface
         )
 
-        self.map_.add(aoi_control)
-        self.children = [self.map_]
+        self.children = [self.view]
 
-        # bind an extra js behaviour
         self.view.observe(self._check_lmic, "updated")
 
     def _check_lmic(self, _):
         """Every time a new aoi is set check if it fits the LMIC country list."""
         # check over the lmic country number
         if self.view.model.admin:
-            code = self.view.model.admin
+            logger.info(f"Checking if the aoi is in the LMIC country list")
+            code = str(self.view.model.admin)
 
-            # get the country code out of the admin one (that can be level 1 or 2)
+            # Resolve the admin code (level 0, 1, or 2) to its ISO3 country code
+            # via pygaul. Match on ISO3 instead of GAUL numeric codes because
+            # pygaul 0.4+ uses GAUL 2024 codes that differ from the old codes
+            # stored in the LMIC CSV.
+            df = pygaul._df().astype(str)
 
-            # Access to the parquet file in the package data (required with sepal_ui>2.16.4)
-            resource_path = "data/gaul_database.parquet"
-            content = pkg_resources.resource_filename("pygaul", resource_path)
+            if {"ADM0_CODE", "ADM1_CODE", "ADM2_CODE"}.issubset(df.columns):
+                level_0_col, level_1_col, level_2_col = "ADM0_CODE", "ADM1_CODE", "ADM2_CODE"
+                iso3_col = "ISO3_CODE" if "ISO3_CODE" in df.columns else "iso3_code"
+            else:
+                level_0_col, level_1_col, level_2_col = (
+                    "gaul0_code",
+                    "gaul1_code",
+                    "gaul2_code",
+                )
+                iso3_col = "iso3_code"
 
-            df = pd.read_parquet(content).astype(str)
-            level_0_code = df[
-                (df.ADM0_CODE == code) | (df.ADM1_CODE == code) | (df.ADM2_CODE == code)
-            ].ADM0_CODE.iloc[0]
+            iso3_code = df[
+                (df[level_0_col] == code) | (df[level_1_col] == code) | (df[level_2_col] == code)
+            ][iso3_col].iloc[0]
 
-            # read the country file
-            country_codes = pd.read_csv(cp.country_list).GAUL.astype(str)
-            included = (country_codes == level_0_code).any()
+            # read the country file and match by ISO3
+            lmic_iso3 = pd.read_csv(cp.country_list).ISO3.astype(str)
+            included = (lmic_iso3 == iso3_code).any()
 
         # check if the aoi is in the LMIC
         else:
@@ -82,10 +102,9 @@ class AoiTile(sw.Layout):
                 maxPixels=1e13,
             )
             # test if bitwiseAnd is 2 (1 is partial coverage, 0 no coverage)
-            included = ee.Algorithms.IsEqual(
-                bit_test.getNumber("constant"), 2
-            ).getInfo()
+            included = self.gee_interface.get_info(
+                ee.Algorithms.IsEqual(bit_test.getNumber("constant"), 2),
+            )
 
         included or self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
-
         return self

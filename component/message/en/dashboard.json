@@ -2,7 +2,7 @@
     "dashboard": {
         "toolbar": {
             "btn": {
-                "download": {"title": "Download", "tooltip": "Save dashboard statistics as .csv"},
+                "download": {"title": "Download stats", "tooltip": "Save dashboard statistics as .csv"},
                 "compute": {
                     "title": "Compute dashboard"
                 },

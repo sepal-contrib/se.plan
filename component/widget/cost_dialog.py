@@ -1,6 +1,9 @@
+from typing import Union, Optional
+
 import pandas as pd
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import decorator as sd
+from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import Bool, link
 
 from component import model as cmod
@@ -20,7 +23,12 @@ class CostDialog(BaseDialog):
 
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model: cmod.CostModel, alert: Alert):
+    def __init__(
+        self,
+        model: cmod.CostModel,
+        alert: Alert,
+        gee_interface: GEEInterface = None,
+    ):
         super().__init__()
         # save the model as a member
         self.model = model
@@ -36,7 +44,7 @@ class CostDialog(BaseDialog):
         default_layers = self._COSTS.layer_id.unique().tolist()
         self.w_name.items = [cm.layers[ly].name for ly in default_layers]
         self.w_id = sw.TextField(v_model=None, readonly=True, viz=False)
-        self.w_asset = sw.AssetSelect(types=["IMAGE"])
+        self.w_asset = sw.AssetSelect(types=["IMAGE"], gee_interface=gee_interface)
         self.w_desc = sw.Textarea(label=cm.cost.dialog.desc, v_model=None)
         self.w_unit = sw.TextField(
             label=cm.cost.dialog.unit,

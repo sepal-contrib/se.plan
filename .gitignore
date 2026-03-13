@@ -1,16 +1,20 @@
 # Byte-compiled / optimized / DLL files
+.yarn/
 __pycache__/
 *.py[cod]
 *$py.class
 *[Uu]ntitled*
 nox_ui.ipynb
 ,nox
+issues/
 # C extensions
 *.so
-
+99*
+.env
+test_solara*
 # test build
 node_modules/*
-
+training/
 # Distribution / packaging
 .Python
 build/

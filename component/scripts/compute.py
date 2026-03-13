@@ -4,7 +4,10 @@ import pandas as pd
 
 import component.parameter.gui_params as param
 from component.parameter.directory import result_dir
+from component.scripts.file_handler import save_file
 from component.types import RecipeStatsDict
+
+from sepal_ui.solara import get_current_sepal_client
 
 TYPE_OF_RESULT = {
     "benefit": "mean",
@@ -19,8 +22,14 @@ def export_as_csv(recipe_summary_stats: RecipeStatsDict):
 
     recipe_name, summary_stats = list(recipe_summary_stats.items())[0]
 
-    csv_folder = result_dir / "results"
-    csv_folder.mkdir(exist_ok=True)
+    sepal_session = get_current_sepal_client()
+    if sepal_session:
+        csv_folder = sepal_session.get_remote_dir("module_results/se.plan/csv_results")
+    else:
+
+        csv_folder = result_dir / "results"
+        csv_folder.mkdir(exist_ok=True)
+
     session_results_path = (csv_folder / recipe_name).with_suffix(".csv")
 
     formatted_data = []
@@ -63,6 +72,9 @@ def export_as_csv(recipe_summary_stats: RecipeStatsDict):
                     )
 
     formatted_df = pd.DataFrame(formatted_data)
-    formatted_df.to_csv(session_results_path, index=False)
+
+    save_file(
+        session_results_path, formatted_df.to_dict(orient="records"), sepal_session
+    )
 
     return session_results_path

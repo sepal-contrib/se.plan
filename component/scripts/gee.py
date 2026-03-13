@@ -2,16 +2,37 @@ from pathlib import Path
 from typing import List, Literal, Union
 
 import ee
+
+from ipyleaflet import TileLayer
+
 from sepal_ui import mapping as sm
+from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.message import cm
-from component.scripts.logger import logger
+from component.scripts.assets import default_asset_id
+import logging
+
+logger = logging.getLogger("SEPLAN")
+
+
+def create_layer(map_id_dict: dict, name: str = "", visible: bool = True) -> TileLayer:
+    return TileLayer(
+        url=map_id_dict["tile_fetcher"].url_format,
+        attribution="Google Earth Engine",
+        name=name,
+        max_zoom=24,
+    )
 
 
 def get_layer(
-    image: ee.Image, vis_params: dict = {}, name: str = "", visible: bool = True
+    gee_interface: GEEInterface,
+    image: ee.Image,
+    vis_params: dict = {},
+    name: str = "",
+    visible: bool = True,
 ) -> sm.layer.EELayer:
-    map_id_dict = ee.Image(image).getMapId(vis_params)
+
+    map_id_dict = gee_interface.get_map_id(image, vis_params)
 
     return sm.layer.EELayer(
         ee_object=image,
@@ -25,6 +46,7 @@ def get_layer(
 
 
 def get_limits(
+    gee_interface: GEEInterface,
     asset: str,
     data_type: Literal["binary", "continuous", "categorical"],
     aoi: Union[ee.FeatureCollection, ee.Geometry],
@@ -43,20 +65,22 @@ def get_limits(
         list: A list containing either min-max values or histogram keys depending on the data_type.
     """
 
+    # We know that the treecover_with_potential asset is binary
+    if asset == default_asset_id:
+        return [0, 1]
+
     if data_type in ["binary", "continuous"]:
         reducer = ee.Reducer.minMax()
 
         def get_value(reduction):
-            return list(reduction.getInfo().values())
+            return list(gee_interface.get_info(reduction).values())
 
     else:
         reducer = ee.Reducer.frequencyHistogram()
 
         def get_value(reduction):
-            return (
-                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0)))
-                .keys()
-                .getInfo()
+            return gee_interface.get_info(
+                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys(),
             )
 
     ee_image = ee.Image(asset).select(0)
@@ -81,7 +105,7 @@ def get_limits(
         )
     )
 
-    logger.info("get_limits_values:", values)
+    logger.debug(f"get_limits_values: {values}")
 
     # check if values are none and if so, raise a ValueError
     if any([val is None for val in values]):
@@ -93,26 +117,84 @@ def get_limits(
     return sorted(set(int(float(val)) for val in values))
 
 
-def get_gee_recipe_folder(recipe_name: str) -> Path:
+async def get_limits_async(
+    gee_interface: GEEInterface,
+    asset: str,
+    data_type: Literal["binary", "continuous", "categorical"],
+    aoi: Union[ee.FeatureCollection, ee.Geometry],
+    factor: int = 2,
+) -> List[int]:
+    """Async version of get_limits function.
+
+    Computes limits or histogram keys for the given Earth Engine image based on the specified data type.
+
+    Args:
+        gee_interface (GEEInterface): The GEE interface for async operations.
+        asset (str): Google Earth Engine asset ID.
+        data_type (str): Either 'binary', 'continuous', or any other type indicating the type of data processing.
+        aoi (ee.Geometry): Area of interest.
+        factor (int, optional): Factor to multiply the nominal scale of the image. Defaults to 2.
+
+    Returns:
+        list: A list containing either min-max values or histogram keys depending on the data_type.
+    """
+
+    # We know that the treecover_with_potential asset is binary
+    if asset == default_asset_id:
+        return [0, 1]
+
+    if data_type in ["binary", "continuous"]:
+        reducer = ee.Reducer.minMax()
+
+        async def get_value_async(reduction):
+            result = await gee_interface.get_info_async(reduction)
+            return list(result.values())
+
+    else:
+        reducer = ee.Reducer.frequencyHistogram()
+
+        async def get_value_async(reduction):
+            keys = await gee_interface.get_info_async(
+                ee.Dictionary(reduction.get(ee.Image(asset).bandNames().get(0))).keys()
+            )
+            return keys
+
+    ee_image = ee.Image(asset).select(0)
+    # Multiply the nominal scale by 2 in case the nominal scale is finer than 45
+    scale = ee.Number(
+        ee.Algorithms.If(
+            ee_image.projection().nominalScale().lt(30),
+            ee_image.projection().nominalScale().multiply(2),
+            ee_image.projection().nominalScale(),
+        )
+    )
+
+    # If scale is less than 30, set it to 30
+    scale = ee.Algorithms.If(scale.lt(30), 30, scale)
+
+    reduction = ee_image.reduceRegion(
+        reducer=reducer,
+        geometry=aoi,
+        scale=scale,
+        maxPixels=1e13,
+    )
+
+    values = await get_value_async(reduction)
+
+    logger.debug(f"get_limits_async_values: {values}")
+
+    # check if values are none and if so, raise a ValueError
+    if any([val is None for val in values]):
+        raise ValueError(cm.questionnaire.error.no_limits)
+
+    # depending on the scale, values from the histogram can be floats, we'll
+    # convert them to integers... sometimes we'll show more values than the
+    # asset really has
+    return sorted(set(int(float(val)) for val in values))
+
+
+def get_gee_recipe_folder(recipe_name: str, gee_interface: GEEInterface) -> Path:
     """Create a folder for the recipe in GEE"""
 
-    project_folder = Path(f"projects/{ee.data._cloud_api_user_project}/assets/")
-    seplan_folder = project_folder / "seplan"
-    recipe_folder = seplan_folder / recipe_name
-
-    try:
-        if not ee.data.getInfo(str(seplan_folder)):
-            ee.data.createAsset({"type": "FOLDER"}, str(seplan_folder))
-
-        # Create the recipe folder
-        if not ee.data.getInfo(str(recipe_folder)):
-            ee.data.createAsset({"type": "FOLDER"}, str(recipe_folder))
-
-        return Path(recipe_folder)
-
-    except Exception as e:
-
-        logger.info("Error in get_gee_recipe_folder:", e)
-
-    finally:
-        return Path(recipe_folder)
+    recipe_folder = Path("seplan") / recipe_name
+    return Path(gee_interface.create_folder(recipe_folder))
