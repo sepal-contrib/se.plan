@@ -1,30 +1,11 @@
 """Test GAUL 2015 → 2024 admin code migration during recipe import."""
 
 import json
-from pathlib import Path
 
 import pygaul
 
 import component.parameter as cp
-
-
-def _migrate_gaul_code(admin_code, name=None):
-    """Local copy of the migration function for testing without full import chain."""
-    if not admin_code:
-        return admin_code
-    code = str(admin_code)
-    df = pygaul._df()
-    if name:
-        iso3_from_name = name.split("_")[0]
-        match = df[
-            (df["gaul0_code"].astype(str) == code)
-            | (df["gaul1_code"].astype(str) == code)
-            | (df["gaul2_code"].astype(str) == code)
-        ]
-        if len(match) > 0 and match["iso3_code"].iloc[0] == iso3_from_name:
-            return code
-    mapping = json.loads(cp.gaul_migration_map.read_text())
-    return mapping.get(code, code)
+from component.model.aoi_model import _migrate_gaul_code
 
 
 def test_old_gaul_code_is_translated():
@@ -49,13 +30,13 @@ def test_translated_code_resolves_in_pygaul():
 
 def test_old_code_translated_with_name():
     """Old GAUL 2015 code + recipe name -> translated to GAUL 2024."""
-    assert _migrate_gaul_code("1521", "IDN_Jawa_Timur") == "2625"
-    assert _migrate_gaul_code("959", "COL_Risaralda") == "1938"
+    assert _migrate_gaul_code("1521", "ADMIN1", "IDN_Jawa_Timur") == "2625"
+    assert _migrate_gaul_code("959", "ADMIN1", "COL_Risaralda") == "1938"
 
 
 def test_new_code_not_translated_with_name():
     """GAUL 2024 code + matching recipe name -> kept as-is (no collision)."""
-    assert _migrate_gaul_code("2625", "IDN_Jawa_Timur") == "2625"
+    assert _migrate_gaul_code("2625", "ADMIN1", "IDN_Jawa_Timur") == "2625"
 
 
 def test_null_admin_passthrough():
@@ -63,6 +44,11 @@ def test_null_admin_passthrough():
     assert _migrate_gaul_code(None) is None
 
 
-def test_no_name_falls_through_to_mapping():
-    """Without a name, always applies the mapping."""
-    assert _migrate_gaul_code("1521") == "2625"
+def test_old_code_without_name_still_translates_when_unambiguous():
+    """Legacy codes that do not exist in current GAUL still translate without a name."""
+    assert _migrate_gaul_code("959", "ADMIN1") == "1938"
+
+
+def test_current_code_without_name_is_not_retranslated():
+    """Current GAUL codes stay unchanged when the recipe name is missing."""
+    assert _migrate_gaul_code("2625", "ADMIN1") == "2625"

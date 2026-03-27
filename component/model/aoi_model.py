@@ -1,6 +1,8 @@
 """SE.PLAN model to store the data related with areas of interest."""
 
 import json
+import logging
+from functools import lru_cache
 from pathlib import Path
 from typing import Tuple, Dict as DictType, Any as AnyType
 
@@ -15,33 +17,154 @@ from traitlets import Dict, Int, Any
 
 import component.parameter as cp
 
+logger = logging.getLogger("SEPLAN")
 
-def _migrate_gaul_code(admin_code, name=None):
+GAUL_CODE_COLUMNS = {
+    "ADMIN0": ("gaul0_code",),
+    "ADMIN1": ("gaul1_code",),
+    "ADMIN2": ("gaul2_code",),
+}
+
+ALL_GAUL_CODE_COLUMNS = ("gaul0_code", "gaul1_code", "gaul2_code")
+
+
+@lru_cache(maxsize=1)
+def _gaul_migration_map():
+    """Return the bundled GAUL 2015 -> 2024 migration map."""
+    return json.loads(cp.gaul_migration_map.read_text())
+
+
+def _normalize_recipe_part(value):
+    """Normalize recipe and GAUL names for safe comparison."""
+    if value is None or value != value:
+        return ""
+
+    return su.normalize_str(str(value))
+
+
+def _match_gaul_rows(df, code, method=None):
+    """Return the current GAUL rows matching a code at the relevant level."""
+    columns = GAUL_CODE_COLUMNS.get(method, ALL_GAUL_CODE_COLUMNS)
+    code = str(code)
+    mask = df[columns[0]].astype(str) == code
+
+    for column in columns[1:]:
+        mask = mask | (df[column].astype(str) == code)
+
+    return df[mask]
+
+
+def _recipe_identity(name):
+    """Extract the ISO3 prefix and remaining name from a recipe name."""
+    normalized_name = _normalize_recipe_part(name)
+    if not normalized_name:
+        return "", ""
+
+    parts = normalized_name.split("_", 1)
+    if len(parts) == 1:
+        return parts[0], ""
+
+    return parts[0], parts[1]
+
+
+def _row_name_fragments(row, method):
+    """Return comparable name fragments for a GAUL row."""
+    gaul1 = _normalize_recipe_part(row.get("gaul1_name"))
+    gaul2 = _normalize_recipe_part(row.get("gaul2_name"))
+
+    if method == "ADMIN0":
+        return set()
+
+    if method == "ADMIN1":
+        return {gaul1} - {""}
+
+    if method == "ADMIN2":
+        fragments = {gaul1, gaul2}
+        if gaul1 and gaul2:
+            fragments.add(f"{gaul1}_{gaul2}")
+
+        return fragments - {""}
+
+    return {gaul1, gaul2} - {""}
+
+
+def _matches_recipe_name(rows, method, recipe_suffix):
+    """Check whether any current GAUL row matches the serialized recipe name."""
+    if not recipe_suffix:
+        return False
+
+    for _, row in rows.iterrows():
+        for fragment in _row_name_fragments(row, method):
+            if recipe_suffix == fragment or recipe_suffix.endswith(f"_{fragment}"):
+                return True
+
+    return False
+
+
+def _migrate_gaul_code(admin_code, method=None, name=None):
     """Translate a GAUL 2015 admin code to GAUL 2024 if needed.
 
-    Checks the recipe name's ISO3 prefix against the current GAUL 2024
-    database to avoid translating codes that are already valid GAUL 2024.
+    Only translate when the code is definitely legacy. If the code already
+    exists in the current GAUL database and the recipe metadata is not strong
+    enough to disambiguate it, keep the current code to avoid silent corruption.
     """
     if not admin_code:
         return admin_code
 
     code = str(admin_code)
     df = pygaul._df()
+    mapping = _gaul_migration_map()
+    mapped_code = mapping.get(code)
+    if mapped_code is None:
+        return code
 
-    # If the recipe has a name (e.g. "IDN_Jawa_Timur"), verify whether
-    # the code already resolves correctly in GAUL 2024.
-    if name:
-        iso3_from_name = name.split("_")[0]
-        match = df[
-            (df["gaul0_code"].astype(str) == code)
-            | (df["gaul1_code"].astype(str) == code)
-            | (df["gaul2_code"].astype(str) == code)
-        ]
-        if len(match) > 0 and match["iso3_code"].iloc[0] == iso3_from_name:
-            return code  # Already a valid GAUL 2024 code
+    current_matches = _match_gaul_rows(df, code, method)
+    if len(current_matches) == 0:
+        return mapped_code
 
-    mapping = json.loads(cp.gaul_migration_map.read_text())
-    return mapping.get(code, code)
+    recipe_iso3, recipe_suffix = _recipe_identity(name)
+    if not recipe_iso3:
+        logger.warning(
+            "Ambiguous GAUL code %s for method %s without recipe identity; leaving unchanged.",
+            code,
+            method,
+        )
+        return code
+
+    current_iso_match = (current_matches["iso3_code"] == recipe_iso3).any()
+    mapped_matches = _match_gaul_rows(df, mapped_code, method)
+    mapped_iso_match = (mapped_matches["iso3_code"] == recipe_iso3).any()
+
+    if current_iso_match and not mapped_iso_match:
+        return code
+
+    if mapped_iso_match and not current_iso_match:
+        return mapped_code
+
+    current_name_match = _matches_recipe_name(
+        current_matches[current_matches["iso3_code"] == recipe_iso3],
+        method,
+        recipe_suffix,
+    )
+    mapped_name_match = _matches_recipe_name(
+        mapped_matches[mapped_matches["iso3_code"] == recipe_iso3],
+        method,
+        recipe_suffix,
+    )
+
+    if current_name_match and not mapped_name_match:
+        return code
+
+    if mapped_name_match and not current_name_match:
+        return mapped_code
+
+    logger.warning(
+        "Ambiguous GAUL code %s for method %s and recipe %s; leaving unchanged.",
+        code,
+        method,
+        name,
+    )
+    return code
 
 
 class AoiModel(AoiModel):
@@ -297,17 +420,21 @@ class SeplanAoi(model.Model):
 
     def import_data(self, data: dict, auto_update: bool = True):
         """Set the data for each of the AOIs."""
+        primary_data = dict(data["primary"])
+
         # Translate GAUL 2015 codes to GAUL 2024 if needed
-        if data["primary"].get("admin"):
-            data["primary"]["admin"] = _migrate_gaul_code(
-                data["primary"]["admin"], data["primary"].get("name")
+        if primary_data.get("admin"):
+            primary_data["admin"] = _migrate_gaul_code(
+                primary_data["admin"],
+                primary_data.get("method"),
+                primary_data.get("name"),
             )
 
-        self.aoi_model.import_data(data["primary"])
+        self.aoi_model.import_data(primary_data)
         self.custom_layers = data["custom"]
 
         # if there's no aoi we just need to reset the map
-        if not data["primary"]["method"]:
+        if not primary_data["method"]:
             self.reset_view += 1
             return
 
@@ -317,17 +444,21 @@ class SeplanAoi(model.Model):
             self.aoi_model.set_object()
 
     async def import_data_async(self, data: dict, auto_update: bool = True):
+        primary_data = dict(data["primary"])
+
         # Translate GAUL 2015 codes to GAUL 2024 if needed
-        if data["primary"].get("admin"):
-            data["primary"]["admin"] = _migrate_gaul_code(
-                data["primary"]["admin"], data["primary"].get("name")
+        if primary_data.get("admin"):
+            primary_data["admin"] = _migrate_gaul_code(
+                primary_data["admin"],
+                primary_data.get("method"),
+                primary_data.get("name"),
             )
 
-        self.aoi_model.import_data(data["primary"])
+        self.aoi_model.import_data(primary_data)
         self.custom_layers = data["custom"]
 
         # if there's no aoi we just need to reset the map
-        if not data["primary"]["method"]:
+        if not primary_data["method"]:
             self.reset_view += 1
             return
 
