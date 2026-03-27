@@ -16,12 +16,32 @@ from traitlets import Dict, Int, Any
 import component.parameter as cp
 
 
-def _migrate_gaul_code(admin_code):
-    """Translate a GAUL 2015 admin code to GAUL 2024 if a mapping exists."""
+def _migrate_gaul_code(admin_code, name=None):
+    """Translate a GAUL 2015 admin code to GAUL 2024 if needed.
+
+    Checks the recipe name's ISO3 prefix against the current GAUL 2024
+    database to avoid translating codes that are already valid GAUL 2024.
+    """
     if not admin_code:
         return admin_code
+
+    code = str(admin_code)
+    df = pygaul._df()
+
+    # If the recipe has a name (e.g. "IDN_Jawa_Timur"), verify whether
+    # the code already resolves correctly in GAUL 2024.
+    if name:
+        iso3_from_name = name.split("_")[0]
+        match = df[
+            (df["gaul0_code"].astype(str) == code)
+            | (df["gaul1_code"].astype(str) == code)
+            | (df["gaul2_code"].astype(str) == code)
+        ]
+        if len(match) > 0 and match["iso3_code"].iloc[0] == iso3_from_name:
+            return code  # Already a valid GAUL 2024 code
+
     mapping = json.loads(cp.gaul_migration_map.read_text())
-    return mapping.get(str(admin_code), str(admin_code))
+    return mapping.get(code, code)
 
 
 class AoiModel(AoiModel):
@@ -279,7 +299,9 @@ class SeplanAoi(model.Model):
         """Set the data for each of the AOIs."""
         # Translate GAUL 2015 codes to GAUL 2024 if needed
         if data["primary"].get("admin"):
-            data["primary"]["admin"] = _migrate_gaul_code(data["primary"]["admin"])
+            data["primary"]["admin"] = _migrate_gaul_code(
+                data["primary"]["admin"], data["primary"].get("name")
+            )
 
         self.aoi_model.import_data(data["primary"])
         self.custom_layers = data["custom"]
@@ -297,7 +319,9 @@ class SeplanAoi(model.Model):
     async def import_data_async(self, data: dict, auto_update: bool = True):
         # Translate GAUL 2015 codes to GAUL 2024 if needed
         if data["primary"].get("admin"):
-            data["primary"]["admin"] = _migrate_gaul_code(data["primary"]["admin"])
+            data["primary"]["admin"] = _migrate_gaul_code(
+                data["primary"]["admin"], data["primary"].get("name")
+            )
 
         self.aoi_model.import_data(data["primary"])
         self.custom_layers = data["custom"]
