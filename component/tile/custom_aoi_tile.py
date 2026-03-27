@@ -64,20 +64,11 @@ class AoiView(sw.Layout):
             # stored in the LMIC CSV.
             df = pygaul._df().astype(str)
 
-            if {"ADM0_CODE", "ADM1_CODE", "ADM2_CODE"}.issubset(df.columns):
-                level_0_col, level_1_col, level_2_col = "ADM0_CODE", "ADM1_CODE", "ADM2_CODE"
-                iso3_col = "ISO3_CODE" if "ISO3_CODE" in df.columns else "iso3_code"
-            else:
-                level_0_col, level_1_col, level_2_col = (
-                    "gaul0_code",
-                    "gaul1_code",
-                    "gaul2_code",
-                )
-                iso3_col = "iso3_code"
-
             iso3_code = df[
-                (df[level_0_col] == code) | (df[level_1_col] == code) | (df[level_2_col] == code)
-            ][iso3_col].iloc[0]
+                (df["gaul0_code"] == code)
+                | (df["gaul1_code"] == code)
+                | (df["gaul2_code"] == code)
+            ]["iso3_code"].iloc[0]
 
             # read the country file and match by ISO3
             lmic_iso3 = pd.read_csv(cp.country_list).ISO3.astype(str)

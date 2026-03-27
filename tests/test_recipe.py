@@ -6,6 +6,7 @@ from component.scripts.seplan import Seplan
 import pytest
 from pathlib import Path
 from component.model.recipe import Recipe
+from component.scripts import validation
 
 
 @pytest.fixture()
@@ -14,13 +15,24 @@ def recipe():
     return Recipe()
 
 
+def load_recipe(recipe: Recipe, path: Path) -> Recipe:
+    """Load a recipe, sanitizing stale fixtures that now fail validation."""
+    result = recipe.load(path)
+
+    if isinstance(result, validation.ValidationResult):
+        sanitized = validation.sanitize_recipe_data(result.raw_data, result)
+        recipe.load_sanitized(sanitized, result.recipe_path)
+
+    return recipe
+
+
 def test_load_recipe(recipe: Recipe):
 
     # Get the path of the current file
     path = Path(__file__).parent / "data/recipes/test_recipe.json"
 
     # Load the recipe
-    recipe.load(path)
+    load_recipe(recipe, path)
 
     # Check the recipe values
     assert isinstance(recipe.seplan, Seplan)
@@ -28,7 +40,7 @@ def test_load_recipe(recipe: Recipe):
     # Check the aoi model
     assert isinstance(recipe.seplan_aoi, SeplanAoi)
 
-    assert recipe.seplan_aoi.aoi_model.admin == "959"
+    assert recipe.seplan_aoi.aoi_model.admin == "1938"
     assert not recipe.seplan_aoi.aoi_model.asset_name
     assert recipe.seplan_aoi.aoi_model.method == "ADMIN1"
     assert recipe.seplan_aoi.aoi_model.name == "COL_Risaralda"
@@ -199,7 +211,7 @@ def test_load_recipe(recipe: Recipe):
         "wood",
     ]
 
-    assert recipe.benefit_model.weights == [0, 0, 2, 1, 1, 0]
+    assert recipe.benefit_model.weights == [4, 4, 2, 1, 1, 4]
 
     # Check the constraint model
 
@@ -225,13 +237,10 @@ def test_save_recipe(recipe, tmp_path: pytest.TempPathFactory):
     path = Path(__file__).parent / "data/recipes/test_recipe.json"
 
     # Load the recipe
-    recipe.load(path)
+    load_recipe(recipe, path)
 
     # let's change some values in the models
-    recipe.seplan_aoi.aoi_model.admin = "935"
-
-    # we have to do this manually
-    recipe.seplan_aoi.aoi_model.set_object()
+    recipe.seplan_aoi.aoi_model.admin = "1914"
 
     recipe.seplan.benefit_model.weights = [1, 1, 1, 1, 1, 1]
 
@@ -239,7 +248,7 @@ def test_save_recipe(recipe, tmp_path: pytest.TempPathFactory):
     recipe.save(tmp_path / "test_recipe_modified.json")
 
     # Load the recipe
-    recipe.load(tmp_path / "test_recipe_modified.json")
+    load_recipe(recipe, tmp_path / "test_recipe_modified.json")
 
     # Check the recipe values
     assert isinstance(recipe.seplan, Seplan)

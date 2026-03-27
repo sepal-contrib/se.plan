@@ -12,3 +12,6 @@ recipe_schema_path = Path(__file__).parents[2] / "utils" / "recipe_schema.json"
 
 # legends
 legends_path = Path(__file__).parents[2] / "utils" / "known_legends.json"
+
+# GAUL 2015 → 2024 code migration map
+gaul_migration_map = Path(__file__).parents[2] / "utils" / "gaul_2015_to_2024.json"
