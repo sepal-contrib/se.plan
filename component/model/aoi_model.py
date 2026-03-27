@@ -13,6 +13,16 @@ from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import Dict, Int, Any
 
+import component.parameter as cp
+
+
+def _migrate_gaul_code(admin_code):
+    """Translate a GAUL 2015 admin code to GAUL 2024 if a mapping exists."""
+    if not admin_code:
+        return admin_code
+    mapping = json.loads(cp.gaul_migration_map.read_text())
+    return mapping.get(str(admin_code), str(admin_code))
+
 
 class AoiModel(AoiModel):
     updated = Int(0).tag(sync=True)
@@ -267,9 +277,9 @@ class SeplanAoi(model.Model):
 
     def import_data(self, data: dict, auto_update: bool = True):
         """Set the data for each of the AOIs."""
-        # I need to reset the traits before importing the data
-        # so they can trigger events if they've no changed.
-        # self.reset()
+        # Translate GAUL 2015 codes to GAUL 2024 if needed
+        if data["primary"].get("admin"):
+            data["primary"]["admin"] = _migrate_gaul_code(data["primary"]["admin"])
 
         self.aoi_model.import_data(data["primary"])
         self.custom_layers = data["custom"]
@@ -285,6 +295,10 @@ class SeplanAoi(model.Model):
             self.aoi_model.set_object()
 
     async def import_data_async(self, data: dict, auto_update: bool = True):
+        # Translate GAUL 2015 codes to GAUL 2024 if needed
+        if data["primary"].get("admin"):
+            data["primary"]["admin"] = _migrate_gaul_code(data["primary"]["admin"])
+
         self.aoi_model.import_data(data["primary"])
         self.custom_layers = data["custom"]
 
