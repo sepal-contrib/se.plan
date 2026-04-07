@@ -1,0 +1,88 @@
+{
+  "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
+  "aoi": {
+    "primary": {
+      "admin": "959",
+      "asset_name": null,
+      "method": "ADMIN1",
+      "name": "COL_Risaralda",
+      "asset_json": null,
+      "vector_json": null,
+      "point_json": null,
+      "geo_json": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "custom": {
+      "type": "FeatureCollection",
+      "features": []
+    }
+  },
+  "benefits": {
+    "names": ["Biodiversity Intactness Index"],
+    "ids": ["biodiversity_intactness"],
+    "themes": ["bii"],
+    "assets": ["projects/se-plan/assets/inputLayers/bii_global_20230101"],
+    "descs": ["Biodiversity Intactness Index"],
+    "weights": [2.0],
+    "units": ["index"]
+  },
+  "constraints": {
+    "themes": [
+      "custom",
+      "custom",
+      "custom",
+      "custom"
+    ],
+    "names": [
+      "Current tree cover less than potential",
+      "Mangrove Probability 2024",
+      "Freshwater",
+      "Land Cover"
+    ],
+    "ids": [
+      "treecover_with_potential",
+      "custom_constraint_2",
+      "custom_constraint_0",
+      "custom_constraint_1"
+    ],
+    "assets": [
+      "projects/ee-reddtimor2021/assets/TimorLesteElevationMasked",
+      "projects/ee-reddtimor2021/assets/Mangrove_Class_2024_Focal",
+      "projects/ee-paingphyotraininggee/assets/Binary_Freshwater_Suitable_Final",
+      "projects/ee-reddtimor2021/assets/Timor-Leste_Classification_smooth"
+    ],
+    "descs": [
+      "Sites that have the potential to hold mangrove for restoration.",
+      "Mangrove probability in 2024",
+      "Freshwater",
+      "Land cover 2021"
+    ],
+    "units": [
+      "0/1",
+      "Classes",
+      "0/1",
+      "Classes"
+    ],
+    "values": [
+      [0],
+      [5, 4, 3],
+      [50, 40, 80],
+      [0]
+    ],
+    "data_type": [
+      "binary",
+      "categorical",
+      "binary",
+      "categorical"
+    ]
+  },
+  "costs": {
+    "names": ["Opportunity cost"],
+    "ids": ["opportunity_cost"],
+    "assets": ["projects/se-plan/assets/inputLayers/opportunity_cost_20221110"],
+    "descs": ["Opportunity cost"],
+    "units": ["USD/ha"]
+  }
+}
