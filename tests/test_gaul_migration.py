@@ -1,11 +1,12 @@
 """Test GAUL 2015 → 2024 admin code migration during recipe import."""
 
 import json
+from pathlib import Path
 
 import pygaul
 
 import component.parameter as cp
-from component.model.aoi_model import _migrate_gaul_code
+from component.model.aoi_model import SeplanAoi, _migrate_gaul_code
 
 
 def test_old_gaul_code_is_translated():
@@ -52,3 +53,15 @@ def test_old_code_without_name_still_translates_when_unambiguous():
 def test_current_code_without_name_is_not_retranslated():
     """Current GAUL codes stay unchanged when the recipe name is missing."""
     assert _migrate_gaul_code("2625", "ADMIN1") == "2625"
+
+
+def test_load_gaul2015_recipe_translates_admin_code():
+    """Loading the gaul2015_admin1_indonesia.json recipe translates 1521 → 2625."""
+    recipe_path = Path(__file__).parent / "data/recipes/gaul2015_admin1_indonesia.json"
+    data = json.loads(recipe_path.read_text())
+
+    seplan_aoi = SeplanAoi()
+    seplan_aoi.import_data(data["aoi"], auto_update=False)
+
+    assert seplan_aoi.aoi_model.admin == "2625"
+    assert seplan_aoi.aoi_model.method == "ADMIN1"
