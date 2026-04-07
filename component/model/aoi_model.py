@@ -348,17 +348,22 @@ class AoiModel(AoiModel):
             raise Exception(ms.aoi_sel.exception.no_admlyr)
 
         # get the data from either the pygaul or the pygadm libs
-        # pygaul needs extra work as ISO codes are not included in the GEE dataset
         self.feature_collection = pygaul.AdmItems(admin=admin)
 
-        # get the ADM0_CODE to get the ISO code
+        # get properties from the first feature to build the AOI name
         feature = self.feature_collection.first()
         properties = await self.gee_interface.get_info_async(
             feature.toDictionary(feature.propertyNames())
         )
 
-        iso = json.loads(self.MAPPING.read_text())[str(properties.get("ADM0_CODE"))]
-        names = [value for prop, value in properties.items() if "NAME" in prop]
+        # GAUL 2024 has iso3_code directly, fallback to mapping for disputed areas
+        iso = properties.get("iso3_code", "")
+        if not iso or (isinstance(iso, str) and iso.startswith("x")):
+            gaul0_code = str(properties.get("gaul0_code", ""))
+            iso = json.loads(self.MAPPING.read_text()).get(gaul0_code, "UNK")
+
+        # GAUL 2024 uses lowercase column names: gaul0_name, gaul1_name, gaul2_name
+        names = [value for prop, value in properties.items() if "_name" in prop]
 
         # generate the name from the columns
         names = [su.normalize_str(name) for name in names]
