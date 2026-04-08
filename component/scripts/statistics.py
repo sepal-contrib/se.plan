@@ -246,20 +246,20 @@ async def _get_summary_statistics_batched(
 
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                for idx, result in enumerate(batch_results):
-                    if isinstance(result, Exception):
+                for idx, batch_res in enumerate(batch_results):
+                    if isinstance(batch_res, Exception):
                         _, name = batch[idx]
                         logger.error(
-                            f"[BATCHED] Failed to process benefit '{name}': {result}"
+                            f"[BATCHED] Failed to process benefit '{name}': {batch_res}"
                         )
-                        error_msg = str(result).lower()
+                        error_msg = str(batch_res).lower()
                         if "429" in error_msg or "resource_exhausted" in error_msg:
-                            raise result
+                            raise batch_res
                         aoi_result["benefit"].append(
-                            {name: {"values": {}, "total": [0], "error": str(result)}}
+                            {name: {"values": {}, "total": [0], "error": str(batch_res)}}
                         )
                     else:
-                        aoi_result["benefit"].append(result)
+                        aoi_result["benefit"].append(batch_res)
 
                 logger.debug(
                     f"[BATCHED] Completed benefit batch {i//batch_size + 1} ({len(batch)} items)"
@@ -281,20 +281,20 @@ async def _get_summary_statistics_batched(
 
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                for idx, result in enumerate(batch_results):
-                    if isinstance(result, Exception):
+                for idx, batch_res in enumerate(batch_results):
+                    if isinstance(batch_res, Exception):
                         _, name = batch[idx]
                         logger.error(
-                            f"[BATCHED] Failed to process cost '{name}': {result}"
+                            f"[BATCHED] Failed to process cost '{name}': {batch_res}"
                         )
-                        error_msg = str(result).lower()
+                        error_msg = str(batch_res).lower()
                         if "429" in error_msg or "resource_exhausted" in error_msg:
-                            raise result
+                            raise batch_res
                         aoi_result["cost"].append(
-                            {name: {"values": {}, "total": [0], "error": str(result)}}
+                            {name: {"values": {}, "total": [0], "error": str(batch_res)}}
                         )
                     else:
-                        aoi_result["cost"].append(result)
+                        aoi_result["cost"].append(batch_res)
 
                 logger.debug(
                     f"[BATCHED] Completed cost batch {i//batch_size + 1} ({len(batch)} items)"
@@ -316,20 +316,20 @@ async def _get_summary_statistics_batched(
 
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                for idx, result in enumerate(batch_results):
-                    if isinstance(result, Exception):
+                for idx, batch_res in enumerate(batch_results):
+                    if isinstance(batch_res, Exception):
                         _, name = batch[idx]
                         logger.error(
-                            f"[BATCHED] Failed to process constraint '{name}': {result}"
+                            f"[BATCHED] Failed to process constraint '{name}': {batch_res}"
                         )
-                        error_msg = str(result).lower()
+                        error_msg = str(batch_res).lower()
                         if "429" in error_msg or "resource_exhausted" in error_msg:
-                            raise result
+                            raise batch_res
                         aoi_result["constraint"].append(
-                            {name: {"values": {}, "total": [0], "error": str(result)}}
+                            {name: {"values": {}, "total": [0], "error": str(batch_res)}}
                         )
                     else:
-                        aoi_result["constraint"].append(result)
+                        aoi_result["constraint"].append(batch_res)
 
                 logger.debug(
                     f"[BATCHED] Completed constraint batch {i//batch_size + 1} ({len(batch)} items)"
