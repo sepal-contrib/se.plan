@@ -208,6 +208,8 @@ class ConstraintDialog(BaseDialog):
             return
 
         if self.w_name.v_model not in self.w_name.items:
+            if self.w_id.v_model in self._CONSTRAINTS.layer_id.tolist():
+                self.w_id.v_model = None
             return
 
         # get the information from the dataframe
