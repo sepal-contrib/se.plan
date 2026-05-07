@@ -4,12 +4,11 @@ from copy import deepcopy
 import ee
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
-from component.frontend.icons import icon
 from sepal_ui import sepalwidgets as sw
 
 import component.parameter as cp
+from component.frontend.icons import icon
 from component.message import cm
-from component.widget import custom_widgets as cw
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import TextBtn
 
