@@ -267,7 +267,12 @@ def get_bars_chart(
         ),
         xAxis=XAxis(type="value", max=max_value),
         series=series,
-        tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
+        tooltip=Tooltip(
+            trigger="axis",
+            axisPointer={"type": "shadow"},
+            appendToBody=True,
+            confine=True,
+        ),
         legend=Legend() if show_legend else None,
     )
 
@@ -315,7 +320,12 @@ def get_stacked_bars_chart(
         ),
         xAxis=XAxis(type="value", axisLabel=axis_label_x, splitLine={"show": False}),
         series=bars,
-        tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
+        tooltip=Tooltip(
+            trigger="axis",
+            axisPointer={"type": "shadow"},
+            appendToBody=True,
+            confine=True,
+        ),
     )
     # style={"height": f"{height}px"}
     return EChartsWidget(
@@ -361,7 +371,12 @@ def get_individual_charts(summary_results: SummaryStatsDict, theme_toggle=None):
             # yAxis=YAxis(type="category", rotate=90, data=[region]),
             yAxis=YAxis(type="category", data=[region]),
             series=bars,
-            tooltip=Tooltip(trigger="axis", axisPointer={"type": "shadow"}),
+            tooltip=Tooltip(
+                trigger="axis",
+                axisPointer={"type": "shadow"},
+                appendToBody=True,
+                confine=True,
+            ),
             grid=Grid(height="60px"),
             toolbox=Toolbox(show=True),
         )

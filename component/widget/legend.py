@@ -5,103 +5,16 @@ from typing import List, Literal
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import WidgetControl
 
-from component.message import cm
-
-
-def SuitabilityLegend() -> WidgetControl:
-    """Create a legend for the map.
-
-    Colors of the table will come from a css simple file located in fronted.
-    """
-    id_ = "".join(random.choices(string.ascii_letters, k=5))
-
-    style = sw.Html(
-        tag="style",
-        children=[
-            f"""
-            .legend_{id_} {{
-                height: 25px;
-                background-color: #353535;
-                background-image:
-                    linear-gradient(
-                    to right, 
-                    #353535,
-                    #353535 16.66%,
-                    #edf8fb 16.66%,
-                    #66c2a4,
-                    #006d2c
-                    );
-            }}
-
-            .td_title_{id_} {{
-                text-align:center !important;
-                font-size: 14px !important;
-                height: auto !important;
-            }}
-            .td_legend_{id_} {{
-                padding: 0px !important;
-                height: auto !important;
-            }}
-
-            .td_label_{id_} {{
-                width: 16.66%;
-                font-size: 12px !important;
-                line-height: 18px !important;
-                text-align:center !important;
-                height: auto !important;
-            }}
-            """
-        ],
-    )
-
-    title = sw.Html(
-        tag="td",
-        class_=f"td_title_{id_}",
-        attributes={"colspan": 6},
-        children=[sw.Html(tag="div", children="Restoration suitability index")],
-    )
-
-    legend_bar = sw.Html(
-        tag="td",
-        class_=f"td_legend_{id_}",
-        attributes={"colspan": 6},
-        children=[sw.Html(tag="div", class_=f"legend_{id_}")],
-    )
-
-    legend_names = {
-        "nodata": cm.map.legend.class_.nodata,
-        "vlow": cm.map.legend.class_.vlow,
-        "low": cm.map.legend.class_.low,
-        "medium": cm.map.legend.class_.medium,
-        "high": cm.map.legend.class_.high,
-        "vhigh": cm.map.legend.class_.vhigh,
-    }
-
-    legend_label = [
-        sw.Html(tag="td", class_=f"td_label_{id_}", children=[name])
-        for name in legend_names.values()
-    ]
-
-    legend = sw.SimpleTable(
-        style_="width:450px; background-color: transparent;",
-        class_="pa-0 ma-0",
-        children=[
-            style,
-            sw.Html(tag="tr", children=[title]),
-            sw.Html(tag="tr", children=[legend_bar]),
-            sw.Html(tag="tr", children=legend_label),
-        ],
-    )
-    # return legend
-
-    return WidgetControl(
-        widget=legend,
-        position="bottomright",
-        transparent_bg=True,
-    )
-
 
 class Legend(WidgetControl):
+    """Map legend widget styled to match the pysepal Solara legend overlay.
+
+    Kept as an ipyleaflet ``WidgetControl`` (rather than the Solara
+    ``LegendComponent``) because this legend lives inside dialog-bound maps
+    (e.g. ``PreviewMapDialog``) where a body-fixed Solara overlay would
+    render outside the dialog.
+    """
+
     def __init__(
         self,
         type_: Literal["stepped", "gradient"] = None,
@@ -109,37 +22,32 @@ class Legend(WidgetControl):
         names: List[str] = None,
         colors: List[str] = None,
     ):
-        """Create a legend for the map.
-
-        Args:
-            type_ (str): Type of the legend. Can be "stepped" or "gradient".
-            title (str): Title of the legend.
-            colors (list): Dictionary of colors.
-            names (list): List of names for the legend.
-        """
-        # create a random name for the legend
-        # this is needed to avoid having the same legend for different layers
         self.id_ = "".join(random.choices(string.ascii_letters, k=5))
 
-        self.title_row = sw.Html(tag="tr")
-        self.color_row = sw.Html(tag="tr")
-        self.label_row = sw.Html(tag="tr", class_=f"legend_tr_{self.id_}")
+        self.title_div = sw.Html(tag="div", class_=f"seplan-legend__title_{self.id_}")
+        self.bar_div = sw.Html(tag="div", class_=f"seplan-legend__bar_{self.id_}")
+        self.labels_div = sw.Html(
+            tag="div", class_=f"seplan-legend__labels_{self.id_}"
+        )
 
         self.style = sw.Html(tag="style")
 
-        legend = sw.SimpleTable(
-            style_="width:450px; background-color: transparent;",
-            class_="pa-0 ma-0",
-            children=[self.style, self.title_row, self.color_row, self.label_row],
+        # The wrapper class lets us target the surrounding ``.leaflet-control``
+        # via a parent selector, so even if Leaflet's default float is
+        # overridden somewhere, we can force the legend back to the right.
+        body = sw.Html(
+            tag="div",
+            class_=(
+                f"seplan-legend seplan-legend_{self.id_} "
+                f"seplan-legend-anchor-{self.id_}"
+            ),
+            children=[self.style, self.title_div, self.bar_div, self.labels_div],
         )
 
-        control_args = {}
-        control_args["widget"] = legend
-        control_args["position"] = "bottomright"
-        control_args["transparent_bg"] = True
-        control_args["attributes"] = {"id": "legend"}
-
-        super().__init__(**control_args)
+        super().__init__(
+            widget=body,
+            position="bottomright",
+        )
 
         if all([type_, title, names, colors]):
             self.update_legend(type_, title, names, colors)
@@ -152,85 +60,73 @@ class Legend(WidgetControl):
         colors: List[str],
     ):
         names = [str(name) for name in names]
-        gradient = get_color_css(type_, colors)
+        gradient_css = get_color_css(type_, colors)
+
+        # Justify labels: 2 stops → space-between, 3+ → evenly spaced.
+        justify = "space-between" if len(names) <= 3 else "space-around"
 
         style = f"""
-            .legend_{self.id_} {{
-                height: 20px;
-                background-color: #353535;
-                {gradient}
-            }}
+        .seplan-legend_{self.id_} {{
+            font-family: Roboto, sans-serif;
+            background: rgba(33, 33, 33, 0.85);
+            color: #fff;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 12px;
+            display: inline-flex;
+            flex-direction: column;
+            gap: 4px;
+            width: fit-content;
+            min-width: 220px;
+            max-width: 90vw;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+        }}
 
-            .td_title_{self.id_} {{
-                text-align:center !important;
-                font-size: 14px !important;
-                height: auto !important;
-            }}
+        .seplan-legend__title_{self.id_} {{
+            font-size: 11px;
+            opacity: 0.85;
+            text-align: center;
+            line-height: 1.2;
+        }}
 
-            .td_legend_{self.id_} {{
-                padding: 0px !important;
-                height: auto !important;
-            }}
+        .seplan-legend__bar_{self.id_} {{
+            height: 12px;
+            border-radius: 3px;
+            min-width: 200px;
+            {gradient_css}
+        }}
 
-            .td_label_{self.id_} {{
-                width: {100/len(names)}%;
-                font-size: 12px !important;
-                line-height: 18px !important;
-                text-align:center !important;
-                height: auto !important;
-                padding: 0px !important;
-            }}
-           
+        .seplan-legend__labels_{self.id_} {{
+            display: flex;
+            justify-content: {justify};
+            font-size: 11px;
+            opacity: 0.85;
+            line-height: 1.2;
+        }}
+
+        .seplan-legend__labels_{self.id_} > span {{
+            white-space: nowrap;
+        }}
         """
 
-        if len(names) <= 3:
-            style += f"""
-            .legend_tr_{self.id_} > td:first-child {{
-                text-align: left !important;
-            }}
-
-            .legend_tr_{self.id_} > td:last-child {{
-                text-align: right !important;
-            }}
-            """
-
-        self.title_row.children = [
-            sw.Html(
-                tag="td",
-                class_=f"td_title_{self.id_}",
-                attributes={"colspan": len(names)},
-                children=[sw.Html(tag="div", children=title)],
-            )
+        self.title_div.children = [title]
+        self.bar_div.children = []
+        self.labels_div.children = [
+            sw.Html(tag="span", children=[name]) for name in names
         ]
-
-        self.color_row.children = [
-            sw.Html(
-                tag="td",
-                class_=f"td_legend_{self.id_}",
-                attributes={"colspan": len(names)},
-                children=[sw.Html(tag="div", class_=f"legend_{self.id_}")],
-            )
-        ]
-
-        self.label_row.children = [
-            sw.Html(tag="td", class_=f"td_label_{self.id_}", children=[name])
-            for name in names
-        ]
-
         self.style.children = [style]
 
 
 def get_color_css(type_, colors):
-    """Generates a CSS linear-gradient from a list of colors.
+    """Generate a CSS background gradient for the legend bar.
 
-    Parameters:
-    - colors: list of strings representing CSS colors.
-
-    Returns:
-    - CSS string with linear-gradient.
+    ``gradient`` produces a smooth linear gradient; ``stepped`` produces
+    discrete color blocks of equal width.
     """
     if type_ == "gradient":
-        return f"background: linear-gradient(to right, {', '.join(colors)})"
+        return f"background: linear-gradient(to right, {', '.join(colors)});"
 
     if not colors:
         return ""
@@ -245,12 +141,9 @@ def get_color_css(type_, colors):
     for i, color in enumerate(colors):
         start = i * percentage
         end = (i + 1) * percentage
-        if i == num_colors - 1:  # For the d color
+        if i == num_colors - 1:
             segments.append(f"{color} {start:.2f}%")
         else:
             segments.append(f"{color} {start:.2f}% {end:.2f}%")
 
-    gradient = ", ".join(segments)
-    css = f"background: linear-gradient(to right, {gradient});"
-
-    return css
+    return f"background: linear-gradient(to right, {', '.join(segments)});"

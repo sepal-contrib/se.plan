@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Union
 from component.scripts.file_handler import save_file
 from pathlib import Path
@@ -55,6 +56,9 @@ class Recipe(HasTraits):
 
         # link the new_changes counter to the models
         self.seplan_aoi.observe(self.update_changes, "updated")
+        # auto-assign a default name+path the first time an AOI is set, so the
+        # right-panel header has something to display and Save has a target
+        self.seplan_aoi.observe(self._auto_init_recipe_path, "updated")
         # Icall them "new_changes" because there's another "updated" trait that is
         # used to trigger the update of the view of these models.
         self.benefit_model.observe(self.update_changes, "new_changes")
@@ -68,6 +72,19 @@ class Recipe(HasTraits):
     def update_changes(self, change):
         """Increment the new_changes counter by 1."""
         self.new_changes += 1
+
+    def _auto_init_recipe_path(self, change):
+        """Assign an in-memory default path on the first AOI update.
+
+        Only fires when no recipe is loaded/saved yet (``recipe_session_path``
+        is empty). Does NOT write to disk — the file is created on the first
+        explicit Save click. This gives the right-panel header a name to
+        display from the moment the user picks an AOI.
+        """
+        if self.recipe_session_path:
+            return
+        default_name = f"recipe_{datetime.now().strftime('%Y-%m-%d-%H%M%S')}"
+        self.recipe_session_path = self.get_recipe_path(default_name)
 
     def load(self, recipe_path: str):
         """Load the recipe element in the different element of the app.

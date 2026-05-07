@@ -11,6 +11,7 @@ from component.tile.dashboard_components import (
     MapDownloadComponent,
 )
 from component.widget.alert_state import Alert, AlertDialog
+from component.widget.recipe_header import RecipeHeader
 
 
 def get_right_panel_content(
@@ -48,10 +49,35 @@ def get_right_panel_content(
     )
 
     map_compute_component = MapComputeComponent(
-        recipe=recipe, map_=map_, gee_interface=gee_interface, alert=shared_alert
+        recipe=recipe,
+        map_=map_,
+        gee_interface=gee_interface,
+        alert=shared_alert,
     )
 
     map_download_component = MapDownloadComponent(recipe=recipe, alert=shared_alert)
+
+    recipe_header = RecipeHeader(recipe=recipe, alert=shared_alert)
+
+    # Buttons that require a valid LMIC AOI. Disabled while
+    # ``recipe.seplan_aoi.aoi_lmic_valid`` is False so the user can't kick
+    # off compute/export against an out-of-scope AOI.
+    lmic_gated_buttons = [
+        map_compute_component.btn_compute,
+        map_download_component.btn_download,
+        download_component.btn_download,
+        dashboard_compute_component.btn_dashboard,
+        dashboard_compute_component.btn_view_dashboard,
+        compare_component.btn_compare,
+    ]
+
+    def _sync_lmic_gate(*_):
+        disabled = not recipe.seplan_aoi.aoi_lmic_valid
+        for btn in lmic_gated_buttons:
+            btn.disabled = disabled
+
+    recipe.seplan_aoi.observe(_sync_lmic_gate, "aoi_lmic_valid")
+    _sync_lmic_gate()
 
     # Right panel configuration
     config = {
@@ -64,6 +90,7 @@ def get_right_panel_content(
 
     # Add dashboard components
     content_data = [
+        {"content": [recipe_header], "divider": True},
         {"content": [AdminButton(models=recipe.models) if not no_admin else None]},
         {
             "title": "Compute Restoration Map",
@@ -71,6 +98,16 @@ def get_right_panel_content(
             "content": [map_compute_component],
             "divider": True,
             "description": "Generate the restoration suitability map based on the benefits, constraints and costs layers and configuration.",
+        },
+        {
+            "title": "Custom geometries",
+            "icon": "mdi-shape-polygon-plus",
+            "content": [map_.btn_custom_geom],
+            "divider": True,
+            "description": (
+                "Refine the analysis by adding sub-areas inside your primary "
+                "AOI. Draw, import a shape, or pick an admin unit below it."
+            ),
         },
         {
             "title": "Export Results",

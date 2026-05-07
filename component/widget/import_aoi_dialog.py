@@ -34,14 +34,39 @@ class ImportAoiDialog(BaseDialog):
 
         self.children = [card]
 
+        # Caller-supplied dialog to restore on cancel — set per call to
+        # ``open_dialog(return_to=...)``. Cleared whenever it's consumed.
+        self._return_to = None
+
         # add js behavior
-        btn_cancel.on_event("click", lambda *_: self.close_dialog())
+        btn_cancel.on_event("click", lambda *_: self._cancel())
 
-        self.aoi_view.observe(lambda *_: self.close_dialog(), "updated")
+        # Successful import → close the dialog (next surface, the rename
+        # dialog, opens via CustomAoiDialog.on_new_geom from ImportAoiView).
+        # Also clear ``_return_to`` so a later cancel from a different open
+        # call doesn't bounce back to a stale picker.
+        self.aoi_view.observe(lambda *_: self._on_success(), "updated")
 
-    def open_dialog(self, *_):
-        """Reset AOI view and open the dialog."""
+    def _on_success(self):
+        self._return_to = None
+        self.close_dialog()
 
+    def _cancel(self, *_):
+        """Close and re-open the caller dialog if any."""
+        return_to = self._return_to
+        self._return_to = None
+        self.close_dialog()
+        if return_to is not None:
+            return_to.open_dialog()
+
+    def open_dialog(self, *_, return_to=None):
+        """Reset AOI view and open the dialog.
+
+        Args:
+            return_to: Optional dialog to re-open if the user cancels.
+        """
+        if return_to is not None:
+            self._return_to = return_to
         self.aoi_view.reset()
         super().open_dialog()
 
@@ -52,7 +77,10 @@ class ImportAoiView(AoiView):
 
     def __init__(self, custom_aoi_dialog, gee_interface, **kwargs):
 
-        methods = ["-POINTS"]
+        # Admin sub-areas have their own dedicated entry (AdminAoiDialog) —
+        # exclude ADMIN0/1/2 here to keep the import dialog focused on file
+        # uploads (SHAPE) and asset references (ASSET). POINTS is also off.
+        methods = ["-POINTS", "-ADMIN0", "-ADMIN1", "-ADMIN2"]
         self.elevation = False
 
         super().__init__(methods=methods, gee_interface=gee_interface, **kwargs)

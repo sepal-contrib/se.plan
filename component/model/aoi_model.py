@@ -13,7 +13,7 @@ from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.message import ms
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.gee_interface import GEEInterface
-from traitlets import Dict, Int, Any
+from traitlets import Bool, Dict, Int, Any
 
 import component.parameter as cp
 
@@ -176,6 +176,29 @@ class AoiModel(AoiModel):
 
         # set the default
         self.set_default(self.default_vector, self.default_admin, self.default_asset)
+
+    def _from_geo_json(self, geo_json: dict):
+        """Build the in-memory feature_collection from a drawn geometry.
+
+        Overrides pysepal's implementation to skip ``export_to_asset()`` —
+        for SE.PLAN we only need an ``ee.FeatureCollection`` in memory; we
+        don't want to persist user-drawn AOIs to their EE asset folder
+        (and pysepal's folder resolution falls through to the literal
+        string "None" when no folder is configured, breaking the export).
+        """
+        if not geo_json or not geo_json.get("features"):
+            raise Exception(ms.aoi_sel.exception.no_draw)
+
+        # Strip styling so geopandas/EE accept the geometry.
+        for feat in geo_json["features"]:
+            if "style" in feat.get("properties", {}):
+                del feat["properties"]["style"]
+
+        self.gdf = gpd.GeoDataFrame.from_features(geo_json).set_crs(epsg=4326)
+        self.name = su.normalize_str(self.name)
+        self.feature_collection = su.geojson_to_ee(self.gdf.__geo_interface__)
+
+        return self
 
     def set_object(self, method: str = ""):
         """Set the object (gdf/featurecollection) based on the model inputs.
@@ -390,6 +413,18 @@ class SeplanAoi(model.Model):
     updated = Int(0).tag(sync=True)
     """int: this trait will be updated every time the aoi_model is updated"""
 
+    aoi_lmic_valid = Bool(True).tag(sync=True)
+    """bool: True when the current AOI overlaps the LMIC mask. Defaults True
+    so a fresh app (no AOI yet) doesn't disable the right-panel actions
+    pre-emptively. Updated by ``custom_aoi_tile.AoiView._check_lmic`` after
+    each AOI change."""
+
+    aoi_lmic_checked = Int(0).tag(sync=True)
+    """int: counter that increments every time the LMIC verdict is settled
+    (sync admin path or async GEE path). Used by the AOI view to gate the
+    auto-close of the step dialog so the user can see a non-LMIC warning
+    before the dialog disappears."""
+
     def __init__(self, gee_interface=None, **kwargs):
         # test_countries:
         # Multiple polygon country: 220
@@ -397,11 +432,40 @@ class SeplanAoi(model.Model):
         # Medium department: 935 (Antioquia)
         self.aoi_model = AoiModel(gee_interface=gee_interface, **kwargs)
 
+        # Tracks the (method, name) of the primary AOI between updates so we
+        # can detect when the user replaces it (e.g. Colombia → Brazil) and
+        # drop sub-AOIs that referenced the previous primary.
+        self._prev_primary_id = None
+
+        # Suppresses the auto-clear in ``on_aoi_change`` while
+        # ``import_data``/``import_data_async`` is restoring a recipe — the
+        # recipe sets ``custom_layers`` before ``set_object`` fires ``updated``,
+        # so without this flag the just-restored sub-AOIs would be wiped.
+        self._loading = False
+
         self.aoi_model.observe(self.on_aoi_change, "updated")
 
     def on_aoi_change(self, change):
-        """Update the feature_collection when the aoi_model.name is updated."""
+        """Update the feature_collection when the aoi_model.name is updated.
+
+        Also clears ``custom_layers`` whenever the primary AOI identity
+        actually changes — sub-AOIs are defined relative to a primary, so
+        they're meaningless once that primary is replaced. Skipped during
+        recipe import (``_loading``) and on first set (``_prev_primary_id is
+        None``).
+        """
         self.feature_collection = self.aoi_model.feature_collection
+
+        new_id = (self.aoi_model.method, self.aoi_model.name)
+        identity_changed = (
+            self._prev_primary_id is not None and new_id != self._prev_primary_id
+        )
+        # Update prev *before* the clear so re-entrancy from the
+        # custom_layers/link → observer chain sees the new identity.
+        self._prev_primary_id = new_id
+        if identity_changed and not self._loading:
+            self.custom_layers = {"type": "FeatureCollection", "features": []}
+
         self.updated += 1
 
     def get_ee_features(self) -> Tuple[DictType[str, AnyType], DictType[str, AnyType]]:
@@ -435,18 +499,22 @@ class SeplanAoi(model.Model):
                 primary_data.get("name"),
             )
 
-        self.aoi_model.import_data(primary_data)
-        self.custom_layers = data["custom"]
+        self._loading = True
+        try:
+            self.aoi_model.import_data(primary_data)
+            self.custom_layers = data["custom"]
 
-        # if there's no aoi we just need to reset the map
-        if not primary_data["method"]:
-            self.reset_view += 1
-            return
+            # if there's no aoi we just need to reset the map
+            if not primary_data["method"]:
+                self.reset_view += 1
+                return
 
-        self.set_map += 1
+            self.set_map += 1
 
-        if auto_update:
-            self.aoi_model.set_object()
+            if auto_update:
+                self.aoi_model.set_object()
+        finally:
+            self._loading = False
 
     async def import_data_async(self, data: dict, auto_update: bool = True):
         primary_data = dict(data["primary"])
@@ -459,18 +527,22 @@ class SeplanAoi(model.Model):
                 primary_data.get("name"),
             )
 
-        self.aoi_model.import_data(primary_data)
-        self.custom_layers = data["custom"]
+        self._loading = True
+        try:
+            self.aoi_model.import_data(primary_data)
+            self.custom_layers = data["custom"]
 
-        # if there's no aoi we just need to reset the map
-        if not primary_data["method"]:
-            self.reset_view += 1
-            return
+            # if there's no aoi we just need to reset the map
+            if not primary_data["method"]:
+                self.reset_view += 1
+                return
 
-        self.set_map += 1
+            self.set_map += 1
 
-        if auto_update:
-            await self.aoi_model.set_object_async()
+            if auto_update:
+                await self.aoi_model.set_object_async()
+        finally:
+            self._loading = False
 
     def export_data(self):
         """Save the data from each of the AOIs."""

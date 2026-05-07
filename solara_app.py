@@ -27,6 +27,7 @@ from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.tile.custom_aoi_tile import AoiView
 from component.widget.map import SeplanMap
+from component.widget.seplan_legend import SuitabilityLegendOverlay
 from component.tile.questionnaire_tile import QuestionnaireTile
 from component.tile.recipe_tile import RecipeView
 from component.tile.right_panel import get_right_panel_content
@@ -80,7 +81,9 @@ def Page():
     recipe_tile = RecipeView(
         recipe=recipe, app_model=app_model, sepal_session=sepal_client
     )
-    aoi_view = AoiView(map_, gee_interface=gee_interface, recipe=recipe)
+    aoi_view = AoiView(
+        map_, gee_interface=gee_interface, recipe=recipe, app_model=app_model
+    )
 
     questionnaire_tile = QuestionnaireTile(
         gee_interface=gee_interface,
@@ -162,6 +165,10 @@ def Page():
         dialog_width=860,
         right_panel_config=right_panel_config,
         right_panel_content=right_panel_content,
+        right_panel_open=True,
         repo_url="https://github.com/sepal-contrib/se.plan",
         docs_url="https://docs.sepal.io/en/latest/modules/dwn/seplan.html",
+        model=app_model,
     )
+
+    SuitabilityLegendOverlay()

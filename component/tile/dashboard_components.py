@@ -29,7 +29,12 @@ class MapComputeComponent(sw.Layout):
     """Component for map computation functionality"""
 
     def __init__(
-        self, recipe: Recipe, map_, gee_interface: GEEInterface, alert: Alert, **kwargs
+        self,
+        recipe: Recipe,
+        map_,
+        gee_interface: GEEInterface,
+        alert: Alert,
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.recipe = recipe

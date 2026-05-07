@@ -15,11 +15,13 @@ def get_table_table_body(
     suitability_levels,
     display_type: Literal["absolute", "percentage", "both"] = "both",
 ):
-    # Collect all area names across all recipes
+    # Collect all area names across all recipes. Drop ``None`` keys (legacy
+    # recipes occasionally carry a custom layer with no ``name``) so the
+    # sort below doesn't blow up on ``str < NoneType``.
     areas = set()
     for recipe_stats_dict in recipe_stats_list:
         for summary_stats in recipe_stats_dict.values():
-            areas.update(summary_stats.keys())
+            areas.update(k for k in summary_stats.keys() if k is not None)
     areas = sorted(areas)
 
     # Determine if we need to include the recipe name column
