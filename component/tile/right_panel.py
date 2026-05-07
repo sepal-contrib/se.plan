@@ -11,6 +11,7 @@ from component.tile.dashboard_components import (
     MapDownloadComponent,
 )
 from component.widget.alert_state import Alert, AlertDialog
+from component.widget.recipe_header import RecipeHeader
 
 
 def get_right_panel_content(
@@ -53,6 +54,8 @@ def get_right_panel_content(
 
     map_download_component = MapDownloadComponent(recipe=recipe, alert=shared_alert)
 
+    recipe_header = RecipeHeader(recipe=recipe, alert=shared_alert)
+
     # Right panel configuration
     config = {
         "title": "Compute results",
@@ -64,6 +67,7 @@ def get_right_panel_content(
 
     # Add dashboard components
     content_data = [
+        {"content": [recipe_header], "divider": True},
         {"content": [AdminButton(models=recipe.models) if not no_admin else None]},
         {
             "title": "Compute Restoration Map",

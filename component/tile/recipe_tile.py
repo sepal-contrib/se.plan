@@ -182,12 +182,21 @@ class RecipeView(sw.Layout):
             ),
         ]
 
+        # Recipe → view: keep the CardSave name field in sync with whatever
+        # writes ``recipe.recipe_session_path`` (auto-init in ``Recipe`` and
+        # the right-panel header's save button). One-way avoids the link's
+        # initial sync wiping a freshly auto-init'd path with this view's
+        # empty default.
         directional_link(
-            (self, "recipe_session_path"), (self.recipe, "recipe_session_path")
+            (self.recipe, "recipe_session_path"), (self, "recipe_session_path")
         )
 
         # link the current session path with save_card.recipe_name
         self.observe(self.session_path_handler, "recipe_session_path")
+        # Seed the save card with whatever path is already on the recipe
+        # (e.g. set by the auto-init observer before this view existed).
+        if self.recipe.recipe_session_path:
+            self.recipe_session_path = self.recipe.recipe_session_path
 
         # Capture errors with alert (we have to decorate before the events definition)
         self.new_event = loading_button(alert=self.alert, button=self.card_new.btn)(
@@ -224,8 +233,11 @@ class RecipeView(sw.Layout):
         """handle current session path and link its value with save_card.recipe_name."""
         # we only need to show the name, not the full path, but we have to keep the full path
         # to save the recipe
-
-        self.card_save.recipe_name = str(Path(change["new"]).stem)
+        new_path = change["new"]
+        if not new_path:
+            self.card_save.recipe_name = ""
+            return
+        self.card_save.recipe_name = str(Path(new_path).stem)
 
     @switch("disabled", on_widgets=["card_new", "card_load", "card_save"])
     @switch("loading", on_widgets=["card_new"])
