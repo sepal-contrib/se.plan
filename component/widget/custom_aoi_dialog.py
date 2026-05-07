@@ -190,10 +190,12 @@ class CustomAoiDialog(BaseDialog):
     def on_cancel(self, *_):
         """Clear any in-progress drawing and remove the Geoman toolbar.
 
-        ``dc.clear()`` only resets the layer data; ``dc.hide()`` also pops
-        the toolbar off ``map_.controls`` so the user gets a clean map back
+        ``dc.clear()`` discards any draft features so they don't reappear
+        the next time the toolbar is shown; ``dc.hide()`` also pops the
+        toolbar off ``map_.controls`` so the user gets a clean map back
         after committing or cancelling the custom geometry.
         """
+        self.map_.dc.clear()
         self.map_.dc.hide()
 
         # Clear any feature that was selected

@@ -180,9 +180,11 @@ class CustomGeometryRow(sw.Html):
         self.map_ = map_
 
         # use layer_id to get the name of the geometry from the custom_layers dict
+        name = str(layer_id)
         for layer in self.map_.custom_layers["features"]:
             if layer["properties"]["id"] == layer_id:
                 name = layer["properties"]["name"]
+                break
 
         self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
 

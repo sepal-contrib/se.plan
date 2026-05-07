@@ -1,17 +1,14 @@
 import time
 from copy import deepcopy
-from typing import Optional
 
-import ipyvuetify as v
 from component.frontend.icons import icon
-from component.widget.buttons import IconBtn, TextBtn
+from component.widget.buttons import TextBtn
 import sepal_ui.sepalwidgets as sw
-from ipyleaflet import GeoJSON, WidgetControl, basemap_to_tiles, basemaps
+from ipyleaflet import GeoJSON, WidgetControl
 from shapely.geometry import Point, shape
 from sepal_ui import mapping as sm
 from traitlets import Dict, Int, link
 from sepal_ui.scripts.gee_interface import GEEInterface
-from sepal_ui import color
 from sepal_ui.mapping.map_btn import MapBtn
 from component.widget.admin_aoi_dialog import AdminAoiDialog
 from component.widget.custom_geometries_dialog import CustomGeometriesDialog

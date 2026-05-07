@@ -6,7 +6,6 @@ replacing the legacy ipyleaflet ``WidgetControl``-based ``SuitabilityLegend``.
 """
 
 from dataclasses import asdict
-from typing import Optional
 
 import solara
 from pysepal.solara.components.legend import (
