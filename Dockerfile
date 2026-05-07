@@ -17,7 +17,7 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 USER $MAMBA_USER
 
 COPY requirements.txt /home/$MAMBA_USER/requirements.txt
-RUN micromamba create -n seplan python=3.10 pip -c conda-forge -y && \
+RUN micromamba create -n seplan python=3.12 pip -c conda-forge -y && \
     micromamba run -n seplan pip install -r /home/$MAMBA_USER/requirements.txt --no-cache-dir && \
     micromamba clean --all --yes && \
     rm -f /home/$MAMBA_USER/requirements.txt && \
