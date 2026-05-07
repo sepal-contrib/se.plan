@@ -15,6 +15,8 @@ Restoration of forests and other ecosystems can be a major nature-based strategy
 
 This mapping tool combines ecological data on forest restoration with data on restoration’s benefits, costs, and risks. It is intended to support the preparation of strategic restoration plans for a given area of interest (AOI) —a country, a group of countries, or a region within a country—by providing spatially explicit information on restoration suitability and impacts. This information is intended to aid decision makers in identifying promising, cost-effective restoration locations: locations where restoration provides a high level of benefits relative to the costs incurred. It can also help identify tradeoffs among impacts that might require further attention.
 
+See `docs/workflow.md <docs/workflow.md>`_ for a Mermaid diagram of the end-to-end user workflow.
+
 Before running the tool, users select their areas of interest, provide information on their ratings of different prospective restoration benefits (i.e., the relative importance of the benefits to them), and have the option to impose constraints that exclude locations they view as unsuitable for restoration due to ecological or socioeconomic risks. The tool then generates maps and related information on restoration’s benefits, costs, and risks in the areas of interest. It provides an overall suitability index, on a scale of 1 to 5, that indicates the relative benefit-cost ratio for each location within the areas of interest. By varying the benefit ratings and constraints, users can investigate the sensitivity of model output to these input choices. They also have the option to use customized data for their areas of interest instead of the default data built into the tool.
 
 .. raw:: html
