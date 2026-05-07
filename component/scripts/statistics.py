@@ -16,6 +16,10 @@ from component.types import (
 
 logger = logging.getLogger("SEPLAN")
 
+STATS_SCALE_M = 100
+"""Scale (in meters) used by every reduceRegion in this module. The dashboard
+CSV export reads this constant to report the actual computation scale."""
+
 
 def is_main_aoi(main_aoi_name, aoi_name) -> bool:
     """Check if the aoi is the main aoi."""
@@ -368,7 +372,7 @@ def get_image_stats(image, mask, geom):
         .reduceRegion(
             reducer=ee.Reducer.sum().group(1, "image"),
             geometry=geom,
-            scale=100,
+            scale=STATS_SCALE_M,
             maxPixels=1e12,
         )
         .get("groups")
@@ -396,7 +400,7 @@ def get_image_percent_cover_pixelarea(
         .reduceRegion(
             reducer=ee.Reducer.sum().group(1, "image"),
             geometry=aoi,
-            scale=100,
+            scale=STATS_SCALE_M,
             maxPixels=1e12,
         )
         .get("groups")
@@ -461,7 +465,7 @@ def get_image_mean(image, aoi, mask, name, main_aoi) -> Dict[str, MeanStatsDict]
         image.reduceRegion(
             reducer=reducer,
             geometry=aoi,
-            scale=100,
+            scale=STATS_SCALE_M,
             maxPixels=1e13,
         )
     )
@@ -487,7 +491,7 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
         .reduceRegion(
             reducer=ee.Reducer.sum(),
             geometry=aoi,
-            scale=100,
+            scale=STATS_SCALE_M,
             maxPixels=1e13,
         )
         .get("area")
@@ -499,7 +503,7 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
         .reduceRegion(
             reducer=ee.Reducer.sum(),
             geometry=aoi,
-            scale=100,
+            scale=STATS_SCALE_M,
             maxPixels=1e13,
         )
     )
@@ -507,7 +511,7 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
     total_img = image.reduceRegion(
         reducer=ee.Reducer.sum(),
         geometry=aoi,
-        scale=100,
+        scale=STATS_SCALE_M,
         maxPixels=1e13,
     )
 
