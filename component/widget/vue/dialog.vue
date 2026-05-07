@@ -1,9 +1,7 @@
 <!-- Custom dialog to trigger a resize event when it is open -->
 <template>
     <v-dialog v-model="show" :persistent="persistent" :max-width="max_width" :min-width="min_width" :retain-focus="retain_focus">
-          <template v-for="(child, index) in children" :key="index">
-            <jupyter-widget :widget="child"></jupyter-widget>
-          </template>
+          <jupyter-widget v-for="(child, index) in children" :key="index" :widget="child"></jupyter-widget>
     </v-dialog>
   </template>
   

@@ -27,6 +27,7 @@ from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.tile.custom_aoi_tile import AoiView
 from component.widget.map import SeplanMap
+from component.widget.seplan_legend import SuitabilityLegendOverlay
 from component.tile.questionnaire_tile import QuestionnaireTile
 from component.tile.recipe_tile import RecipeView
 from component.tile.right_panel import get_right_panel_content
@@ -169,3 +170,5 @@ def Page():
         docs_url="https://docs.sepal.io/en/latest/modules/dwn/seplan.html",
         model=app_model,
     )
+
+    SuitabilityLegendOverlay()

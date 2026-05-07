@@ -1,5 +1,7 @@
+import logging
 from copy import deepcopy
 
+import ee
 from matplotlib import pyplot as plt
 from matplotlib.colors import to_hex
 from component.frontend.icons import icon
@@ -11,7 +13,15 @@ from component.widget import custom_widgets as cw
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import TextBtn
 
+from .custom_geometries_dialog import CustomGeometriesTable
 from .map import SeplanMap
+
+logger = logging.getLogger("SEPLAN")
+
+# Tolerance (in m²) for the "outside primary AOI" check. Geoman polygons can
+# carry sub-meter rounding error vs. the primary AOI boundary, so anything
+# under 1 m² of leakage is treated as inside.
+_CONTAINMENT_TOLERANCE_M2 = 1.0
 
 
 class CustomAoiDialog(BaseDialog):
@@ -39,12 +49,22 @@ class CustomAoiDialog(BaseDialog):
                 self.btn,
             ],
         )
-        text = sw.CardText(children=[table, self.save_input])
+        # Alert area for containment-check errors. Stays empty in the happy path.
+        self.alert = sw.Alert()
+        text = sw.CardText(children=[table, self.save_input, self.alert])
         btn_cancel = TextBtn(cm.map.dialog.drawing.cancel, outlined=True)
         action = sw.CardActions(children=[sw.Spacer(), btn_cancel])
         card = sw.Card(class_="ma-0", children=[title, text, action])
 
         self.children = [card]
+
+        # Holds the in-flight validation task between kick-off and completion
+        self._validate_task = None
+
+        # Set by ``on_new_geom`` when the admin-sub flow forwards a feature
+        # whose containment is structurally guaranteed; ``on_save_geom``
+        # honors it by bypassing the GEE check.
+        self._skip_containment_check = False
 
         # add js behavior
         btn_cancel.on_event("click", self.on_cancel)
@@ -53,19 +73,24 @@ class CustomAoiDialog(BaseDialog):
         self.map_.observe(self.on_new_geom, "new_geom")
 
     def on_save_geom(self, *_):
-        """Updates map_.custom_layers with the new geometry."""
-        # Get all the fc in the map_.dc, there should be only one
+        """Stage the candidate features and kick off the GEE containment check.
 
+        The actual append to ``map_.custom_layers`` happens in
+        ``_commit_save`` once ``_validate_async`` confirms every drawn /
+        imported feature lies within the primary AOI. The dialog stays open
+        on validation failure so the user can adjust without losing context.
+        """
         if self.feature:
             features = self.feature["features"]
-
             # Increase the new_geom counter but don't trigger the event
             self.map_.unobserve(self.on_new_geom, "new_geom")
             self.map_.new_geom += 1
             self.map_.observe(self.on_new_geom, "new_geom")
-
         else:
             features = self.map_.dc.to_json()["features"]
+
+        if not features:
+            return
 
         geom_number = self.map_.new_geom
         aoi_color = to_hex(plt.cm.tab10(geom_number))
@@ -74,7 +99,6 @@ class CustomAoiDialog(BaseDialog):
             "color": aoi_color,
             "fillColor": aoi_color,
         }
-
         for feature in features:
             feature["properties"]["id"] = geom_number
             feature["properties"]["name"] = self.w_name.v_model
@@ -84,21 +108,104 @@ class CustomAoiDialog(BaseDialog):
                 "fillOpacity": 0.4,
                 "weight": 2,
             }
-        current_feats = deepcopy(self.map_.custom_layers)
-        current_feats["features"] += features
 
-        # Trigger the change in the custom_layers dict
-        self.map_.custom_layers = current_feats
+        self._candidate_features = features
+        self.alert.reset()
 
-        # Remove all the geometries from the map_.dc and close the dialog
+        gee_interface = getattr(self.map_, "gee_interface", None)
+        primary_fc = getattr(self.map_.aoi_model, "feature_collection", None)
+
+        # Skip the GEE round-trip in any of:
+        #   - No GEE session / no primary AOI (defensive fallback).
+        #   - The admin-sub path opted out (containment is structural).
+        if (
+            self._skip_containment_check
+            or gee_interface is None
+            or primary_fc is None
+        ):
+            self._commit_save()
+            return
+
+        self.btn.disabled = True
+        self.btn.loading = True
+        self._validate_task = gee_interface.create_task(
+            func=self._validate_async,
+            key="custom_geom_validate",
+            on_done=self._on_validate_done,
+            on_error=self._on_validate_error,
+        )
+        self._validate_task.start()
+
+    async def _validate_async(self):
+        """Return the count of staged features that fall outside the primary AOI."""
+        primary_fc = self.map_.aoi_model.feature_collection
+        primary_geom = primary_fc.geometry()
+        gee_interface = self.map_.gee_interface
+
+        outside_count = 0
+        for feat in self._candidate_features:
+            child = ee.Geometry(feat["geometry"])
+            outside_area = await gee_interface.get_info_async(
+                child.difference(primary_geom, maxError=1).area()
+            )
+            if outside_area is not None and outside_area > _CONTAINMENT_TOLERANCE_M2:
+                outside_count += 1
+        return outside_count
+
+    def _on_validate_done(self, outside_count: int):
+        """Commit on full containment, otherwise surface the failure."""
+        self.btn.disabled = False
+        self.btn.loading = False
+        if outside_count > 0:
+            noun = "geometry" if outside_count == 1 else "geometries"
+            verb = "is" if outside_count == 1 else "are"
+            self.alert.add_msg(
+                f"{outside_count} {noun} {verb} outside the primary area of "
+                "interest. Adjust the drawing (or pick a different AOI) and "
+                "try again.",
+                type_="error",
+            )
+            return
+        self._commit_save()
+
+    def _on_validate_error(self, exc: Exception):
+        """Surface the GEE error in the dialog without silently saving."""
+        self.btn.disabled = False
+        self.btn.loading = False
+        logger.exception("Custom geometry validation failed", exc_info=exc)
+        self.alert.add_msg(
+            f"Could not verify the geometry against the primary AOI: {exc}",
+            type_="error",
+        )
+
+    def _commit_save(self):
+        """Append validated features to ``map_.custom_layers`` and close."""
+        features = getattr(self, "_candidate_features", None) or []
+        if features:
+            current_feats = deepcopy(self.map_.custom_layers)
+            current_feats["features"] += features
+            self.map_.custom_layers = current_feats
+        self._candidate_features = None
         self.on_cancel()
 
     def on_cancel(self, *_):
-        """Remove all the geometries from the map_.dc."""
-        self.map_.dc.clear()
+        """Clear any in-progress drawing and remove the Geoman toolbar.
+
+        ``dc.clear()`` only resets the layer data; ``dc.hide()`` also pops
+        the toolbar off ``map_.controls`` so the user gets a clean map back
+        after committing or cancelling the custom geometry.
+        """
+        self.map_.dc.hide()
 
         # Clear any feature that was selected
         self.feature = None
+        self._candidate_features = None
+        self._skip_containment_check = False
+
+        # Reset transient validation UI
+        self.btn.disabled = False
+        self.btn.loading = False
+        self.alert.reset()
 
         # Close the dialog
         self.close_dialog()
@@ -114,14 +221,26 @@ class CustomAoiDialog(BaseDialog):
 
         super().open_dialog()
 
-    def on_new_geom(self, *_, feature_collection: dict = None, name: str = None):
-        """Read the aoi and give an default name.
+    def on_new_geom(
+        self,
+        *_,
+        feature_collection: dict = None,
+        name: str = None,
+        skip_containment_check: bool = False,
+    ):
+        """Read the aoi and give a default name.
 
-        It will manage the new geometries drawn by the user and the custom ones
-        imported by the user (using ImportAoiDialog)
+        Manages new geometries drawn by the user, custom ones imported via
+        ``ImportAoiDialog``, and admin sub-areas forwarded from
+        ``AdminAoiDialog``.
 
         Args:
-            aoi_model (AoiModel): Aoi Model when using the import aoi dialog
+            feature_collection: Optional GeoJSON ``FeatureCollection`` dict
+                from the import / admin paths.
+            name: Suggested name when ``feature_collection`` is provided.
+            skip_containment_check: If True, ``on_save_geom`` will skip the
+                GEE containment check. Used by the admin-sub path where
+                hierarchy guarantees the geometry sits inside the primary AOI.
         """
         # Count the number of geometries in map_.custom_layers
         index = len(self.map_.custom_layers["features"]) + 1
@@ -132,117 +251,6 @@ class CustomAoiDialog(BaseDialog):
             aoi_name = f"Custom_{name}"
             self.feature = feature_collection
 
+        self._skip_containment_check = skip_containment_check
         self.w_name.v_model = aoi_name
         self.open_dialog(new_geom=True)
-
-
-class CustomGeometriesTable(sw.Layout):
-    def __init__(self, map_: SeplanMap) -> None:
-        self.class_ = "d-block"
-        self.attributes = {"id": "custom_geometries_table"}
-        self.no_items = cm.map.dialog.drawing.table.no_geometries
-
-        # create the table
-        super().__init__()
-
-        self.map_ = map_
-
-        # generate header using the translator
-        headers = sw.Html(
-            tag="tr",
-            children=[
-                sw.Html(tag="th", children=[title])
-                for title in cp.custom_geom_table_headers.values()
-            ],
-        )
-
-        self.tbody = sw.Html(attributes={"id": "tbody"}, tag="tbody", children=[])
-        self.set_rows()
-
-        # create the table
-        self.table = sw.SimpleTable(
-            dense=False,
-            children=[
-                sw.Html(tag="thead", children=[headers]),
-                self.tbody,
-            ],
-        )
-
-        self.children = [self.table]
-
-        # add js behavior
-        self.map_.observe(self.set_rows, "custom_layers")
-
-    def set_rows(self, *args):
-        """Add, remove or update rows in the table."""
-        # We don't want to recreate all the elements of the table each time since
-        # that's so expensive (specially the set_limits method)
-
-        view_layers = [
-            row.layer_id
-            for row in self.tbody.children
-            if isinstance(row, CustomGeometryRow)
-        ]
-        map_layers = [
-            lyr.get("properties")["id"] for lyr in self.map_.custom_layers["features"]
-        ]
-
-        new_ids = [id_ for id_ in map_layers if id_ not in view_layers]
-        old_ids = [id_ for id_ in view_layers if id_ not in map_layers]
-
-        if new_ids:
-            for new_id in new_ids:
-                row = CustomGeometryRow(self.map_, new_id)
-                # drop no items if it's in the table
-
-                new_items = [
-                    chld for chld in self.tbody.children if chld != self.no_items
-                ] + [row]
-                self.tbody.children = new_items
-
-        elif old_ids:
-            for old_id in old_ids:
-                row_to_remove = self.tbody.get_children(attr="layer_id", value=old_id)[
-                    0
-                ]
-                self.tbody.children = [
-                    row
-                    for row in self.tbody.children
-                    if row not in [row_to_remove, self.no_items]
-                ]
-
-        if not self.tbody.children:
-            self.tbody.children = [self.no_items]
-
-
-class CustomGeometryRow(sw.Html):
-    def __init__(self, map_, layer_id, **kwargs) -> None:
-        self.tag = "tr"
-        self.attributes = {"layer_id": layer_id}
-        self.layer_id = layer_id
-
-        super().__init__()
-
-        self.map_ = map_
-
-        # use layer_id to get the name of the geometry from the custom_layers dict
-        for layer in self.map_.custom_layers["features"]:
-            if layer["properties"]["id"] == layer_id:
-                name = layer["properties"]["name"]
-
-        # self.delete_btn = cw.TableIcon("fa-solid fa-trash-can", self.layer_id)
-        self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
-
-        td_list = [
-            sw.Html(tag="td", children=[self.delete_btn]),
-            sw.Html(tag="td", children=[name]),
-        ]
-
-        super().__init__(tag="tr", children=td_list)
-
-        # add js behaviour
-        self.delete_btn.on_event("click", self.on_delete)
-
-    def on_delete(self, widget, data, event):
-        """Remove the line from the model and trigger table update."""
-        self.map_.remove_custom_layer(self.layer_id)

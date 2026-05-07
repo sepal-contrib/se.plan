@@ -194,7 +194,6 @@ async def get_limits_async(
 
 
 def get_gee_recipe_folder(recipe_name: str, gee_interface: GEEInterface) -> Path:
-    """Create a folder for the recipe in GEE"""
-
+    """Create a folder for the recipe in GEE."""
     recipe_folder = Path("seplan") / recipe_name
-    return Path(gee_interface.create_folder(recipe_folder))
+    return Path(gee_interface.create_folder(recipe_folder.as_posix()))

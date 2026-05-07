@@ -166,6 +166,7 @@ class CompareScenariosDialog(BaseDialog):
 
         layer_control = SplitMapControl(left_layer=layers[0], right_layer=layers[1])
         map_.add(layer_control)
+
         self.close_dialog()
 
     def _configure_statistics_comparison(self):

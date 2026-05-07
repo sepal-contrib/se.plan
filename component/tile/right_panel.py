@@ -100,6 +100,16 @@ def get_right_panel_content(
             "description": "Generate the restoration suitability map based on the benefits, constraints and costs layers and configuration.",
         },
         {
+            "title": "Custom geometries",
+            "icon": "mdi-shape-polygon-plus",
+            "content": [map_.btn_custom_geom],
+            "divider": True,
+            "description": (
+                "Refine the analysis by adding sub-areas inside your primary "
+                "AOI. Draw, import a shape, or pick an admin unit below it."
+            ),
+        },
+        {
             "title": "Export Results",
             "icon": "mdi-download",
             "content": [map_download_component, download_component],
