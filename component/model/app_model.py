@@ -23,6 +23,15 @@ class AppModel(HasTraits):
     close_all_dialogs = Int().tag(sync=True)
     """A counter that is incremented by the drawers to close all the dialogs"""
 
+    # MapApp dialog control — bidirectionally linked when ``model=app_model``
+    # is passed to ``MapApp.element(...)`` (see ``MapApp._setup_model_binding``).
+    # Setting ``step_open = False`` closes the active step dialog from Python.
+    current_step = Int(default_value=None, allow_none=True).tag(sync=True)
+    """The id of the active MapApp step (linked to MapApp.current_step)"""
+
+    step_open = Bool(False).tag(sync=True)
+    """Whether the active MapApp step dialog is open (linked to MapApp.step_open)"""
+
     @observe(
         "new_changes",
         "ready",
