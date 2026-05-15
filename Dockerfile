@@ -16,11 +16,11 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
 USER $MAMBA_USER
 
-COPY requirements.txt /home/$MAMBA_USER/requirements.txt
+COPY requirements.lock /home/$MAMBA_USER/requirements.lock
 RUN micromamba create -n seplan python=3.12 pip -c conda-forge -y && \
-    micromamba run -n seplan pip install -r /home/$MAMBA_USER/requirements.txt --no-cache-dir && \
+    micromamba run -n seplan pip install --require-hashes -r /home/$MAMBA_USER/requirements.lock --no-cache-dir && \
     micromamba clean --all --yes && \
-    rm -f /home/$MAMBA_USER/requirements.txt && \
+    rm -f /home/$MAMBA_USER/requirements.lock && \
     rm -rf ~/.cache/pip
 
 COPY . /usr/local/lib/seplan

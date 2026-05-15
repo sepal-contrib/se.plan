@@ -1,4 +1,12 @@
 # these libs are requested to build application env
+#
+# Production builds (Dockerfile) install from requirements.lock with
+# --require-hashes. After editing this file, regenerate the lock with:
+#
+#   uv pip compile requirements.txt --python-version 3.12 \
+#     --generate-hashes -o requirements.lock
+#
+# Then commit both files in the same change.
 
 solara>=1.50.0 
 uvicorn<0.30
@@ -12,8 +20,8 @@ rasterio<1.3.11 # Leave it here even if it's already in the sepal_ui requirement
 
 pysepal>=3.5.0
 
-https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/jupyter_leaflet-0.20.0-py3-none-any.whl
-https://github.com/dfguerrerom/ipyleaflet/raw/refs/heads/master/wheels/ipyleaflet-0.20.0-py3-none-any.whl
+https://github.com/dfguerrerom/ipyleaflet/raw/634bcf22c09034a917819437358d5840fa72ac41/wheels/jupyter_leaflet-0.20.0-py3-none-any.whl
+https://github.com/dfguerrerom/ipyleaflet/raw/634bcf22c09034a917819437358d5840fa72ac41/wheels/ipyleaflet-0.20.0-py3-none-any.whl
 
 # custom libs
 earthengine-api>=1.6
