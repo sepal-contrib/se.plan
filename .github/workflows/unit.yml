@@ -7,7 +7,6 @@ on:
   pull_request:
 
 env:
-  EARTHENGINE_TOKEN: ${{ secrets.EARTHENGINE_TOKEN }}
   PYTHONNOUSERSITE: "1"
   JUPYTER_PLATFORM_DIRS: "1"
 
@@ -17,6 +16,9 @@ jobs:
     defaults:
       run:
         shell: bash -el {0}
+    env:
+      # Inject EE creds when triggered by push or by a same-repo PR. Forks see ''.
+      EARTHENGINE_TOKEN: ${{ (github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository) && secrets.EARTHENGINE_TOKEN || '' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
