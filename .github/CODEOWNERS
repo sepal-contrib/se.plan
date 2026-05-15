@@ -1,0 +1,17 @@
+# Reviews on these paths require @dfguerrerom even if other reviewers
+# already approved the PR. Enforced via branch protection's "Require review
+# from Code Owners" toggle.
+#
+# Rationale: these files all have RCE-equivalent reach if a malicious change
+# slips through (workflows run with secrets, requirements/Dockerfile install
+# arbitrary Python at build time, conftest/noxfile execute on every test).
+
+/.github/                       @dfguerrerom
+/Dockerfile                     @dfguerrerom
+/docker-compose.yml             @dfguerrerom
+/docker-compose.override.yml    @dfguerrerom
+/pyproject.toml                 @dfguerrerom
+/requirements.txt               @dfguerrerom
+/requirements.lock              @dfguerrerom
+/noxfile.py                     @dfguerrerom
+/tests/conftest.py              @dfguerrerom
