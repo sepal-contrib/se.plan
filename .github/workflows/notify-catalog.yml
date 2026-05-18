@@ -1,0 +1,51 @@
+name: Notify catalog of release
+
+on:
+  release:
+    types: [published]
+
+env:
+  CATALOG_REPO: dfguerrerom/sepal-apps-catalog
+  APP_ID: se.plan
+  APP_REPOSITORY: https://github.com/sepal-contrib/se.plan
+
+permissions:
+  contents: read
+
+jobs:
+  notify:
+    if: github.event.release.prerelease == false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Resolve tag to 40-char commit SHA
+        id: sha
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          SHA=$(git rev-parse "refs/tags/${TAG}^{commit}")
+          if ! [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Could not resolve tag $TAG to a 40-char SHA (got: $SHA)"
+            exit 1
+          fi
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch bump-app to catalog
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.CATALOG_DISPATCH_TOKEN }}
+          repository: ${{ env.CATALOG_REPO }}
+          event-type: bump-app
+          client-payload: |
+            {
+              "app_id": "${{ env.APP_ID }}",
+              "repository": "${{ env.APP_REPOSITORY }}",
+              "commit": "${{ steps.sha.outputs.sha }}",
+              "tag": "${{ github.event.release.tag_name }}",
+              "release_url": "${{ github.event.release.html_url }}"
+            }
