@@ -1,4 +1,4 @@
-FROM mambaorg/micromamba:latest
+FROM mambaorg/micromamba:latest@sha256:dc6e3fc34e7d8179ee2f1af3218b59bc17b2625d0ef5d31190de28ced840007f
 
 LABEL org.opencontainers.image.source="https://github.com/sepal-contrib/se.plan"
 
