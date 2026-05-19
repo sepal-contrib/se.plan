@@ -1,3 +1,86 @@
+## 2.0.0 (2026-05-19)
+
+### Feat
+
+- **map**: Geoman draw, consolidated custom geometries modal, legend overlay
+- **aoi**: LMIC gating and async DRAW auto-submit
+- **recipe**: add right-panel recipe header with auto-naming
+- fallback to a batched process when 429 raised in summary statistics
+- improve recipe validation
+- validate recipe before loading
+- improve fileinput with breadcrums
+- update to sepal new fileSystem api
+- add --no-cache flag to conda create command in Dockerfile
+- get make constraint layers limits asynchronous
+- make sure map is clean when we compute the map
+- add --no-cache flag to conda create command in Dockerfile
+- get make constraint layers limits asynchronous
+- make sure map is clean when we compute the map
+- use sepal_ui solara map template
+- task long running tasks to its own event loop by using the GEEInterface.
+- **docker**: add local development environment support
+- make sure app loads with dark theme
+- configure logger
+- use ThemeToggle obj from sepal_ui instead of Solara
+- **UI**: open aoi selector as dialog
+- do not get_limits on base layer
+- adjust aoi style
+- import gee session
+- instal nvim
+- update
+- adapt to solara app
+- add recipeviewer to all the recipe inputs
+- merge main
+- scenarios improvement
+- merge
+- set suitability table dinamically
+
+### Fix
+
+- **map**: address Copilot review comments
+- **plots**: unclip echarts tooltips with appendToBody and confine
+- **dashboard**: write a real CSV when exporting summary statistics
+- clear stale w_id when user types a custom name in layer dialogs
+- variable shadowing in batched statistics fallback (#258)
+- do not change "object_set"
+- update _from_admin_async for GAUL 2024 and add code migration
+- update _from_admin_async for GAUL 2024 and clean up tests (#255)
+- pin starlette<0.44 to fix Solara startup crash
+- migrate GAUL 2015 recipe codes to GAUL 2024 (#254)
+- match LMIC countries by ISO3 instead of GAUL numeric codes
+- fix pkg dependency issues
+- change test env variable:
+- make sure we reproject custom images to 4326
+- use sepal client to save exported stats
+- use olver earthengien-api
+- fix splitcontrol bug
+- pin uvicorn version. see: https://github.com/widgetti/solara/issues/1101
+- sepal_ui latest
+- clear attributes
+- clean
+- reset recipe path when theres no file selected
+- add modulename to sepalclient
+- recipe folder from session
+- fix csv result (#251)
+- fix csv result (#251)
+- change log to path.home
+
+### Refactor
+
+- **aoi**: tidy imports in custom_aoi_dialog
+- change recipe icon
+- use sepal_ui common - for solara server configuration (centralizes common assets) - for logging - and trigger build
+- migrate to sepal_ui.solara session management
+- set logger instead of prints
+- improve error handling
+- use supervisord
+- pass ee session to dashboard
+- use eeclient
+- add useful packages
+- avoid mutate vuetify.theme shared variable, instead create a custom theme object
+- wrap icons
+- delete outadted locales
+
 ## 1.6.0 (2024-08-23)
 
 ### Feat
