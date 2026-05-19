@@ -151,3 +151,7 @@ ui-tests/jlab_root
 
 .yarn/
 yarn.lock
+
+# Local-only docs and instructions
+docs/presentations/
+CLAUDE.md

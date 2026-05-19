@@ -134,6 +134,11 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# Git metadata
+.git/
+.gitignore
+.github/
+
 # IDE specific ignore
 .vscode/
 ui-tests/.yarn/
