@@ -165,7 +165,7 @@ def Page():
         dialog_width=860,
         right_panel_config=right_panel_config,
         right_panel_content=right_panel_content,
-        right_panel_open=True,
+        right_panel_open=False,
         repo_url="https://github.com/sepal-contrib/se.plan",
         docs_url="https://docs.sepal.io/en/latest/modules/dwn/seplan.html",
         model=app_model,
