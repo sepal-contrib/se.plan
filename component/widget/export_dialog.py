@@ -1,12 +1,10 @@
+import logging
 from pathlib import Path
 from typing import Literal
 
 import ee
 import rasterio as rio
 from matplotlib.colors import to_rgba
-from component.scripts.gee import get_gee_recipe_folder
-from component.scripts.ui_helpers import parse_export_name
-from component.widget.buttons import TextBtn
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import gee
 from sepal_ui.scripts import utils as su
@@ -15,10 +13,16 @@ from component import parameter as cp
 from component import scripts as cs
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.gee import (
+    apply_export_viz,
+    get_ee_project_id,
+    get_gee_recipe_folder_async,
+)
 from component.scripts.seplan import asset_to_image, mask_image, quintiles
-from component.widget.base_dialog import BaseDialog
+from component.scripts.ui_helpers import parse_export_name
 from component.widget.alert_state import Alert
-import logging
+from component.widget.base_dialog import BaseDialog
+from component.widget.buttons import TextBtn
 
 logger = logging.getLogger("SEPLAN")
 
@@ -52,9 +56,9 @@ class ExportMapDialog(BaseDialog):
         )
         self.w_asset = sw.Select(items=[], v_model=[])
 
-        # add alert and btn component for the loading_button
+        # alert + action buttons (the export button runs an async task)
         self.alert = alert or sw.Alert()
-        self.btn = TextBtn(cm.map.dialog.export.export)
+        self.btn = sw.TaskButton(cm.map.dialog.export.export, small=True, class_="mr-2")
         self.btn_cancel = TextBtn(cm.map.dialog.export.cancel, outlined=True)
 
         title = sw.CardTitle(children=[cm.map.dialog.export.title])
@@ -80,8 +84,8 @@ class ExportMapDialog(BaseDialog):
 
         super().__init__()
 
-        # add js behaviour
-        self.btn.on_event("click", self.on_download)
+        # the export button runs the (async) export task on the GEE loop
+        self.btn.configure(task_factory=self._create_export_task)
         self.btn_cancel.on_event("click", self.close_dialog)
 
         # Let's observe "updated" trait, this one changes only when there's change
@@ -196,29 +200,16 @@ class ExportMapDialog(BaseDialog):
                 # TODO: check if we have to normalize or not
                 return ee_asset
 
-    def set_data(self, dataset, geometry, name, aoi_name):
-        """set the dataset and the geometry to allow the download."""
-        # add vizualization properties to the image
-        # cast to image as set is a ee.Element method
-        palette = ",".join(cp.no_data_color + cp.gradient(5))
-        self.dataset = ee.Image(
-            dataset.set(
-                {
-                    "visualization_0_bands": "constant",
-                    "visualization_0_max": 5,
-                    "visualization_0_min": 0,
-                    "visualization_0_name": "restauration index",
-                    "visualization_0_palette": palette,
-                    "visualization_0_type": "continuous",
-                }
-            )
+    def _create_export_task(self):
+        """Build the GEE task that runs the export (wired to the TaskButton)."""
+        return self.recipe.gee_interface.create_task(
+            func=self._export,
+            key="export_map",
+            on_error=lambda e: self.alert.add_msg(str(e), type_="error"),
         )
 
-        return self
-
-    @su.loading_button()
-    def on_download(self, *_):
-        """download the dataset using the given parameters."""
+    async def _export(self):
+        """Export the selected layer using awaited Earth Engine calls only."""
         aoi = self.recipe.seplan.aoi_model.feature_collection
 
         if not aoi:
@@ -227,44 +218,60 @@ class ExportMapDialog(BaseDialog):
         if not self.recipe.recipe_session_path:
             raise Exception(cm.map.dialog.export.error.no_recipe)
 
+        gee_interface = self.recipe.gee_interface
+
         # The value from the w_asset is a tuple with (theme, id_)
-        ee_image = self.get_ee_image(*self.w_asset.v_model)
+        theme, id_ = self.w_asset.v_model
+        ee_image = self.get_ee_image(theme, id_)
 
         recipe_name = str(Path(self.recipe.recipe_session_path).stem)
 
-        # set the parameters
-        name = "_".join(self.w_asset.v_model) + "_" + recipe_name
-
-        # Parse the name to provide a better description
-        name = parse_export_name(name)
+        # set the parameters and parse the name for a better description
+        name = parse_export_name("_".join(self.w_asset.v_model) + "_" + recipe_name)
 
         export_params = {
-            # "image": ee_image,
             "description": name,
             "scale": self.w_scale.v_model,
             "region": aoi.geometry(),
             "max_pixels": 1e13,
         }
 
+        # resolve the user's Cloud project so the success message can deep-link
+        # to the Earth Engine tasks page scoped to that project
+        project_id = get_ee_project_id(gee_interface)
+
         # launch the task
         if self.w_method.v_model == "gee":
 
-            recipe_gee_folder = get_gee_recipe_folder(
-                recipe_name, self.recipe.gee_interface
+            recipe_gee_folder = await get_gee_recipe_folder_async(
+                recipe_name, gee_interface
             )
             logger.debug(f"recipe_gee_folder>>>>>>>>>>>> {recipe_gee_folder}")
             export_params.update(
                 asset_id=str(recipe_gee_folder / name), description=f"{name}"
             )
-            self.recipe.gee_interface.export_image_to_asset(ee_image, **export_params)
 
-            msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
+            # embed the map's visualization so the asset styles itself when
+            # reloaded in se.plan / other SEPAL recipes / the Code Editor
+            ee_image = await apply_export_viz(ee_image, theme, id_, aoi, gee_interface)
+
+            await gee_interface.export_image_to_asset_async(ee_image, **export_params)
+
+            msg = sw.Markdown(
+                cm.map.dialog.export.gee_task_success.format(
+                    name=name, project=project_id
+                )
+            )
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "gdrive":
 
-            self.recipe.gee_interface.export_image_to_drive(ee_image, **export_params)
-            msg = sw.Markdown(cm.map.dialog.export.gee_task_success.format(name))
+            await gee_interface.export_image_to_drive_async(ee_image, **export_params)
+            msg = sw.Markdown(
+                cm.map.dialog.export.gee_task_success.format(
+                    name=name, project=project_id
+                )
+            )
             self.alert.add_msg(msg, "success")
 
         elif self.w_method.v_model == "sepal":
