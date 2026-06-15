@@ -208,6 +208,14 @@ class CompareScenariosDialog(BaseDialog):
         recipes = []
         self.validate_scenarios()
 
+        # Resolve the GEE assets folder up-front on the loop. Without it, the
+        # Recipe() constructor below reaches pysepal's AoiModel.__init__, which
+        # falls back to the *blocking* gee_interface.get_folder(). Since this
+        # coroutine runs on the GEE event-loop thread, that blocking call trips
+        # pysepal's deadlock guard. Passing a resolved folder skips that branch.
+        if folder is None and self.gee_interface is not None:
+            folder = await self.gee_interface.get_folder_async()
+
         for _, recipe_data in self.scenario_inputs.recipe_paths.items():
             recipe_path = recipe_data["path"]
             recipe = Recipe(

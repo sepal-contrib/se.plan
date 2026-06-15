@@ -216,6 +216,10 @@ class Recipe(HasTraits):
 
         save_file(full_recipe_path, data, self.sepal_session)
 
+        # The path we just wrote is now the canonical session path. Keep the
+        # model in sync so the header, exports and asset naming all agree
+        # (str() because traitlets compares/stores the Unicode value).
+        self.recipe_session_path = str(full_recipe_path)
         self.new_changes = 0
 
         return full_recipe_path
