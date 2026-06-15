@@ -226,7 +226,6 @@ class RecipeView(sw.Layout):
     @observe("recipe_session_path")
     def test_recipe_path(self, change):
         """Test if the recipe path is valid."""
-        print("testoutput")
         logger.debug(f"Testing recipe path: {self.recipe_session_path}")
 
     def session_path_handler(self, change):
@@ -252,8 +251,9 @@ class RecipeView(sw.Layout):
         self.recipe.reset()
         self.alert.set_state("reset", "all", "done")
 
-        # update current session path
-        self.recipe_session_path = self.recipe.get_recipe_path(
+        # update current session path on the model (source of truth); the
+        # one-way link mirrors it into this view's recipe_session_path.
+        self.recipe.recipe_session_path = self.recipe.get_recipe_path(
             self.card_new.recipe_name
         )
 
@@ -308,8 +308,8 @@ class RecipeView(sw.Layout):
         # Success - recipe loaded normally
         self._pending_validation = None
 
-        # Assign the recipe path to the current session path
-        self.recipe_session_path = self.load_dialog.load_recipe_path
+        # Assign the recipe path to the model (source of truth)
+        self.recipe.recipe_session_path = self.load_dialog.load_recipe_path
 
         self.alert.set_state("load", "all", "done")
 
@@ -340,8 +340,9 @@ class RecipeView(sw.Layout):
 
         self.recipe.save(recipe_path)
 
-        # Assign the recipe path to the current session path
-        self.recipe_session_path = str(recipe_path)
+        # Assign the recipe path to the model (source of truth); save() already
+        # sets it, this keeps the intent explicit and is idempotent.
+        self.recipe.recipe_session_path = str(recipe_path)
 
         self.alert.add_msg(cm.recipe.states.save.format(recipe_path), type_="success")
 
@@ -369,8 +370,8 @@ class RecipeView(sw.Layout):
                 sanitized_data, self._pending_validation.recipe_path
             )
 
-            # Assign the recipe path to the current session path
-            self.recipe_session_path = self._pending_validation.recipe_path
+            # Assign the recipe path to the model (source of truth)
+            self.recipe.recipe_session_path = self._pending_validation.recipe_path
 
             # Show success message with error count
             error_count = self._pending_validation.total_errors
@@ -407,8 +408,8 @@ class RecipeView(sw.Layout):
             # Reset all models to default state
             self.recipe.reset()
 
-            # Clear recipe path
-            self.recipe_session_path = ""
+            # Clear recipe path on the model (source of truth)
+            self.recipe.recipe_session_path = ""
 
             # Update the alert
             self.alert.add_msg(
