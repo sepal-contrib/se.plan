@@ -1,3 +1,13 @@
+## 2.1.0 (2026-06-15)
+
+### Feat
+
+- embed map visualization on GEE asset exports (#264)
+
+### Fix
+
+- scenario-compare deadlock and recipe path drift (#266)
+
 ## 2.0.0 (2026-05-19)
 
 ### Feat
