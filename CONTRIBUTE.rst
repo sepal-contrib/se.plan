@@ -2,10 +2,10 @@ Install dev environment
 
 .. code-block::
     
-    conda create -n seplan python=3.10
+    conda create -n seplan python=3.12
     export PYTHONNOUSERSITE=1
     conda activate seplan
-    pip install -r requirements.txt
+    pip install -e ".[dev]"
 
 
 To run the container

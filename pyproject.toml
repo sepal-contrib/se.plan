@@ -1,5 +1,47 @@
+[build-system]
+requires = ["setuptools>=61.2", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
+name = "se-plan"
 version = "2.1.0"
+description = "Forest restoration suitability and impact mapping tool, built as a SEPAL module."
+requires-python = ">=3.12"
+dependencies = [
+    "solara>=1.50.0",
+    "uvicorn<0.30",
+    "starlette<0.44",
+    "ee-client>=2.4.0",
+    "toml",
+    "ipecharts>=1.2.0",
+    "pysepal>=3.6.1",
+    "rasterio",
+    # custom ipyleaflet build (fork) shipped as direct wheel URLs
+    "jupyter_leaflet @ https://github.com/dfguerrerom/ipyleaflet/raw/634bcf22c09034a917819437358d5840fa72ac41/wheels/jupyter_leaflet-0.20.0-py3-none-any.whl",
+    "ipyleaflet @ https://github.com/dfguerrerom/ipyleaflet/raw/634bcf22c09034a917819437358d5840fa72ac41/wheels/ipyleaflet-0.20.0-py3-none-any.whl",
+    "earthengine-api>=1.6",
+    "pandas",
+    "shapely",
+    "matplotlib",
+    "geopandas",
+    "numpy",
+    "numexpr",
+    # installed transitively by pysepal, declared here because the app uses it directly
+    "pygaul",
+    "colorlog",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[tool.setuptools.packages.find]
+include = ["component*"]
+# component/ is a PEP 420 namespace package (no top-level __init__.py); its
+# subpackages are regular packages. namespaces=true lets find discover it.
+namespaces = true
 
 [tool.ruff]
 ignore-init-module-imports = true

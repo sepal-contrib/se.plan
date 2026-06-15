@@ -14,16 +14,19 @@ RUN apt-get update && apt-get install -y \
 
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Copy the project and hand ownership to the mamba user so the editable install
+# can write its build metadata into the project dir.
+COPY . /usr/local/lib/seplan
+RUN chown -R $MAMBA_USER:$MAMBA_USER /usr/local/lib/seplan
+
 USER $MAMBA_USER
 
-COPY requirements.lock /home/$MAMBA_USER/requirements.lock
+# pyproject.toml is the single source of truth for dependencies; the same
+# `pip install -e .` is used by sepal_environment.yml for the SEPAL deploy.
 RUN micromamba create -n seplan python=3.12 pip -c conda-forge -y && \
-    micromamba run -n seplan pip install --require-hashes -r /home/$MAMBA_USER/requirements.lock --no-cache-dir && \
+    micromamba run -n seplan pip install -e . --no-cache-dir && \
     micromamba clean --all --yes && \
-    rm -f /home/$MAMBA_USER/requirements.lock && \
     rm -rf ~/.cache/pip
-
-COPY . /usr/local/lib/seplan
 
 EXPOSE 8765
 

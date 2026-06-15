@@ -180,3 +180,11 @@ ui_tests/data/
 # Yarn and npm caches
 .yarn/cache/
 node_modules/
+
+# Local developer / agent / sync artifacts (never belong in the image)
+.claude/
+.stfolder/
+.stignore
+.stignore.local
+tracking/
+notebooks/
