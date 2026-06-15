@@ -14,7 +14,6 @@ from sepal_ui.scripts import utils as su
 from component.frontend.icons import icon
 from component.message import cm
 from component.model.recipe import Recipe
-from component.scripts import validation
 from component.widget.alert_state import Alert
 from component.widget.buttons import IconBtn
 from component.widget.custom_widgets import RecipeInspector
@@ -76,23 +75,6 @@ class RecipeHeader(sw.Layout):
     def _on_changes(self, _):
         self.name_field.hint = self._format_status()
 
-    def _build_recipe_dict(self) -> dict:
-        """Snapshot of the live recipe in the same shape ``Recipe.save`` writes.
-
-        Built directly from the in-memory models so the inspector can render
-        unsaved changes — never reads from disk.
-        """
-        data = {
-            "signature": "live-session",
-            "aoi": self.recipe.seplan_aoi.export_data(),
-            "benefits": self.recipe.benefit_model.export_data(),
-            "constraints": self.recipe.constraint_model.export_data(),
-            "costs": self.recipe.cost_model.export_data(),
-        }
-        for key in ("updated", "new_changes", "object_set"):
-            validation.remove_key(data, key)
-        return data
-
     def _commit_name(self, widget, event, data):
         """Normalize the typed name and rewrite ``recipe_session_path``.
 
@@ -111,7 +93,7 @@ class RecipeHeader(sw.Layout):
 
     def _on_view(self, *_):
         name = self._format_name()
-        self.inspector.set_data(self._build_recipe_dict(), recipe_name=name)
+        self.inspector.set_data(self.recipe.to_dict(), recipe_name=name)
 
     def _on_save(self, *_):
         path = self.recipe.recipe_session_path
