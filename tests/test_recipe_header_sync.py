@@ -6,8 +6,10 @@ against the drift where the tile's new/save flows updated only the mirror,
 leaving the model (and therefore the header, exports and asset naming) stale.
 """
 
-from component.model.recipe import Recipe
+from component.model.recipe import RECIPE_SIGNATURE, Recipe
 from component.tile.recipe_tile import RecipeView
+from component.widget.alert_state import Alert
+from component.widget.recipe_header import RecipeHeader
 
 
 def test_save_updates_model_session_path(tmp_path):
@@ -65,3 +67,22 @@ def test_view_trait_mirrors_model():
     recipe.recipe_session_path = "/tmp/some/path.json"
 
     assert view.recipe_session_path == "/tmp/some/path.json"
+
+
+def test_to_dict_is_single_source_of_truth():
+    """to_dict carries the real signature and the canonical recipe shape."""
+    recipe = Recipe()
+    data = recipe.to_dict()
+
+    assert data["signature"] == RECIPE_SIGNATURE
+    assert set(data) == {"signature", "aoi", "benefits", "constraints", "costs"}
+
+
+def test_header_inspector_uses_real_signature():
+    """The header preview reuses Recipe.to_dict (no 'live-session' sentinel)."""
+    recipe = Recipe()
+    header = RecipeHeader(recipe=recipe, alert=Alert())
+
+    header._on_view()
+
+    assert header.inspector.data_dict["signature"] == RECIPE_SIGNATURE

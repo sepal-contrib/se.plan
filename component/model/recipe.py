@@ -18,6 +18,9 @@ import logging
 
 logger = logging.getLogger("SEPLAN")
 
+RECIPE_SIGNATURE = "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75"
+"""Fixed marker every se.plan recipe file carries; validated on load."""
+
 
 class Recipe(HasTraits):
     # Set types
@@ -195,26 +198,32 @@ class Recipe(HasTraits):
         logger.info("Sanitized recipe loaded successfully")
         return self
 
-    def save(self, full_recipe_path: str):
-        """Save the recipe in a json file with a timestamp."""
-        # Raise a sepal_ui.warning if there is no loaded models
-        if not self.seplan:
-            raise SepalWarning(cm.recipe.error.no_seplan)
+    def to_dict(self) -> dict:
+        """Build the recipe payload from the in-memory models.
 
+        Single source of truth for the on-disk recipe shape, shared by
+        ``save`` and the right-panel inspector preview so they never diverge.
+        """
         data = {
-            "signature": "cc19794c0d420e449f36308ce0ede23d03f14be78490d857fbda3289a1910e75",
+            "signature": RECIPE_SIGNATURE,
             "aoi": self.seplan_aoi.export_data(),
             "benefits": self.benefit_model.export_data(),
             "constraints": self.constraint_model.export_data(),
             "costs": self.cost_model.export_data(),
         }
 
-        [
+        for key in ("updated", "new_changes", "object_set"):
             validation.remove_key(data, key)
-            for key in ["updated", "new_changes", "object_set"]
-        ]
 
-        save_file(full_recipe_path, data, self.sepal_session)
+        return data
+
+    def save(self, full_recipe_path: str):
+        """Save the recipe in a json file with a timestamp."""
+        # Raise a sepal_ui.warning if there is no loaded models
+        if not self.seplan:
+            raise SepalWarning(cm.recipe.error.no_seplan)
+
+        save_file(full_recipe_path, self.to_dict(), self.sepal_session)
 
         # The path we just wrote is now the canonical session path. Keep the
         # model in sync so the header, exports and asset naming all agree
