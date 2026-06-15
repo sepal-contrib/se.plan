@@ -1,0 +1,10 @@
+name: seplan
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.12
+  - pip
+  - pip:
+      # pyproject.toml is the single source of truth for Python dependencies.
+      - -e .

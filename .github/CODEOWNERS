@@ -11,7 +11,6 @@
 /docker-compose.yml             @dfguerrerom
 /docker-compose.override.yml    @dfguerrerom
 /pyproject.toml                 @dfguerrerom
-/requirements.txt               @dfguerrerom
-/requirements.lock              @dfguerrerom
+/sepal_environment.yml          @dfguerrerom
 /noxfile.py                     @dfguerrerom
 /tests/conftest.py              @dfguerrerom

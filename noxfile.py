@@ -72,6 +72,6 @@ def test_ui(session):
 @nox.session(reuse_venv=True)
 def jupyter(session):
     """Run the application."""
-    session.install("-r", "requirements.txt")
+    session.install("-e", ".")
     session.run("jupyter", "trust", "no_ui.ipynb")
     session.run("jupyter", "notebook", "no_ui.ipynb")
