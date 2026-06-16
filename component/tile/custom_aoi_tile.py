@@ -1,23 +1,18 @@
-from typing import Union
+
+import logging
 
 import ee
 import pandas as pd
 import pygaul
-from component.frontend.icons import icon
-from component.widget.base_dialog import BaseDialog
-from component.widget.buttons import IconBtn, TextBtn
 import sepal_ui.sepalwidgets as sw
-from ipyleaflet import WidgetControl
 from sepal_ui.mapping import SepalMap
 from sepal_ui.scripts.gee_interface import GEEInterface
+from sepal_ui.scripts.utils import init_ee
 
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
 from component.widget.custom_aoi_view import SeplanAoiView
-
-from sepal_ui.scripts.utils import init_ee
-import logging
 
 logger = logging.getLogger("SEPLAN")
 
@@ -73,6 +68,9 @@ class AoiView(sw.Layout):
         action-blocking can react.
         """
         seplan_aoi = self.seplan_aoi  # SeplanAoi wrapper
+        # Reset the soft-warning flag; only the partial / unverifiable verdicts
+        # below (or the async GEE path) raise it again.
+        seplan_aoi.aoi_lmic_warning = False
         if self.view.model.admin:
             logger.info("Checking if the aoi is in the LMIC country list")
             code = str(self.view.model.admin)
@@ -113,17 +111,29 @@ class AoiView(sw.Layout):
         return self
 
     def _on_gee_lmic_error(self, exc: Exception):
-        """Treat GEE check failures as 'unknown' — leave aoi_lmic_valid False.
+        """Treat GEE check failures as 'unverifiable' — warn but allow.
 
-        The user can still see the warning (logged here) but the right-panel
-        actions stay disabled until a successful re-check. Bumping the
-        counter releases any waiters (e.g. the dialog-close observer).
+        A failed heuristic shouldn't lock the user out, so the AOI stays usable
+        (``aoi_lmic_valid`` True) with a visible notice and ``aoi_lmic_warning``
+        set so the step dialog stays open. Bumping the counter releases any
+        waiters (e.g. the dialog-close observer).
         """
         logger.warning(f"LMIC check failed: {exc}")
+        self.view.alert.add_msg(cm.aoi.lmic_check_failed, "error")
+        self.seplan_aoi.aoi_lmic_valid = True
+        self.seplan_aoi.aoi_lmic_warning = True
         self.seplan_aoi.aoi_lmic_checked += 1
 
     async def _check_lmic_gee_async(self):
-        """Async LMIC overlap check for non-admin AOIs.
+        """Async, tiered LMIC coverage check for non-admin AOIs.
+
+        Computes the fraction of the AOI that falls on LMIC land and grades it:
+        ``>= cp.MIN_LMIC_COVERAGE`` passes cleanly; a smaller but non-zero share
+        is allowed with a warning (``aoi_lmic_warning``); a zero share is
+        blocked. This replaces an earlier ``bitwiseAnd`` test that required
+        *every* pixel to be LMIC — at 1 km a handful of coastline pixels (e.g.
+        ~10 of ~1.9M for Indonesia, 99.999% LMIC) collapsed the AND to 0 and
+        falsely flagged whole LMIC countries as out of scope.
 
         Drives ``get_info_async`` on the GEE event loop. Safe to launch from
         either the kernel thread or the GEE thread.
@@ -134,23 +144,53 @@ class AoiView(sw.Layout):
         )
         aoi_ee_geom = seplan_aoi.feature_collection.geometry()
 
-        empt = ee.Image().byte()
-        aoi_ee_raster = empt.paint(aoi_ee_geom, 1)
-
-        bit_test = aoi_ee_raster.add(lmic_raster).reduceRegion(
-            reducer=ee.Reducer.bitwiseAnd(),
+        # select(0)+rename so the verdict doesn't depend on the asset's band
+        # name. Keep the raster MASKED (no unmask): masked ocean/no-data is
+        # excluded, so ``fraction`` is the LMIC share of the AOI's land pixels.
+        # unmask(0) would force EE to materialise the exact AOI polygon and
+        # blow the 2M-edge limit on large countries (Indonesia's GAUL geometry
+        # has ~3.26M edges).
+        lmic01 = lmic_raster.select(0).rename("lmic")
+        fraction = lmic01.reduceRegion(
+            reducer=ee.Reducer.mean(),
             geometry=aoi_ee_geom,
             scale=1000,
             bestEffort=True,
             maxPixels=1e13,
+        ).getNumber("lmic")
+
+        # ``If(fraction, ...)`` guards against a null mean (AOI outside the
+        # raster footprint) so we always get a number back.
+        frac = await self.gee_interface.get_info_async(
+            ee.Number(ee.Algorithms.If(fraction, fraction, 0))
         )
-        # bitwiseAnd == 2 means full LMIC coverage (1 partial, 0 none).
-        included = bool(
-            await self.gee_interface.get_info_async(
-                ee.Algorithms.IsEqual(bit_test.getNumber("constant"), 2),
-            )
-        )
-        if not included:
+        self._apply_lmic_verdict(frac)
+
+    def _apply_lmic_verdict(self, frac) -> None:
+        """Grade an LMIC land-coverage fraction into a verdict + user alert.
+
+        ``frac`` is the share (0..1) of the AOI that falls on LMIC land:
+        ``>= cp.MIN_LMIC_COVERAGE`` passes cleanly; a smaller non-zero share is
+        allowed but warned (``aoi_lmic_warning`` keeps the step dialog open so
+        the notice is read); zero/None is blocked as fully out of scope.
+        Pure-Python and synchronous so it can be unit-tested without GEE.
+        """
+        seplan_aoi = self.seplan_aoi
+        frac = frac or 0.0
+        if frac <= 0:
+            # entirely out of scope → hard block.
             self.view.alert.add_msg(cm.aoi.not_lmic, "warning")
-        seplan_aoi.aoi_lmic_valid = included
+            seplan_aoi.aoi_lmic_valid = False
+            seplan_aoi.aoi_lmic_warning = False
+        elif frac < cp.MIN_LMIC_COVERAGE:
+            # partial coverage → allow, but warn and keep the dialog open.
+            self.view.alert.add_msg(
+                cm.aoi.partial_lmic.format(round(frac * 100)), "warning"
+            )
+            seplan_aoi.aoi_lmic_valid = True
+            seplan_aoi.aoi_lmic_warning = True
+        else:
+            # majority LMIC → clean pass.
+            seplan_aoi.aoi_lmic_valid = True
+            seplan_aoi.aoi_lmic_warning = False
         seplan_aoi.aoi_lmic_checked += 1

@@ -46,6 +46,8 @@
 	},
 	"aoi": {
 		"not_lmic": "The country you are about to use is out of the scope of the provided layers. Please note that you'll need to customize all the layers before computing the restauration suitability index. Refer to the documentation for more information",
+		"partial_lmic": "Only {}% of your area of interest falls within a low- or middle-income country covered by the default layers. You can continue, but the default layers may not be appropriate outside that area — consider customizing them before computing the restoration suitability index. Refer to the documentation for more information",
+		"lmic_check_failed": "We couldn't verify whether your area of interest is within the scope of the provided layers (the coverage check failed). You can continue, but results may be unreliable; re-select the area to run the check again",
 		"aoi_title" : "Area of interest selection"
 	}
 }

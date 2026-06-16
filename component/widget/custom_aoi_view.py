@@ -80,6 +80,10 @@ class SeplanAoiView(AoiView):
             return
         if not getattr(self.seplan_aoi, "aoi_lmic_valid", True):
             return
+        # Partial-coverage / unverifiable AOIs are usable but carry a warning;
+        # keep the dialog open so the user actually reads it before continuing.
+        if getattr(self.seplan_aoi, "aoi_lmic_warning", False):
+            return
         self._app_model.step_open = False
 
     def _mirror_draw_event(self, target, action, geo_json):
