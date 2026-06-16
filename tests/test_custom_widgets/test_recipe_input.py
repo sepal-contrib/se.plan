@@ -21,43 +21,43 @@ def test_invalid_recipe():
     recipe_input = RecipeInput()
 
     with pytest.raises(ValidationError):
-        recipe_input.select_file(test_error_recipe_path)
+        recipe_input.validate_input({"new": str(test_error_recipe_path)})
 
-    # Check this is not empty
-    assert recipe_input.text_field_msg.error_messages
+    # The error is surfaced on the file input
+    assert recipe_input.file_input.error_messages
 
-    # Check value is not valid
+    # and the recipe is not accepted
     assert recipe_input.valid is False
     assert recipe_input.load_recipe_path is None
 
 
 def test_valid_recipe():
-    """Test the validation of an invalid recipe."""
+    """Test the validation of a valid recipe."""
 
     recipe_input = RecipeInput()
-    recipe_input.select_file(str(test_recipe_path))
+    recipe_input.validate_input({"new": str(test_recipe_path)})
 
-    # Check this is not empty
-    assert not recipe_input.text_field_msg.error_messages
+    # No error is surfaced
+    assert not recipe_input.file_input.error_messages
 
-    # Check value is not valid
+    # and the recipe is accepted
     assert recipe_input.valid
     assert recipe_input.load_recipe_path == str(test_recipe_path)
 
 
 def test_valid_and_invalid_recipe():
-    """Test the validation of an invalid recipe."""
+    """Test loading a valid recipe followed by an invalid one."""
 
     recipe_input = RecipeInput()
-    recipe_input.select_file(str(test_recipe_path))
+    recipe_input.validate_input({"new": str(test_recipe_path)})
 
     # Now we load an invalid recipe
     with pytest.raises(ValidationError):
-        recipe_input.select_file(test_error_recipe_path)
+        recipe_input.validate_input({"new": str(test_error_recipe_path)})
 
-    # Check this is not empty
-    assert recipe_input.text_field_msg.error_messages
+    # The error is surfaced on the file input
+    assert recipe_input.file_input.error_messages
 
-    # Check value is not valid
+    # and the previously valid state is cleared
     assert recipe_input.valid is False
     assert recipe_input.load_recipe_path is None
