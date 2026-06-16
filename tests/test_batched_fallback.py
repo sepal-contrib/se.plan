@@ -3,7 +3,23 @@
 import asyncio
 from unittest.mock import Mock, AsyncMock, patch
 
+import ee
 import pytest
+
+
+def _img():
+    """A real, constructable ee.Image standing in for a layer.
+
+    The statistics code builds lazy ee graphs from these inputs; only
+    ``get_info_async`` (mocked in these tests) actually reaches GEE, so the
+    inputs just need to be valid ee objects, not Mocks.
+    """
+    return ee.Image(1)
+
+
+def _fc():
+    """A real, constructable ee.FeatureCollection standing in for an AOI."""
+    return ee.FeatureCollection([ee.Feature(ee.Geometry.Point([0, 0]))])
 
 
 def create_mock_recipe():
@@ -18,27 +34,27 @@ def create_mock_recipe():
     mock_aoi_model = Mock()
     mock_seplan.aoi_model = mock_aoi_model
 
-    main_features = {"Main AOI": {"ee_feature": Mock(), "color": "#FF0000"}}
+    main_features = {"Main AOI": {"ee_feature": _fc(), "color": "#FF0000"}}
     secondary_features = {
-        "Sub AOI 1": {"ee_feature": Mock(), "color": "#00FF00"},
-        "Sub AOI 2": {"ee_feature": Mock(), "color": "#0000FF"},
+        "Sub AOI 1": {"ee_feature": _fc(), "color": "#00FF00"},
+        "Sub AOI 2": {"ee_feature": _fc(), "color": "#0000FF"},
     }
     mock_aoi_model.get_ee_features.return_value = (main_features, secondary_features)
 
     mock_seplan.get_benefits_list.return_value = [
-        (Mock(), "Benefit 1"),
-        (Mock(), "Benefit 2"),
-        (Mock(), "Benefit 3"),
+        (_img(), "Benefit 1"),
+        (_img(), "Benefit 2"),
+        (_img(), "Benefit 3"),
     ]
     mock_seplan.get_costs_list.return_value = [
-        (Mock(), "Cost 1"),
-        (Mock(), "Cost 2"),
+        (_img(), "Cost 1"),
+        (_img(), "Cost 2"),
     ]
     mock_seplan.get_masked_constraints_list.return_value = [
-        (Mock(), "Constraint 1"),
-        (Mock(), "Constraint 2"),
+        (_img(), "Constraint 1"),
+        (_img(), "Constraint 2"),
     ]
-    mock_seplan.get_constraint_index.return_value = Mock()
+    mock_seplan.get_constraint_index.return_value = _img()
 
     return mock_recipe
 
@@ -91,12 +107,12 @@ async def test_fallback_on_429_error():
 
     mock_recipe = create_mock_recipe()
     # Simplify to single AOI for fallback test
-    main_features = {"Main AOI": {"ee_feature": Mock(), "color": "#FF0000"}}
+    main_features = {"Main AOI": {"ee_feature": _fc(), "color": "#FF0000"}}
     mock_recipe.seplan.aoi_model.get_ee_features.return_value = (main_features, {})
-    mock_recipe.seplan.get_benefits_list.return_value = [(Mock(), "Benefit 1")]
-    mock_recipe.seplan.get_costs_list.return_value = [(Mock(), "Cost 1")]
+    mock_recipe.seplan.get_benefits_list.return_value = [(_img(), "Benefit 1")]
+    mock_recipe.seplan.get_costs_list.return_value = [(_img(), "Cost 1")]
     mock_recipe.seplan.get_masked_constraints_list.return_value = [
-        (Mock(), "Constraint 1")
+        (_img(), "Constraint 1")
     ]
 
     mock_gee_interface = Mock()

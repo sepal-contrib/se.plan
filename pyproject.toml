@@ -34,6 +34,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-asyncio",
     "pytest-cov",
 ]
 
@@ -68,3 +69,4 @@ version_files = [
 addopts = [
     "--import-mode=importlib",
 ]
+asyncio_mode = "auto"
