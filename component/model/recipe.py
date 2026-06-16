@@ -1,20 +1,19 @@
+import copy
+import logging
 from datetime import datetime
-from typing import Union
-from component.scripts.file_handler import save_file
 from pathlib import Path
 
-from sepal_ui.scripts.warning import SepalWarning
 from sepal_ui.scripts.gee_interface import GEEInterface
-from traitlets import HasTraits, Int, Unicode, observe, List as TraitsList
+from sepal_ui.scripts.warning import SepalWarning
+from traitlets import HasTraits, Int, Unicode, observe
 
 import component.parameter as cp
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
 from component.scripts import validation
+from component.scripts.file_handler import save_file
 from component.scripts.seplan import Seplan
-
-import logging
 
 logger = logging.getLogger("SEPLAN")
 
@@ -212,6 +211,14 @@ class Recipe(HasTraits):
             "costs": self.cost_model.export_data(),
         }
 
+        # export_data() hands back each model's live ``_trait_values`` mapping,
+        # so the assembled dict aliases live state. Snapshot it before returning:
+        # callers (save, the header inspector) must get an independent copy, or
+        # later edits mutate the dict in place — which leaks stale data into the
+        # inspector preview and lets remove_key() below delete keys out of the
+        # live models.
+        data = copy.deepcopy(data)
+
         for key in ("updated", "new_changes", "object_set"):
             validation.remove_key(data, key)
 
@@ -251,7 +258,6 @@ class Recipe(HasTraits):
 
     def get_recipe_path(self, recipe_name: str):
         """generate full recipe path."""
-
         if self.sepal_session:
             recipe_dir = self.sepal_session.get_remote_dir(
                 "module_results/se.plan/recipes"
