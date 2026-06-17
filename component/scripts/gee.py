@@ -52,9 +52,8 @@ async def get_layer_min_max(
     Returns:
         A ``(min, max)`` tuple rounded to two decimals.
     """
-    # Clip to the AOI + reduce over its bounding box. aoi.geometry() would
-    # dissolve the whole collection (Collection.geometry) and blow EE's 2M-edge
-    # limit for dense GAUL 2024 boundaries (e.g. Indonesia).
+    # Clip to the AOI + reduce over its bbox; reducing over aoi.geometry()
+    # would dissolve the collection and can exceed EE's 2M-edge limit.
     clipped = image.clip(aoi)
     reduced = clipped.reduceRegion(
         reducer=ee.Reducer.minMax(),
@@ -277,12 +276,9 @@ async def get_limits_async(
     # If scale is less than 30, set it to 30
     scale = ee.Algorithms.If(scale.lt(30), 30, scale)
 
-    # Clip to the AOI + reduce over its bbox; geometry=aoi would dissolve the
-    # whole collection (Collection.geometry) and blow EE's 2M-edge limit for
-    # dense GAUL 2024 boundaries (e.g. Indonesia).
-    # bestEffort + a capped maxPixels coarsens the scale for big AOIs (e.g.
-    # Indonesia at 30 m would take ~2 min otherwise) — an approximate range is
-    # fine for the slider; small AOIs stay under the cap and remain exact.
+    # Clip to the AOI + reduce over its bbox to avoid dissolving the collection.
+    # bestEffort + a capped maxPixels coarsens the scale for big AOIs (an
+    # approximate range is fine for the slider; small AOIs stay exact).
     reduction = ee_image.clip(aoi).reduceRegion(
         reducer=reducer,
         geometry=_aoi_bbox(aoi),

@@ -266,12 +266,9 @@ class AoiModel(AoiModel):
     async def total_bounds_async(self):
         """Return the AOI extent ``[minx, miny, maxx, maxy]`` asynchronously.
 
-        pysepal's sync ``total_bounds`` dissolves the whole feature collection
-        (``Collection.geometry``), which exceeds EE's 2M-edge limit for dense
-        GAUL 2024 boundaries (Indonesia is ~2.4M edges). Reduce each feature to
-        its bounding box first, then take the extent of those small boxes — same
-        result, no full-coastline union — and fetch it through ``get_info_async``
-        so the Solara kernel thread never blocks.
+        Uses per-feature bounding boxes (see ``_aoi_bbox``) rather than the
+        dissolved collection geometry, which can exceed EE's 2M-edge limit for
+        dense AOIs. Fetched via ``get_info_async`` so the kernel never blocks.
         """
         if self.feature_collection is None:
             raise ValueError(ms.aoi_sel.exception.no_gdf)

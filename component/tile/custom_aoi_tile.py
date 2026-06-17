@@ -149,8 +149,7 @@ class AoiView(sw.Layout):
         # name. Keep the raster MASKED (no unmask): masked ocean/no-data is
         # excluded, so ``fraction`` is the LMIC share of the AOI's land pixels.
         # Clip to the AOI + reduce over its bbox rather than geometry=fc.geometry(),
-        # which would dissolve the whole collection and blow the 2M-edge limit on
-        # a large non-admin AOI (e.g. an uploaded dense boundary).
+        # which would dissolve the collection and can exceed the 2M-edge limit.
         lmic01 = lmic_raster.select(0).rename("lmic")
         masked = lmic01.clip(fc)
         fraction = masked.reduceRegion(

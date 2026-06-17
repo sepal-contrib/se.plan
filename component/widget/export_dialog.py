@@ -227,7 +227,7 @@ class ExportMapDialog(BaseDialog):
         # Mask to the AOI so the bbox region below exports nodata outside it (a
         # polygon region masks to its shape, a bbox region doesn't). clip(fc)
         # rasterises per feature, so it doesn't dissolve the AOI like
-        # aoi.geometry() would (which blows EE's 2M-edge limit on dense AOIs).
+        # aoi.geometry() would.
         ee_image = ee_image.clip(aoi)
 
         recipe_name = str(Path(self.recipe.recipe_session_path).stem)

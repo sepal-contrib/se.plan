@@ -26,11 +26,9 @@ CSV export reads this constant to report the actual computation scale."""
 def _reduce_region_aoi(image: ee.Image, aoi, **reduce_kwargs) -> ee.Dictionary:
     """``reduceRegion`` over an AOI without dissolving it.
 
-    ``geometry=aoi`` unions every feature (``Collection.geometry``) and exceeds
-    EE's 2M-edge limit for dense GAUL 2024 boundaries (e.g. Indonesia, ~2.4M
-    edges). Clip the image to the AOI and reduce over its bounding box — masked
-    pixels don't contribute, so the result matches reducing over the exact
-    polygon (verified to within a pixel for both area and percentiles).
+    Reducing over ``aoi.geometry()`` can exceed EE's 2M-edge limit for dense
+    AOIs. Clip the image to the AOI and reduce over its bounding box instead —
+    masked pixels don't contribute, so the result matches the exact polygon.
     """
     return image.clip(aoi).reduceRegion(geometry=_aoi_bbox(aoi), **reduce_kwargs)
 

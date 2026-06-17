@@ -28,9 +28,8 @@ def _outside_area(child: ee.Geometry, primary_fc: ee.FeatureCollection) -> ee.Nu
 
     Differences only against the primary features the child overlaps
     (``filterBounds``); ``primary_fc.geometry()`` would union the whole
-    collection and blow EE's 2M-edge limit on dense GAUL 2024 boundaries
-    (e.g. Indonesia, ~2.4M edges). Stays vector-exact, so the sub-m² tolerance
-    above is preserved.
+    collection and can exceed EE's 2M-edge limit on dense AOIs. Stays
+    vector-exact, so the sub-m² tolerance above is preserved.
     """
     nearby = primary_fc.filterBounds(child)
     return child.difference(nearby.geometry(), maxError=1).area()

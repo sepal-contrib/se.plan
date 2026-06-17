@@ -195,9 +195,8 @@ class PreviewMapDialog(MapDialog):
             geometry (ee.Geometry): the geometry of the AOI
 
         """
-        # clip image to the AOI, then reduce over its bbox: geometry=geometry
-        # would dissolve the AOI collection (Collection.geometry) and blow EE's
-        # 2M-edge limit on a dense GAUL 2024 boundary (e.g. Indonesia).
+        # clip image to the AOI, then reduce over its bbox: reducing over
+        # geometry=geometry would dissolve the AOI and can exceed the 2M-edge limit.
         ee_image = image.clip(geometry)
 
         # get minmax

@@ -149,8 +149,8 @@ class SeplanAoiView(AoiView):
         if fc is None:
             return
 
-        # Bounds → zoom. Per-feature bounding boxes avoid Collection.geometry's
-        # 2M-edge limit on large AOIs (see AoiModel.total_bounds_async).
+        # Bounds → zoom; per-feature bboxes avoid dissolving the AOI
+        # (see AoiModel.total_bounds_async).
         bounds = await self.model.total_bounds_async()
 
         self.map_.remove_layer("aoi", none_ok=True)
@@ -180,13 +180,9 @@ class SeplanAoiView(AoiView):
     def _update_aoi(self, *args):
         """Async-zoom submit for ADMIN/ASSET/SHAPE (DRAW uses ``_auto_submit_async``).
 
-        The build stays synchronous — identical to pysepal's ``_update_aoi`` —
-        so recipe-import timing and the wrapper's ``_loading`` guard (which
-        protects restored sub-AOIs) are unchanged. Only the EE-heavy extent +
-        zoom is deferred to the GEE loop, and it uses the async per-feature
-        ``total_bounds_async`` so dense GAUL 2024 boundaries (e.g. Indonesia,
-        ~2.4M edges) don't blow ``Collection.geometry``'s 2M-edge limit — which
-        is exactly what pysepal's sync ``total_bounds`` dissolve hit.
+        The build stays synchronous so recipe-import timing and the ``_loading``
+        guard that protects restored sub-AOIs are unchanged; only the EE-heavy
+        extent + zoom is deferred to the GEE loop, via ``total_bounds_async``.
         """
         gee_interface = getattr(self.model, "gee_interface", None)
         if not self.gee or gee_interface is None or self.map_ is None:
