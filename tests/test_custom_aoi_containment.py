@@ -1,11 +1,4 @@
-"""Regression test: sub-AOI containment must not dissolve a dense primary AOI.
-
-Validating a drawn sub-AOI computed ``child.difference(primary_fc.geometry())``,
-which dissolves the whole primary and exceeds EE's 2M-edge limit for dense
-GAUL 2024 boundaries (e.g. Indonesia, ~2.4M edges). ``_outside_area`` differences
-only against the primary features the child overlaps (``filterBounds``), so it
-stays vector-exact without ever materialising the union.
-"""
+"""Regression: sub-AOI containment must not dissolve a dense primary AOI."""
 
 import ee
 import pygaul
