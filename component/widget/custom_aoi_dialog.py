@@ -26,13 +26,20 @@ _CONTAINMENT_TOLERANCE_M2 = 1.0
 def _outside_area(child: ee.Geometry, primary_fc: ee.FeatureCollection) -> ee.Number:
     """Area (m²) of ``child`` lying outside the primary AOI.
 
-    Differences only against the primary features the child overlaps
-    (``filterBounds``); ``primary_fc.geometry()`` would union the whole
-    collection and can exceed EE's 2M-edge limit on dense AOIs. Stays
-    vector-exact, so the sub-m² tolerance above is preserved.
+    Sums per-feature covered area instead of differencing against the union of
+    the overlapping features: a sub-AOI spanning a dense primary would otherwise
+    rebuild the whole multi-million-edge collection and exceed EE's 2M-edge
+    limit. Admin features are disjoint, so covered area is the sum of per-feature
+    intersections; this stays vector-exact (the sub-m² tolerance is preserved).
     """
     nearby = primary_fc.filterBounds(child)
-    return child.difference(nearby.geometry(), maxError=1).area()
+    with_area = nearby.map(
+        lambda feat: feat.set(
+            "_a", child.intersection(feat.geometry(), maxError=1).area(maxError=1)
+        )
+    )
+    covered = with_area.aggregate_sum("_a")
+    return child.area(maxError=1).subtract(covered)
 
 
 class CustomAoiDialog(BaseDialog):

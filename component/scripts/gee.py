@@ -277,14 +277,16 @@ async def get_limits_async(
     scale = ee.Algorithms.If(scale.lt(30), 30, scale)
 
     # Clip to the AOI + reduce over its bbox to avoid dissolving the collection.
-    # bestEffort + a capped maxPixels coarsens the scale for big AOIs (an
-    # approximate range is fine for the slider; small AOIs stay exact).
+    # Only continuous range sliders tolerate coarsening (bestEffort + a capped
+    # maxPixels speeds up big AOIs); binary/categorical value discovery stays
+    # exact so rare values present in the AOI aren't dropped from the choices.
+    coarsen = data_type == "continuous"
     reduction = ee_image.clip(aoi).reduceRegion(
         reducer=reducer,
         geometry=_aoi_bbox(aoi),
         scale=scale,
-        bestEffort=True,
-        maxPixels=1e8,
+        bestEffort=coarsen,
+        maxPixels=1e8 if coarsen else 1e13,
     )
 
     values = await get_value_async(reduction)
