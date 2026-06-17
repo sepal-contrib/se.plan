@@ -1,5 +1,5 @@
-"""
-Individual dashboard components for the right panel stacking system.
+"""Individual dashboard components for the right panel stacking system.
+
 These replace the monolithic DashboardTile approach.
 """
 
@@ -13,9 +13,9 @@ from component import parameter as cp
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.compute import export_as_csv
 from component.scripts.gee import create_layer
-from component.scripts.seplan import _aoi_bbox
 from component.scripts.statistics import get_summary_statistics_async
 from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
 from component.widget.alert_state import Alert

@@ -19,7 +19,7 @@ from component import parameter as cp
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
-from component.scripts.seplan import _aoi_bbox
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.statistics import get_summary_statistics_async
 from component.scripts.validation import are_comparable, validate_scenarios_recipes
 from component.tile.dashboard_components import DashboardDialog

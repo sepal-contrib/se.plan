@@ -12,7 +12,7 @@ from sepal_ui.scripts.utils import init_ee
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
-from component.scripts.seplan import _aoi_bbox
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.widget.custom_aoi_view import SeplanAoiView
 
 logger = logging.getLogger("SEPLAN")

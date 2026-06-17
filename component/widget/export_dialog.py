@@ -13,12 +13,13 @@ from component import parameter as cp
 from component import scripts as cs
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.gee import (
     apply_export_viz,
     get_ee_project_id,
     get_gee_recipe_folder_async,
 )
-from component.scripts.seplan import _aoi_bbox, asset_to_image, mask_image, quintiles
+from component.scripts.seplan import asset_to_image, mask_image, quintiles
 from component.scripts.ui_helpers import parse_export_name
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog

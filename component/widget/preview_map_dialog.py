@@ -11,8 +11,8 @@ from sepal_ui.scripts.gee_task import GEETask
 
 from component import parameter as cp
 from component.message import cm
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.gee import create_layer
-from component.scripts.seplan import _aoi_bbox
 from component.widget.base_dialog import MapDialog
 from component.widget.buttons import TextBtn
 from component.widget.legend import Legend

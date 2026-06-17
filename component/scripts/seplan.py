@@ -7,6 +7,7 @@ import ee
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.validation import validate_mask_image_parameters
 
 
@@ -166,20 +167,6 @@ def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> e
     """Reduce constraints list and returns one image masked."""
     constraints = [constraint for constraint, _ in masked_constraints_list]
     return ee.Image(constraints).mask().reduce(ee.Reducer.min()).gt(0).selfMask()
-
-
-def _aoi_bbox(aoi: Union[ee.FeatureCollection, ee.Geometry]) -> ee.Geometry:
-    """Bounding-box geometry for ``reduceRegion`` that never dissolves the AOI.
-
-    ``aoi.geometry()`` unions every feature (``Collection.geometry``) and exceeds
-    EE's 2M-edge limit for dense GAUL 2024 boundaries (e.g. Indonesia, ~2.4M
-    edges). The per-feature bbox merge is a cheap stand-in; callers clip the
-    image to ``aoi`` first so only AOI pixels are reduced (a clipped reduction
-    over this box matches reducing over the exact polygon — verified to the
-    sub-pixel — without ever materialising the union).
-    """
-    fc = ee.FeatureCollection(aoi)
-    return fc.map(lambda feat: ee.Feature(feat.geometry().bounds())).geometry().bounds()
 
 
 def _percentile(

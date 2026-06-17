@@ -8,7 +8,6 @@ from typing import Any as AnyType
 from typing import Dict as DictType
 from typing import Tuple
 
-import ee
 import geopandas as gpd
 import pygaul
 from sepal_ui import color, model
@@ -19,6 +18,7 @@ from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import Any, Bool, Dict, Int
 
 import component.parameter as cp
+from component.scripts.aoi_geometry import _aoi_bbox
 
 logger = logging.getLogger("SEPLAN")
 
@@ -276,11 +276,8 @@ class AoiModel(AoiModel):
         if self.feature_collection is None:
             raise ValueError(ms.aoi_sel.exception.no_gdf)
 
-        boxes = self.feature_collection.map(
-            lambda feat: ee.Feature(feat.geometry().bounds())
-        )
         coords = await self.gee_interface.get_info_async(
-            boxes.geometry().bounds().coordinates().get(0)
+            _aoi_bbox(self.feature_collection).coordinates().get(0)
         )
         bounds = [coords[0][0], coords[0][1], coords[2][0], coords[2][1]]
         return [round(bound, 4) for bound in bounds]

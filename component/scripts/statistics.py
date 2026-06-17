@@ -6,7 +6,8 @@ import ee
 from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.model.recipe import Recipe
-from component.scripts.seplan import _aoi_bbox, reduce_constraints
+from component.scripts.aoi_geometry import _aoi_bbox
+from component.scripts.seplan import reduce_constraints
 from component.types import (
     MeanStatsDict,
     MeanStatsValues,
