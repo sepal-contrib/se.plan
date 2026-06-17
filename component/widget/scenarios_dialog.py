@@ -1,33 +1,33 @@
 """UI component widget to compare different scenarios."""
 
 import asyncio
+import logging
 from copy import deepcopy
 from typing import List, Literal
 
 import ipyvuetify as v
 from ipyleaflet import SplitMapControl
-from traitlets import Dict as Dict, Int
-
-from component.tile.dashboard_components import DashboardDialog
-from sepal_ui.mapping import SepalMap
 from sepal_ui import sepalwidgets as sw
+from sepal_ui.mapping import SepalMap
 from sepal_ui.scripts.gee_interface import GEEInterface
 from sepal_ui.scripts.gee_task import GEETask
 from sepal_ui.scripts.sepal_client import SepalClient
+from traitlets import Dict as Dict
+from traitlets import Int
 
-import component.scripts.gee as gee
+from component import parameter as cp
 from component.frontend.icons import icon
 from component.model.recipe import Recipe
 from component.scripts import gee
+from component.scripts.seplan import _aoi_bbox
 from component.scripts.statistics import get_summary_statistics_async
 from component.scripts.validation import are_comparable, validate_scenarios_recipes
+from component.tile.dashboard_components import DashboardDialog
 from component.types import RecipeInfo, RecipePaths
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import IconBtn
 from component.widget.custom_widgets import RecipeInput, TableIcon, TextBtn
-from component import parameter as cp
-import logging
 
 log = logging.getLogger("SEPLAN.scenarios_dialog")
 
@@ -118,7 +118,6 @@ class CompareScenariosDialog(BaseDialog):
 
     def close_dialog(self, *args):
         """Close the dialog and cancel any running tasks."""
-
         self.btn_compare_map._on_cancel()
         self.btn_compare_stat._on_cancel()
 
@@ -140,7 +139,6 @@ class CompareScenariosDialog(BaseDialog):
 
     async def _get_maps_with_recipes(self):
         """Get maps for comparison by first reading recipes."""
-
         map_ = self.map_
         map_.clean_map()
 
@@ -197,14 +195,12 @@ class CompareScenariosDialog(BaseDialog):
 
     def validate_scenarios(self):
         """Validate that all selected scenarios have the same AOI."""
-
         # First validate that all of them are valid
         validate_scenarios_recipes(self.scenario_inputs.recipe_paths)
         are_comparable(self.scenario_inputs.recipe_paths, self.sepal_session)
 
     async def read_recipes_async(self, folder=None) -> List[Recipe]:
         """Load the recipes from the recipe paths."""
-
         recipes = []
         self.validate_scenarios()
 
@@ -260,7 +256,7 @@ class CompareScenariosDialog(BaseDialog):
 
         # Get the bounds for centering the map (using the first recipe's AOI)
         bounds_task = self.gee_interface.get_info_async(
-            recipes[0].seplan_aoi.feature_collection.bounds().coordinates().get(0)
+            _aoi_bbox(recipes[0].seplan_aoi.feature_collection).coordinates().get(0)
         )
 
         # Combine all tasks
@@ -285,7 +281,6 @@ class CompareScenariosDialog(BaseDialog):
 
     def set_stats_content(self, overall_dashboard=None, theme_dashboard=None):
         """Set the content of the statistics dashboard."""
-
         self.overall_dashboard = overall_dashboard
         self.theme_dashboard = theme_dashboard
 
@@ -360,12 +355,10 @@ class ScenarioInputs(sw.Layout):
 
     def get_limit(self) -> int:
         """Count the number of inputs in the widget and return the number of inputs left."""
-
         return self.recipe_limit - len(self.recipe_paths)
 
     def add_input(self, *args):
         """Add a new input row to the widget."""
-
         if self.get_limit() > 0:
             self.tbody.children = self.tbody.children + [self.get_input_row()]
 
@@ -374,12 +367,10 @@ class ScenarioInputs(sw.Layout):
 
     def get_id_name(self, idx: int) -> str:
         """Get the name of the input based on the index."""
-
         return "recipe_path_" + str(idx)
 
     def remove_input_row(self, input_id: int):
         """Remove and dispose the a given file input."""
-
         row_to_remove = self.get_children(attr="id", value=input_id)
 
         if row_to_remove:
@@ -402,7 +393,6 @@ class ScenarioInputs(sw.Layout):
 
     def get_input_row(self, trashable=True, main_recipe: Recipe = None) -> v.Html:
         """Get a new file input."""
-
         row_id = self.get_id_name(self.idx)
 
         if trashable:
@@ -443,7 +433,6 @@ class ScenarioInputs(sw.Layout):
 
     def update_recipe_paths(self, change: dict):
         """Update the list of recipe paths."""
-
         recipe_id: str = change["owner"].attributes["id"]
         value_name = "path" if change["name"] == "v_model" else "valid"
         value = change["new"]

@@ -51,9 +51,16 @@ async def get_layer_min_max(
     Returns:
         A ``(min, max)`` tuple rounded to two decimals.
     """
-    reduced = image.clip(aoi.geometry()).reduceRegion(
+    # Clip to the AOI + reduce over its bounding box. aoi.geometry() would
+    # dissolve the whole collection (Collection.geometry) and blow EE's 2M-edge
+    # limit for dense GAUL 2024 boundaries (e.g. Indonesia). Imported here to
+    # avoid a module-level import cycle with seplan.
+    from component.scripts.seplan import _aoi_bbox
+
+    clipped = image.clip(aoi)
+    reduced = clipped.reduceRegion(
         reducer=ee.Reducer.minMax(),
-        geometry=aoi.geometry(),
+        geometry=_aoi_bbox(aoi),
         scale=1,
         maxPixels=int(1e5),
         bestEffort=True,
@@ -343,9 +350,15 @@ async def get_limits_async(
     # If scale is less than 30, set it to 30
     scale = ee.Algorithms.If(scale.lt(30), 30, scale)
 
-    reduction = ee_image.reduceRegion(
+    # Clip to the AOI + reduce over its bbox; geometry=aoi would dissolve the
+    # whole collection (Collection.geometry) and blow EE's 2M-edge limit for
+    # dense GAUL 2024 boundaries (e.g. Indonesia). Imported here to avoid a
+    # module-level import cycle with seplan.
+    from component.scripts.seplan import _aoi_bbox
+
+    reduction = ee_image.clip(aoi).reduceRegion(
         reducer=reducer,
-        geometry=aoi,
+        geometry=_aoi_bbox(aoi),
         scale=scale,
         maxPixels=1e13,
     )

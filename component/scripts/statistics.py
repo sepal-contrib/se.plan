@@ -1,11 +1,12 @@
-from typing import Dict, List, Union
-import logging
 import asyncio
+import logging
+from typing import Dict
+
 import ee
 from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.model.recipe import Recipe
-from component.scripts.seplan import reduce_constraints
+from component.scripts.seplan import _aoi_bbox, reduce_constraints
 from component.types import (
     MeanStatsDict,
     MeanStatsValues,
@@ -19,6 +20,18 @@ logger = logging.getLogger("SEPLAN")
 STATS_SCALE_M = 100
 """Scale (in meters) used by every reduceRegion in this module. The dashboard
 CSV export reads this constant to report the actual computation scale."""
+
+
+def _reduce_region_aoi(image: ee.Image, aoi, **reduce_kwargs) -> ee.Dictionary:
+    """``reduceRegion`` over an AOI without dissolving it.
+
+    ``geometry=aoi`` unions every feature (``Collection.geometry``) and exceeds
+    EE's 2M-edge limit for dense GAUL 2024 boundaries (e.g. Indonesia, ~2.4M
+    edges). Clip the image to the AOI and reduce over its bounding box — masked
+    pixels don't contribute, so the result matches reducing over the exact
+    polygon (verified to within a pixel for both area and percentiles).
+    """
+    return image.clip(aoi).reduceRegion(geometry=_aoi_bbox(aoi), **reduce_kwargs)
 
 
 def is_main_aoi(main_aoi_name, aoi_name) -> bool:
@@ -71,7 +84,6 @@ async def _get_summary_statistics_sequential(
     Processes each AOI sequentially to avoid overwhelming GEE with concurrent operations.
     This is the primary method that should work for most cases.
     """
-
     if not recipe:
         raise ValueError("There is no recipe to get statistics from.")
 
@@ -171,7 +183,6 @@ async def _get_summary_statistics_batched(
     Returns:
         RecipeStatsDict with all computed statistics
     """
-
     if not recipe:
         raise ValueError("There is no recipe to get statistics from.")
 
@@ -365,18 +376,14 @@ def get_image_stats(image, mask, geom):
 
     image = image.rename("image").round()
 
-    areas = (
-        ee.Image.pixelArea()
-        .divide(10000)
-        .addBands(image)
-        .reduceRegion(
-            reducer=ee.Reducer.sum().group(1, "image"),
-            geometry=geom,
-            scale=STATS_SCALE_M,
-            maxPixels=1e12,
-        )
-        .get("groups")
-    )
+    composite = ee.Image.pixelArea().divide(10000).addBands(image)
+    areas = _reduce_region_aoi(
+        composite,
+        geom,
+        reducer=ee.Reducer.sum().group(1, "image"),
+        scale=STATS_SCALE_M,
+        maxPixels=1e12,
+    ).get("groups")
 
     areas_list = ee.List(areas).map(lambda i: ee.Dictionary(i).get("sum"))
     total = areas_list.reduce(ee.Reducer.sum())
@@ -393,18 +400,14 @@ def get_image_percent_cover_pixelarea(
     # Be sure the mask is 0
     image = image.rename("image").unmask(0)
 
-    areas = (
-        ee.Image.pixelArea()
-        .divide(10000)
-        .addBands(image)
-        .reduceRegion(
-            reducer=ee.Reducer.sum().group(1, "image"),
-            geometry=aoi,
-            scale=STATS_SCALE_M,
-            maxPixels=1e12,
-        )
-        .get("groups")
-    )
+    composite = ee.Image.pixelArea().divide(10000).addBands(image)
+    areas = _reduce_region_aoi(
+        composite,
+        aoi,
+        reducer=ee.Reducer.sum().group(1, "image"),
+        scale=STATS_SCALE_M,
+        maxPixels=1e12,
+    ).get("groups")
     areas = ee.List(areas)
     areas_list = areas.map(lambda i: ee.Dictionary(i).get("sum"))
     total = areas_list.reduce(ee.Reducer.sum())
@@ -440,7 +443,6 @@ def get_image_mean(image, aoi, mask, name, main_aoi) -> Dict[str, MeanStatsDict]
     Note: This function has been optimized to reduce the number of reduceRegion calls
     from 2 to 1 by reusing the masked mean calculation for the total value.
     """
-
     image = image.updateMask(mask)
 
     # Set the default values for the output
@@ -462,9 +464,10 @@ def get_image_mean(image, aoi, mask, name, main_aoi) -> Dict[str, MeanStatsDict]
 
     # Single reduceRegion call instead of two
     result = result.combine(
-        image.reduceRegion(
+        _reduce_region_aoi(
+            image,
+            aoi,
             reducer=reducer,
-            geometry=aoi,
             scale=STATS_SCALE_M,
             maxPixels=1e13,
         )
@@ -485,32 +488,26 @@ def get_image_sum(image, aoi, mask, name) -> Dict[str, SumStatsDict]:
 
     returns dict name:{value:[],total:[]}.
     """
-    area_ha = (
-        ee.Image.pixelArea()
-        .divide(10000)
-        .reduceRegion(
-            reducer=ee.Reducer.sum(),
-            geometry=aoi,
-            scale=STATS_SCALE_M,
-            maxPixels=1e13,
-        )
-        .get("area")
-    )
-
-    sum_img = (
-        image.reproject("EPSG:4326")
-        .updateMask(mask)
-        .reduceRegion(
-            reducer=ee.Reducer.sum(),
-            geometry=aoi,
-            scale=STATS_SCALE_M,
-            maxPixels=1e13,
-        )
-    )
-
-    total_img = image.reduceRegion(
+    area_ha = _reduce_region_aoi(
+        ee.Image.pixelArea().divide(10000),
+        aoi,
         reducer=ee.Reducer.sum(),
-        geometry=aoi,
+        scale=STATS_SCALE_M,
+        maxPixels=1e13,
+    ).get("area")
+
+    sum_img = _reduce_region_aoi(
+        image.reproject("EPSG:4326").updateMask(mask),
+        aoi,
+        reducer=ee.Reducer.sum(),
+        scale=STATS_SCALE_M,
+        maxPixels=1e13,
+    )
+
+    total_img = _reduce_region_aoi(
+        image,
+        aoi,
+        reducer=ee.Reducer.sum(),
         scale=STATS_SCALE_M,
         maxPixels=1e13,
     )

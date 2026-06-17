@@ -142,7 +142,6 @@ def mask_image(
     maskout_values: list,
 ) -> ee.Image:
     """Mask out an image based on its data type and input values."""
-
     # Validate parameters using centralized validation
     validate_mask_image_parameters(asset_id, data_type, maskout_values)
 
@@ -169,6 +168,20 @@ def reduce_constraints(masked_constraints_list: List[Tuple[ee.Image, str]]) -> e
     return ee.Image(constraints).mask().reduce(ee.Reducer.min()).gt(0).selfMask()
 
 
+def _aoi_bbox(aoi: Union[ee.FeatureCollection, ee.Geometry]) -> ee.Geometry:
+    """Bounding-box geometry for ``reduceRegion`` that never dissolves the AOI.
+
+    ``aoi.geometry()`` unions every feature (``Collection.geometry``) and exceeds
+    EE's 2M-edge limit for dense GAUL 2024 boundaries (e.g. Indonesia, ~2.4M
+    edges). The per-feature bbox merge is a cheap stand-in; callers clip the
+    image to ``aoi`` first so only AOI pixels are reduced (a clipped reduction
+    over this box matches reducing over the exact polygon — verified to the
+    sub-pixel — without ever materialising the union).
+    """
+    fc = ee.FeatureCollection(aoi)
+    return fc.map(lambda feat: ee.Feature(feat.geometry().bounds())).geometry().bounds()
+
+
 def _percentile(
     ee_image: ee.Image,
     aoi: ee.FeatureCollection,
@@ -177,10 +190,12 @@ def _percentile(
 ) -> ee.Image:
     """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
-    percents = ee_image.rename("img").reduceRegion(
+    clipped = ee_image.rename("img").clip(aoi)
+    percents = clipped.reduceRegion(
         reducer=ee.Reducer.percentile(percentiles=percentile),
-        geometry=aoi.geometry(),
+        geometry=_aoi_bbox(aoi),
         scale=scale,
+        maxPixels=1e13,
     )
     low = ee.Number(percents.get(f"img_p{percentile[0]}"))
     high = ee.Number(percents.get(f"img_p{percentile[1]}")).add(0.1e-13)
@@ -195,8 +210,12 @@ def _min_max(
 ) -> ee.Image:
     """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
-    min_max = ee_image.rename("img").reduceRegion(
-        reducer=ee.Reducer.minMax(), geometry=aoi.geometry(), scale=scale
+    clipped = ee_image.rename("img").clip(aoi)
+    min_max = clipped.reduceRegion(
+        reducer=ee.Reducer.minMax(),
+        geometry=_aoi_bbox(aoi),
+        scale=scale,
+        maxPixels=1e13,
     )
     low = ee.Number(min_max.get("img_min"))
     high = ee.Number(min_max.get("img_max")).add(0.1e-13)
@@ -248,9 +267,10 @@ def quintiles(
     # ee_image.projection().nominalScale().multiply(2)
 
     band_name = ee.String(ee_image.bandNames().get(0))
-    quintiles_dict = ee_image.reduceRegion(
+    clipped = ee_image.clip(ee_aoi)
+    quintiles_dict = clipped.reduceRegion(
         reducer=ee.Reducer.percentile(percentiles=[20, 40, 60, 80]),
-        geometry=ee_aoi,
+        geometry=_aoi_bbox(ee_aoi),
         tileScale=2,
         scale=100,
         maxPixels=1e13,

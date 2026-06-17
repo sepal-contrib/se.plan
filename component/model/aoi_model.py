@@ -8,6 +8,7 @@ from typing import Any as AnyType
 from typing import Dict as DictType
 from typing import Tuple
 
+import ee
 import geopandas as gpd
 import pygaul
 from sepal_ui import color, model
@@ -261,6 +262,28 @@ class AoiModel(AoiModel):
         self.updated += 1
 
         return self
+
+    async def total_bounds_async(self):
+        """Return the AOI extent ``[minx, miny, maxx, maxy]`` asynchronously.
+
+        pysepal's sync ``total_bounds`` dissolves the whole feature collection
+        (``Collection.geometry``), which exceeds EE's 2M-edge limit for dense
+        GAUL 2024 boundaries (Indonesia is ~2.4M edges). Reduce each feature to
+        its bounding box first, then take the extent of those small boxes — same
+        result, no full-coastline union — and fetch it through ``get_info_async``
+        so the Solara kernel thread never blocks.
+        """
+        if self.feature_collection is None:
+            raise ValueError(ms.aoi_sel.exception.no_gdf)
+
+        boxes = self.feature_collection.map(
+            lambda feat: ee.Feature(feat.geometry().bounds())
+        )
+        coords = await self.gee_interface.get_info_async(
+            boxes.geometry().bounds().coordinates().get(0)
+        )
+        bounds = [coords[0][0], coords[0][1], coords[2][0], coords[2][1]]
+        return [round(bound, 4) for bound in bounds]
 
     def clear_attributes(self):
         """Return all attributes to their default state.

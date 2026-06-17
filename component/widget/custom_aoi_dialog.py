@@ -23,6 +23,19 @@ logger = logging.getLogger("SEPLAN")
 _CONTAINMENT_TOLERANCE_M2 = 1.0
 
 
+def _outside_area(child: ee.Geometry, primary_fc: ee.FeatureCollection) -> ee.Number:
+    """Area (m²) of ``child`` lying outside the primary AOI.
+
+    Differences only against the primary features the child overlaps
+    (``filterBounds``); ``primary_fc.geometry()`` would union the whole
+    collection and blow EE's 2M-edge limit on dense GAUL 2024 boundaries
+    (e.g. Indonesia, ~2.4M edges). Stays vector-exact, so the sub-m² tolerance
+    above is preserved.
+    """
+    nearby = primary_fc.filterBounds(child)
+    return child.difference(nearby.geometry(), maxError=1).area()
+
+
 class CustomAoiDialog(BaseDialog):
     feature: dict = None
     "feature collection of new geometry imported from ImportAoiDialog."
@@ -138,14 +151,13 @@ class CustomAoiDialog(BaseDialog):
     async def _validate_async(self):
         """Return the count of staged features that fall outside the primary AOI."""
         primary_fc = self.map_.aoi_model.feature_collection
-        primary_geom = primary_fc.geometry()
         gee_interface = self.map_.gee_interface
 
         outside_count = 0
         for feat in self._candidate_features:
             child = ee.Geometry(feat["geometry"])
             outside_area = await gee_interface.get_info_async(
-                child.difference(primary_geom, maxError=1).area()
+                _outside_area(child, primary_fc)
             )
             if outside_area is not None and outside_area > _CONTAINMENT_TOLERANCE_M2:
                 outside_count += 1

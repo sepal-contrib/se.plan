@@ -12,6 +12,7 @@ from sepal_ui.scripts.utils import init_ee
 import component.parameter as cp
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.seplan import _aoi_bbox
 from component.widget.custom_aoi_view import SeplanAoiView
 
 logger = logging.getLogger("SEPLAN")
@@ -142,18 +143,19 @@ class AoiView(sw.Layout):
         lmic_raster = ee.Image(
             "projects/john-ee-282116/assets/fao-restoration/misc/lmic_global_1k"
         )
-        aoi_ee_geom = seplan_aoi.feature_collection.geometry()
+        fc = seplan_aoi.feature_collection
 
         # select(0)+rename so the verdict doesn't depend on the asset's band
         # name. Keep the raster MASKED (no unmask): masked ocean/no-data is
         # excluded, so ``fraction`` is the LMIC share of the AOI's land pixels.
-        # unmask(0) would force EE to materialise the exact AOI polygon and
-        # blow the 2M-edge limit on large countries (Indonesia's GAUL geometry
-        # has ~3.26M edges).
+        # Clip to the AOI + reduce over its bbox rather than geometry=fc.geometry(),
+        # which would dissolve the whole collection and blow the 2M-edge limit on
+        # a large non-admin AOI (e.g. an uploaded dense boundary).
         lmic01 = lmic_raster.select(0).rename("lmic")
-        fraction = lmic01.reduceRegion(
+        masked = lmic01.clip(fc)
+        fraction = masked.reduceRegion(
             reducer=ee.Reducer.mean(),
-            geometry=aoi_ee_geom,
+            geometry=_aoi_bbox(fc),
             scale=1000,
             bestEffort=True,
             maxPixels=1e13,
