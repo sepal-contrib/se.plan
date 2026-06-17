@@ -18,7 +18,7 @@ from component.scripts.gee import (
     get_ee_project_id,
     get_gee_recipe_folder_async,
 )
-from component.scripts.seplan import asset_to_image, mask_image, quintiles
+from component.scripts.seplan import _aoi_bbox, asset_to_image, mask_image, quintiles
 from component.scripts.ui_helpers import parse_export_name
 from component.widget.alert_state import Alert
 from component.widget.base_dialog import BaseDialog
@@ -223,6 +223,11 @@ class ExportMapDialog(BaseDialog):
         # The value from the w_asset is a tuple with (theme, id_)
         theme, id_ = self.w_asset.v_model
         ee_image = self.get_ee_image(theme, id_)
+        # Mask to the AOI so the bbox region below exports nodata outside it (a
+        # polygon region masks to its shape, a bbox region doesn't). clip(fc)
+        # rasterises per feature, so it doesn't dissolve the AOI like
+        # aoi.geometry() would (which blows EE's 2M-edge limit on dense AOIs).
+        ee_image = ee_image.clip(aoi)
 
         recipe_name = str(Path(self.recipe.recipe_session_path).stem)
 
@@ -232,7 +237,7 @@ class ExportMapDialog(BaseDialog):
         export_params = {
             "description": name,
             "scale": self.w_scale.v_model,
-            "region": aoi.geometry(),
+            "region": _aoi_bbox(aoi),
             "max_pixels": 1e13,
         }
 

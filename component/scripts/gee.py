@@ -356,11 +356,15 @@ async def get_limits_async(
     # module-level import cycle with seplan.
     from component.scripts.seplan import _aoi_bbox
 
+    # bestEffort + a capped maxPixels coarsens the scale for big AOIs (e.g.
+    # Indonesia at 30 m would take ~2 min otherwise) — an approximate range is
+    # fine for the slider; small AOIs stay under the cap and remain exact.
     reduction = ee_image.clip(aoi).reduceRegion(
         reducer=reducer,
         geometry=_aoi_bbox(aoi),
         scale=scale,
-        maxPixels=1e13,
+        bestEffort=True,
+        maxPixels=1e8,
     )
 
     values = await get_value_async(reduction)
