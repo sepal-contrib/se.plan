@@ -1,3 +1,10 @@
+## 2.1.3 (2026-06-18)
+
+### Fix
+
+- keep the AOI validate button loading until the async build finishes
+- zoom to the AOI snapshot, not the live trait nulled during import
+
 ## 2.1.2 (2026-06-18)
 
 ### Fix
