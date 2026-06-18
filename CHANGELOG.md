@@ -1,3 +1,17 @@
+## 2.1.2 (2026-06-18)
+
+### Fix
+
+- keep discrete limits exact; sub-AOI containment without union
+- export + faster constraint limits for large AOIs
+- handle large AOIs over EE's 2M-edge geometry limit
+- **aoi**: grade LMIC coverage into a tiered soft-gate
+- snapshot Recipe.to_dict() so the header inspector isn't stale
+
+### Refactor
+
+- extract _aoi_bbox to its own module, drop lazy imports
+
 ## 2.1.1 (2026-06-15)
 
 ## 2.1.0 (2026-06-15)
