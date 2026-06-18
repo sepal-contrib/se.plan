@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 from sepal_ui import mapping as sm
 from sepal_ui.aoi.aoi_view import AoiView
@@ -7,6 +8,17 @@ from sepal_ui.message import ms
 from component.model.aoi_model import SeplanAoi
 
 logger = logging.getLogger("SEPLAN")
+
+
+def _set_btn_loading(btn, loading: bool) -> None:
+    """Toggle a button's loading + disabled state across an async task.
+
+    Mirrors ``sw.Btn.toggle_loading`` (used by pysepal's synchronous
+    ``@loading_button``) so the validate button spins for the whole deferred
+    AOI build, not just the synchronous scheduling step.
+    """
+    btn.loading = loading
+    btn.disabled = loading
 
 
 class SeplanAoiView(AoiView):
@@ -119,6 +131,8 @@ class SeplanAoiView(AoiView):
             self.btn.fire_event("click", None)
             return
 
+        # spin the validate button until _auto_submit_async finishes
+        _set_btn_loading(self.btn, True)
         task = gee_interface.create_task(
             func=self._auto_submit_async,
             key="aoi_auto_submit",
@@ -138,30 +152,34 @@ class SeplanAoiView(AoiView):
         if self.aoi_dc is None:
             return
 
-        self.model.geo_json = self.aoi_dc.to_json()
-        self.model.set_object()  # builds in-memory ee.FeatureCollection
+        try:
+            self.model.geo_json = self.aoi_dc.to_json()
+            self.model.set_object()  # builds in-memory ee.FeatureCollection
 
-        if self.map_ is None:
+            if self.map_ is None:
+                self.updated += 1
+                return
+
+            fc = self.model.feature_collection
+            if fc is None:
+                return
+
+            # Bounds → zoom; per-feature bboxes avoid dissolving the AOI
+            # (see AoiModel.total_bounds_async). Use the captured ``fc``, not the
+            # live trait, which set_object() can null mid-rebuild.
+            bounds = await self.model.total_bounds_async(fc)
+
+            self.map_.remove_layer("aoi", none_ok=True)
+            self.map_.zoom_bounds(bounds)
+
+            # add_ee_layer_async resolves the slow getMapId off the kernel thread.
+            await self.map_.add_ee_layer_async(fc, {}, "aoi")
+
+            self.aoi_dc.hide()
+            self.alert.add_msg(ms.aoi_sel.complete, "success")
             self.updated += 1
-            return
-
-        fc = self.model.feature_collection
-        if fc is None:
-            return
-
-        # Bounds → zoom; per-feature bboxes avoid dissolving the AOI
-        # (see AoiModel.total_bounds_async).
-        bounds = await self.model.total_bounds_async()
-
-        self.map_.remove_layer("aoi", none_ok=True)
-        self.map_.zoom_bounds(bounds)
-
-        # add_ee_layer_async resolves the slow getMapId off the kernel thread.
-        await self.map_.add_ee_layer_async(fc, {}, "aoi")
-
-        self.aoi_dc.hide()
-        self.alert.add_msg(ms.aoi_sel.complete, "success")
-        self.updated += 1
+        finally:
+            _set_btn_loading(self.btn, False)
 
     def _on_auto_submit_error(self, exc: Exception):
         """Surface auto-submit failures via the AoiView alert area.
@@ -176,6 +194,8 @@ class SeplanAoiView(AoiView):
         self.alert.add_msg(str(exc), type_="error")
         if self._app_model is not None:
             self._app_model.step_open = True
+        # never leave the button stuck spinning if a task dies
+        _set_btn_loading(self.btn, False)
 
     def _update_aoi(self, *args):
         """Async-zoom submit for ADMIN/ASSET/SHAPE (DRAW uses ``_auto_submit_async``).
@@ -191,11 +211,17 @@ class SeplanAoiView(AoiView):
 
         self.model.set_object()
         self.alert.add_msg(ms.aoi_sel.complete, "success")
-        if self.model.feature_collection is None:
+        # Snapshot the freshly-built AOI: set_object() runs again during recipe
+        # import and transiently nulls feature_collection, so the deferred zoom
+        # must not re-read the live trait.
+        fc = self.model.feature_collection
+        if fc is None:
             return self
 
+        # spin the validate button until the deferred zoom finishes
+        _set_btn_loading(self.btn, True)
         task = gee_interface.create_task(
-            func=self._zoom_async,
+            func=partial(self._zoom_async, fc),
             key="aoi_zoom",
             on_error=self._on_auto_submit_error,
         )
@@ -203,21 +229,26 @@ class SeplanAoiView(AoiView):
         task.start()
         return self
 
-    async def _zoom_async(self):
-        """Zoom to the AOI extent and add its layer — off the kernel thread.
+    async def _zoom_async(self, fc):
+        """Zoom to the captured AOI extent and add its layer — off the kernel thread.
 
-        Uses ``total_bounds_async`` (per-feature bounding boxes) so the zoom box
-        for large countries never requires dissolving the whole collection.
+        Operates on the ``fc`` snapshot taken when the zoom was scheduled, not the
+        live ``feature_collection`` trait, which set_object() nulls mid-rebuild
+        during recipe import. Per-feature bounding boxes (see
+        ``total_bounds_async``) avoid dissolving the collection.
         """
-        bounds = await self.model.total_bounds_async()
-        self.map_.remove_layer("aoi", none_ok=True)
-        self.map_.zoom_bounds(bounds)
+        try:
+            bounds = await self.model.total_bounds_async(fc)
+            self.map_.remove_layer("aoi", none_ok=True)
+            self.map_.zoom_bounds(bounds)
 
-        await self.map_.add_ee_layer_async(self.model.feature_collection, {}, "aoi")
+            await self.map_.add_ee_layer_async(fc, {}, "aoi")
 
-        if self.aoi_dc is not None:
-            self.aoi_dc.hide()
-        self.updated += 1
+            if self.aoi_dc is not None:
+                self.aoi_dc.hide()
+            self.updated += 1
+        finally:
+            _set_btn_loading(self.btn, False)
 
     def update_view(self, *args):
         """Update the view when the feature collection is updated."""
