@@ -263,18 +263,21 @@ class AoiModel(AoiModel):
 
         return self
 
-    async def total_bounds_async(self):
+    async def total_bounds_async(self, fc=None):
         """Return the AOI extent ``[minx, miny, maxx, maxy]`` asynchronously.
 
-        Uses per-feature bounding boxes (see ``_aoi_bbox``) rather than the
-        dissolved collection geometry, which can exceed EE's 2M-edge limit for
-        dense AOIs. Fetched via ``get_info_async`` so the kernel never blocks.
+        Pass ``fc`` to compute from a captured feature collection instead of the
+        live ``feature_collection`` trait, which ``set_object`` transiently nulls
+        (via ``clear_output``) while rebuilding — a deferred zoom must use the AOI
+        it was scheduled with. Per-feature bounding boxes (see ``_aoi_bbox``) avoid
+        the dissolved-geometry edge limit; fetched via ``get_info_async``.
         """
-        if self.feature_collection is None:
+        fc = self.feature_collection if fc is None else fc
+        if fc is None:
             raise ValueError(ms.aoi_sel.exception.no_gdf)
 
         coords = await self.gee_interface.get_info_async(
-            _aoi_bbox(self.feature_collection).coordinates().get(0)
+            _aoi_bbox(fc).coordinates().get(0)
         )
         bounds = [coords[0][0], coords[0][1], coords[2][0], coords[2][1]]
         return [round(bound, 4) for bound in bounds]

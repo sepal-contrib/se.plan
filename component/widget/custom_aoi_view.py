@@ -1,4 +1,5 @@
 import logging
+from functools import partial
 
 from sepal_ui import mapping as sm
 from sepal_ui.aoi.aoi_view import AoiView
@@ -150,8 +151,9 @@ class SeplanAoiView(AoiView):
             return
 
         # Bounds → zoom; per-feature bboxes avoid dissolving the AOI
-        # (see AoiModel.total_bounds_async).
-        bounds = await self.model.total_bounds_async()
+        # (see AoiModel.total_bounds_async). Use the captured ``fc``, not the
+        # live trait, which set_object() can null mid-rebuild.
+        bounds = await self.model.total_bounds_async(fc)
 
         self.map_.remove_layer("aoi", none_ok=True)
         self.map_.zoom_bounds(bounds)
@@ -191,11 +193,15 @@ class SeplanAoiView(AoiView):
 
         self.model.set_object()
         self.alert.add_msg(ms.aoi_sel.complete, "success")
-        if self.model.feature_collection is None:
+        # Snapshot the freshly-built AOI: set_object() runs again during recipe
+        # import and transiently nulls feature_collection, so the deferred zoom
+        # must not re-read the live trait.
+        fc = self.model.feature_collection
+        if fc is None:
             return self
 
         task = gee_interface.create_task(
-            func=self._zoom_async,
+            func=partial(self._zoom_async, fc),
             key="aoi_zoom",
             on_error=self._on_auto_submit_error,
         )
@@ -203,17 +209,19 @@ class SeplanAoiView(AoiView):
         task.start()
         return self
 
-    async def _zoom_async(self):
-        """Zoom to the AOI extent and add its layer — off the kernel thread.
+    async def _zoom_async(self, fc):
+        """Zoom to the captured AOI extent and add its layer — off the kernel thread.
 
-        Uses ``total_bounds_async`` (per-feature bounding boxes) so the zoom box
-        for large countries never requires dissolving the whole collection.
+        Operates on the ``fc`` snapshot taken when the zoom was scheduled, not the
+        live ``feature_collection`` trait, which set_object() nulls mid-rebuild
+        during recipe import. Per-feature bounding boxes (see
+        ``total_bounds_async``) avoid dissolving the collection.
         """
-        bounds = await self.model.total_bounds_async()
+        bounds = await self.model.total_bounds_async(fc)
         self.map_.remove_layer("aoi", none_ok=True)
         self.map_.zoom_bounds(bounds)
 
-        await self.map_.add_ee_layer_async(self.model.feature_collection, {}, "aoi")
+        await self.map_.add_ee_layer_async(fc, {}, "aoi")
 
         if self.aoi_dc is not None:
             self.aoi_dc.hide()
