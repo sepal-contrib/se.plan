@@ -7,6 +7,7 @@ observe that ``None`` window and raise "You must set the gdf before interacting
 with it". The zoom must instead use the AOI snapshot taken when it was scheduled.
 """
 
+import types
 from pathlib import Path
 
 import pytest
@@ -46,6 +47,14 @@ class _FakeMap:
         pass
 
 
+class _FakeBtn:
+    """Records the loading/disabled state pysepal's loading button toggles."""
+
+    def __init__(self):
+        self.loading = False
+        self.disabled = False
+
+
 class _StubView:
     """Stand-in for SeplanAoiView holding only what ``_zoom_async`` touches."""
 
@@ -55,6 +64,7 @@ class _StubView:
         self.model = model
         self.map_ = map_
         self.updated = 0
+        self.btn = _FakeBtn()
 
 
 @pytest.mark.asyncio
@@ -88,3 +98,48 @@ async def test_zoom_async_uses_snapshot_when_feature_collection_cleared():
 
     assert fake_map.zoomed is not None
     assert len(fake_map.zoomed) == 4
+
+
+@pytest.mark.asyncio
+async def test_update_aoi_holds_button_loading_until_zoom_completes():
+    """The validate button stays loading from schedule until the async zoom ends."""
+    captured = {}
+
+    class _Gee:
+        def create_task(self, func, key=None, on_error=None):
+            captured["func"] = func
+            return types.SimpleNamespace(start=lambda: None)
+
+    sentinel_fc = object()
+
+    class _Model:
+        gee_interface = _Gee()
+        feature_collection = sentinel_fc
+
+        def set_object(self):
+            pass
+
+        async def total_bounds_async(self, fc):
+            assert fc is sentinel_fc
+            return [0.0, 0.0, 1.0, 1.0]
+
+    view = SeplanAoiView.__new__(SeplanAoiView)  # skip the UI-heavy __init__
+    view.gee = True
+    view.map_ = _FakeMap()
+    view.model = _Model()
+    view.alert = types.SimpleNamespace(add_msg=lambda *a, **k: None)
+    view.btn = _FakeBtn()
+    view.aoi_dc = None
+    view.updated = 0
+    view._app_model = None
+
+    view._update_aoi()
+    # spinner shown while the background task is still pending
+    assert view.btn.loading is True
+    assert view.btn.disabled is True
+
+    await captured["func"]()  # run the deferred _zoom_async(fc)
+    # cleared once the AOI is actually loaded
+    assert view.btn.loading is False
+    assert view.btn.disabled is False
+    assert view.map_.zoomed == [0.0, 0.0, 1.0, 1.0]
