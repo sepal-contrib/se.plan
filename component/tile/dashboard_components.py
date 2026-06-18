@@ -1,13 +1,11 @@
-"""
-Individual dashboard components for the right panel stacking system.
+"""Individual dashboard components for the right panel stacking system.
+
 These replace the monolithic DashboardTile approach.
 """
 
-import logging
 import asyncio
+import logging
 
-from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
-from component.widget.custom_widgets import MapInfoDialog
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts.gee_interface import GEEInterface
 
@@ -15,18 +13,21 @@ from component import parameter as cp
 from component import widget as cw
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.compute import export_as_csv
-from component.scripts.statistics import get_summary_statistics_async
-from component.widget.alert_state import Alert
-from component.widget.base_dialog import BaseDialog, MapDialog
-from component.widget.buttons import IconBtn, TextBtn
 from component.scripts.gee import create_layer
+from component.scripts.statistics import get_summary_statistics_async
+from component.tile.dashboard_tile import OverallDashboard, ThemeDashboard
+from component.widget.alert_state import Alert
+from component.widget.base_dialog import MapDialog
+from component.widget.buttons import IconBtn, TextBtn
+from component.widget.custom_widgets import MapInfoDialog
 
 logger = logging.getLogger("SEPLAN")
 
 
 class MapComputeComponent(sw.Layout):
-    """Component for map computation functionality"""
+    """Component for map computation functionality."""
 
     def __init__(
         self,
@@ -109,7 +110,6 @@ class MapComputeComponent(sw.Layout):
 
     async def _get_maps(self):
         """Compute the restoration maps."""
-
         self.map_.clean_map()
 
         aoi = self.recipe.seplan_aoi.feature_collection
@@ -121,7 +121,7 @@ class MapComputeComponent(sw.Layout):
         constraint_index = self.recipe.seplan.get_constraint_index().unmask(0).clip(aoi)
 
         tasks = [
-            self.gee_interface.get_info_async(aoi.bounds().coordinates().get(0)),
+            self.gee_interface.get_info_async(_aoi_bbox(aoi).coordinates().get(0)),
             self.gee_interface.get_map_id_async(benefit_index, cp.layer_vis),
             self.gee_interface.get_map_id_async(benefit_cost_index, cp.layer_vis),
             self.gee_interface.get_map_id_async(constraint_index, cp.layer_vis),
@@ -135,7 +135,7 @@ class MapComputeComponent(sw.Layout):
 
 
 class MapDownloadComponent(sw.Layout):
-    """Component for map download functionality"""
+    """Component for map download functionality."""
 
     def __init__(self, recipe: Recipe, alert: Alert, **kwargs):
         super().__init__(**kwargs)
@@ -157,7 +157,7 @@ class MapDownloadComponent(sw.Layout):
 
 
 class DashboardDialog(MapDialog):
-    """Dialog to display the dashboard results"""
+    """Dialog to display the dashboard results."""
 
     def __init__(self, recipe, theme_toggle, **kwargs):
         super().__init__(persistent=False, **kwargs)
@@ -190,7 +190,7 @@ class DashboardDialog(MapDialog):
         ]
 
     def set_results(self, summary_stats, recipes=None):
-        """Set the results for the dashboard"""
+        """Set the results for the dashboard."""
         logger.debug(f"Setting results in DashboardDialog: {summary_stats}")
 
         if not recipes:
@@ -207,7 +207,7 @@ class DashboardDialog(MapDialog):
 
 
 class DownloadComponent(sw.Layout):
-    """Component for CSV export functionality"""
+    """Component for CSV export functionality."""
 
     def __init__(
         self, gee_interface: GEEInterface, recipe: Recipe, alert: Alert, **kwargs
@@ -227,7 +227,7 @@ class DownloadComponent(sw.Layout):
         self._configure_csv_export()
 
     def _configure_csv_export(self):
-        """Configure the CSV export functionality"""
+        """Configure the CSV export functionality."""
 
         def create_csv_task():
             def callback(*_):
@@ -253,7 +253,7 @@ class DownloadComponent(sw.Layout):
 
 
 class DashboardComputeComponent(sw.Layout):
-    """Component for dashboard computation and viewing"""
+    """Component for dashboard computation and viewing."""
 
     def __init__(
         self,
@@ -295,7 +295,7 @@ class DashboardComputeComponent(sw.Layout):
         self._configure_dashboard()
 
     def _configure_dashboard(self):
-        """Configure the dashboard computation"""
+        """Configure the dashboard computation."""
 
         def create_dashboard_task():
             def callback(*_):
@@ -319,7 +319,7 @@ class DashboardComputeComponent(sw.Layout):
         )
 
     def _open_existing_dashboard(self, *_):
-        """Open dashboard with existing results"""
+        """Open dashboard with existing results."""
         if self.summary_stats:
             self.dashboard_dialog.set_results(self.summary_stats)
 
@@ -330,13 +330,13 @@ class DashboardComputeComponent(sw.Layout):
             return
 
     def reset(self):
-        """Reset component state"""
+        """Reset component state."""
         self.summary_stats = None
         self.dashboard_dialog.close_dialog()
 
 
 class CompareComponent(sw.Layout):
-    """Component for scenario comparison"""
+    """Component for scenario comparison."""
 
     def __init__(
         self,

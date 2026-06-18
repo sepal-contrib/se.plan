@@ -6,6 +6,8 @@ against the drift where the tile's new/save flows updated only the mirror,
 leaving the model (and therefore the header, exports and asset naming) stale.
 """
 
+import copy
+
 from component.model.recipe import RECIPE_SIGNATURE, Recipe
 from component.tile.recipe_tile import RecipeView
 from component.widget.alert_state import Alert
@@ -86,3 +88,46 @@ def test_header_inspector_uses_real_signature():
     header._on_view()
 
     assert header.inspector.data_dict["signature"] == RECIPE_SIGNATURE
+
+
+def test_inspector_preview_is_decoupled_from_live_model():
+    """An open preview must be a snapshot, not a live alias of the models.
+
+    ``to_dict`` builds its payload from the models' live ``_trait_values``
+    mappings, so without a copy the dict handed to the inspector keeps tracking
+    later edits. That silent mutation is what made the header preview show stale
+    data (and defeated the traitlets change-detection on re-view).
+    """
+    recipe = Recipe()
+    header = RecipeHeader(recipe=recipe, alert=Alert())
+
+    header._on_view()
+    shown = copy.deepcopy(header.inspector.data_dict)
+
+    # edit the recipe *after* the preview was taken
+    recipe.benefit_model.names = ["regression-sentinel"]
+
+    # the dict already handed to the inspector must not change underneath us
+    assert header.inspector.data_dict == shown
+
+
+def test_inspector_resyncs_on_reopen_after_edit():
+    """Re-viewing after an edit must change data_dict so the frontend re-syncs.
+
+    With live ``_trait_values`` aliasing, the second assignment compared equal
+    to the first (both tracked the same mutated objects), so the synced traitlet
+    emitted no change event and the Vue widget kept showing the stale snapshot.
+    """
+    recipe = Recipe()
+    header = RecipeHeader(recipe=recipe, alert=Alert())
+
+    header._on_view()
+
+    recipe.benefit_model.names = ["regression-sentinel"]
+
+    events = []
+    header.inspector.observe(lambda change: events.append(change["new"]), "data_dict")
+    header._on_view()
+
+    assert events, "data_dict did not change on re-view; inspector stays stale"
+    assert header.inspector.data_dict["benefits"]["names"] == ["regression-sentinel"]

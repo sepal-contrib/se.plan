@@ -13,6 +13,7 @@ from component import parameter as cp
 from component import scripts as cs
 from component.message import cm
 from component.model.recipe import Recipe
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.gee import (
     apply_export_viz,
     get_ee_project_id,
@@ -223,6 +224,11 @@ class ExportMapDialog(BaseDialog):
         # The value from the w_asset is a tuple with (theme, id_)
         theme, id_ = self.w_asset.v_model
         ee_image = self.get_ee_image(theme, id_)
+        # Mask to the AOI so the bbox region below exports nodata outside it (a
+        # polygon region masks to its shape, a bbox region doesn't). clip(fc)
+        # rasterises per feature, so it doesn't dissolve the AOI like
+        # aoi.geometry() would.
+        ee_image = ee_image.clip(aoi)
 
         recipe_name = str(Path(self.recipe.recipe_session_path).stem)
 
@@ -232,7 +238,7 @@ class ExportMapDialog(BaseDialog):
         export_params = {
             "description": name,
             "scale": self.w_scale.v_model,
-            "region": aoi.geometry(),
+            "region": _aoi_bbox(aoi),
             "max_pixels": 1e13,
         }
 

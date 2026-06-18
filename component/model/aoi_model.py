@@ -4,7 +4,9 @@ import json
 import logging
 from functools import lru_cache
 from pathlib import Path
-from typing import Tuple, Dict as DictType, Any as AnyType
+from typing import Any as AnyType
+from typing import Dict as DictType
+from typing import Tuple
 
 import geopandas as gpd
 import pygaul
@@ -13,9 +15,10 @@ from sepal_ui.aoi.aoi_model import AoiModel
 from sepal_ui.message import ms
 from sepal_ui.scripts import utils as su
 from sepal_ui.scripts.gee_interface import GEEInterface
-from traitlets import Bool, Dict, Int, Any
+from traitlets import Any, Bool, Dict, Int
 
 import component.parameter as cp
+from component.scripts.aoi_geometry import _aoi_bbox
 
 logger = logging.getLogger("SEPLAN")
 
@@ -260,6 +263,22 @@ class AoiModel(AoiModel):
 
         return self
 
+    async def total_bounds_async(self):
+        """Return the AOI extent ``[minx, miny, maxx, maxy]`` asynchronously.
+
+        Uses per-feature bounding boxes (see ``_aoi_bbox``) rather than the
+        dissolved collection geometry, which can exceed EE's 2M-edge limit for
+        dense AOIs. Fetched via ``get_info_async`` so the kernel never blocks.
+        """
+        if self.feature_collection is None:
+            raise ValueError(ms.aoi_sel.exception.no_gdf)
+
+        coords = await self.gee_interface.get_info_async(
+            _aoi_bbox(self.feature_collection).coordinates().get(0)
+        )
+        bounds = [coords[0][0], coords[0][1], coords[2][0], coords[2][1]]
+        return [round(bound, 4) for bound in bounds]
+
     def clear_attributes(self):
         """Return all attributes to their default state.
 
@@ -414,10 +433,18 @@ class SeplanAoi(model.Model):
     """int: this trait will be updated every time the aoi_model is updated"""
 
     aoi_lmic_valid = Bool(True).tag(sync=True)
-    """bool: True when the current AOI overlaps the LMIC mask. Defaults True
-    so a fresh app (no AOI yet) doesn't disable the right-panel actions
-    pre-emptively. Updated by ``custom_aoi_tile.AoiView._check_lmic`` after
-    each AOI change."""
+    """bool: "may proceed" flag gating the right-panel actions. True when the
+    AOI is at least partially within the LMIC scope (majority or partial
+    coverage, or an unverifiable AOI); False only when the AOI is entirely
+    out of scope. Defaults True so a fresh app (no AOI yet) doesn't disable
+    the right-panel actions pre-emptively. Updated by
+    ``custom_aoi_tile.AoiView._check_lmic`` after each AOI change."""
+
+    aoi_lmic_warning = Bool(False).tag(sync=True)
+    """bool: True when the AOI is only partially in scope or the coverage
+    check could not be completed. The AOI is still usable (``aoi_lmic_valid``
+    stays True) but the AOI step dialog stays open so the user reads the
+    warning. False for a clean (majority-LMIC) or fully out-of-scope verdict."""
 
     aoi_lmic_checked = Int(0).tag(sync=True)
     """int: counter that increments every time the LMIC verdict is settled

@@ -155,3 +155,11 @@ yarn.lock
 # Local-only docs and instructions
 docs/presentations/
 CLAUDE.md
+docs/superpowers/
+.github/instructions/
+
+# Local-only tooling and sync artifacts
+.claude/
+.stfolder/
+.stignore
+.stignore.local

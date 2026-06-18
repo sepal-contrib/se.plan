@@ -23,6 +23,25 @@ logger = logging.getLogger("SEPLAN")
 _CONTAINMENT_TOLERANCE_M2 = 1.0
 
 
+def _outside_area(child: ee.Geometry, primary_fc: ee.FeatureCollection) -> ee.Number:
+    """Area (m²) of ``child`` lying outside the primary AOI.
+
+    Sums per-feature covered area instead of differencing against the union of
+    the overlapping features: a sub-AOI spanning a dense primary would otherwise
+    rebuild the whole multi-million-edge collection and exceed EE's 2M-edge
+    limit. Admin features are disjoint, so covered area is the sum of per-feature
+    intersections; this stays vector-exact (the sub-m² tolerance is preserved).
+    """
+    nearby = primary_fc.filterBounds(child)
+    with_area = nearby.map(
+        lambda feat: feat.set(
+            "_a", child.intersection(feat.geometry(), maxError=1).area(maxError=1)
+        )
+    )
+    covered = with_area.aggregate_sum("_a")
+    return child.area(maxError=1).subtract(covered)
+
+
 class CustomAoiDialog(BaseDialog):
     feature: dict = None
     "feature collection of new geometry imported from ImportAoiDialog."
@@ -138,14 +157,13 @@ class CustomAoiDialog(BaseDialog):
     async def _validate_async(self):
         """Return the count of staged features that fall outside the primary AOI."""
         primary_fc = self.map_.aoi_model.feature_collection
-        primary_geom = primary_fc.geometry()
         gee_interface = self.map_.gee_interface
 
         outside_count = 0
         for feat in self._candidate_features:
             child = ee.Geometry(feat["geometry"])
             outside_area = await gee_interface.get_info_async(
-                child.difference(primary_geom, maxError=1).area()
+                _outside_area(child, primary_fc)
             )
             if outside_area is not None and outside_area > _CONTAINMENT_TOLERANCE_M2:
                 outside_count += 1

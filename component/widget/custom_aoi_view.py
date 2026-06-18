@@ -80,6 +80,10 @@ class SeplanAoiView(AoiView):
             return
         if not getattr(self.seplan_aoi, "aoi_lmic_valid", True):
             return
+        # Partial-coverage / unverifiable AOIs are usable but carry a warning;
+        # keep the dialog open so the user actually reads it before continuing.
+        if getattr(self.seplan_aoi, "aoi_lmic_warning", False):
+            return
         self._app_model.step_open = False
 
     def _mirror_draw_event(self, target, action, geo_json):
@@ -145,13 +149,9 @@ class SeplanAoiView(AoiView):
         if fc is None:
             return
 
-        gee_interface = self.model.gee_interface
-
-        # Bounds → zoom (async getInfo on the GEE loop).
-        coords = await gee_interface.get_info_async(
-            fc.geometry().bounds().coordinates().get(0)
-        )
-        bounds = [coords[0][0], coords[0][1], coords[2][0], coords[2][1]]
+        # Bounds → zoom; per-feature bboxes avoid dissolving the AOI
+        # (see AoiModel.total_bounds_async).
+        bounds = await self.model.total_bounds_async()
 
         self.map_.remove_layer("aoi", none_ok=True)
         self.map_.zoom_bounds(bounds)
@@ -176,6 +176,48 @@ class SeplanAoiView(AoiView):
         self.alert.add_msg(str(exc), type_="error")
         if self._app_model is not None:
             self._app_model.step_open = True
+
+    def _update_aoi(self, *args):
+        """Async-zoom submit for ADMIN/ASSET/SHAPE (DRAW uses ``_auto_submit_async``).
+
+        The build stays synchronous so recipe-import timing and the ``_loading``
+        guard that protects restored sub-AOIs are unchanged; only the EE-heavy
+        extent + zoom is deferred to the GEE loop, via ``total_bounds_async``.
+        """
+        gee_interface = getattr(self.model, "gee_interface", None)
+        if not self.gee or gee_interface is None or self.map_ is None:
+            # non-gee / headless: keep pysepal's synchronous behaviour
+            return super()._update_aoi(*args)
+
+        self.model.set_object()
+        self.alert.add_msg(ms.aoi_sel.complete, "success")
+        if self.model.feature_collection is None:
+            return self
+
+        task = gee_interface.create_task(
+            func=self._zoom_async,
+            key="aoi_zoom",
+            on_error=self._on_auto_submit_error,
+        )
+        self._zoom_task = task  # hold a ref so the task isn't GC'd
+        task.start()
+        return self
+
+    async def _zoom_async(self):
+        """Zoom to the AOI extent and add its layer — off the kernel thread.
+
+        Uses ``total_bounds_async`` (per-feature bounding boxes) so the zoom box
+        for large countries never requires dissolving the whole collection.
+        """
+        bounds = await self.model.total_bounds_async()
+        self.map_.remove_layer("aoi", none_ok=True)
+        self.map_.zoom_bounds(bounds)
+
+        await self.map_.add_ee_layer_async(self.model.feature_collection, {}, "aoi")
+
+        if self.aoi_dc is not None:
+            self.aoi_dc.hide()
+        self.updated += 1
 
     def update_view(self, *args):
         """Update the view when the feature collection is updated."""

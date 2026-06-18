@@ -1,22 +1,19 @@
 """Custom dialog to display individual layers from questionnaire tile."""
 
 import asyncio
-from typing import Any, Literal, Optional, Union
+from typing import Literal
 
 import ee
-from component.scripts.gee import create_layer
 import sepal_ui.sepalwidgets as sw
-from sepal_ui.scripts.gee_task import GEETask
-from sepal_ui.frontend.resize_trigger import rt
-from sepal_ui.mapping import SepalMap
-import sepal_ui.scripts.decorator as sd
-from sepal_ui.mapping import InspectorControl
+from sepal_ui.mapping import InspectorControl, SepalMap
 from sepal_ui.scripts.gee_interface import GEEInterface
-
+from sepal_ui.scripts.gee_task import GEETask
 
 from component import parameter as cp
 from component.message import cm
-from component.widget.base_dialog import BaseDialog, MapDialog
+from component.scripts.aoi_geometry import _aoi_bbox
+from component.scripts.gee import create_layer
+from component.widget.base_dialog import MapDialog
 from component.widget.buttons import TextBtn
 from component.widget.legend import Legend
 
@@ -71,7 +68,6 @@ class PreviewMapDialog(MapDialog):
 
     def close_dialog(self, *_):
         """Closes the dialog."""
-
         for task in self._tasks.values():
             task.cancel()
 
@@ -86,10 +82,9 @@ class PreviewMapDialog(MapDialog):
 
     async def get_maps(self, aoi, ee_map, base_layer, vis_params, type_):
         """Returns the map and the legend."""
-
         coros = [
             self.gee_interface.get_map_id_async(aoi),
-            self.gee_interface.get_info_async(aoi.bounds().coordinates().get(0)),
+            self.gee_interface.get_info_async(_aoi_bbox(aoi).coordinates().get(0)),
             self.gee_interface.get_map_id_async(ee_map.clip(aoi), vis_params),
         ]
 
@@ -200,13 +195,14 @@ class PreviewMapDialog(MapDialog):
             geometry (ee.Geometry): the geometry of the AOI
 
         """
-        # clip image
+        # clip image to the AOI, then reduce over its bbox: reducing over
+        # geometry=geometry would dissolve the AOI and can exceed the 2M-edge limit.
         ee_image = image.clip(geometry)
 
         # get minmax
         min_max = ee_image.reduceRegion(
             reducer=ee.Reducer.minMax(),
-            geometry=geometry,
+            geometry=_aoi_bbox(geometry),
             scale=1,
             maxPixels=1e5,
             bestEffort=True,

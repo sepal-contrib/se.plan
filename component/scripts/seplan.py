@@ -7,6 +7,7 @@ import ee
 from component import model as cmod
 from component.message import cm
 from component.model.aoi_model import SeplanAoi
+from component.scripts.aoi_geometry import _aoi_bbox
 from component.scripts.validation import validate_mask_image_parameters
 
 
@@ -142,7 +143,6 @@ def mask_image(
     maskout_values: list,
 ) -> ee.Image:
     """Mask out an image based on its data type and input values."""
-
     # Validate parameters using centralized validation
     validate_mask_image_parameters(asset_id, data_type, maskout_values)
 
@@ -177,10 +177,12 @@ def _percentile(
 ) -> ee.Image:
     """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
-    percents = ee_image.rename("img").reduceRegion(
+    clipped = ee_image.rename("img").clip(aoi)
+    percents = clipped.reduceRegion(
         reducer=ee.Reducer.percentile(percentiles=percentile),
-        geometry=aoi.geometry(),
+        geometry=_aoi_bbox(aoi),
         scale=scale,
+        maxPixels=1e13,
     )
     low = ee.Number(percents.get(f"img_p{percentile[0]}"))
     high = ee.Number(percents.get(f"img_p{percentile[1]}")).add(0.1e-13)
@@ -195,8 +197,12 @@ def _min_max(
 ) -> ee.Image:
     """Return a normalized version of the layer image."""
     ee_image = ee_image.select(0)
-    min_max = ee_image.rename("img").reduceRegion(
-        reducer=ee.Reducer.minMax(), geometry=aoi.geometry(), scale=scale
+    clipped = ee_image.rename("img").clip(aoi)
+    min_max = clipped.reduceRegion(
+        reducer=ee.Reducer.minMax(),
+        geometry=_aoi_bbox(aoi),
+        scale=scale,
+        maxPixels=1e13,
     )
     low = ee.Number(min_max.get("img_min"))
     high = ee.Number(min_max.get("img_max")).add(0.1e-13)
@@ -248,9 +254,10 @@ def quintiles(
     # ee_image.projection().nominalScale().multiply(2)
 
     band_name = ee.String(ee_image.bandNames().get(0))
-    quintiles_dict = ee_image.reduceRegion(
+    clipped = ee_image.clip(ee_aoi)
+    quintiles_dict = clipped.reduceRegion(
         reducer=ee.Reducer.percentile(percentiles=[20, 40, 60, 80]),
-        geometry=ee_aoi,
+        geometry=_aoi_bbox(ee_aoi),
         tileScale=2,
         scale=100,
         maxPixels=1e13,
