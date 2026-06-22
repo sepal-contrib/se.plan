@@ -211,7 +211,9 @@ def test_load_recipe(recipe: Recipe):
         "wood",
     ]
 
-    assert recipe.benefit_model.weights == [4, 4, 2, 1, 1, 4]
+    # 0 is a valid weight (benefit disabled); it loads unchanged rather than
+    # being sanitized to the default of 4.
+    assert recipe.benefit_model.weights == [0, 0, 2, 1, 1, 0]
 
     # Check the constraint model
 
