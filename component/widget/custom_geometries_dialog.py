@@ -42,9 +42,7 @@ class CustomGeometriesDialog(BaseDialog):
         # new → Geoman on the map, import → ImportAoiDialog). Admin first
         # because it's the recommended path for admin-based primaries.
         self.item_admin = self._make_list_item("admin", "Admin sub-area")
-        self.item_new = self._make_list_item(
-            "new", cm.map.toolbar.draw_menu["new"]
-        )
+        self.item_new = self._make_list_item("new", cm.map.toolbar.draw_menu["new"])
         self.item_import = self._make_list_item(
             "import", cm.map.toolbar.draw_menu["import"]
         )
@@ -81,9 +79,7 @@ class CustomGeometriesDialog(BaseDialog):
             link=True,
             ripple=True,
             children=[
-                v.ListItemContent(
-                    children=[v.ListItemTitle(children=[label])]
-                ),
+                v.ListItemContent(children=[v.ListItemTitle(children=[label])]),
             ],
         )
         item.on_event("click", self.map_.on_draw)
@@ -186,17 +182,38 @@ class CustomGeometryRow(sw.Html):
                 name = layer["properties"]["name"]
                 break
 
+        self.zoom_btn = cw.TableIcon(icon("eye"), self.layer_id, class_="mr-2")
         self.delete_btn = cw.TableIcon(icon("trash-can"), self.layer_id)
 
         td_list = [
-            sw.Html(tag="td", children=[self.delete_btn]),
+            sw.Html(tag="td", children=[self.zoom_btn, self.delete_btn]),
             sw.Html(tag="td", children=[name]),
         ]
 
         super().__init__(tag="tr", children=td_list)
 
         # add js behaviour
+        self.zoom_btn.on_event("click", self.on_zoom)
         self.delete_btn.on_event("click", self.on_delete)
+
+    def on_zoom(self, widget, data, event):
+        """Zoom to this geometry (async, exact) and close the dialog."""
+        feature = next(
+            (
+                feat
+                for feat in self.map_.custom_layers["features"]
+                if feat["properties"]["id"] == self.layer_id
+            ),
+            None,
+        )
+        if feature is None:
+            return
+        self.map_.zoom_to_custom([feature])
+        # close whichever dialog hosts this table (idempotent on a closed one)
+        for attr in ("custom_geometries_dialog", "custom_aoi_dialog"):
+            dialog = getattr(self.map_, attr, None)
+            if dialog is not None:
+                dialog.close_dialog()
 
     def on_delete(self, widget, data, event):
         """Remove the line from the model and trigger table update."""

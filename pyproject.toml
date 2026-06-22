@@ -14,7 +14,7 @@ dependencies = [
     "ee-client>=2.4.0",
     "toml",
     "ipecharts>=1.2.0",
-    "pysepal>=3.6.1",
+    "pysepal>=3.6.2",
     "rasterio",
     # custom ipyleaflet build (fork) shipped as direct wheel URLs
     "jupyter_leaflet @ https://github.com/dfguerrerom/ipyleaflet/raw/634bcf22c09034a917819437358d5840fa72ac41/wheels/jupyter_leaflet-0.20.0-py3-none-any.whl",

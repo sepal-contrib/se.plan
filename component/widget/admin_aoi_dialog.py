@@ -14,6 +14,7 @@ from sepal_ui.aoi.aoi_view import AdminField
 from sepal_ui.scripts.gee_interface import GEEInterface
 
 from component.frontend.icons import icon
+from component.scripts.aoi_geometry import simplify_fc
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import TextBtn
 
@@ -232,8 +233,7 @@ class AdminAoiDialog(BaseDialog):
             if not field.v_model:
                 level = self._parent_level + 1 + idx
                 self.alert.add_msg(
-                    f"Please pick an admin level {level} unit before "
-                    "submitting.",
+                    f"Please pick an admin level {level} unit before " "submitting.",
                     type_="error",
                 )
                 return
@@ -272,7 +272,10 @@ class AdminAoiDialog(BaseDialog):
         ``getInfo`` round-trip is slow.
         """
         fc = pygaul.AdmItems(admin=self._admin_code)
-        return await self.gee_interface.get_info_async(fc)
+        # Simplify server-side: a dense admin unit (e.g. a country with millions
+        # of vertices) would otherwise be pulled in full and OOM the kernel. The
+        # full-resolution geometry stays server-side for analysis.
+        return await self.gee_interface.get_info_async(simplify_fc(fc))
 
     def _on_resolved(self, geo_json: dict):
         """Forward the materialized geometry to ``CustomAoiDialog``."""
@@ -294,6 +297,9 @@ class AdminAoiDialog(BaseDialog):
             feature_collection=geo_json,
             name=self._admin_text or self._admin_code,
             skip_containment_check=True,
+            # rebuild the EXACT geometry from the admin code for analysis + tiles
+            # (geo_json above is simplified for display only)
+            source={"type": "admin", "code": self._admin_code},
         )
 
     def _on_resolve_error(self, exc: Exception):
@@ -307,6 +313,4 @@ class AdminAoiDialog(BaseDialog):
 
     def _show_message(self, text: str):
         """Render a plain message in place of the selector."""
-        self.body_card.children = [
-            sw.Html(tag="p", class_="ma-2", children=[text])
-        ]
+        self.body_card.children = [sw.Html(tag="p", class_="ma-2", children=[text])]

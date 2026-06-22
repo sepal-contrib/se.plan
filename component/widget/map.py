@@ -1,23 +1,26 @@
+import logging
 import time
 from copy import deepcopy
+from functools import partial
 
-from component.frontend.icons import icon
-from component.widget.buttons import TextBtn
+import ee
 import sepal_ui.sepalwidgets as sw
-from ipyleaflet import GeoJSON, WidgetControl
-from shapely.geometry import Point, shape
+from ipyleaflet import SplitMapControl, WidgetControl
 from sepal_ui import mapping as sm
-from traitlets import Dict, Int, link
-from sepal_ui.scripts.gee_interface import GEEInterface
 from sepal_ui.mapping.map_btn import MapBtn
-from component.widget.admin_aoi_dialog import AdminAoiDialog
-from component.widget.custom_geometries_dialog import CustomGeometriesDialog
-from component.message import cm
-from component import widget as cw
+from sepal_ui.scripts.gee_interface import GEEInterface
+from shapely.geometry import Point, shape
+from traitlets import Dict, Int, link
 
+from component import widget as cw
+from component.frontend.icons import icon
 from component.model.aoi_model import SeplanAoi
-from component.widget.admin_aoi_dialog import _is_admin_eligible
-from ipyleaflet import SplitMapControl
+from component.scripts.aoi_geometry import _aoi_bbox, fc_from_source
+from component.widget.admin_aoi_dialog import AdminAoiDialog, _is_admin_eligible
+from component.widget.buttons import TextBtn
+from component.widget.custom_geometries_dialog import CustomGeometriesDialog
+
+logger = logging.getLogger("SEPLAN")
 
 
 class SeplanMap(sm.SepalMap):
@@ -135,7 +138,6 @@ class SeplanMap(sm.SepalMap):
         ``ADMIN2`` is the finest grain so no further subdivision is offered,
         and non-admin primaries (DRAW / SHAPE / ASSET) skip it.
         """
-
         has_aoi = self.aoi_model.feature_collection is not None
         primary_method = getattr(self.aoi_model.aoi_model, "method", "") or ""
         admin_eligible = has_aoi and _is_admin_eligible(primary_method)
@@ -172,17 +174,12 @@ class SeplanMap(sm.SepalMap):
     def clean_map(self, *args, keep_aoi: bool = True):
         """Remove computed result layers but keep the AOI and user geometries.
 
-        Custom sub-AOIs the user drew or imported live in
-        ``self.custom_layers``; their on-map ipyleaflet ``GeoJSON`` layers
-        carry the user's chosen names. We preserve those by name so that
-        re-running compute / compare-scenarios doesn't wipe them.
+        Custom sub-AOIs the user drew or imported are drawn as one merged EE
+        tile layer (``_OUTLINE_KEY``); we preserve it (and the primary ``aoi``)
+        so re-running compute / compare-scenarios doesn't wipe them.
         """
         keep = ["aoi"] if keep_aoi else []
-        keep += [
-            feat["properties"]["name"]
-            for feat in self.custom_layers["features"]
-            if feat.get("properties", {}).get("name")
-        ]
+        keep.append(self._OUTLINE_KEY)
         self.remove_all(keep_names=keep)
         self.controls = [
             control
@@ -190,49 +187,116 @@ class SeplanMap(sm.SepalMap):
             if not isinstance(control, SplitMapControl)
         ]
 
+    # Key of the single EE tile layer that draws all sub-AOI exact outlines.
+    _OUTLINE_KEY = "custom_outlines"
+
     def on_custom_layers(self, *_):
-        """Event triggered when there are new custom layers (created by user).
+        """Render custom sub-AOIs as pixel-perfect EE-tile outlines.
 
-        Create GeoJSON layers and add them to the map if they're not.
-
+        There is deliberately NO client-side GeoJSON layer: the simplified
+        display geometry can contain Point / LineString / GeometryCollection
+        parts (small features collapse under simplification), which ipyleaflet
+        renders as stray markers and which also break hover. Instead the exact
+        outline is an EE tile layer and the name label is driven by
+        ``_on_map_interaction`` against the per-sub-AOI geometry cache below.
         """
-        geojson_layers = [layer for layer in self.layers if isinstance(layer, GeoJSON)]
-        # Check if there are new geometries in the custom_layers
-        # If there are new geometries that are not in the map, add them
+        features = self.custom_layers["features"]
 
-        # Add layers to the map
-        for feat in self.custom_layers["features"]:
-            if feat["properties"]["name"] not in [lyr.name for lyr in geojson_layers]:
-                # Add the layer to the map
-                layer = GeoJSON(
-                    data=feat,
-                    hover_style=feat["properties"]["hover_style"],
-                    name=feat["properties"]["name"],
-                    style=feat["properties"]["style"],
-                )
-                layer.on_hover(self._display_name)
+        # exact outline tiles (single merged EE layer, rebuilt async)
+        self._refresh_outline_tiles(features)
 
-                # Add the layer to the map_layers list
-                self.add_layer(layer)
-
-        # Remove layers from the map
-        for layer in geojson_layers:
-            if layer.name not in [
-                feat["properties"]["name"] for feat in self.custom_layers["features"]
-            ]:
-                self.remove_layer(layer)
-
-        # Refresh the cached bbox / shapely geoms used by the hover-leave
-        # detector. Built once here, not on every mousemove.
+        # (bbox, shapely geom, name) per sub-AOI — drives the hover label.
+        # ``shape`` handles every geometry type (incl. GeometryCollection); a
+        # collapsed point/line part simply never ``contains`` the cursor.
         cache = []
-        for feat in self.custom_layers["features"]:
+        for feat in features:
             geom_dict = feat.get("geometry")
-            if not geom_dict:
+            name = feat.get("properties", {}).get("name")
+            if not geom_dict or not name:
                 continue
-            geom = shape(geom_dict)
-            minx, miny, maxx, maxy = geom.bounds
-            cache.append((minx, miny, maxx, maxy, geom))
+            try:
+                geom = shape(geom_dict)
+                minx, miny, maxx, maxy = geom.bounds
+            except Exception:
+                continue
+            cache.append((minx, miny, maxx, maxy, geom, name))
         self._hover_bbox_cache = cache
+
+    def _refresh_outline_tiles(self, features):
+        """(Re)build the single EE tile layer with every sub-AOI's exact outline.
+
+        The exact geometry is reconstructed server-side from each feature's
+        ``source`` descriptor; the ``getMapId`` runs on the GEE event loop so the
+        kernel thread stays responsive. Nothing dense is pulled to the client.
+        """
+        if not features:
+            self.remove_layer(self._OUTLINE_KEY, none_ok=True)
+            return
+
+        gee_interface = getattr(self, "gee_interface", None)
+        if gee_interface is None:
+            return
+
+        # snapshot (the trait can change before the task runs)
+        snapshot = [dict(f) for f in features]
+        self._outline_task = gee_interface.create_task(
+            func=partial(self._build_outline_tiles, snapshot),
+            key="custom_outline_tiles",
+            on_error=lambda exc: logger.exception(
+                "Custom outline tiles failed", exc_info=exc
+            ),
+        )
+        self._outline_task.start()
+
+    async def _build_outline_tiles(self, features):
+        """Merge each sub-AOI's exact FC, style per-feature, add as one tile layer."""
+        styled = []
+        for feat in features:
+            fc = fc_from_source(feat["properties"].get("source"), feat)
+            color = feat["properties"]["style"]["color"]
+            # per-feature style dict consumed by FeatureCollection.style(styleProperty)
+            style_dict = {"color": color, "fillColor": "#00000000", "width": 2}
+            styled.append(fc.map(lambda f, s=style_dict: f.set("_seplan_style", s)))
+
+        merged = ee.FeatureCollection(styled).flatten()
+        image = merged.style(styleProperty="_seplan_style")
+
+        self.remove_layer(self._OUTLINE_KEY, none_ok=True)
+        await self.add_ee_layer_async(
+            image, {}, self._OUTLINE_KEY, key=self._OUTLINE_KEY
+        )
+
+    def zoom_to_custom(self, features: list) -> None:
+        """Zoom to just-added custom sub-AOI feature(s) — async, off the kernel thread.
+
+        Uses each feature's EXACT geometry (rebuilt from its ``source``
+        descriptor) and per-feature bounding boxes (no dissolve), so it stays
+        cheap and safe on dense AOIs. No-op without a GEE session or features.
+        """
+        gee_interface = getattr(self, "gee_interface", None)
+        if gee_interface is None or not features:
+            return
+        snapshot = [dict(f) for f in features]
+        self._zoom_custom_task = gee_interface.create_task(
+            func=partial(self._zoom_to_custom_async, snapshot),
+            key="custom_zoom",
+            on_error=lambda exc: logger.exception("Custom zoom failed", exc_info=exc),
+        )
+        self._zoom_custom_task.start()
+
+    async def _zoom_to_custom_async(self, features: list) -> None:
+        """Resolve the added sub-AOI extent off the kernel thread and zoom to it."""
+        fcs = [
+            fc_from_source(feat.get("properties", {}).get("source"), feat)
+            for feat in features
+        ]
+        merged = ee.FeatureCollection(fcs).flatten()
+        # per-feature bbox (see _aoi_bbox) -> overall extent ring -> [minx,miny,maxx,maxy]
+        coords = await self.gee_interface.get_info_async(
+            _aoi_bbox(merged).coordinates().get(0)
+        )
+        bounds = [coords[0][0], coords[0][1], coords[2][0], coords[2][1]]
+        self.zoom_bounds(bounds)
 
     def remove_custom_layer(self, layer_id):
         """Remove custom layer from the custom_layers dict."""
@@ -248,7 +312,7 @@ class SeplanMap(sm.SepalMap):
                 self.custom_layers = current_feats
 
     def _handle_draw(self, target, action, geo_json):
-        """handle the draw on map event.
+        """Handle the draw on map event.
 
         Accepts both action conventions — legacy ipl.DrawControl emits
         ``created``/``deleted``/``edited`` with ``geo_json`` as a single
@@ -264,25 +328,16 @@ class SeplanMap(sm.SepalMap):
             self.aoi_model.updated += 1
 
     def _on_map_interaction(self, **kwargs):
-        """Clear the hover label when the cursor isn't over a custom layer.
+        """Show/clear the sub-AOI name label from the cursor position.
 
-        Mousemove fires constantly, so this runs on a multi-user server —
-        we keep it cheap with three gates:
+        The custom outlines are EE tiles (raster, no per-feature events), so the
+        label is driven here: on each (throttled) mousemove we find the sub-AOI
+        whose cached geometry contains the cursor and show its name, clearing the
+        label otherwise. A bbox quick-reject keeps the common case cheap.
 
-        1. ``self.html.children`` is empty → return immediately (no label
-           to clear). This is the common case: the label only exists for
-           a few seconds after a hover.
-        2. Throttle to ~10 Hz via ``_hover_check_last``.
-        3. Bounding-box quick-reject against the cached
-           ``_hover_bbox_cache`` before paying for ``shapely.contains``.
-
-        ``mouseout`` would be the natural signal but ipyleaflet's GeoJSON
-        only registers ``mouseover``/``click`` on the JS side
-        (``onEachFeature`` in jupyter-leaflet's index.js), so the comm
-        never sees it.
+        Mousemove fires constantly (multi-user server), so we gate on a ~10 Hz
+        throttle and a bounding-box reject before paying for ``shapely.contains``.
         """
-        if not self.html.children:
-            return
         if kwargs.get("type") != "mousemove":
             return
         now = time.monotonic()
@@ -294,24 +349,14 @@ class SeplanMap(sm.SepalMap):
             return
         # Leaflet gives ``[lat, lng]``; shapely uses ``(x=lng, y=lat)``.
         x, y = coords[1], coords[0]
-        for minx, miny, maxx, maxy, geom in self._hover_bbox_cache:
-            if minx <= x <= maxx and miny <= y <= maxy:
-                if geom.contains(Point(x, y)):
-                    return
-        self.html.children = []
-
-    def _display_name(self, feature, **kwargs):
-        """update the AOI in the html viewver widget."""
-        # if the feature is a aoi it has no name so I display only the sub AOI name
-        # it will be solved with: https://github.com/12rambau/sepal_ui/issues/390
-        name = (
-            feature["properties"]["name"]
-            if "name" in feature["properties"]
-            else "Main AOI"
-        )
-        self.html.children = [name]
-
-        return self
+        point = Point(x, y)
+        for minx, miny, maxx, maxy, geom, name in self._hover_bbox_cache:
+            if minx <= x <= maxx and miny <= y <= maxy and geom.contains(point):
+                if self.html.children != [name]:
+                    self.html.children = [name]
+                return
+        if self.html.children:
+            self.html.children = []
 
     def reset(self, change):
         """Reset the map view (remove all the layers)."""

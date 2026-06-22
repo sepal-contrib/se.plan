@@ -18,7 +18,7 @@ from sepal_ui.scripts.gee_interface import GEEInterface
 from traitlets import Any, Bool, Dict, Int
 
 import component.parameter as cp
-from component.scripts.aoi_geometry import _aoi_bbox
+from component.scripts.aoi_geometry import _aoi_bbox, fc_from_source
 
 logger = logging.getLogger("SEPLAN")
 
@@ -507,9 +507,12 @@ class SeplanAoi(model.Model):
             }
         }
 
+        # Analysis uses the EXACT geometry, rebuilt server-side from each
+        # feature's ``source`` descriptor (asset id / admin code). The geometry
+        # stored in ``custom_layers`` is only a simplified display copy.
         custom_aois = {
             feat["properties"]["name"]: {
-                "ee_feature": su.geojson_to_ee(feat),
+                "ee_feature": fc_from_source(feat["properties"].get("source"), feat),
                 "color": feat["properties"]["style"]["color"],
             }
             for feat in self.custom_layers["features"]

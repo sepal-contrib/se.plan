@@ -29,7 +29,9 @@ class SeplanAoiView(AoiView):
         self.seplan_aoi = model
         kwargs.update(
             {
-                "methods": ["-POINTS"],
+                # SHAPE (local vector-file upload) and POINTS are excluded — users
+                # upload geometries as a GEE asset instead.
+                "methods": ["-POINTS", "-SHAPE"],
                 "class_": "d-block pa-2 py-4",
                 "model": model.aoi_model,
                 "elevation": 0,
