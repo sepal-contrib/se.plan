@@ -30,6 +30,11 @@ class SeplanMap(sm.SepalMap):
     new_geom = Int(0).tag(sync=True)
     """int: either a new geometry has been drawn on the map"""
 
+    # Minimum seconds between hover-label recomputes in ``_on_map_interaction``.
+    # mousemove fires constantly and this runs on the shared kernel; throttling
+    # caps the per-user work. Higher = cheaper but laggier label (see ~5 Hz here).
+    _HOVER_THROTTLE_S = 0.2
+
     def __init__(
         self,
         seplan_aoi: SeplanAoi = None,
@@ -360,13 +365,14 @@ class SeplanMap(sm.SepalMap):
         whose cached geometry contains the cursor and show its name, clearing the
         label otherwise. A bbox quick-reject keeps the common case cheap.
 
-        Mousemove fires constantly (multi-user server), so we gate on a ~10 Hz
-        throttle and a bounding-box reject before paying for ``shapely.contains``.
+        Mousemove fires constantly (multi-user server), so we gate on the
+        ``_HOVER_THROTTLE_S`` throttle and a bounding-box reject before paying for
+        ``shapely.contains``.
         """
         if kwargs.get("type") != "mousemove":
             return
         now = time.monotonic()
-        if now - self._hover_check_last < 0.1:
+        if now - self._hover_check_last < self._HOVER_THROTTLE_S:
             return
         self._hover_check_last = now
         coords = kwargs.get("coordinates")
