@@ -51,6 +51,10 @@ icons = {
         "fa": "fa-solid fa-trash",
         "mdi": "mdi-trash-can",
     },
+    "eye": {
+        "fa": "fa-solid fa-eye",
+        "mdi": "mdi-eye",
+    },
     "draw": {
         "fa": "fa-solid fa-draw-polygon",
         "mdi": "mdi-draw",
@@ -96,5 +100,4 @@ icons = {
 
 def icon(icon: str, lib: str = "mdi") -> str:
     """Return the icon class."""
-
     return icons[icon][lib]

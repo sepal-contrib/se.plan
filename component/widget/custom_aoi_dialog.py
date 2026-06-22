@@ -1,5 +1,6 @@
 import logging
 from copy import deepcopy
+from typing import Optional
 
 import ee
 from matplotlib import pyplot as plt
@@ -9,6 +10,7 @@ from sepal_ui import sepalwidgets as sw
 import component.parameter as cp
 from component.frontend.icons import icon
 from component.message import cm
+from component.scripts.aoi_geometry import fc_from_source
 from component.widget.base_dialog import BaseDialog
 from component.widget.buttons import TextBtn
 
@@ -17,10 +19,13 @@ from .map import SeplanMap
 
 logger = logging.getLogger("SEPLAN")
 
-# Tolerance (in m²) for the "outside primary AOI" check. Geoman polygons can
-# carry sub-meter rounding error vs. the primary AOI boundary, so anything
-# under 1 m² of leakage is treated as inside.
-_CONTAINMENT_TOLERANCE_M2 = 1.0
+# A sub-AOI is flagged "outside" only when more than this FRACTION of its area
+# falls outside the primary AOI. Independent vector datasets never align exactly
+# (coastlines / borders from different sources), so a small relative mismatch is
+# expected and tolerated; a geometry that is genuinely (largely) outside still
+# trips it. Replaces the old fixed 1 m² tolerance, which an imported asset's
+# boundary mismatch (~0.005 % of area) would already exceed.
+_CONTAINMENT_FRACTION = 0.01
 
 
 def _outside_area(child: ee.Geometry, primary_fc: ee.FeatureCollection) -> ee.Number:
@@ -40,6 +45,14 @@ def _outside_area(child: ee.Geometry, primary_fc: ee.FeatureCollection) -> ee.Nu
     )
     covered = with_area.aggregate_sum("_a")
     return child.area(maxError=1).subtract(covered)
+
+
+def _outside_fraction(
+    child: ee.Geometry, primary_fc: ee.FeatureCollection
+) -> ee.Number:
+    """Fraction (0-1) of ``child``'s area lying outside the primary AOI."""
+    area = child.area(maxError=1)
+    return _outside_area(child, primary_fc).divide(area.max(1))
 
 
 class CustomAoiDialog(BaseDialog):
@@ -78,11 +91,18 @@ class CustomAoiDialog(BaseDialog):
 
         # Holds the in-flight validation task between kick-off and completion
         self._validate_task = None
+        # Monotonic token: rejects a validation verdict that settles after the
+        # user cancelled or started a newer save.
+        self._validate_gen = 0
 
         # Set by ``on_new_geom`` when the admin-sub flow forwards a feature
         # whose containment is structurally guaranteed; ``on_save_geom``
         # honors it by bypassing the GEE check.
         self._skip_containment_check = False
+
+        # Descriptor (asset id / admin code) carried from on_new_geom to
+        # on_save_geom so analysis + tiles can rebuild the exact geometry.
+        self._pending_source = None
 
         # add js behavior
         btn_cancel.on_event("click", self.on_cancel)
@@ -126,6 +146,10 @@ class CustomAoiDialog(BaseDialog):
                 "fillOpacity": 0.4,
                 "weight": 2,
             }
+            # Descriptor to rebuild the EXACT geometry server-side for analysis
+            # + tile rendering (None for drawn geometries — their geojson is
+            # already exact). The stored geometry itself stays simplified.
+            feature["properties"]["source"] = getattr(self, "_pending_source", None)
 
         self._candidate_features = features
         self.alert.reset()
@@ -136,41 +160,67 @@ class CustomAoiDialog(BaseDialog):
         # Skip the GEE round-trip in any of:
         #   - No GEE session / no primary AOI (defensive fallback).
         #   - The admin-sub path opted out (containment is structural).
-        if (
-            self._skip_containment_check
-            or gee_interface is None
-            or primary_fc is None
-        ):
+        if self._skip_containment_check or gee_interface is None or primary_fc is None:
             self._commit_save()
             return
 
         self.btn.disabled = True
         self.btn.loading = True
+        # Supersede any in-flight validation; the token lets us reject a verdict
+        # that settles after the user cancelled (the cancel button stays enabled).
+        if self._validate_task is not None:
+            self._validate_task.cancel()
+        self._validate_gen += 1
+        gen = self._validate_gen
         self._validate_task = gee_interface.create_task(
-            func=self._validate_async,
+            func=lambda: self._validate_async(gen),
             key="custom_geom_validate",
             on_done=self._on_validate_done,
-            on_error=self._on_validate_error,
+            on_error=lambda exc: self._on_validate_error(exc, gen),
         )
         self._validate_task.start()
 
-    async def _validate_async(self):
-        """Return the count of staged features that fall outside the primary AOI."""
+    async def _validate_async(self, gen):
+        """Return the count of staged sub-AOIs that fall (largely) outside the primary.
+
+        Uses the EXACT geometry, rebuilt server-side from the ``source``
+        descriptor (asset id / admin code). The stored geojson is *simplified*
+        and its distortion produced false "outside" verdicts on near-boundary
+        features. Drawn geometries have no source, so their exact geojson is used
+        directly. A relative threshold (``_CONTAINMENT_FRACTION``) tolerates
+        boundary mismatches between independent datasets.
+        """
         primary_fc = self.map_.aoi_model.feature_collection
         gee_interface = self.map_.gee_interface
+        feats = self._candidate_features or []
+
+        # Import/admin: every candidate feature shares one source, so rebuild and
+        # check the exact reconstructed FC once. Draw: each exact geojson feature.
+        source = feats[0]["properties"].get("source") if feats else None
+        if source:
+            child = fc_from_source(source, feats[0]).geometry(maxError=1)
+            frac = await gee_interface.get_info_async(
+                _outside_fraction(child, primary_fc)
+            )
+            outside = 1 if (frac is not None and frac > _CONTAINMENT_FRACTION) else 0
+            return {"gen": gen, "outside_count": outside}
 
         outside_count = 0
-        for feat in self._candidate_features:
+        for feat in feats:
             child = ee.Geometry(feat["geometry"])
-            outside_area = await gee_interface.get_info_async(
-                _outside_area(child, primary_fc)
+            frac = await gee_interface.get_info_async(
+                _outside_fraction(child, primary_fc)
             )
-            if outside_area is not None and outside_area > _CONTAINMENT_TOLERANCE_M2:
+            if frac is not None and frac > _CONTAINMENT_FRACTION:
                 outside_count += 1
-        return outside_count
+        return {"gen": gen, "outside_count": outside_count}
 
-    def _on_validate_done(self, outside_count: int):
+    def _on_validate_done(self, result: dict):
         """Commit on full containment, otherwise surface the failure."""
+        # Reject a verdict whose save the user cancelled or superseded.
+        if not result or result["gen"] != self._validate_gen:
+            return
+        outside_count = result["outside_count"]
         self.btn.disabled = False
         self.btn.loading = False
         if outside_count > 0:
@@ -185,8 +235,10 @@ class CustomAoiDialog(BaseDialog):
             return
         self._commit_save()
 
-    def _on_validate_error(self, exc: Exception):
+    def _on_validate_error(self, exc: Exception, gen: int):
         """Surface the GEE error in the dialog without silently saving."""
+        if gen != self._validate_gen:  # superseded/cancelled — drop stale error
+            return
         self.btn.disabled = False
         self.btn.loading = False
         logger.exception("Custom geometry validation failed", exc_info=exc)
@@ -202,6 +254,8 @@ class CustomAoiDialog(BaseDialog):
             current_feats = deepcopy(self.map_.custom_layers)
             current_feats["features"] += features
             self.map_.custom_layers = current_feats
+            # zoom to the freshly added sub-AOI (async, exact geometry)
+            self.map_.zoom_to_custom(features)
         self._candidate_features = None
         self.on_cancel()
 
@@ -216,10 +270,17 @@ class CustomAoiDialog(BaseDialog):
         self.map_.dc.clear()
         self.map_.dc.hide()
 
+        # Invalidate + cancel any in-flight validation so it can't commit/alert
+        # after the user cancelled.
+        self._validate_gen += 1
+        if self._validate_task is not None:
+            self._validate_task.cancel()
+
         # Clear any feature that was selected
         self.feature = None
         self._candidate_features = None
         self._skip_containment_check = False
+        self._pending_source = None
 
         # Reset transient validation UI
         self.btn.disabled = False
@@ -243,9 +304,10 @@ class CustomAoiDialog(BaseDialog):
     def on_new_geom(
         self,
         *_,
-        feature_collection: dict = None,
-        name: str = None,
+        feature_collection: Optional[dict] = None,
+        name: Optional[str] = None,
         skip_containment_check: bool = False,
+        source: Optional[dict] = None,
     ):
         """Read the aoi and give a default name.
 
@@ -255,11 +317,16 @@ class CustomAoiDialog(BaseDialog):
 
         Args:
             feature_collection: Optional GeoJSON ``FeatureCollection`` dict
-                from the import / admin paths.
+                from the import / admin paths. Its geometry is SIMPLIFIED (for
+                display / hover only); analysis uses ``source`` instead.
             name: Suggested name when ``feature_collection`` is provided.
             skip_containment_check: If True, ``on_save_geom`` will skip the
                 GEE containment check. Used by the admin-sub path where
                 hierarchy guarantees the geometry sits inside the primary AOI.
+            source: Descriptor used to rebuild the EXACT geometry server-side
+                for analysis + tile rendering (``{"type": "asset"|"admin", ...}``).
+                ``None`` for drawn geometries (their geojson is already exact).
+                Stored on each feature's ``properties["source"]``.
         """
         # Count the number of geometries in map_.custom_layers
         index = len(self.map_.custom_layers["features"]) + 1
@@ -271,5 +338,6 @@ class CustomAoiDialog(BaseDialog):
             self.feature = feature_collection
 
         self._skip_containment_check = skip_containment_check
+        self._pending_source = source
         self.w_name.v_model = aoi_name
         self.open_dialog(new_geom=True)

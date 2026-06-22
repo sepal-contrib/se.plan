@@ -5,36 +5,34 @@ logger.debug("Setting up SEPLAN application...")
 
 import logging
 from pathlib import Path
-from traitlets import Float, HasTraits, List, link
-
-import solara
-from solara.lab.components.theming import theme
 
 import sepal_ui.sepalwidgets as sw
+import solara
 from sepal_ui.scripts.utils import init_ee
 from sepal_ui.sepalwidgets.vue_app import MapApp, ThemeToggle
-
 from sepal_ui.solara import (
-    setup_sessions,
-    with_sepal_sessions,
     get_current_gee_interface,
     get_current_sepal_client,
-    setup_theme_colors,
+    setup_sessions,
     setup_solara_server,
+    setup_theme_colors,
+    with_sepal_sessions,
 )
+from solara.lab.components.theming import theme
+from traitlets import Float, HasTraits, List, link
 
 from component.frontend.icons import icon
+from component.message import cm
+from component.model.app_model import AppModel
 from component.model.recipe import Recipe
+from component.scripts.mem_diagnostics import start_memory_diagnostics
 from component.tile.custom_aoi_tile import AoiView
-from component.widget.map import SeplanMap
-from component.widget.seplan_legend import SuitabilityLegendOverlay
 from component.tile.questionnaire_tile import QuestionnaireTile
 from component.tile.recipe_tile import RecipeView
 from component.tile.right_panel import get_right_panel_content
-from component.model.app_model import AppModel
-from component.message import cm
 from component.widget.custom_widgets import CustomAppBar, CustomTileAbout
-
+from component.widget.map import SeplanMap
+from component.widget.seplan_legend import SuitabilityLegendOverlay
 
 logging.getLogger("httpx").setLevel(logging.WARNING)
 logging.getLogger("httpcore").setLevel(logging.WARNING)
@@ -42,6 +40,10 @@ logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 init_ee()
 setup_solara_server(extra_asset_locations=[str(Path(__file__).parent / "assets")])
+
+# Background memory diagnostics (RSS / tracemalloc / session counts).
+# Runs once per process; no-op when SEPLAN_MEM_DIAG=0. See the module docstring.
+start_memory_diagnostics()
 
 
 @solara.lab.on_kernel_start
