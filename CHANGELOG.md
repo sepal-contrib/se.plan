@@ -1,3 +1,14 @@
+## 2.1.5 (2026-06-22)
+
+### Fix
+
+- **aoi**: guard async task completions against cancel/supersede races
+- prevent OOM from dense custom AOIs and rework sub-AOI handling
+
+### Perf
+
+- **map**: make hover-label throttle a tunable constant (0.2s)
+
 ## 2.1.4 (2026-06-22)
 
 ### Fix
