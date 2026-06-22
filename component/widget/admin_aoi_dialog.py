@@ -63,6 +63,10 @@ class AdminAoiDialog(BaseDialog):
         self._primary_admin: str = ""
         self._parent_level: int = -1
         self._admin_task = None
+        # Monotonic token: bumped on every submit/cancel so a task that settles
+        # after the user moved on (cancel, or a newer pick) is rejected at
+        # completion instead of committing a stale/wrong-AOI geometry.
+        self._admin_gen = 0
         # Caller-supplied dialog to re-open if the user cancels out of this
         # one — used to restore the consolidated Custom Geometries picker
         # after a back-out.
@@ -93,6 +97,11 @@ class AdminAoiDialog(BaseDialog):
 
     def _cancel(self, *_):
         """Close the dialog and re-open the caller dialog if any."""
+        # Invalidate + cancel any in-flight resolution so it can't commit after
+        # the user backed out (the cancel button stays enabled during the await).
+        self._admin_gen += 1
+        if self._admin_task is not None:
+            self._admin_task.cancel()
         return_to = self._return_to
         self._return_to = None
         self.close_dialog()
@@ -253,32 +262,50 @@ class AdminAoiDialog(BaseDialog):
         self.btn.loading = True
         self.alert.reset()
 
-        self._admin_code = admin_code
-        self._admin_text = admin_text
+        # Supersede any in-flight resolution and capture a fresh token; the
+        # per-selection code/text travel WITH the task (not via mutable self.*),
+        # so the completion can't pair selection A's geometry with code B.
+        if self._admin_task is not None:
+            self._admin_task.cancel()
+        self._admin_gen += 1
+        gen = self._admin_gen
         self._admin_task = self.gee_interface.create_task(
-            func=self._resolve_admin_async,
+            func=lambda: self._resolve_admin_async(admin_code, admin_text, gen),
             key="admin_subaoi_resolve",
             on_done=self._on_resolved,
             on_error=self._on_resolve_error,
         )
         self._admin_task.start()
 
-    async def _resolve_admin_async(self):
+    async def _resolve_admin_async(self, admin_code, admin_text, gen):
         """Materialize the picked admin unit as a GeoJSON FeatureCollection.
 
-        Returns the GeoJSON dict ready to feed into
-        ``CustomAoiDialog.on_new_geom``. We use ``get_info_async`` so the
-        resolution doesn't block the kernel — pygaul is lazy and only the
-        ``getInfo`` round-trip is slow.
+        Returns ``{gen, code, text, geo_json}`` so the completion handler reads
+        the per-selection data from the result, never from mutable ``self.*``.
+        ``get_info_async`` keeps the kernel responsive — pygaul is lazy and only
+        the ``getInfo`` round-trip is slow.
         """
-        fc = pygaul.AdmItems(admin=self._admin_code)
+        fc = pygaul.AdmItems(admin=admin_code)
         # Simplify server-side: a dense admin unit (e.g. a country with millions
         # of vertices) would otherwise be pulled in full and OOM the kernel. The
         # full-resolution geometry stays server-side for analysis.
-        return await self.gee_interface.get_info_async(simplify_fc(fc))
+        geo_json = await self.gee_interface.get_info_async(simplify_fc(fc))
+        return {
+            "gen": gen,
+            "code": admin_code,
+            "text": admin_text,
+            "geo_json": geo_json,
+        }
 
-    def _on_resolved(self, geo_json: dict):
+    def _on_resolved(self, result: dict):
         """Forward the materialized geometry to ``CustomAoiDialog``."""
+        # Reject a result whose selection the user has cancelled or replaced.
+        if not result or result["gen"] != self._admin_gen:
+            return
+        geo_json = result["geo_json"]
+        code = result["code"]
+        text = result["text"]
+
         self.btn.disabled = False
         self.btn.loading = False
         if not geo_json or not geo_json.get("features"):
@@ -295,11 +322,11 @@ class AdminAoiDialog(BaseDialog):
         self.close_dialog()
         self.custom_aoi_dialog.on_new_geom(
             feature_collection=geo_json,
-            name=self._admin_text or self._admin_code,
+            name=text or code,
             skip_containment_check=True,
             # rebuild the EXACT geometry from the admin code for analysis + tiles
             # (geo_json above is simplified for display only)
-            source={"type": "admin", "code": self._admin_code},
+            source={"type": "admin", "code": code},
         )
 
     def _on_resolve_error(self, exc: Exception):

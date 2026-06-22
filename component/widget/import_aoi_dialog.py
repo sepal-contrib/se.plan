@@ -56,6 +56,7 @@ class ImportAoiDialog(BaseDialog):
 
     def _cancel(self, *_):
         """Close and re-open the caller dialog if any."""
+        self.aoi_view.cancel_import()  # reject any in-flight build that settles late
         return_to = self._return_to
         self._return_to = None
         self.close_dialog()
@@ -70,6 +71,7 @@ class ImportAoiDialog(BaseDialog):
         """
         if return_to is not None:
             self._return_to = return_to
+        self.aoi_view.cancel_import()  # invalidate any leftover in-flight build
         self.aoi_view.reset()
         super().open_dialog()
 
@@ -89,6 +91,16 @@ class ImportAoiView(AoiView):
         super().__init__(methods=methods, gee_interface=gee_interface, **kwargs)
 
         self.custom_aoi_dialog = custom_aoi_dialog
+        self._import_task = None
+        # Monotonic token: bumped on each validate / cancel / reopen so a build
+        # that settles after the user moved on doesn't pop the rename dialog.
+        self._import_gen = 0
+
+    def cancel_import(self) -> None:
+        """Invalidate + cancel any in-flight import build (call on cancel/reopen)."""
+        self._import_gen += 1
+        if self._import_task is not None:
+            self._import_task.cancel()
 
     def _update_aoi(self, *args) -> Self:
         """Import the AOI without materialising full geometry client-side.
@@ -131,11 +143,20 @@ class ImportAoiView(AoiView):
             dissolve = False
             do_simplify = False
 
+        # Supersede any in-flight build and capture a fresh token.
+        self.cancel_import()
+        gen = self._import_gen
         self._set_loading(True)
         # hold a ref so the task isn't GC'd before it runs
         self._import_task = self.model.gee_interface.create_task(
             func=partial(
-                self._build_async, fc, self.model.name, dissolve, do_simplify, source
+                self._build_async,
+                gen,
+                fc,
+                self.model.name,
+                dissolve,
+                do_simplify,
+                source,
             ),
             key="import_aoi_build",
             on_error=self._on_build_error,
@@ -143,7 +164,7 @@ class ImportAoiView(AoiView):
         self._import_task.start()
         return self
 
-    async def _build_async(self, fc, name, dissolve, do_simplify, source):
+    async def _build_async(self, gen, fc, name, dissolve, do_simplify, source):
         """Pull the display outline server-side, then hand off to the rename dialog.
 
         Runs on the GEE event loop (via ``create_task``) so the kernel thread
@@ -157,6 +178,11 @@ class ImportAoiView(AoiView):
                 feature_collection = await self.model.gee_interface.get_info_async(
                     display_fc
                 )
+
+            # Drop the result if the user cancelled/reopened or re-validated; the
+            # completion tail has no further await, so cancel() alone can't stop it.
+            if gen != self._import_gen:
+                return
 
             self.alert.add_msg(ms.aoi_sel.complete, "success")
             self.updated += 1

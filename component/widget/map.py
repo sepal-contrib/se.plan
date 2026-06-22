@@ -103,6 +103,11 @@ class SeplanMap(sm.SepalMap):
         self._hover_bbox_cache: list = []
         self._hover_check_last: float = 0.0
 
+        # Custom-outline tile task + monotonic token (single-flight; a superseded
+        # getMapId must not resurrect deleted outlines — see _refresh_outline_tiles).
+        self._outline_task = None
+        self._outline_gen = 0
+
         self.dc.on_draw(self._handle_draw)
         self.observe(self.on_custom_layers, "custom_layers")
         self.on_interaction(self._on_map_interaction)
@@ -228,7 +233,16 @@ class SeplanMap(sm.SepalMap):
         The exact geometry is reconstructed server-side from each feature's
         ``source`` descriptor; the ``getMapId`` runs on the GEE event loop so the
         kernel thread stays responsive. Nothing dense is pulled to the client.
+
+        Concurrency: bump a token and cancel the prior task BEFORE any layer
+        mutation (incl. the empty/delete-all remove), so a slow ``getMapId`` from
+        a superseded refresh can't resurrect deleted outlines.
         """
+        if self._outline_task is not None:
+            self._outline_task.cancel()
+        self._outline_gen += 1
+        my_gen = self._outline_gen
+
         if not features:
             self.remove_layer(self._OUTLINE_KEY, none_ok=True)
             return
@@ -240,7 +254,7 @@ class SeplanMap(sm.SepalMap):
         # snapshot (the trait can change before the task runs)
         snapshot = [dict(f) for f in features]
         self._outline_task = gee_interface.create_task(
-            func=partial(self._build_outline_tiles, snapshot),
+            func=partial(self._build_outline_tiles, snapshot, my_gen),
             key="custom_outline_tiles",
             on_error=lambda exc: logger.exception(
                 "Custom outline tiles failed", exc_info=exc
@@ -248,8 +262,10 @@ class SeplanMap(sm.SepalMap):
         )
         self._outline_task.start()
 
-    async def _build_outline_tiles(self, features):
+    async def _build_outline_tiles(self, features, my_gen):
         """Merge each sub-AOI's exact FC, style per-feature, add as one tile layer."""
+        if my_gen != self._outline_gen:  # superseded before we started
+            return
         styled = []
         for feat in features:
             fc = fc_from_source(feat["properties"].get("source"), feat)
@@ -261,10 +277,19 @@ class SeplanMap(sm.SepalMap):
         merged = ee.FeatureCollection(styled).flatten()
         image = merged.style(styleProperty="_seplan_style")
 
-        self.remove_layer(self._OUTLINE_KEY, none_ok=True)
+        if my_gen != self._outline_gen:  # superseded while building the request
+            return
+        # add_layer self-removes the existing _OUTLINE_KEY layer; we deliberately
+        # do NOT remove first (a stale task removing could blank a newer layer).
         await self.add_ee_layer_async(
             image, {}, self._OUTLINE_KEY, key=self._OUTLINE_KEY
         )
+
+        # Delete-all guard: if every sub-AOI was removed while our getMapId was in
+        # flight, drop the outline we just added (no clobber — only fires when the
+        # map is genuinely empty).
+        if not self.custom_layers["features"]:
+            self.remove_layer(self._OUTLINE_KEY, none_ok=True)
 
     def zoom_to_custom(self, features: list) -> None:
         """Zoom to just-added custom sub-AOI feature(s) — async, off the kernel thread.

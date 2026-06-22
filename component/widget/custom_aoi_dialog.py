@@ -91,6 +91,9 @@ class CustomAoiDialog(BaseDialog):
 
         # Holds the in-flight validation task between kick-off and completion
         self._validate_task = None
+        # Monotonic token: rejects a validation verdict that settles after the
+        # user cancelled or started a newer save.
+        self._validate_gen = 0
 
         # Set by ``on_new_geom`` when the admin-sub flow forwards a feature
         # whose containment is structurally guaranteed; ``on_save_geom``
@@ -163,15 +166,21 @@ class CustomAoiDialog(BaseDialog):
 
         self.btn.disabled = True
         self.btn.loading = True
+        # Supersede any in-flight validation; the token lets us reject a verdict
+        # that settles after the user cancelled (the cancel button stays enabled).
+        if self._validate_task is not None:
+            self._validate_task.cancel()
+        self._validate_gen += 1
+        gen = self._validate_gen
         self._validate_task = gee_interface.create_task(
-            func=self._validate_async,
+            func=lambda: self._validate_async(gen),
             key="custom_geom_validate",
             on_done=self._on_validate_done,
-            on_error=self._on_validate_error,
+            on_error=lambda exc: self._on_validate_error(exc, gen),
         )
         self._validate_task.start()
 
-    async def _validate_async(self):
+    async def _validate_async(self, gen):
         """Return the count of staged sub-AOIs that fall (largely) outside the primary.
 
         Uses the EXACT geometry, rebuilt server-side from the ``source``
@@ -193,7 +202,8 @@ class CustomAoiDialog(BaseDialog):
             frac = await gee_interface.get_info_async(
                 _outside_fraction(child, primary_fc)
             )
-            return 1 if (frac is not None and frac > _CONTAINMENT_FRACTION) else 0
+            outside = 1 if (frac is not None and frac > _CONTAINMENT_FRACTION) else 0
+            return {"gen": gen, "outside_count": outside}
 
         outside_count = 0
         for feat in feats:
@@ -203,10 +213,14 @@ class CustomAoiDialog(BaseDialog):
             )
             if frac is not None and frac > _CONTAINMENT_FRACTION:
                 outside_count += 1
-        return outside_count
+        return {"gen": gen, "outside_count": outside_count}
 
-    def _on_validate_done(self, outside_count: int):
+    def _on_validate_done(self, result: dict):
         """Commit on full containment, otherwise surface the failure."""
+        # Reject a verdict whose save the user cancelled or superseded.
+        if not result or result["gen"] != self._validate_gen:
+            return
+        outside_count = result["outside_count"]
         self.btn.disabled = False
         self.btn.loading = False
         if outside_count > 0:
@@ -221,8 +235,10 @@ class CustomAoiDialog(BaseDialog):
             return
         self._commit_save()
 
-    def _on_validate_error(self, exc: Exception):
+    def _on_validate_error(self, exc: Exception, gen: int):
         """Surface the GEE error in the dialog without silently saving."""
+        if gen != self._validate_gen:  # superseded/cancelled — drop stale error
+            return
         self.btn.disabled = False
         self.btn.loading = False
         logger.exception("Custom geometry validation failed", exc_info=exc)
@@ -253,6 +269,12 @@ class CustomAoiDialog(BaseDialog):
         """
         self.map_.dc.clear()
         self.map_.dc.hide()
+
+        # Invalidate + cancel any in-flight validation so it can't commit/alert
+        # after the user cancelled.
+        self._validate_gen += 1
+        if self._validate_task is not None:
+            self._validate_task.cancel()
 
         # Clear any feature that was selected
         self.feature = None
