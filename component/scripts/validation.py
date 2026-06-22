@@ -558,7 +558,7 @@ def validate_benefit_data(benefits_data: dict) -> Tuple[bool, List[dict]]:
 
     Checks:
     - All benefit arrays have matching lengths
-    - Each benefit has valid weights (should be numeric 1-7)
+    - Each benefit has valid weights (should be numeric 0-4)
 
     Args:
         benefits_data: Dictionary containing benefit arrays
@@ -594,18 +594,20 @@ def validate_benefit_data(benefits_data: dict) -> Tuple[bool, List[dict]]:
             name = benefits_data["names"][i]
             weight = benefits_data["weights"][i]
 
-            # Validate the weight (should be numeric 1-7)
+            # Validate the weight. The benefit weight selector only offers
+            # values 0-4 (see component/widget/benefit_row.py), where 0 means
+            # the benefit is disabled, so that is the valid range.
             is_valid = True
             error_msg = ""
 
             if not isinstance(weight, (int, float)):
                 is_valid = False
                 error_msg = (
-                    f"Expected numeric weight (1-7), got {type(weight).__name__}"
+                    f"Expected numeric weight (0-4), got {type(weight).__name__}"
                 )
-            elif weight < 1 or weight > 7:
+            elif weight < 0 or weight > 4:
                 is_valid = False
-                error_msg = f"Weight must be between 1 and 7, got {weight}"
+                error_msg = f"Weight must be between 0 and 4, got {weight}"
 
             if not is_valid:
                 invalid_benefits.append(
