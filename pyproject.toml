@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "se-plan"
-version = "2.1.3"
+version = "2.1.4"
 description = "Forest restoration suitability and impact mapping tool, built as a SEPAL module."
 requires-python = ">=3.12"
 dependencies = [
@@ -57,7 +57,7 @@ docstring-quotes = "double"
 convention = "google"
 
 [tool.commitizen]
-version = "2.1.3"
+version = "2.1.4"
 update_changelog_on_bump = true
 changelog_file = "CHANGELOG.md"
 changelog_incremental = true

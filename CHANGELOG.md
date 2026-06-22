@@ -1,3 +1,9 @@
+## 2.1.4 (2026-06-22)
+
+### Fix
+
+- accept benefit weight of 0 when loading recipes
+
 ## 2.1.3 (2026-06-18)
 
 ### Fix
