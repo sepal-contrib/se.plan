@@ -17,9 +17,11 @@ services:
       LOCAL_SEPAL_PASSWORD: "${LOCAL_SEPAL_PASSWORD:-}"
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8765"]
-      timeout: 60s
-      interval: 1s
-      retries: 60
+      start_period: 60s
+      start_interval: 1s
+      interval: 20s
+      timeout: 5s
+      retries: 3
     networks:
       - sepal
     restart: always
