@@ -6,3 +6,4 @@ services:
       - "${SEPAL_HOST:?SEPAL_HOST must be set}:host-gateway"
     environment:
       SEPAL_HOST: ${SEPAL_HOST}
+      EECLIENT_INSECURE_TLS: "1"  # local dev: Python doesn't trust the Caddy local CA
