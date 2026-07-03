@@ -1,3 +1,10 @@
+## 2.1.6 (2026-07-03)
+
+### Perf
+
+- **memory**: run under jemalloc to bound RSS
+- **docker**: poll healthcheck every 20s instead of 1s
+
 ## 2.1.5 (2026-06-22)
 
 ### Fix
