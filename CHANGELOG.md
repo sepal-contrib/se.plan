@@ -1,3 +1,10 @@
+## 2.1.7 (2026-09-02)
+
+### Fix
+
+- require pysepal 3.8.3
+- cap pysepal below 4 and require 3.8.2
+
 ## 2.1.6 (2026-07-03)
 
 ### Perf
