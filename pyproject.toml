@@ -11,6 +11,9 @@ dependencies = [
     "solara>=1.50.0",
     "uvicorn<0.30",
     "starlette<0.44",
+    # anyio 4.15 made the top-level imports lazy (anyio#1169); solara reads
+    # anyio.from_thread off a bare "import anyio" and dies at startup.
+    "anyio<4.15",
     "ee-client>=2.4.0",
     "toml",
     "ipecharts>=1.2.0",
