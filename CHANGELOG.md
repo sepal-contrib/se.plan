@@ -1,3 +1,9 @@
+## 2.1.9 (2026-11-10)
+
+### Fix
+
+- create remote result folders with parents
+
 ## 2.1.8 (2026-09-03)
 
 ### Fix
