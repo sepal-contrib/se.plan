@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 import pandas as pd
+from sepal_ui.solara import get_current_sepal_client
 
 import component.parameter.gui_params as param
 from component.message import cm
@@ -13,8 +14,6 @@ from component.parameter.directory import result_dir
 from component.parameter.file_params import layer_list
 from component.scripts.statistics import STATS_SCALE_M
 from component.types import RecipeStatsDict
-
-from sepal_ui.solara import get_current_sepal_client
 
 logger = logging.getLogger("SEPLAN")
 
@@ -54,7 +53,9 @@ def _layer_label(layer_id: str) -> str:
     """Human-readable name for a layer; falls back to a humanized layer_id."""
     entry = cm.layers.get(layer_id) if hasattr(cm.layers, "get") else None
     if entry is not None:
-        name = getattr(entry, "name", None) or (entry.get("name") if hasattr(entry, "get") else None)
+        name = getattr(entry, "name", None) or (
+            entry.get("name") if hasattr(entry, "get") else None
+        )
         if name:
             return name
     return layer_id.replace("_", " ").capitalize()
@@ -186,7 +187,9 @@ def export_as_csv(recipe_summary_stats: RecipeStatsDict):
 
     sepal_session = get_current_sepal_client()
     if sepal_session:
-        csv_folder = sepal_session.get_remote_dir("module_results/se.plan/csv_results")
+        csv_folder = sepal_session.get_remote_dir(
+            "module_results/se.plan/csv_results", parents=True
+        )
     else:
         csv_folder = result_dir / "results"
         csv_folder.mkdir(exist_ok=True)
